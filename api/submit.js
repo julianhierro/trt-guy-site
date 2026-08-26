@@ -1,0 +1,154 @@
+// Server-side proxy for every lead on the TRT Guy site.
+// Three sources land here — the low-T quiz, the free email course, and the
+// coaching waitlist — and each gets its own tags in GoHighLevel.
+// The GHL token stays on the server and is never exposed to the browser.
+//
+// Required env var on Vercel:  GHL_API_KEY   (the same private integration
+// token the jacked-fathers-quiz project already uses for this location)
+// Optional:                    GHL_LOCATION_ID, GHL_EMAIL_FROM
+
+const GHL_API = 'https://services.leadconnectorhq.com';
+const GHL_TOKEN = process.env.GHL_API_KEY;
+const LOCATION_ID = process.env.GHL_LOCATION_ID || 'WmcafLXT7njeQOu3fqlP';
+const EMAIL_FROM = process.env.GHL_EMAIL_FROM || 'TRT Guy <admin@jackedvegans.com>';
+
+function ghl(method, path, body) {
+  return fetch(`${GHL_API}${path}`, {
+    method,
+    headers: {
+      'Authorization': `Bearer ${GHL_TOKEN}`,
+      'Version': '2021-07-28',
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+function bloodworkEmailHtml(firstName) {
+  const name = esc(firstName) || 'there';
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#1a1a1a;max-width:560px;margin:0 auto">
+    <p>Hey ${name},</p>
+    <p>You scored positive on the ADAM screen. That means the way you've been feeling lines up with low testosterone.</p>
+    <p>That's not a diagnosis, and it's not a reason to panic. It's a reason to get one blood test and stop guessing.</p>
+    <p>Here's the exact panel to ask your doctor for. Screenshot this or forward it straight to them:</p>
+    <ul style="padding-left:20px">
+      <li><strong>Total Testosterone</strong></li>
+      <li><strong>Free Testosterone</strong> &mdash; the part your body can actually use</li>
+      <li><strong>SHBG</strong></li>
+      <li><strong>LH and FSH</strong> &mdash; these show where the problem is starting</li>
+      <li><strong>Estradiol (E2)</strong></li>
+      <li><strong>A standard metabolic panel + CBC</strong> for the full picture</li>
+    </ul>
+    <p>Reply back with "&#128170;&#127995;" so I know you're a real one.</p>
+    <p>Talk soon,<br>Julian<br>TRT Guy</p>
+    <p style="font-size:12px;color:#888;margin-top:24px">This is educational, not medical advice. Always confirm results and next steps with a licensed physician.</p>
+  </div>`;
+}
+
+// Tags are built server-side so the browser can't inject arbitrary ones.
+function tagsFor(source, result) {
+  const base = ['trt-dad'];
+  if (source === 'quiz') {
+    base.push('adam-quiz', result === 'positive' ? 'low-t-positive' : 'low-t-negative');
+    if (result === 'positive') base.push('bloodwork-interested');
+  } else if (source === 'course') {
+    base.push('30-emails-30-days');
+  } else if (source === 'coaching') {
+    base.push('coaching-interest');
+  } else if (source === 'checkout') {
+    // Reached the order form. Whether they PAID is a separate tag, added by the
+    // payment side — so "checkout-started AND NOT coaching-client" is your
+    // abandoned-checkout segment.
+    base.push('coaching-interest', 'checkout-started');
+  } else if (source === 'injection-guide') {
+    base.push('injection-guide', 'trt-interested');
+  } else if (source === 'trt-rules') {
+    base.push('trt-non-negotiables', 'trt-interested');
+  } else if (source === 'trt-101-guide') {
+    base.push('trt-101-guide', 'trt-interested');
+  }
+  return base;
+}
+
+const SOURCE_LABEL = {
+  quiz: 'TRT Guy Low-T Quiz',
+  course: 'TRT Guy 30 Emails In 30 Days',
+  coaching: 'TRT Guy Coaching Waitlist',
+  'injection-guide': 'TRT Guy TRT Injection Guide',
+  'trt-rules': 'TRT Guy 5 TRT Non-Negotiables',
+  'trt-101-guide': 'TRT Guy TRT 101 Guide',
+};
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  if (!GHL_TOKEN) {
+    return res.status(500).json({ error: 'GHL_API_KEY is not set on this deployment' });
+  }
+
+  try {
+    const data = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+
+    const firstName = (data.firstName || data.first_name || data.name || '').toString().trim();
+    const email = (data.email || '').toString().trim();
+    const source = ['quiz', 'course', 'coaching', 'injection-guide', 'trt-rules', 'trt-101-guide'].includes(data.source) ? data.source : 'course';
+    const result = data.result === 'positive' ? 'positive' : 'negative';
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'A valid email is required' });
+    }
+
+    const tags = tagsFor(source, result);
+
+    const upsert = await ghl('POST', '/contacts/upsert', {
+      locationId: LOCATION_ID,
+      firstName,
+      email,
+      source: SOURCE_LABEL[source],
+      tags,
+    });
+
+    const json = await upsert.json();
+    const contactId = json && json.contact && json.contact.id;
+
+    if (!contactId) {
+      return res.status(502).json({ error: 'GHL did not return a contact', details: json });
+    }
+
+    // On a positive quiz screen, send the bloodwork panel right away.
+    let emailQueued = false;
+    if (source === 'quiz' && result === 'positive') {
+      try {
+        const send = await ghl('POST', '/conversations/messages', {
+          type: 'Email',
+          contactId,
+          subject: 'Your Low-T result — and exactly what to get tested',
+          html: bloodworkEmailHtml(firstName),
+          emailFrom: EMAIL_FROM,
+        });
+        const sendJson = await send.json();
+        emailQueued = !!(sendJson && (sendJson.messageId || sendJson.emailMessageId));
+      } catch (e) {
+        // Never fail the whole request just because the email didn't queue.
+      }
+    }
+
+    // echo back what GoHighLevel actually stored, so tagging can be verified
+    const storedTags = (json && json.contact && json.contact.tags) || null;
+    return res.status(200).json({ success: true, contactId, tags, storedTags, emailQueued });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
