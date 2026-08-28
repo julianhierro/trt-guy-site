@@ -969,6 +969,12 @@
     var containers = [root];
     Array.prototype.forEach.call(root.querySelectorAll("section, .wrap"), function (c) {
       if (c.closest(".jv-toolbar, .jv-outline, .jv-preview-overlay, [data-noedit]")) return;
+      // A grid or flex container lays its children out itself, and a strip
+      // dropped in among them becomes a cell of its own - a two-column card
+      // grid collapses to one column and the edit view stops matching the
+      // live page. Add sections around such a block, not inside it.
+      var disp = getComputedStyle(c).display;
+      if (disp === "grid" || disp === "inline-grid" || disp === "flex" || disp === "inline-flex") return;
       containers.push(c);
     });
     containers.forEach(function (c) {
