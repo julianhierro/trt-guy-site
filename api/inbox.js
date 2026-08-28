@@ -68,6 +68,9 @@ async function list(req) {
   const params = new URLSearchParams({ locationId: LOCATION_ID, limit: String(limit), sortBy: 'last_message_date', sort: 'desc' });
   if (req.query.q) params.set('query', String(req.query.q).slice(0, 120));
   if (req.query.unread === '1') params.set('status', 'unread');
+  // GHL's search returns every conversation and reports each one's inbox flag,
+  // but it will not filter on it — so archived threads come back here too and
+  // the client is what separates the two views.
 
   const r = await readJson(await ghl('GET', `/conversations/search?${params}`));
   if (!r.ok) return { status: r.status, body: { error: 'GHL refused the conversation list', ghl: r.json || r.text } };
@@ -82,10 +85,15 @@ async function list(req) {
       email: c.email || '',
       phone: c.phone || '',
       channel: channelOf(c.lastMessageType || c.type),
+      // which channels this person can be reached on at all — an IG lead with
+      // no email cannot be answered by email, and the UI should not offer it
+      can: [c.email ? 'email' : null, c.phone ? 'sms' : null, channelOf(c.lastMessageType || c.type)]
+        .filter(Boolean).filter((v, i, a) => a.indexOf(v) === i),
       unread: c.unreadCount || 0,
       preview: (c.lastMessageBody || '').replace(/\s+/g, ' ').trim().slice(0, 160),
       direction: c.lastMessageDirection || '',
       at: c.lastMessageDate || c.dateUpdated || c.dateAdded || null,
+      archived: c.inbox === false,
     })),
   } };
 }
@@ -98,9 +106,22 @@ async function thread(req) {
   const r = await readJson(await ghl('GET', `/conversations/${encodeURIComponent(id)}/messages?limit=40`));
   if (!r.ok) return { status: r.status, body: { error: 'GHL refused the thread', ghl: r.json || r.text } };
 
+  // The conversation record only carries the address the thread came in on. To
+  // offer "answer this IG lead by email instead" honestly, ask the contact
+  // record what this person can actually be reached on.
+  let contact = null;
+  const cid = String(req.query.contactId || '');
+  if (cid) {
+    const c = await readJson(await ghl('GET', `/contacts/${encodeURIComponent(cid)}`));
+    const rec = c.ok && c.json && c.json.contact;
+    if (rec) contact = { email: rec.email || '', phone: rec.phone || '',
+      name: [rec.firstName, rec.lastName].filter(Boolean).join(' ').trim() };
+  }
+
   const box = (r.json && r.json.messages) || {};
   const rows = box.messages || box || [];
   return { status: 200, body: {
+    contact,
     messages: (Array.isArray(rows) ? rows : []).map(m => ({
       id: m.id,
       channel: channelOf(m.messageType || m.type),
@@ -147,6 +168,94 @@ async function send(req) {
   return { status: 200, body: { sent: true, channel, id: (r.json && (r.json.messageId || r.json.msg)) || null } };
 }
 
+/* ── contacts: who am I about to write to? ───────────────────────────────── */
+async function contacts(req) {
+  const q = String(req.query.q || '').trim();
+  if (q.length < 2) return { status: 200, body: { contacts: [] } };
+  const params = new URLSearchParams({ locationId: LOCATION_ID, query: q.slice(0, 80), limit: '15' });
+  const r = await readJson(await ghl('GET', `/contacts/?${params}`));
+  if (!r.ok) return { status: r.status, body: { error: 'GHL refused the contact search', ghl: r.json || r.text } };
+  const rows = (r.json && (r.json.contacts || r.json.items)) || [];
+  return { status: 200, body: {
+    contacts: rows.map(c => ({
+      id: c.id,
+      name: [c.firstName, c.lastName].filter(Boolean).join(' ').trim() || c.contactName || c.email || c.phone || 'Unknown',
+      email: c.email || '',
+      phone: c.phone || '',
+    })).filter(c => c.email || c.phone),
+  } };
+}
+
+/* ── compose: a first email to someone who has no thread yet ─────────────── */
+async function compose(req) {
+  const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+  const subject = String(b.subject || '').trim();
+  const text = String(b.text || '').trim();
+  let contactId = String(b.contactId || '').trim();
+  const email = String(b.email || '').trim();
+
+  if (!text) return { status: 400, body: { error: 'Nothing to send' } };
+  if (!subject) return { status: 400, body: { error: 'A subject is required' } };
+
+  // Writing to an address that isn't in the CRM yet creates the contact — which
+  // is the point: the reply has to land somewhere GHL can thread it.
+  if (!contactId) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return { status: 400, body: { error: 'Pick a contact or type a valid email address' } };
+    }
+    const up = await readJson(await ghl('POST', '/contacts/upsert', {
+      locationId: LOCATION_ID, email,
+      firstName: String(b.firstName || '').trim() || undefined,
+      source: 'TRT Guy Command Center',
+    }));
+    contactId = up.json && up.json.contact && up.json.contact.id;
+    if (!contactId) return { status: 502, body: { error: 'GHL would not create the contact', ghl: up.json || up.text } };
+  }
+
+  const r = await readJson(await ghl('POST', '/conversations/messages', {
+    type: 'Email', contactId, subject: subject.slice(0, 160),
+    html: '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6">'
+      + esc(text).replace(/\n/g, '<br>') + '</div>',
+    emailFrom: EMAIL_FROM,
+  }));
+  if (!r.ok) return { status: r.status, body: { error: 'GHL would not send it', ghl: r.json || r.text } };
+  return { status: 200, body: { sent: true, contactId, id: (r.json && r.json.messageId) || null } };
+}
+
+/* ── archive / mark read / delete ─────────────────────────────────────────
+   GoHighLevel's own inbox flag is what "archived" means here, so archiving in
+   the command center is archiving in GHL — not a local hide that only this
+   dashboard knows about. Deleting is GHL's delete: permanent, no undo, the
+   whole message history with it. */
+async function setConv(req) {
+  const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+  const id = String(b.id || '');
+  if (!id) return { status: 400, body: { error: 'id is required' } };
+
+  const patch = { locationId: LOCATION_ID };
+  if (typeof b.archived === 'boolean') patch.inbox = !b.archived;   // out of the inbox = archived
+  if (typeof b.unread === 'boolean') patch.unreadCount = b.unread ? 1 : 0;
+  if (typeof b.starred === 'boolean') patch.starred = b.starred;
+  if (Object.keys(patch).length === 1) return { status: 400, body: { error: 'Nothing to change' } };
+
+  const r = await readJson(await ghl('PUT', `/conversations/${encodeURIComponent(id)}`, patch));
+  if (!r.ok) return { status: r.status, body: { error: 'GHL would not update it', ghl: r.json || r.text } };
+  const c = (r.json && r.json.conversation) || {};
+  return { status: 200, body: { ok: true, archived: c.inbox === false, unread: (c.unreadCount || 0) > 0 } };
+}
+
+async function destroy(req) {
+  const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+  const id = String(b.id || '');
+  if (!id) return { status: 400, body: { error: 'id is required' } };
+  // The caller has to say so twice — this is not recoverable from our side or GHL's.
+  if (b.confirm !== 'DELETE') return { status: 400, body: { error: 'Delete was not confirmed' } };
+
+  const r = await readJson(await ghl('DELETE', `/conversations/${encodeURIComponent(id)}`));
+  if (!r.ok) return { status: r.status, body: { error: 'GHL would not delete it', ghl: r.json || r.text } };
+  return { status: 200, body: { deleted: true } };
+}
+
 /* ── diag: what can this token actually do? ──────────────────────────────── */
 async function diag() {
   const probe = async (label, path) => {
@@ -188,8 +297,12 @@ module.exports = async (req, res) => {
   if (given !== CC_KEY) return res.status(401).json({ error: 'Wrong passcode' });
 
   try {
-    const out = action === 'thread' ? await thread(req)
-              : action === 'send'   ? await send(req)
+    const out = action === 'archive'  ? await setConv(req)
+              : action === 'delete'   ? await destroy(req)
+              : action === 'thread'   ? await thread(req)
+              : action === 'send'     ? await send(req)
+              : action === 'contacts' ? await contacts(req)
+              : action === 'compose'  ? await compose(req)
               : await list(req);
     return res.status(out.status).json(out.body);
   } catch (err) {

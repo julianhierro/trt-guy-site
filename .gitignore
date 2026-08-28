@@ -5,3 +5,4 @@ fin/
 pages/
 raw.pdf
 *.bak
+.env*
