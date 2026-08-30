@@ -414,12 +414,13 @@
         + '<div class="actions">'
           + '<button type="button" class="btn" data-open="' + pr.id + '">Open →</button>'
           + '<a class="btn ghost" href="' + pr.home + '" target="_blank" rel="noopener">View live</a>'
+          + '<button type="button" class="btn ghost copy-link" data-copy="' + pr.home + '">🔗 Copy link</button>'
         + '</div></div>';
     }).join('');
 
     document.querySelectorAll('.card.folder').forEach(c => {
       c.addEventListener('click', e => {
-        if (e.target.closest('a')) return;
+        if (e.target.closest('a, .copy-link')) return;
         showProject(c.dataset.project);
       });
     });
@@ -448,6 +449,7 @@
         + '<div class="actions">'
           + '<button type="button" class="btn" data-idx="' + i + '">Edit ↗</button>'
           + '<a class="btn ghost" href="' + p.url + '" target="_blank" rel="noopener">View live</a>'
+          + '<button type="button" class="btn ghost copy-link" data-copy="' + p.url + '">🔗 Copy link</button>'
         + '</div></div>';
     }).join('');
 
@@ -543,6 +545,16 @@
       document.body.removeChild(ta); done();
     }
   });
+
+  // copy a page's link with one click
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('.copy-link'); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var url = b.dataset.copy, old = b.textContent;
+    var done = function(){ b.textContent = 'Copied ✓'; b.classList.add('copied'); setTimeout(function(){ b.textContent = old; b.classList.remove('copied'); }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
+    else { var ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (x) {} document.body.removeChild(ta); done(); }
+  }, true);
 
   buildEditUrls();
   paintLock();

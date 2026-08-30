@@ -8,6 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/editor.css?v=1">
+<!-- Paint-hold: keep the page hidden until published edits are applied, so it never flashes the old version. -->
+<style>html.jv-pending body{visibility:hidden}</style>
+<script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 <style>
   :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;
     --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
