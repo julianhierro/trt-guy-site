@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRT 101 — The No-BS Starter Guide | TRT Guy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600;6..96,700;6..96,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;--red:#e2483a;
+    --display:"Bodoni Moda","Didot","Bodoni MT",Georgia,serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 18px 60px;min-height:100vh}
+  .wrap{max-width:560px;margin:0 auto;text-align:center}
+  .wordmark{font-family:var(--display);font-weight:900;font-size:clamp(34px,9vw,52px);line-height:.9;letter-spacing:.02em;text-transform:uppercase;display:inline-block;transform:scaleX(.84);transform-origin:center;margin:42px 0 22px}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+  h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,8vw,50px);line-height:1.02;text-transform:uppercase;margin:12px 0 14px}
+  .lead{color:var(--mut);font-size:17px;max-width:480px;margin:0 auto 26px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;box-shadow:0 2px 10px rgba(11,13,16,.05);text-align:left}
+  ul.bul{list-style:none;margin:0 0 20px}
+  ul.bul li{position:relative;padding-left:30px;margin:11px 0;font-size:15.5px;font-weight:500}
+  ul.bul li::before{content:"✓";position:absolute;left:0;top:0;color:#fff;background:var(--acc);width:20px;height:20px;border-radius:50%;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  input{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:11px;font-family:var(--body);font-size:16px;margin-bottom:12px;outline:none}
+  input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
+  .btn{width:100%;background:var(--acc);color:#fff;border:none;border-radius:12px;padding:16px;font-family:var(--display);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;transition:background .15s,transform .1s}
+  .btn:hover{background:var(--acc-d);transform:translateY(-1px)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .err{color:var(--red);font-size:13.5px;min-height:18px;margin-top:8px;font-weight:600;text-align:center}
+  .fine{font-size:12px;color:var(--mut);text-align:center;margin-top:12px}
+  #done{display:none}
+  #done.show{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  #done .big{font-family:var(--display);font-weight:900;font-size:38px;text-transform:uppercase;color:var(--ok);margin-bottom:10px}
+  .foot{color:var(--mut);font-size:12px;margin-top:34px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">TRT-GUY</div>
+
+  <div id="offer">
+    <div class="kicker">Free Guide</div>
+    <h1>TRT 101</h1>
+    <p class="lead">The no-BS starter guide to testosterone — what it does, how to know if yours is low, and what to do about it before you waste a year guessing.</p>
+    <div class="card">
+      <ul class="bul">
+        <li>The real signs of low T (and the ones everyone misses)</li>
+        <li>The exact bloodwork panel to ask for</li>
+        <li>What a proper protocol actually looks like</li>
+        <li>Mistakes that tank your results — and how to skip them</li>
+      </ul>
+      <form id="form" novalidate>
+        <input type="text" id="fname" placeholder="First name" autocomplete="given-name">
+        <input type="email" id="email" placeholder="Your best email" autocomplete="email" required>
+        <button class="btn" id="btn" type="submit">Send me the guide →</button>
+        <div class="err" id="err"></div>
+        <div class="fine">🔒 No spam. Unsubscribe anytime.</div>
+      </form>
+    </div>
+  </div>
+
+  <div id="done">
+    <div class="big">You're in 💪</div>
+    <p class="lead">Check your inbox for the guide — it's on the way. Want to start reading right now?</p>
+    <a class="btn" style="display:block;text-decoration:none;text-align:center" href="https://julianhierro.github.io/trt-guy-101-guide/">Read TRT 101 now →</a>
+  </div>
+
+  <div class="foot">© TRT Guy · Educational only — not medical advice</div>
+</div>
+
+<script>
+// ⬇️ Set to the deployed onboarding Worker URL (same worker serves /optin)
+const WORKER_URL = "https://trt-guy-onboarding.<YOUR-SUBDOMAIN>.workers.dev";
+const GUIDE_URL = "https://julianhierro.github.io/trt-guy-101-guide/";
+const $=s=>document.querySelector(s);
+$('#form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const email=$('#email').value.trim(), name=$('#fname').value.trim(), err=$('#err');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
+  err.textContent=''; const b=$('#btn'); b.disabled=true; b.textContent='Sending…';
+  try{
+    await fetch(WORKER_URL.replace(/\/+$/,'')+'/optin',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({list:'trt-101',firstName:name,email})});
+  }catch(e){}
+  $('#offer').style.display='none'; $('#done').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
