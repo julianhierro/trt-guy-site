@@ -202,7 +202,7 @@ $('#appForm').addEventListener('submit', async e=>{
 <!-- ═══ Inline editor (add ?edit=1). Labels/copy editable; form controls locked so GHL mapping stays intact. ═══ -->
 <script>
 document.querySelectorAll('input,select,textarea,button').forEach(function(el){el.setAttribute('data-noedit','');});
-window.JV_EDITOR={ site:"tg-waitlist", page:1, pwKey:"trtguy", api:"https://jv-dashboard-chi.vercel.app/api/content" };
+window.JV_EDITOR={ site:"td-waitlist", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };
 </script>
 <script>
 (function () {
