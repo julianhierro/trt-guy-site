@@ -192,9 +192,10 @@ $('#appForm').addEventListener('submit', async e=>{
   for(const id of ids){ const v=$('#'+id).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+id).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[id]=v; payload.qa.push({q:labelFor(id),a:v}); }
   err.textContent=''; const b=$('#appBtn'); b.disabled=true; b.textContent='Submitting…';
   try{
-    await fetch(API+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  }catch(e){}
-  show('done');
+    const r=await fetch(API+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r.ok) throw 0;
+    location.href='/waitlist/thanks/';   // dedicated thank-you page (data is saved first)
+  }catch(e){ err.textContent='Something went wrong — please try again.'; b.disabled=false; b.textContent='Submit my application →'; }
 });
 </script>
 
