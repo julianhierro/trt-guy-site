@@ -282,6 +282,7 @@ body.jv-editing [data-ins].jv-active { outline: 2px solid #2563eb !important; }
 /* ── In-place hover tools (quick delete / duplicate / move per block) ─────── */
 .jv-hover-tools {
   position: fixed; z-index: 2147483600; display: none; gap: 4px;
+  transform: translateX(-100%);
   background: rgba(15,15,15,.94); border: 1px solid rgba(255,255,255,.16);
   border-radius: 9px; padding: 4px; box-shadow: 0 8px 24px rgba(0,0,0,.45);
   -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
@@ -450,27 +451,3 @@ body.jv-editing .jv-col:hover{outline-color:rgba(26,92,255,.75)}
 .jv-actions .jv-act:hover { background: #1a5cff; }
 .jv-actions .jv-act-now { padding: 8px; font-size: 11.5px; color: #8a8f98;
   border-top: 1px solid #3a3a3a; margin-top: 4px; word-break: break-all; }
-
-/* inline link field — replaces prompt(), which Chrome blocks in cross-origin iframes */
-.jv-actions .jv-act-in { display:block; width:100%; margin:0 0 8px; padding:10px;
-  font:600 13px/1.2 Inter,system-ui,sans-serif; color:#fff; background:#22252b;
-  border:1px solid #3a3f48; border-radius:8px; outline:0; }
-.jv-actions .jv-act-in:focus { border-color:#1a5cff; box-shadow:0 0 0 3px rgba(26,92,255,.28); }
-.jv-actions .jv-act-row { display:flex; gap:6px; }
-.jv-actions .jv-act-row .jv-act { white-space:nowrap; padding:10px 8px; }
-.jv-actions .jv-act-row .jv-act { text-align:center; }
-.jv-actions .jv-act-go { background:#1a5cff; }
-
-/* Section chip: keep it out of the text column. On a wide enough window it sits in
-   the page's left margin; on narrow ones it falls back to its old inside position. */
-@media (min-width: 1180px){
-  .jv-section-tools { left: -12px; transform: translateX(-100%); max-width: none; }
-}
-
-/* A transparent bridge on the block side of the hover bar, so the pointer never
-   crosses dead space on its way over. Purely a hit-area; nothing is drawn. */
-.jv-hover-tools{ position: fixed; }
-.jv-hover-tools::before{
-  content:""; position:absolute; top:-10px; bottom:-10px; left:-22px; right:-10px;
-  z-index:-1;
-}

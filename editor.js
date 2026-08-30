@@ -35,7 +35,7 @@
   // Where "← Control Center" goes. Overridable via ?cc=<url> when the dashboard opens the editor.
   var CONTROL_CENTER_URL = (function () {
     try { var c = new URLSearchParams(location.search).get("cc"); if (c && /^https?:\/\//.test(c)) return c; } catch (e) {}
-    return "https://julianhierro.github.io/trt-guy-control/";
+    return "https://jv-dashboard-chi.vercel.app/";
   })();
 
   // ── A/B variants ──────────────────────────────────────────────────────────
@@ -1323,7 +1323,7 @@
   // contentNodes + the click-ignore list) and reuses duplicateActive /
   // moveActive / removeActive, so behaviour matches the toolbar exactly.
   var hoverTools = null, hoverEl = null, hoverHideTimer = null;
-  function scheduleHoverHide() { clearTimeout(hoverHideTimer); hoverHideTimer = setTimeout(hideHoverTools, 650); }
+  function scheduleHoverHide() { clearTimeout(hoverHideTimer); hoverHideTimer = setTimeout(hideHoverTools, 180); }
   function hideHoverTools() {
     clearTimeout(hoverHideTimer);
     if (hoverEl && hoverEl.classList) hoverEl.classList.remove("jv-hovered");
@@ -1353,32 +1353,6 @@
     var blk = node.closest("p,h1,h2,h3,h4,h5,h6,li,figure,blockquote,img,article,.jv-cols");
     if (blk && blk.hasAttribute("data-eid") && blk.tagName !== "SECTION") return { el: blk, kind: "block" };
 
-    // A block-level <div> — a card, a callout, a boxed CTA — matched none of the
-    // tags above, so it fell through to `return null` and never got a hover bar.
-    // That made whole sections impossible to delete or move: you could empty one
-    // out child by child, but the container itself stayed put forever.
-    // Walk out to the outermost element that still sits inside the page's content
-    // wrapper and offer THAT, so 🗑 removes the entire block. Runs after the
-    // paragraph checks, so hovering text still targets the text.
-    var host = node.closest(".wrap, .sheet, main, article, section, body");
-    if (host) {
-      var top = node;
-      while (top && top.parentElement && top.parentElement !== host) top = top.parentElement;
-      if (top && top !== host && top.nodeType === 1 && top.hasAttribute && top.hasAttribute("data-eid")
-          && !top.closest(".jv-toolbar, .jv-launcher, [data-noedit]")) {
-        return { el: top, kind: "block" };
-      }
-    }
-
-    // A standalone button/link that isn't inside a <section> used to fall through
-    // to `return null`, so it never got a hover bar — and with no hover bar there
-    // was no ⚡, i.e. no way to set where it points. Catch it here, after the
-    // paragraph checks, so a link inside a paragraph still targets the paragraph.
-    var lnk = node.closest("a,button");
-    if (lnk && lnk.hasAttribute("data-eid") && !lnk.closest(".jv-toolbar,.jv-launcher,[data-noedit]")) {
-      return { el: lnk, kind: "block" };
-    }
-
     var sec = node.closest("section");
     if (sec) return { el: sec, kind: "section" };
     return null;
@@ -1388,27 +1362,8 @@
     if (!document.body.contains(hoverEl)) { hideHoverTools(); return; }
     var r = hoverEl.getBoundingClientRect();
     if (r.bottom < 0 || r.top > window.innerHeight) { hideHoverTools(); return; }
-
-    // The bar used to sit ON the block's top-right corner, so it covered the very
-    // text you were trying to click. Put it in the empty margin beside the block
-    // instead: right of it if there's room, otherwise left, otherwise above.
-    var bw = hoverTools.offsetWidth || 170;
-    var bh = hoverTools.offsetHeight || 38;
-    var GAP = 10, EDGE = 6;
-    var top = Math.max(EDGE, Math.min(r.top, window.innerHeight - bh - EDGE));
-    var left;
-
-    if (r.right + GAP + bw <= window.innerWidth - EDGE) {
-      left = r.right + GAP;                                  // right-hand margin
-    } else if (r.left - GAP - bw >= EDGE) {
-      left = r.left - GAP - bw;                              // left-hand margin
-    } else {
-      left = Math.max(EDGE, Math.min(r.right - bw, window.innerWidth - bw - EDGE));
-      top  = r.top - bh - 6;                                 // sit fully above
-      if (top < EDGE) top = r.bottom + 6;                    // ...or fully below
-    }
-    hoverTools.style.top = top + "px";
-    hoverTools.style.left = left + "px";
+    hoverTools.style.top = Math.max(8, r.top + 8) + "px";
+    hoverTools.style.left = (r.right - 8) + "px";
   }
   function showHoverFor(el, kind) {
     if (hoverEl && hoverEl !== el && hoverEl.classList) hoverEl.classList.remove("jv-hovered");
@@ -1425,20 +1380,6 @@
   function onHoverMove(e) {
     if (!editMode || !hoverTools) return;
     if (e.target && e.target.closest && e.target.closest(".jv-hover-tools")) { clearTimeout(hoverHideTimer); return; }
-
-    // Heading for the open bar? Leave everything alone until the pointer either
-    // lands on it or clearly veers off. Without this, crossing the gap between a
-    // block and its bar retargeted or hid the bar before you could click it.
-    if (hoverEl && hoverTools.classList.contains("show")) {
-      var b = hoverTools.getBoundingClientRect();
-      var pad = 26;
-      if (e.clientX >= b.left - pad && e.clientX <= b.right + pad &&
-          e.clientY >= b.top - pad && e.clientY <= b.bottom + pad) {
-        clearTimeout(hoverHideTimer);
-        return;
-      }
-    }
-
     var t = hoverTargetFrom(e.target);
     if (!t) { scheduleHoverHide(); return; }
     hoverNode = e.target;
@@ -1526,39 +1467,11 @@
       var k = b.getAttribute("data-k");
       if (k === "popup") { applyAction(link, "popup"); closeActionMenu(); return; }
       if (k === "link") {
-        // Chrome ignores prompt() inside a cross-origin iframe, and that is exactly
-        // how the Control Center loads these pages — so the old prompt silently did
-        // nothing when editing from the dashboard. Ask for the address inline instead.
-        m.innerHTML =
-          '<div class="jv-act-h">Link to where?</div>' +
-          '<input type="text" class="jv-act-in" spellcheck="false" placeholder="trtguy.com" />' +
-          '<div class="jv-act-row">' +
-            '<button type="button" class="jv-act jv-act-go">Save link</button>' +
-            '<button type="button" class="jv-act jv-act-x">Cancel</button>' +
-          '</div>' +
-          '<div class="jv-act-now">A full address (trtguy.com), a page on this site (pay.html), or an email address.</div>';
-        var inp = m.querySelector(".jv-act-in");
-        inp.value = link.getAttribute("href") || "";
-        setTimeout(function () { inp.focus(); inp.select(); }, 0);
-        // the editor blocks keys elsewhere on the page; keep this field's to itself
-        ["keydown", "keypress", "keyup", "input", "mousedown", "click"].forEach(function (t) {
-          inp.addEventListener(t, function (ev) { ev.stopPropagation(); }, true);
-        });
-        function save() {
-          var v = normalizeUrl(inp.value);
-          if (!v) { inp.focus(); return; }
-          applyAction(link, "link", v);
-          closeActionMenu();
-        }
-        inp.addEventListener("keydown", function (ev) {
-          if (ev.key === "Enter") { ev.preventDefault(); save(); }
-          if (ev.key === "Escape") { ev.preventDefault(); closeActionMenu(); }
-        });
-        m.addEventListener("click", function (e2) {
-          if (e2.target.closest(".jv-act-go")) { e2.stopPropagation(); e2.preventDefault(); save(); }
-          if (e2.target.closest(".jv-act-x"))  { e2.stopPropagation(); e2.preventDefault(); closeActionMenu(); }
-        });
-        return;
+        var u = prompt("Link to where?\n\nA full address (trtguy.com), a page on this site\n(pay.html), or an email address.", link.getAttribute("href") || "");
+        closeActionMenu();
+        if (u === null) return;
+        u = normalizeUrl(u); if (!u) return;
+        applyAction(link, "link", u); return;
       }
       // scroll: replace the menu with the list of sections
       var choices = sectionChoices();
@@ -1576,126 +1489,6 @@
   }
   document.addEventListener("click", function (e) {
     if (actionMenu && !e.target.closest(".jv-actions") && !e.target.closest(".jv-ht-link")) closeActionMenu();
-  }, true);
-
-  // ── Add a link: ⌘K / Ctrl+K, or the 🔗 Link button in the toolbar ─────────
-  // Works two ways, whichever matches what you're pointing at:
-  //   • text selected  → that text becomes the link
-  //   • a button/link  → that button's destination changes
-  function editableSelection() {
-    var sel = window.getSelection();
-    if (!sel || !sel.rangeCount || sel.isCollapsed) return null;
-    var n = sel.getRangeAt(0).commonAncestorContainer;
-    n = n.nodeType === 1 ? n : n.parentElement;
-    if (!n || !n.closest) return null;
-    if (n.closest(".jv-toolbar, .jv-actions, [data-noedit]")) return null;
-    if (!n.closest('[data-etext], [contenteditable="true"]')) return null;
-    var a = n.closest("a");
-    return {
-      mode: "selection",
-      range: sel.getRangeAt(0).cloneRange(),
-      current: a ? (a.getAttribute("href") || "") : "",
-      rect: sel.getRangeAt(0).getBoundingClientRect()
-    };
-  }
-  function linkTarget(snapshot) {
-    var s = snapshot || editableSelection();
-    if (s) return s;
-    var cand = (activeEl && targetLink(activeEl)) || (hoverEl && targetLink(hoverEl)) || null;
-    if (cand && !cand.closest(".jv-toolbar, [data-noedit]")) {
-      return { mode: "element", el: cand, current: cand.getAttribute("href") || "",
-               rect: cand.getBoundingClientRect() };
-    }
-    return null;
-  }
-  function openLinkBox(t) {
-    closeActionMenu();
-    var m = document.createElement("div");
-    m.className = "jv-actions jv-linkbox";
-    m.setAttribute("data-noedit", "");
-    m.innerHTML =
-      '<div class="jv-act-h">' +
-        (t.mode === "selection" ? "Link this text to\u2026" : "Link this button to\u2026") +
-      '</div>' +
-      '<input type="text" class="jv-act-in" spellcheck="false" placeholder="Paste a link, or type trtguy.com" />' +
-      '<div class="jv-act-row">' +
-        '<button type="button" class="jv-act jv-act-go">Save link</button>' +
-        (t.current ? '<button type="button" class="jv-act jv-act-rm">Remove</button>' : '') +
-        '<button type="button" class="jv-act jv-act-x">Cancel</button>' +
-      '</div>' +
-      '<div class="jv-act-now">Paste and press Enter. Publish when you\u2019re done.</div>';
-    document.body.appendChild(m);
-    actionMenu = m;
-
-    var r = t.rect || { bottom: 120, top: 100, left: 40 };
-    var BOXH = 200, BARH = 78;                    // keep clear of the bottom toolbar
-    var room = window.innerHeight - BARH;
-    var top = (r.bottom || 0) + 10;
-    if (top + BOXH > room) top = (r.top || 0) - BOXH - 10;   // flip above the target
-    top = Math.max(8, Math.min(top, room - BOXH));
-    m.style.top = top + "px";
-    m.style.left = Math.max(8, Math.min((r.left || 40), window.innerWidth - 250)) + "px";
-
-    var inp = m.querySelector(".jv-act-in");
-    inp.value = t.current || "";
-    setTimeout(function () { inp.focus(); inp.select(); }, 0);
-    ["keydown", "keypress", "keyup", "input", "mousedown", "click"].forEach(function (evt) {
-      inp.addEventListener(evt, function (ev) { ev.stopPropagation(); }, true);
-    });
-
-    function reselect() {
-      if (t.mode !== "selection" || !t.range) return;
-      var sel = window.getSelection();
-      sel.removeAllRanges(); sel.addRange(t.range);
-    }
-    function finish(msg) { scheduleDraft(); closeActionMenu(); flash(msg); }
-    function save() {
-      var url = normalizeUrl(inp.value);
-      if (!url) { inp.focus(); return; }
-      pushUndo();
-      if (t.mode === "element") { applyAction(t.el, "link", url); closeActionMenu(); return; }
-      reselect();
-      document.execCommand("createLink", false, url);
-      var sel = window.getSelection();
-      var node = sel.rangeCount ? sel.getRangeAt(0).commonAncestorContainer : null;
-      node = node && node.nodeType === 1 ? node : (node && node.parentElement);
-      var a = node && node.closest ? node.closest("a") : null;
-      if (a && /^https?:/i.test(url) && url.indexOf(location.host) === -1) {
-        a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener");
-      }
-      finish("Linked to " + url);
-    }
-    function remove() {
-      pushUndo();
-      if (t.mode === "element") { t.el.removeAttribute("href"); markAttr(t.el); finish("Link removed"); return; }
-      reselect();
-      document.execCommand("unlink");
-      finish("Link removed");
-    }
-    inp.addEventListener("keydown", function (ev) {
-      if (ev.key === "Enter") { ev.preventDefault(); save(); }
-      if (ev.key === "Escape") { ev.preventDefault(); closeActionMenu(); }
-    });
-    m.addEventListener("click", function (e2) {
-      if (e2.target.closest(".jv-act-go")) { e2.stopPropagation(); e2.preventDefault(); save(); }
-      if (e2.target.closest(".jv-act-rm")) { e2.stopPropagation(); e2.preventDefault(); remove(); }
-      if (e2.target.closest(".jv-act-x"))  { e2.stopPropagation(); e2.preventDefault(); closeActionMenu(); }
-    });
-  }
-  function startLinkFlow(snapshot) {
-    var t = linkTarget(snapshot);
-    if (!t) { flash("Select some text, or click a button first \u2014 then press \u2318K"); return; }
-    openLinkBox(t);
-  }
-  window.__jvStartLinkFlow = startLinkFlow;
-  window.__jvLinkSnapshot = editableSelection;
-
-  document.addEventListener("keydown", function (e) {
-    if (!editMode) return;
-    if (!(e.metaKey || e.ctrlKey) || String(e.key).toLowerCase() !== "k") return;
-    if (e.target && e.target.closest && e.target.closest(".jv-act-in")) return;
-    e.preventDefault(); e.stopPropagation();
-    startLinkFlow(null);
   }, true);
 
   // ── Add a section below the block you're pointing at ─────────────────────
@@ -2016,7 +1809,6 @@
       '</div>' +
 
       // ── Sections navigator ──
-      '<button class="jv-grp-btn jv-link-btn" type="button" title="Add a link to the selected text or button (⌘K)">🔗 Link</button>' +
       '<button class="jv-grp-btn jv-sections-btn" type="button" title="Reorder sections">☰ Sections</button>' +
 
       // ── Settings (popover) ──
@@ -2058,14 +1850,6 @@
       });
     });
     bar.querySelectorAll(".jv-pop").forEach(function (p) { p.addEventListener("click", function (e) { e.stopPropagation(); }); });
-    var linkBtn = bar.querySelector(".jv-link-btn"), linkSnap = null;
-    // grab the selection on mousedown — by click time the button has taken focus
-    linkBtn.addEventListener("mousedown", function () { linkSnap = window.__jvLinkSnapshot(); });
-    linkBtn.addEventListener("click", function (e) {
-      e.stopPropagation(); e.preventDefault(); jvClosePops();
-      if (addMenu) addMenu.classList.remove("open");
-      window.__jvStartLinkFlow(linkSnap); linkSnap = null;
-    });
     bar.querySelector(".jv-sections-btn").addEventListener("click", function (e) { e.stopPropagation(); jvClosePops(); if (addMenu) addMenu.classList.remove("open"); toggleOutline(); });
     document.addEventListener("click", function () { jvClosePops(); });
 

@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor.css?v=1">
 <style>
   :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;--red:#e2483a;
     --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
@@ -37,6 +38,9 @@
   .steptag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ok);margin-bottom:6px}
   #done .big{font-family:var(--display);font-weight:700;font-size:42px;text-transform:uppercase;color:var(--ok);margin-bottom:10px}
   .foot{color:var(--mut);font-size:12px;margin-top:34px}
+  /* In edit mode, show all steps stacked so the application questions can be edited */
+  body.jv-editing .stepwrap{display:block!important;border-top:1px dashed rgba(26,92,255,.35);margin-top:18px;padding-top:14px}
+  body.jv-editing .stepwrap::before{content:attr(id);display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -143,6 +147,13 @@
 </div>
 
 <script>
+/* ── Analytics (shared dashboard beacons) ── */
+var TRACK_URL='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtguy-waitlist';
+function tgVisitor(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'anon';}}
+function tgUtm(){var keys=['utm_source','utm_medium','utm_campaign','utm_content','utm_term'],sp=new URLSearchParams(location.search),store={},out='',ch=false;try{store=JSON.parse(sessionStorage.getItem('tg-utm')||'{}');}catch(e){}keys.forEach(function(k){var v=sp.get(k);if(v){store[k]=v;ch=true;}});if(ch){try{sessionStorage.setItem('tg-utm',JSON.stringify(store));}catch(e){}}keys.forEach(function(k){if(store[k])out+='&'+k+'='+encodeURIComponent(store[k]);});return out;}
+function track(evt){var u=TRACK_URL+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+evt+'&v='+encodeURIComponent(tgVisitor())+tgUtm();try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(e){}try{new Image().src=u;}catch(e){}}
+if(!/[?&]edit=1/.test(location.search)) track('view');
+
 // ⬇️ Set to the deployed onboarding Worker URL (same worker serves /optin and /application)
 const WORKER_URL = "https://trt-guy-onboarding.julianhierro.workers.dev";
 const API = WORKER_URL.replace(/\/+$/,'');
@@ -165,16 +176,20 @@ $('#joinForm').addEventListener('submit', async e=>{
     await fetch(API+'/optin',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({list:'coaching-waitlist',firstName:name,email,phone})});
   }catch(e){}
+  track('optin');
   show('step2');
 });
+
+// Reads the live question label for a control, so an edited question transcribes with its new wording
+function labelFor(id){ var el=document.getElementById(id); var p=el&&el.previousElementSibling; if(p&&p.tagName==='LABEL'){ return p.textContent.replace('*','').trim(); } return id; }
 
 // Step 2 → submit the application
 $('#appForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const err=$('#appErr');
   const ids=['short_term_goals','long_term_goals','on_trt','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker'];
-  const payload={firstName:lead.firstName,email:lead.email,phone:lead.phone};
-  for(const id of ids){ const v=$('#'+id).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+id).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[id]=v; }
+  const payload={firstName:lead.firstName,email:lead.email,phone:lead.phone,qa:[]};
+  for(const id of ids){ const v=$('#'+id).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+id).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[id]=v; payload.qa.push({q:labelFor(id),a:v}); }
   err.textContent=''; const b=$('#appBtn'); b.disabled=true; b.textContent='Submitting…';
   try{
     await fetch(API+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -182,5 +197,26 @@ $('#appForm').addEventListener('submit', async e=>{
   show('done');
 });
 </script>
+
+<!-- ═══ Inline editor (add ?edit=1). Labels/copy editable; form controls locked so GHL mapping stays intact. ═══ -->
+<script>
+document.querySelectorAll('input,select,textarea,button').forEach(function(el){el.setAttribute('data-noedit','');});
+window.JV_EDITOR={ site:"tg-waitlist", page:1, pwKey:"trtguy", api:"https://jv-dashboard-chi.vercel.app/api/content" };
+</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
+  var n=0;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
+  var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var c=el.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(c.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
+  (function walk(el){ var c=el.children; for(var i=0;i<c.length;i++){ var ch=c[i]; if(skip(ch))continue; if(isTextLeaf(ch)) ch.setAttribute("data-etext","1"); else walk(ch); } })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+})();
+</script>
+<script src="/editor.js?v=1"></script>
 </body>
 </html>
