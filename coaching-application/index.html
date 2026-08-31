@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaching Application | TRT Guy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor.css?v=1">
+<!-- Paint-hold: never flash the old version -->
+<style>html.jv-pending body{visibility:hidden}</style>
+<script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
+<style>
+  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;--red:#e2483a;
+    --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 18px 70px}
+  .wrap{max-width:560px;margin:0 auto;text-align:center}
+  .wordmark{font-family:var(--display);font-weight:700;font-size:clamp(32px,8vw,48px);line-height:.9;letter-spacing:.04em;text-transform:uppercase;display:inline-block;margin:42px 0 22px}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(36px,8.5vw,54px);line-height:1;text-transform:uppercase;margin:12px 0 14px}
+  .lead{color:var(--mut);font-size:17px;max-width:490px;margin:0 auto 26px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;box-shadow:0 2px 10px rgba(11,13,16,.05);text-align:left}
+  label{display:block;font-weight:600;font-size:14.5px;margin-bottom:6px}
+  label .req{color:var(--acc)}
+  input,textarea,select{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:11px;font-family:var(--body);font-size:16px;margin-bottom:16px;outline:none;background:#fff;color:var(--txt)}
+  textarea{min-height:76px;resize:vertical}
+  input:focus,textarea:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235b6572' d='M6 8 0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+  .btn{width:100%;background:var(--acc);color:#fff;border:none;border-radius:12px;padding:16px;font-family:var(--display);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;transition:background .15s,transform .1s}
+  .btn:hover{background:var(--acc-d);transform:translateY(-1px)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .err{color:var(--red);font-size:13.5px;min-height:18px;margin-top:6px;font-weight:600;text-align:center}
+  .fine{font-size:12px;color:var(--mut);text-align:center;margin-top:12px}
+  .foot{color:var(--mut);font-size:12px;margin-top:34px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">TRT-GUY</div>
+  <div class="kicker">Coaching · By Application</div>
+  <h1>Coaching Application</h1>
+  <p class="lead">A few quick questions so we can see if you're the right fit. Be honest — it helps us build the right plan.</p>
+  <div class="card">
+    <form id="appForm" novalidate>
+      <label>First name <span class="req">*</span></label>
+      <input type="text" id="fname" placeholder="First name" autocomplete="given-name" required>
+      <label>Email <span class="req">*</span></label>
+      <input type="email" id="email" placeholder="Your best email" autocomplete="email" required>
+      <label>Phone <span class="req">*</span></label>
+      <input type="tel" id="phone" placeholder="So we can reach you" autocomplete="tel" required>
+
+      <label>What are your short-term goals? <span class="req">*</span></label>
+      <textarea id="short_term_goals" placeholder="Next 1–3 months" required></textarea>
+
+      <label>What are your long-term goals? <span class="req">*</span></label>
+      <textarea id="long_term_goals" placeholder="6–12+ months out" required></textarea>
+
+      <label>Are you on TRT, or thinking about it? <span class="req">*</span></label>
+      <select id="on_trt" required>
+        <option value="">Select…</option>
+        <option value="Yes — currently on TRT">Yes — I'm on TRT</option>
+        <option value="No — not yet, want to start">Thinking about it / want to start</option>
+        <option value="No — just exploring">Just exploring</option>
+      </select>
+
+      <label>Have you ever used steroids? <span class="req">*</span></label>
+      <select id="ever_used_steroids" required>
+        <option value="">Select…</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label>Are you currently on a cycle? <span class="req">*</span></label>
+      <select id="on_cycle_now" required>
+        <option value="">Select…</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label>Are you willing to invest significantly to hit your goals? <span class="req">*</span></label>
+      <select id="investment_ready" required>
+        <option value="">Select…</option>
+        <option value="Yes — finances arent an issue">Yes — finances aren't an issue</option>
+        <option value="Possibly — depends on the package">Possibly — depends on the package</option>
+        <option value="Not right now">Not right now</option>
+      </select>
+
+      <label>If accepted, when would you look to start? <span class="req">*</span></label>
+      <select id="ready_to_start" required>
+        <option value="">Select…</option>
+        <option value="As soon as possible">As soon as possible</option>
+        <option value="As soon as coaching opens">As soon as coaching opens</option>
+      </select>
+
+      <label>Can you make this financial decision on your own? <span class="req">*</span></label>
+      <select id="decision_maker" required>
+        <option value="">Select…</option>
+        <option value="I make my own financial decisions">I make my own financial decisions</option>
+        <option value="I would discuss with my spouse/partner">I'd discuss with my spouse/partner</option>
+        <option value="I would need someone elses sign-off">I'd need someone else's sign-off</option>
+      </select>
+
+      <button class="btn" id="appBtn" type="submit">Submit my application →</button>
+      <div class="err" id="appErr"></div>
+    </form>
+  </div>
+  <div class="foot">© TRT Guy · Educational only — not medical advice</div>
+</div>
+
+<script>
+const WORKER='https://trt-guy-onboarding.julianhierro.workers.dev';
+var TRACK='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtguy-coaching-app';
+function tgv(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'anon';}}
+function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+encodeURIComponent(tgv());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){}}
+if(!/[?&]edit=1/.test(location.search)) track('view');
+
+const $=s=>document.querySelector(s);
+function labelFor(id){ var el=document.getElementById(id); var p=el&&el.previousElementSibling; if(p&&p.tagName==='LABEL'){ return p.textContent.replace('*','').trim(); } return id; }
+
+$('#appForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var err=$('#appErr');
+  var name=$('#fname').value.trim(), email=$('#email').value.trim(), phone=$('#phone').value.trim();
+  if(!name){ err.textContent='Please enter your first name.'; return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
+  if(!phone){ err.textContent='Please enter your phone.'; return; }
+  var ids=['short_term_goals','long_term_goals','on_trt','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker'];
+  var payload={firstName:name,email:email,phone:phone,qa:[]};
+  for(var i=0;i<ids.length;i++){ var v=$('#'+ids[i]).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+ids[i]).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[ids[i]]=v; payload.qa.push({q:labelFor(ids[i]),a:v}); }
+  err.textContent=''; var b=$('#appBtn'); b.disabled=true; b.textContent='Submitting…';
+  try{
+    var r=await fetch(WORKER+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r.ok) throw 0;
+    location.href='/waitlist/thanks/';
+  }catch(x){ err.textContent='Something went wrong — please try again.'; b.disabled=false; b.textContent='Submit my application →'; }
+});
+</script>
+
+<!-- ═══ Inline editor (add ?edit=1) — labels editable, controls locked so GHL mapping stays intact ═══ -->
+<script>
+document.querySelectorAll('input,select,textarea,button').forEach(function(el){el.setAttribute('data-noedit','');});
+window.JV_EDITOR={ site:"td-coaching-application", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };
+</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
+  var n=0;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
+  var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var c=el.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(c.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
+  (function walk(el){ var c=el.children; for(var i=0;i<c.length;i++){ var ch=c[i]; if(skip(ch))continue; if(isTextLeaf(ch)) ch.setAttribute("data-etext","1"); else walk(ch); } })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+})();
+</script>
+<script src="/editor.js?v=1"></script>
+</body>
+</html>
