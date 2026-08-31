@@ -65,6 +65,9 @@
         <option value="No — just exploring">Just exploring</option>
       </select>
 
+      <label data-eid="e701">Describe your current TRT protocol (total amount, injection frequency, and anything else you're taking) <span class="req" data-eid="e702">*</span></label>
+      <textarea id="trt_protocol" data-eid="e703" required></textarea>
+
       <label>Have you ever used steroids? <span class="req">*</span></label>
       <select id="ever_used_steroids" required>
         <option value="">Select…</option>
@@ -78,6 +81,11 @@
         <option value="Yes">Yes</option>
         <option value="No">No</option>
       </select>
+
+      <div id="cycle_wrap" data-eid="e711" style="display:none">
+        <label data-eid="e712">Describe your current cycle <span class="req" data-eid="e713">*</span></label>
+        <textarea id="cycle_describe" data-eid="e714"></textarea>
+      </div>
 
       <label>If you find the right program, are you willing to invest significantly to hit your goals? <span class="req">*</span></label>
       <select id="investment_ready" required>
@@ -138,9 +146,11 @@ $('#appForm').addEventListener('submit', async function(e){
   if(!name){ err.textContent='Please enter your first name.'; return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
   if(!phone){ err.textContent='Please enter your phone.'; return; }
-  var ids=['short_term_goals','long_term_goals','on_trt','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
+  var ids=['short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
   var payload={firstName:name,email:email,phone:phone,qa:[]};
   for(var i=0;i<ids.length;i++){ var v=$('#'+ids[i]).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+ids[i]).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[ids[i]]=v; payload.qa.push({q:labelFor(ids[i]),a:v}); }
+  // If they're currently on a cycle, they must describe it (this field is hidden otherwise).
+  if($('#on_cycle_now').value.trim()==='Yes'){ var cd=$('#cycle_describe'); var cv=cd.value.trim(); if(!cv){ err.textContent='Please describe your current cycle.'; cd.scrollIntoView({behavior:'smooth',block:'center'}); return; } payload['cycle_describe']=cv; payload.qa.push({q:labelFor('cycle_describe'),a:cv}); }
   err.textContent=''; var b=$('#appBtn'); b.disabled=true; b.textContent='Submitting…';
   try{
     var r=await fetch(WORKER+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -148,6 +158,8 @@ $('#appForm').addEventListener('submit', async function(e){
     location.href='/waitlist/thanks/';
   }catch(x){ err.textContent='Something went wrong — please try again.'; b.disabled=false; b.textContent='Submit my application →'; }
 });
+// Reveal the "describe your cycle" question only when they say they're on a cycle.
+$('#on_cycle_now').addEventListener('change',function(){ document.getElementById('cycle_wrap').style.display=this.value==='Yes'?'':'none'; });
 </script>
 
 <!-- ═══ Inline editor (add ?edit=1) — labels editable, controls locked so GHL mapping stays intact ═══ -->
