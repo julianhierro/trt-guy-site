@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TRT Guy — Control Center</title>
-<link rel="icon" href="https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/6a81c704cf50f900f223de18.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -16,7 +17,8 @@
     --accent:#1a5cff; --accent-2:#0f3fd6; --accent-soft:rgba(26,92,255,.14);
     --good:#22c55e; --mid:#eab308;
   }
-  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+*{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
     font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.55;font-weight:400}
   ::selection{background:var(--accent);color:#fff}
@@ -28,6 +30,8 @@
   }
   .brand{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.12em;font-size:13.5px;
     display:flex;align-items:center;text-decoration:none;color:#fff}
+  /* the T mark replaces the accent dot — same job, actual branding */
+  .brand .mark{width:24px;height:24px;border-radius:5px;margin-right:11px;display:block}
   .brand .dot{width:7px;height:7px;background:var(--accent);border-radius:50%;margin-right:10px}
   .brand .slash{color:var(--muted-2);margin:0 5px}
   .topbar .right{display:flex;align-items:center;gap:12px;
@@ -113,8 +117,263 @@
   .btn:hover{background:var(--accent-2);border-color:var(--accent-2)}
   .btn.ghost{background:transparent;color:#fff;border-color:var(--line-bright)}
   .btn.ghost:hover{background:#fff;color:#000;border-color:#fff}
+  .btn.copy.copied{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .dates{display:none;align-items:center;gap:6px;margin-left:6px}
+  .dates.on{display:inline-flex}
+  .dates input[type=date]{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;
+    background:transparent;color:#fff;border:1px solid var(--line-bright);
+    border-radius:6px;padding:6px 8px;color-scheme:dark;
+  }
+  .dates .to{font-size:10px;color:#8d97a5;letter-spacing:.14em}
+  #resetBtn{border-color:rgba(234,88,12,.5);color:#ffb08a}
+  #resetBtn:hover{background:#c2410c;border-color:#c2410c;color:#fff}
+  .baseline{
+    margin:10px 0 0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:#ffb08a;display:none;
+  }
+  .baseline.on{display:block}
+  .baseline button{
+    margin-left:8px;background:transparent;border:1px solid var(--line-bright);color:#fff;
+    border-radius:5px;padding:3px 8px;cursor:pointer;font:inherit;
+  }
 
   /* editor overlay */
+  /* ── To-do drawer ────────────────────────────────────────────────────────
+     The same list as the phone app, off the same store, so a note taken on
+     the couch is on the laptop and vice versa. Slides over the grid rather
+     than taking a tab, because it is a companion to whatever you're looking
+     at, not a place you go. */
+  .todo-btn{position:relative;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;
+    text-transform:uppercase;font-weight:700;padding:9px 13px;border-radius:7px;cursor:pointer;
+    background:transparent;color:var(--muted);border:1px solid var(--line-bright);transition:all .14s}
+  .todo-btn:hover{color:#fff;border-color:#fff}
+  .todo-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .todo-btn .n{display:none;margin-left:7px;padding:2px 6px;border-radius:999px;
+    background:var(--accent);color:#fff;font-size:9.5px;letter-spacing:.06em}
+  .todo-btn.has .n{display:inline-block}
+  .todo-btn.on .n{background:rgba(255,255,255,.22)}
+
+  .todo-scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:44;opacity:0;pointer-events:none;
+    transition:opacity .18s ease}
+  .todo-scrim.open{opacity:1;pointer-events:auto}
+  .todo{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);z-index:45;
+    background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .2s ease;box-shadow:-24px 0 60px rgba(0,0,0,.55)}
+  .todo.open{transform:none}
+  .todo{overflow:hidden}
+  .todo-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .todo-head h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.02em;flex:1}
+  .todo-sync{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)}
+  .todo-sync i{width:6px;height:6px;border-radius:50%;background:var(--muted-2);font-style:normal}
+  .todo-sync i.on{background:var(--good)}
+  .todo-sync i.err{background:#ef4444}
+  .todo-x{border:0;background:none;color:var(--muted);font-size:22px;line-height:1;cursor:pointer;padding:0 2px}
+  .todo-x:hover{color:#fff}
+
+  .todo-seg{display:flex;gap:5px;padding:12px 18px 0}
+  .todo-seg button{flex:1;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;font-weight:600;padding:9px;border-radius:7px;cursor:pointer;
+    background:transparent;color:var(--muted);border:1px solid var(--line-bright)}
+  .todo-seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  .todo-list{flex:1;overflow:auto;padding:14px 18px 18px}
+  .todo-day{margin:16px 0 8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted-2)}
+  .todo-list .todo-day:first-child{margin-top:2px}
+  .ti{display:flex;gap:11px;align-items:flex-start;padding:12px 13px;margin-bottom:7px;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:11px}
+  .ti.done{background:transparent;border-style:dashed}
+  .ti .ck{flex:none;width:21px;height:21px;margin-top:1px;border-radius:6px;border:2px solid var(--line-bright);
+    background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  .ti .ck svg{width:12px;height:12px;opacity:0;color:#fff}
+  .ti.done .ck{background:var(--accent);border-color:var(--accent)}
+  .ti.done .ck svg{opacity:1}
+  .ti .bd{flex:1;min-width:0}
+  .ti .tx{font-size:14px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+  .ti.done .tx{color:var(--muted-2);text-decoration:line-through}
+  .ti .kd{display:inline-block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:9px;
+    letter-spacing:.13em;text-transform:uppercase;padding:3px 6px;border-radius:5px;
+    background:#141417;color:var(--muted-2)}
+  .ti .kd.task{color:#9dbcff;background:var(--accent-soft)}
+  .ti .kd.idea{color:#f0c36b;background:rgba(240,195,107,.12)}
+  .ti .kd.note{color:#a7f3d0;background:rgba(167,243,208,.1)}
+  .ti .rm{flex:none;border:0;background:none;color:var(--muted-2);font-size:17px;line-height:1;
+    cursor:pointer;padding:1px 3px}
+  .ti .rm:hover{color:#ef4444}
+  .todo-empty{text-align:center;color:var(--muted-2);padding:44px 18px;font-size:13.5px;line-height:1.65}
+  .todo-empty b{display:block;color:#fff;font-size:14.5px;margin-bottom:5px}
+
+  .todo-add{border-top:1px solid var(--line);padding:12px 18px 16px;background:var(--panel)}
+  .todo-kinds{display:flex;gap:6px;margin-bottom:9px}
+  .todo-kinds button{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;font-weight:600;padding:7px 11px;border-radius:999px;cursor:pointer;
+    background:transparent;color:var(--muted-2);border:1px solid var(--line-bright)}
+  .todo-kinds button.on{background:var(--accent-soft);border-color:var(--accent);color:#9dbcff}
+  .todo-form{display:flex;gap:8px;align-items:flex-end}
+  .todo-form textarea{flex:1;min-height:44px;max-height:130px;resize:none;padding:11px 13px;border-radius:10px;
+    border:1px solid var(--line-bright);background:#0a0a0c;color:#fff;font:400 14px/1.4 Inter,sans-serif;outline:0}
+  .todo-form textarea:focus{border-color:var(--accent)}
+  .todo-form button{flex:none;width:44px;height:44px;border:0;border-radius:10px;background:var(--accent);
+    color:#fff;font-size:21px;line-height:1;cursor:pointer}
+  /* 16px or iOS zooms the whole dashboard in the moment the caret lands */
+  .ti .mt{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;align-items:center}
+  .ti .pi{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+    padding:3px 6px;border-radius:5px;border:1px solid transparent}
+  .ti .pi.p1{color:#ff9a8b;background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.3)}
+  .ti .pi.p2{color:#f0c36b;background:rgba(240,195,107,.1)}
+  .ti .pi.p3{color:var(--muted-2);background:#141417}
+  .ti .nt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--muted-2)}
+  .ti .go{flex:none;border:0;background:none;color:var(--muted-2);font-size:20px;line-height:1;
+    cursor:pointer;padding:0 2px;align-self:center}
+  .ti:hover .go{color:#fff}
+  .ti{cursor:pointer}
+  .todo-newpri button{font-size:9px}
+
+  /* the item, opened — slides over the list inside the drawer */
+  .todo-detail{position:absolute;inset:0;z-index:2;background:var(--panel);display:flex;flex-direction:column;
+    transform:translateX(100%);transition:transform .19s ease;visibility:hidden}
+  .todo.detail .todo-detail{transform:none;visibility:visible}
+  .todo.detail .todo-seg,.todo.detail .todo-add{visibility:hidden}
+  .d-bar{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .d-bar .d-back{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;
+    font:600 13px Inter,sans-serif}
+  .d-bar .d-when{flex:1;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--muted-2);text-align:center}
+  .d-bar .d-del{border:1px solid var(--line-bright);background:transparent;color:var(--muted-2);cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+    padding:6px 10px;border-radius:7px}
+  .d-bar .d-del:hover{color:#fff;border-color:#ef4444;background:rgba(239,68,68,.14)}
+  .d-body{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+  .d-title{flex:none;border:0;background:none;color:#fff;font:800 20px/1.3 Inter,sans-serif;
+    letter-spacing:-.02em;resize:none;outline:0;padding:0;overflow:hidden}
+  .d-row{flex:none;display:flex;gap:6px}
+  .d-pri,.d-kind{display:flex;gap:6px}
+  .d-pri button,.d-kind button{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;font-weight:600;padding:7px 11px;border-radius:999px;cursor:pointer;
+    background:transparent;color:var(--muted-2);border:1px solid var(--line-bright)}
+  .d-kind button.on{background:var(--accent-soft);border-color:var(--accent);color:#9dbcff}
+  .d-pri button[data-pri="1"].on{background:rgba(239,68,68,.16);border-color:rgba(239,68,68,.5);color:#ff9a8b}
+  .d-pri button[data-pri="2"].on{background:rgba(240,195,107,.14);border-color:rgba(240,195,107,.45);color:#f0c36b}
+  .d-pri button[data-pri="3"].on{background:#16161a;border-color:var(--line-bright);color:#fff}
+  #dNotes{flex:1;min-height:260px;resize:vertical;padding:13px 14px;border-radius:11px;
+    border:1px solid var(--line-bright);background:#0a0a0c;color:#e7e7ea;
+    font:400 14px/1.62 Inter,sans-serif;outline:0}
+  #dNotes:focus{border-color:var(--accent)}
+  .d-foot{border-top:1px solid var(--line);padding:12px 18px 16px}
+  .d-foot button{width:100%;padding:12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13.5px;
+    border:1px solid var(--line-bright);background:transparent;color:#fff}
+  .d-foot button.on{background:var(--accent);border-color:var(--accent)}
+
+  /* ── Inbox ───────────────────────────────────────────────────────────────
+     Reuses the drawer the to-do list already established, one size wider,
+     because a conversation needs more room than a line of text. */
+  .todo.inbox{width:min(540px,100%)}
+  .in-gate{padding:20px 18px;display:none;flex-direction:column;gap:12px}
+  .todo.inbox.locked .in-gate{display:flex}
+  .in-gate p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.6}
+  .in-gate form{display:flex;gap:8px}
+  .in-gate input{flex:1;background:#0a0a0c;border:1px solid var(--line-bright);border-radius:9px;color:#fff;
+    padding:11px 13px;font:500 15px Inter,sans-serif;outline:0}
+  .in-gate input:focus{border-color:var(--accent)}
+  .in-gate button{border:0;border-radius:9px;background:var(--accent);color:#fff;cursor:pointer;
+    font:700 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;padding:0 16px}
+  .in-err{font-size:12.5px;color:#ff9a8b;min-height:16px}
+
+  .in-filters{padding:12px 18px 0}
+  .cv{display:flex;gap:11px;align-items:flex-start;padding:12px 13px;margin-bottom:7px;cursor:pointer;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:11px}
+  .cv:hover{border-color:var(--line-bright)}
+  .cv.unread{border-color:rgba(26,92,255,.45);background:rgba(26,92,255,.06)}
+  .cv .av{flex:none;width:34px;height:34px;border-radius:50%;background:#1c1c22;color:#cfd8ff;
+    display:flex;align-items:center;justify-content:center;font:700 13px Inter,sans-serif}
+  .cv .bd{flex:1;min-width:0}
+  .cv .nm{display:flex;align-items:center;gap:7px}
+  .cv .nm b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cv .ago{flex:none;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;
+    letter-spacing:.1em;color:var(--muted-2);white-space:nowrap}
+  .cv .pv{margin-top:4px;font-size:13px;line-height:1.45;color:var(--muted);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .cv .pv i{font-style:normal;color:var(--muted-2)}
+  .ch{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;
+    padding:3px 6px;border-radius:5px;background:#141417;color:var(--muted-2)}
+  .ch.email{color:#9dbcff;background:var(--accent-soft)}
+  .ch.ig{color:#f7a8d8;background:rgba(247,168,216,.12)}
+  .ch.sms{color:#a7f3d0;background:rgba(167,243,208,.1)}
+  .ch.fb{color:#8ab4ff;background:rgba(138,180,255,.12)}
+  .cv .un{flex:none;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+  .in-msgs{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:9px}
+  .bub{max-width:82%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;
+    white-space:pre-wrap;word-wrap:break-word}
+  .bub.in{align-self:flex-start;background:var(--panel-2);border:1px solid var(--line);border-bottom-left-radius:5px}
+  .bub.out{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:5px}
+  .bub .st{display:block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:8.5px;
+    letter-spacing:.11em;text-transform:uppercase;opacity:.62}
+  .in-reply{border-top:1px solid var(--line);padding:11px 18px 16px}
+  .in-on{margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--muted-2)}
+  #inText{font-size:14px}
+  .in-msgs .todo-empty{margin:auto}
+
+  .in-new{border:1px solid var(--line-bright);background:transparent;color:var(--muted);cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+    padding:7px 10px;border-radius:7px;white-space:nowrap}
+  .in-new:hover{color:#fff;border-color:#fff}
+  .in-on{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .in-ch{display:flex;gap:5px}
+  .in-ch button{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600;padding:5px 9px;border-radius:999px;cursor:pointer;
+    background:transparent;color:var(--muted-2);border:1px solid var(--line-bright)}
+  .in-ch button.on{background:var(--accent-soft);border-color:var(--accent);color:#9dbcff}
+  .in-subj{width:100%;margin-bottom:8px;background:#0a0a0c;border:1px solid var(--line-bright);
+    border-radius:9px;color:#fff;padding:9px 12px;font:500 13.5px Inter,sans-serif;outline:0}
+  .in-subj:focus{border-color:var(--accent)}
+
+  .todo.compose .in-compose{transform:none;visibility:visible}
+  .todo.compose .todo-seg,.todo.compose .todo-add{visibility:hidden}
+  .cm-body{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+  .cm-to{position:relative;flex:none}
+  .cm-body input,.cm-body textarea{width:100%;background:#0a0a0c;border:1px solid var(--line-bright);
+    border-radius:10px;color:#fff;padding:11px 13px;font:400 14px/1.5 Inter,sans-serif;outline:0}
+  .cm-body input:focus,.cm-body textarea:focus{border-color:var(--accent)}
+  .cm-body textarea{flex:1;min-height:240px;resize:vertical;line-height:1.62}
+  .cm-hits{position:absolute;top:100%;left:0;right:0;z-index:3;margin-top:5px;max-height:210px;overflow:auto;
+    background:var(--panel-2);border:1px solid var(--line-bright);border-radius:10px;
+    box-shadow:0 16px 40px rgba(0,0,0,.6)}
+  .cm-hits div{padding:10px 13px;cursor:pointer;font-size:13.5px;border-bottom:1px solid var(--line)}
+  .cm-hits div:last-child{border-bottom:0}
+  .cm-hits div:hover{background:var(--accent-soft)}
+  .cm-hits b{display:block;font-weight:600}
+  .cm-hits span{color:var(--muted-2);font-size:12px}
+  .cm-picked{display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:10px;
+    background:var(--accent-soft);border:1px solid rgba(26,92,255,.4);font-size:13.5px}
+  .cm-picked span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cm-picked button{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 2px}
+  .in-compose .d-foot{display:flex;align-items:center;gap:12px}
+  .in-compose .d-foot .in-err{flex:1;min-height:0}
+  .in-compose .d-foot button{width:auto;flex:none;padding:12px 22px;background:var(--accent);
+    border-color:var(--accent)}
+
+  .in-filters .seg-arch{flex:0 0 auto;padding-left:12px;padding-right:12px}
+  .in-filters .seg-arch.on{background:#2b2b30;border-color:var(--line-bright);color:#fff}
+  .d-bar .d-del.in-danger:hover{color:#fff;border-color:#ef4444;background:rgba(239,68,68,.18)}
+  .in-compose .d-foot .in-err,.in-reply .in-err{display:block}
+  .cv{position:relative}
+  .cv .acts{position:absolute;top:7px;right:8px;display:none;gap:4px}
+  .cv:hover .acts{display:flex}
+  .cv .acts button{border:1px solid var(--line-bright);background:var(--panel);color:var(--muted-2);
+    cursor:pointer;border-radius:6px;padding:4px 7px;
+    font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase}
+  .cv .acts button:hover{color:#fff;border-color:#fff}
+  .cv .acts button.rm:hover{color:#fff;border-color:#ef4444;background:rgba(239,68,68,.2)}
+  .cv.gone{opacity:.35;pointer-events:none}
+
+  @media (max-width:560px){ .todo{width:100%} .todo.inbox{width:100%}
+    .todo-form textarea,.d-title,#dNotes,#inText,.in-gate input,
+    .in-subj,.cm-body input,.cm-body textarea{font-size:16px} }
+
   .overlay{position:fixed;inset:0;background:#000;z-index:40;display:none;flex-direction:column}
   .overlay.open{display:flex}
   .frame-bar{border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;
@@ -155,8 +414,10 @@
 <body>
 
 <header class="topbar">
-  <a href="#" class="brand"><span class="dot"></span>TRT GUY<span class="slash">/</span>Control</a>
+  <a href="#" class="brand"><img class="mark" src="icon-180.png" alt="" width="24" height="24">TRT<span class="slash">/</span>GUY</a>
   <div class="right">
+    <button type="button" class="todo-btn" id="inboxBtn">📥 Inbox<span class="n" id="inboxN">0</span></button>
+    <button type="button" class="todo-btn" id="todoBtn">📝 To-do<span class="n" id="todoN">0</span></button>
     <span>Control Center</span>
   </div>
 </header>
@@ -170,14 +431,147 @@
     <div class="range" id="range">
       <button data-days="7" class="on">7 days</button>
       <button data-days="30">30 days</button>
+      <button data-days="90">90 days</button>
       <button data-days="0">All time</button>
+      <button data-custom="1" id="customBtn">Custom&hellip;</button>
+      <span class="dates" id="dates">
+        <input type="date" id="dFrom"><span class="to">to</span><input type="date" id="dTo">
+        <button id="applyDates" class="go">Apply</button>
+      </span>
+      <button id="resetBtn" title="Ignore everything before today, so your own test traffic stops counting">Reset stats</button>
+      <button id="meBtn" title="Stop counting visits from this browser">Ignore me</button>
     </div>
   </div>
 
+  <div class="baseline" id="baseline"></div>
   <div class="totals" id="totals"></div>
   <div id="crumbSlot"></div>
   <div class="grid" id="grid"></div>
 </main>
+
+<div class="todo-scrim" id="todoScrim"></div>
+<aside class="todo" id="todo" aria-label="To-do list">
+  <div class="todo-head">
+    <h2>To-do</h2>
+    <span class="todo-sync"><i id="todoDot"></i><span id="todoSync">offline</span></span>
+    <button type="button" class="todo-x" id="todoClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="todo-seg">
+    <button type="button" class="on" data-view="open">Open</button>
+    <button type="button" data-view="done">Done</button>
+  </div>
+  <div class="todo-list" id="todoList"></div>
+  <div class="todo-add">
+    <div class="todo-kinds">
+      <button type="button" class="on" data-kind="task">Task</button>
+      <button type="button" data-kind="idea">Idea</button>
+      <button type="button" data-kind="note">Note</button>
+    </div>
+    <div class="todo-kinds todo-newpri">
+      <button type="button" data-pri="1">High</button>
+      <button type="button" class="on" data-pri="2">Medium</button>
+      <button type="button" data-pri="3">Low</button>
+    </div>
+    <form class="todo-form" id="todoForm">
+      <textarea id="todoText" rows="1" placeholder="Task, content idea, note&hellip;"></textarea>
+      <button type="submit" aria-label="Add">+</button>
+    </form>
+  </div>
+  <div class="todo-detail" id="todoDetail">
+    <div class="d-bar">
+      <button type="button" class="d-back">&larr; All</button>
+      <span class="d-when"></span>
+      <button type="button" class="d-del" id="dDel" aria-label="Delete">Delete</button>
+    </div>
+    <div class="d-body">
+      <textarea class="d-title" rows="1" placeholder="What is it?"></textarea>
+      <div class="d-row">
+        <div class="d-pri">
+          <button type="button" data-pri="1">High</button>
+          <button type="button" data-pri="2">Medium</button>
+          <button type="button" data-pri="3">Low</button>
+        </div>
+      </div>
+      <div class="d-row">
+        <div class="d-kind">
+          <button type="button" data-kind="task">Task</button>
+          <button type="button" data-kind="idea">Idea</button>
+          <button type="button" data-kind="note">Note</button>
+        </div>
+      </div>
+      <textarea id="dNotes" placeholder="Write it out in here &mdash; the script, the outline, the numbers, whatever the task actually needs."></textarea>
+    </div>
+    <div class="d-foot"><button type="button" id="dDone">Mark done</button></div>
+  </div>
+</aside>
+
+<aside class="todo inbox" id="inbox" aria-label="Inbox">
+  <div class="todo-head">
+    <h2>Inbox</h2>
+    <span class="todo-sync"><i id="inDot"></i><span id="inSync">&mdash;</span></span>
+    <button type="button" class="in-new" id="inNew" title="Write an email">&#9998; New</button>
+    <button type="button" class="todo-x" id="inClose" aria-label="Close">&times;</button>
+  </div>
+
+  <div class="in-gate" id="inGate">
+    <p>This one shows real conversations with real leads, so it sits behind a passcode.</p>
+    <form id="inGateForm">
+      <input type="password" id="inKey" placeholder="Passcode" autocomplete="current-password">
+      <button type="submit">Unlock</button>
+    </form>
+    <span class="in-err" id="inGateErr"></span>
+  </div>
+
+  <div class="todo-seg in-filters" id="inFilters" hidden>
+    <button type="button" class="on" data-ch="">All</button>
+    <button type="button" data-ch="email">Email</button>
+    <button type="button" data-ch="ig">IG</button>
+    <button type="button" data-ch="sms">SMS</button>
+    <button type="button" class="seg-arch" data-box="archived">Archived</button>
+  </div>
+  <div class="todo-list" id="inList" hidden></div>
+
+  <div class="todo-detail in-compose" id="inCompose">
+    <div class="d-bar">
+      <button type="button" class="d-back cm-back">&larr; Inbox</button>
+      <span class="d-when">New email</span>
+      <span style="width:64px"></span>
+    </div>
+    <div class="cm-body">
+      <div class="cm-to">
+        <input type="text" id="cmTo" placeholder="Name or email address" autocomplete="off">
+        <div class="cm-hits" id="cmHits" hidden></div>
+        <div class="cm-picked" id="cmPicked" hidden><span></span><button type="button" id="cmClear" aria-label="Clear">&times;</button></div>
+      </div>
+      <input type="text" id="cmSubj" placeholder="Subject">
+      <textarea id="cmText" placeholder="Write it&hellip;"></textarea>
+    </div>
+    <div class="d-foot">
+      <span class="in-err" id="cmErr"></span>
+      <button type="button" id="cmSend">Send email</button>
+    </div>
+  </div>
+
+  <div class="todo-detail" id="inThread">
+    <div class="d-bar">
+      <button type="button" class="d-back in-back">&larr; All</button>
+      <span class="d-when" id="inWho"></span>
+      <button type="button" class="d-del" id="inArch">Archive</button>
+      <button type="button" class="d-del in-danger" id="inDel">Delete</button>
+      <a class="d-del" id="inGhl" href="#" target="_blank" rel="noopener">GHL &#8599;</a>
+    </div>
+    <div class="in-msgs" id="inMsgs"></div>
+    <div class="in-reply">
+      <div class="in-on"><span id="inOn"></span><span class="in-ch" id="inCh"></span></div>
+      <input type="text" id="inSubj" class="in-subj" placeholder="Subject" hidden>
+      <form class="todo-form" id="inForm">
+        <textarea id="inText" rows="1" placeholder="Reply&hellip;"></textarea>
+        <button type="submit" aria-label="Send">&uarr;</button>
+      </form>
+      <span class="in-err" id="inErr"></span>
+    </div>
+  </div>
+</aside>
 
 <div class="overlay" id="overlay">
   <div class="frame-bar">
@@ -205,116 +599,57 @@
   ───────────────────────────────────────────────────────────────────────── */
   const PROJECTS = [
     {
-      id:'start', icon:'🚪', tag:'Hub', name:'TRT 101 + Coaching',
-      description:'One page, two tabs — the TRT 101 guide and the coaching waitlist. Reuses your existing copy.',
-      home:'https://trt-guy.com/start/',
+      id:'coaching', icon:'📹', tag:'Offer', name:'Coaching',
+      description:'Coaching is open at $125/week. VSL, who it is for, before/afters and the FAQ.',
+      home:'https://julianhierro.github.io/trt-guy-coaching/',
       pages:[
-        { kind:'gate', key:'trtguy-start', tags:["trt-guy", "trt-101"], name:'TRT 101 + Waitlist (2 tabs)',
-          description:'Tab 1: TRT 101 guide opt-in (tags trt-101). Tab 2: coaching waitlist that links to the full application.',
-          url:'https://trt-guy.com/start/' }
+        { kind:'gate',  key:'trtdad-coaching-gate', tags:["trt-dad", "coaching-interest"], name:'Sales Page',
+          description:'The one coaching page: VSL, what\'s included, who it\'s for and who it isn\'t, 19 before/afters, $125/week and the FAQ. Start Now opens the email pop-up, then the order form.',
+          url:'https://julianhierro.github.io/trt-guy-coaching/' },
+        { kind:'asset', key:'trtdad-pillars', tags:[], name:'Four Pillars (draft)',
+          description:'The four things every plan aims at. Draft — not linked from the sales page yet, and pillar 4 is a suggestion.',
+          url:'https://julianhierro.github.io/trt-guy-coaching/pillars.html' },
+        { kind:'gate', key:'trtdad-checkout', tags:["trt-dad", "coaching-client"], name:'Checkout',
+          description:'Offer summary, price and guarantee, with your GoHighLevel Payment form in a pop-up. Conversion here = visitors who opened the payment form.',
+          url:'https://julianhierro.github.io/trt-guy-coaching/pay.html' },
+        { kind:'gate', key:'trtdad-checkout-paid', tags:[], name:'After payment',
+          description:'Everyone who lands here has paid, so this card counts completed sales. Paste your intake-form URL into NEXT_STEP.url to make it forward automatically.',
+          url:'https://julianhierro.github.io/trt-guy-coaching/thanks.html' },
+        { kind:'gate', key:'trtdad-site', tags:["trt-dad", "coaching-interest"], name:'Coaching tab (main site)',
+          description:'The coaching half of the two-tab main site. Cross-listed here because it is coaching — it lives in the Main Site project and shares that project\'s stats.',
+          url:'https://julianhierro.github.io/trt-guy-site/', editHost:'https://julianhierro.github.io/trt-guy-site' }
       ]
     },
     {
-      id:'coaching', icon:'📝', tag:'Offer', name:'Coaching Waitlist',
-      description:'Two-step waitlist then a qualifying application. Tags coaching-waitlist, then coaching-application.',
+      id:'waitlist', icon:'📝', tag:'Offer', name:'Coaching Waitlist',
+      description:'Two-step waitlist then a qualifying application. Tags coaching-waitlist then coaching-application.',
       home:'https://trt-guy.com/waitlist/',
       pages:[
         { kind:'gate', key:'trtguy-waitlist', tags:["trt-guy", "coaching-waitlist", "coaching-application"], name:'Waitlist + Application',
           description:'Join with name, email and phone, then the qualifying application questions. Saves the answers, drops a note, and emails you.',
           url:'https://trt-guy.com/waitlist/' },
-        { kind:'asset', key:'trtguy-waitlist-thanks', tags:[], name:'Thank-You Page',
-          description:'Where applicants land after they apply. Sets expectations for what happens next.',
+        { kind:'thanks', key:'trtguy-waitlist-thanks', tags:[], name:'Thank You Page',
+          description:'Where applicants land after they apply.',
           url:'https://trt-guy.com/waitlist/thanks/' }
       ]
     },
     {
-      id:'coaching-vsl', icon:'📹', tag:'Sales', name:'Coaching VSL Funnel',
-      description:'The coaching sales funnel — video sales page, pillars, checkout and thank-you. Tags to confirm.',
-      home:'https://julianhierro.github.io/trt-guy-coaching/',
+      id:'startpage', icon:'🚪', tag:'Hub', name:'TRT 101 + Coaching',
+      description:'One page, two tabs — your TRT 101 opt-in and your coaching waitlist, each loaded as your real page.',
+      home:'https://trt-guy.com/start/',
       pages:[
-        { kind:'gate', key:'trtdad-coaching-gate', tags:["trt-guy", "coaching-interest"], name:'VSL / Sales Page',
-          description:'The main coaching pitch — video, offer and CTA.',
-          url:'https://julianhierro.github.io/trt-guy-coaching/' },
-        { kind:'asset', key:'trtdad-coaching-pillars', tags:[], name:'Pillars Page',
-          description:'The method / pillars breakdown.',
-          url:'https://julianhierro.github.io/trt-guy-coaching/pillars.html' },
-        { kind:'asset', key:'trtdad-coaching-pay', tags:[], name:'Checkout',
-          description:'The payment page.',
-          url:'https://julianhierro.github.io/trt-guy-coaching/pay.html' },
-        { kind:'asset', key:'trtdad-coaching-thanks', tags:[], name:'Thank-You Page',
-          description:'Post-purchase confirmation.',
-          url:'https://julianhierro.github.io/trt-guy-coaching/thanks.html' }
-      ]
-    },
-    {
-      id:'trt101', icon:'📘', tag:'Lead Magnet', name:'TRT 101 Guide',
-      description:'Your TRT 101 guide. (trt-guy.com/trt-101 redirects here.)',
-      home:'https://julianhierro.github.io/trt-guy-101-guide/',
-      pages:[
-        { kind:'asset', key:'trtdad-101-guide', tags:[], name:'The Guide',
-          description:'Your TRT 101 guide.',
-          url:'https://julianhierro.github.io/trt-guy-101-guide/' }
-      ]
-    },
-    {
-      id:'quiz', icon:'🩺', tag:'Lead Magnet', name:'Low-T Quiz',
-      description:'The 60-second low-testosterone screen. Email captured before the result. Tags to confirm.',
-      home:'https://julianhierro.github.io/trt-guy-quiz/',
-      pages:[
-        { kind:'gate', key:'trtdad-quiz', tags:["trt-guy", "adam-quiz"], name:'Quiz',
-          description:'Questions, email gate, then the result.',
-          url:'https://julianhierro.github.io/trt-guy-quiz/' }
-      ]
-    },
-    {
-      id:'injection', icon:'💉', tag:'Lead Magnet', name:'TRT Injection Guide',
-      description:'Opt-in page, thank-you, then the full guide. Tags to confirm.',
-      home:'https://julianhierro.github.io/trt-guy-injection-guide/',
-      pages:[
-        { kind:'gate', key:'trtdad-injection-gate', tags:["trt-guy", "injection-guide"], name:'Opt-In Page',
-          description:'Headline and email for the injection guide.',
-          url:'https://julianhierro.github.io/trt-guy-injection-guide/' },
-        { kind:'asset', key:'trtdad-injection-thanks', tags:[], name:'Thank-You Page',
-          description:'Confirmation after opting in.',
-          url:'https://julianhierro.github.io/trt-guy-injection-guide/thanks.html' },
-        { kind:'asset', key:'trtdad-injection-guide', tags:[], name:'The Guide',
-          description:'The full injection guide.',
-          url:'https://julianhierro.github.io/trt-guy-injection-guide/guide.html' }
-      ]
-    },
-    {
-      id:'rules', icon:'📋', tag:'Lead Magnet', name:'5 TRT Non-Negotiables',
-      description:'Opt-in page and thank-you for the free guide. Tags to confirm.',
-      home:'https://julianhierro.github.io/trt-guy-trt-rules/',
-      pages:[
-        { kind:'gate', key:'trtdad-rules-gate', tags:["trt-guy", "trt-non-negotiables"], name:'Opt-In Page',
-          description:'Your headline, your copy, and the form.',
-          url:'https://julianhierro.github.io/trt-guy-trt-rules/' },
-        { kind:'asset', key:'trtdad-rules-thanks', tags:[], name:'Thank-You Page',
-          description:'Confirmation after opting in.',
-          url:'https://julianhierro.github.io/trt-guy-trt-rules/thanks.html' }
-      ]
-    },
-    {
-      id:'course', icon:'✉️', tag:'Email Course', name:'30 Emails In 30 Days',
-      description:'Opt-in page and confirmation for the free daily email course. Tags to confirm.',
-      home:'https://julianhierro.github.io/trt-guy-30-days/',
-      pages:[
-        { kind:'gate', key:'trtdad-30days', tags:["trt-guy", "30-emails-30-days"], name:'Opt-In Page',
-          description:'The email-course sign-up.',
-          url:'https://julianhierro.github.io/trt-guy-30-days/' },
-        { kind:'asset', key:'trtdad-30days-confirm', tags:[], name:'Confirmation Page',
-          description:'Whitelist steps after signing up.',
-          url:'https://julianhierro.github.io/trt-guy-30-days/confirmation.html' }
+        { kind:'gate', key:'trtguy-start', tags:[], name:'TRT 101 + Waitlist (2 tabs)',
+          description:'Tab 1 loads your /get opt-in, tab 2 loads your waitlist.',
+          url:'https://trt-guy.com/start/' }
       ]
     },
     {
       id:'protocol', icon:'💊', tag:'Draft', name:'My Current Protocol',
-      description:'Your live protocol page — compounds, supplements, training, notes. Editable in the browser; not linked anywhere yet.',
+      description:'Your protocol page — compounds, supplements, training, notes. Editable in the browser; not linked anywhere yet.',
       home:'https://trt-guy.com/protocol/',
       pages:[
         { kind:'asset', key:'trtguy-protocol', tags:[], name:'My Current Protocol',
-          description:'What you are currently running. Click Edit to fill it in and update it.',
+          description:'What you are currently running. Edit it in the browser.',
           url:'https://trt-guy.com/protocol/' }
       ]
     },
@@ -324,23 +659,133 @@
       home:'https://onboarding.trt-guy.com/',
       pages:[
         { kind:'gate', key:'trtguy-onboarding', tags:["trt-guy", "client-onboarded"], name:'Onboarding Intake',
-          description:'The 45-question intake plus photo and bloodwork uploads. Writes answers and a note to the contact and emails you.',
+          description:'The intake plus photo and bloodwork uploads. Writes answers and a note to the contact and emails you.',
           url:'https://onboarding.trt-guy.com/' }
+      ]
+    },
+    {
+      id:'quiz', group:'magnets', icon:'🩺', tag:'Lead Magnet', name:'Low-T Quiz',
+      description:'The 10-question ADAM screen. Email captured before the result.',
+      home:'https://julianhierro.github.io/trt-guy-quiz/',
+      pages:[
+        { kind:'gate', key:'trtdad-quiz', tags:["trt-dad", "adam-quiz", "low-t-positive / low-t-negative", "bloodwork-interested"], name:'Opt-In Page',
+          description:'Questions, then the email gate.',
+          url:'https://julianhierro.github.io/trt-guy-quiz/' },
+        { kind:'thanks', key:'trtdad-quiz', tags:[], name:'Result Page (thank you)',
+          description:'The result and the bloodwork panel show on the same page right after the gate — that screen is this funnel\'s thank-you step.',
+          url:'https://julianhierro.github.io/trt-guy-quiz/' }
+      ]
+    },
+    {
+      id:'injection', group:'magnets', icon:'💉', tag:'Lead Magnet', name:'TRT Injection Guide',
+      description:'Opt-in page, then the 17-page guide and the dose calculator.',
+      home:'https://julianhierro.github.io/trt-guy-injection-guide/',
+      pages:[
+        { kind:'gate',  key:'trtdad-injection-gate', tags:["trt-dad", "injection-guide", "trt-interested"], name:'Opt-In Page',
+          description:'Headline + email for the injection guide.',
+          url:'https://julianhierro.github.io/trt-guy-injection-guide/' },
+        { kind:'thanks', key:'trtdad-injection-thanks', tags:[], name:'Thank You Page',
+          description:'Find the email, move it to the main inbox, hit reply. Links straight to the guide.',
+          url:'https://julianhierro.github.io/trt-guy-injection-guide/thanks.html' },
+        { kind:'asset', key:'trtdad-injection-guide', tags:["trt-dad", "injection-guide"], name:'Guide + Calculator',
+          description:'PDF download, the full guide on the page, and the dose calculator.',
+          pdf:'https://julianhierro.github.io/trt-guy-injection-guide/Hero-Dad-Complete-TRT-Injection-Guide.pdf',
+          url:'https://julianhierro.github.io/trt-guy-injection-guide/guide.html' }
+      ]
+    },
+    {
+      id:'guide101', group:'magnets', icon:'📘', tag:'Lead Magnet', name:'The TRT 101 Guide',
+      description:'Opt-in page, then the 17-page guide and the PDF download.',
+      home:'https://julianhierro.github.io/trt-guy-101-guide/get',
+      pages:[
+        { kind:'gate',  key:'trtdad-101-gate', tags:["trt-dad", "trt-101-guide", "trt-interested"], name:'Opt-In Page',
+          description:'First name + email. Tags trt-101-guide in GHL.',
+          url:'https://julianhierro.github.io/trt-guy-101-guide/get' },
+        { kind:'thanks', key:'trtdad-101-thanks', tags:[], name:'Thank You Page',
+          description:'Find the email, move it to the main inbox, hit reply. Plus a direct PDF download.',
+          url:'https://julianhierro.github.io/trt-guy-101-guide/thanks' },
+        { kind:'asset', key:'trtdad-101-guide', tags:["trt-dad", "trt-101-guide"], name:'The TRT 101 Guide (PDF)',
+          description:'The full 17-page guide. Edit it here, then download the PDF \u2014 \u2318K adds links.',
+          pdf:'https://julianhierro.github.io/trt-guy-101-guide/TRT-Guy-TRT-101-Guide.pdf',
+          url:'https://julianhierro.github.io/trt-guy-101-guide/' }
+      ]
+    },
+    {
+      id:'rules', group:'magnets', icon:'📋', tag:'Lead Magnet', name:'5 TRT Non-Negotiables',
+      description:'Single opt-in page. The guide itself goes out by email.',
+      home:'https://julianhierro.github.io/trt-guy-trt-rules/',
+      pages:[
+        { kind:'gate', key:'trtdad-rules-gate', tags:["trt-dad", "trt-non-negotiables", "trt-interested"], name:'Opt-In Page',
+          description:'Your headline, your copy, and the form.',
+          url:'https://julianhierro.github.io/trt-guy-trt-rules/' },
+        { kind:'thanks', key:'trtdad-rules-thanks', tags:[], name:'Thank You Page',
+          description:'Find the email, move it to the main inbox, hit reply.',
+          url:'https://julianhierro.github.io/trt-guy-trt-rules/thanks.html' }
+      ]
+    },
+    {
+      id:'course', group:'magnets', icon:'✉️', tag:'Email Course', name:'30 Emails In 30 Days',
+      description:'Opt-in page and the confirmation page for the free daily email course.',
+      home:'https://julianhierro.github.io/trt-guy-30-days/',
+      pages:[
+        { kind:'gate', key:'trtdad-30days', tags:["trt-dad", "30-emails-30-days"], name:'Opt-In Page',
+          description:'Copy kept word for word from the original GoHighLevel page.',
+          url:'https://julianhierro.github.io/trt-guy-30-days/' },
+        { kind:'thanks', key:'trtdad-30days-confirm', tags:[], name:'Thank You Page',
+          description:'Find email #1, move it to the main inbox, hit reply — or the rest go to spam.',
+          url:'https://julianhierro.github.io/trt-guy-30-days/confirmation.html' }
+      ]
+    },
+    {
+      id:'site', icon:'🏠', tag:'Hub', name:'Main Site',
+      description:'Two sections toggled from the nav — the free email course and the coaching sales page. Also hosts /api/submit.',
+      home:'https://julianhierro.github.io/trt-guy-site/',
+      pages:[
+        { kind:'gate', key:'trtdad-site', tags:["trt-dad", "30-emails-30-days", "coaching-interest"], name:'Home',
+          description:'Email course + the full coaching sales page, switched from the nav bar. In ?edit=1 the tabs still work and the FAQ opens so you can edit it.',
+          url:'https://julianhierro.github.io/trt-guy-site/' },
+        { kind:'asset', key:'trtdad-30days-confirm', tags:[], name:'Email Confirmation Page',
+          description:'Where the email-course opt-in lands — the whitelist steps. Same page as in the 30 Emails project.',
+          url:'https://julianhierro.github.io/trt-guy-30-days/confirmation.html' }
       ]
     }
   ];
+
+  /* ── Top level is a GROUP. "Lead Magnets" holds every magnet as its own
+        subfolder; open one and you get its pages (opt-in, thank you, asset).
+        A project with no group sits at the top level on its own. ── */
+  const GROUPS = [
+    { id:'magnets', icon:'🧲', tag:'Folder', name:'Lead Magnets',
+      description:'Every free thing you give away. Each one opens into its own opt-in page and thank-you page.' }
+  ];
+  const groupOf = pr => pr.group ? GROUPS.find(g => g.id === pr.group) : null;
+
+  // The link you'd actually send someone is the opt-in page — never the asset
+  // sitting behind it. Derive it from the pages rather than a hand-set `home`,
+  // so a project whose opt-in isn't at the root can't hand out the wrong URL.
+  function entryUrl(pr){
+    const gate = (pr.pages || []).find(p => p.kind === 'gate');
+    return gate ? gate.url : pr.home;
+  }
+  const inGroup = gid => PROJECTS.filter(pr => pr.group === gid);
 
   const ALL = [];
   PROJECTS.forEach(pr => pr.pages.forEach(p => { p.project = pr; ALL.push(p); }));
 
   /* ── publish unlock: stored once here, handed to each page via the editor's
         existing #k= channel, so Publish never prompts again. ── */
-  const PW_STORE = 'tg-publish-pw';
+  const PW_STORE = 'td-publish-pw';
   const getPw = () => { try { return localStorage.getItem(PW_STORE) || ''; } catch (e) { return ''; } };
   function buildEditUrls(){
     const pw = getPw();
     ALL.forEach(p => {
-      p.editUrl = p.url + '?edit=1&cc=' + encodeURIComponent(CC);
+      // A card whose url already carries a query (?v=B pins the A/B variant) needs
+      // '&', not a second '?' — otherwise edit=1 became part of the v value and
+      // the editor simply never opened on that page.
+      // editHost lets a card be VIEWED on its live host but EDITED on another copy
+      // of the same files (same content store, so publishing still updates live).
+      const base = p.editHost ? p.url.replace(/^https?:\/\/[^/]+/, p.editHost) : p.url;
+      p.editUrl = base + (base.indexOf('?') === -1 ? '?' : '&') + 'edit=1&cc=' + encodeURIComponent(CC);
     });
   }
   // Publishing stays unlocked: the key is entered once here and handed to every
@@ -350,13 +795,30 @@
 
   /* ── stats ── */
   const STATS = 'https://jv-dashboard-chi.vercel.app/api/pagestats';
-  let rangeDays = 7, statsByKey = {}, openProject = null;
+  let rangeDays = 7, statsByKey = {}, openProject = null, openGroup = null;
+  let customFrom = null, customTo = null;
+
+  /* A "reset" here HIDES history rather than deleting it: everything before the
+     baseline date is excluded from every query. Nothing is destroyed, and the
+     Undo button below puts it all back. */
+  const BASE_KEY = 'td-stats-baseline';
+  const getBaseline = () => { try { return localStorage.getItem(BASE_KEY) || ''; } catch (e) { return ''; } };
+  const setBaseline = v => { try { v ? localStorage.setItem(BASE_KEY, v) : localStorage.removeItem(BASE_KEY); } catch (e) {} };
 
   const ymd = d => d.toISOString().slice(0,10);
   const rangeQS = () => {
-    if (!rangeDays) return '';
-    const to = new Date(), from = new Date(to.getTime() - rangeDays * 864e5);
-    return '&from=' + ymd(from) + '&to=' + ymd(to);
+    const base = getBaseline();
+    let from = null, to = null;
+    if (customFrom || customTo) { from = customFrom; to = customTo; }
+    else if (rangeDays) {
+      const t = new Date();
+      to = ymd(t); from = ymd(new Date(t.getTime() - rangeDays * 864e5));
+    }
+    if (base && (!from || from < base)) from = base;   // never look further back than the reset
+    let qs = '';
+    if (from) qs += '&from=' + from;
+    if (to)   qs += '&to=' + to;
+    return qs;
   };
   const n = x => (x || 0).toLocaleString();
   const cvClass = v => v == null ? 'low' : v >= 25 ? 'good' : v >= 10 ? 'mid' : 'acc';
@@ -370,6 +832,16 @@
       (p.tags || []).forEach(function(t){ if (!seen[t]) { seen[t] = 1; out.push(t); } });
     });
     return out;
+  }
+
+  function rollupGroup(g){
+    let views=0, visitors=0, optins=0, gateVis=0;
+    inGroup(g.id).forEach(pr => pr.pages.forEach(p => {
+      const s = st(p.key);
+      views += s.views; visitors += s.visitors;
+      if (p.kind === 'gate') { optins += s.optins; gateVis += s.visitors; }
+    }));
+    return { views, visitors, optins, cv: gateVis ? (optins/gateVis)*100 : null };
   }
 
   function rollup(pr){
@@ -414,59 +886,103 @@
 
   function renderFolders(){
     document.getElementById('title').textContent = 'Your projects';
-    document.getElementById('subtitle').textContent = 'Each funnel and its pages, with what they’re converting at.';
+    document.getElementById('subtitle').textContent = 'Each funnel and its pages, with what they\u2019re converting at.';
     document.getElementById('crumbSlot').innerHTML = '';
-    document.getElementById('grid').innerHTML = PROJECTS.map(pr => {
-      const r = rollup(pr);
-      return '<div class="card folder" data-project="' + pr.id + '">'
-        + '<div class="cardtop"><span class="tag">' + pr.tag + '</span>'
-          + '<span class="count">' + pr.pages.length + (pr.pages.length > 1 ? ' pages' : ' page') + '</span></div>'
-        + '<div class="name"><span>' + pr.icon + '</span>' + pr.name + '</div>'
-        + '<p class="desc">' + pr.description + '</p>'
+
+    const groupCards = GROUPS.map(g => {
+      const r = rollupGroup(g), kids = inGroup(g.id);
+      return '<div class="card folder" data-group="' + g.id + '">'
+        + '<div class="cardtop"><span class="tag">' + g.tag + '</span>'
+          + '<span class="count">' + kids.length + ' magnets</span></div>'
+        + '<div class="name"><span>' + g.icon + '</span>' + g.name + '</div>'
+        + '<p class="desc">' + g.description + '</p>'
         + convBlock(r.cv, 'Conversion')
         + '<div class="micro"><span><b>' + n(r.views) + '</b> views</span>'
           + '<span><b>' + n(r.visitors) + '</b> visitors</span>'
           + '<span><b>' + n(r.optins) + '</b> opt-ins</span></div>'
-        + tagBlock(projectTags(pr))
+        + '<div class="taghead">Inside</div><div class="tagrow">'
+          + kids.map(k => '<span class="tag-chip" data-noc="1">' + k.icon + ' ' + k.name + '</span>').join('')
+        + '</div>'
         + '<div class="actions">'
-          + '<button type="button" class="btn" data-open="' + pr.id + '">Open →</button>'
-          + '<a class="btn ghost" href="' + pr.home + '" target="_blank" rel="noopener">View live</a>'
-          + '<button type="button" class="btn ghost copy-link" data-copy="' + pr.home + '">🔗 Copy link</button>'
+          + '<button type="button" class="btn" data-opengroup="' + g.id + '">Open \u2192</button>'
         + '</div></div>';
     }).join('');
 
-    document.querySelectorAll('.card.folder').forEach(c => {
-      c.addEventListener('click', e => {
-        if (e.target.closest('a, .copy-link')) return;
-        showProject(c.dataset.project);
-      });
+    document.getElementById('grid').innerHTML = groupCards
+      + PROJECTS.filter(pr => !pr.group).map(pr => projectCard(pr)).join('');
+
+    document.querySelectorAll('.card.folder[data-group]').forEach(c => {
+      c.addEventListener('click', e => { if (e.target.closest('a')) return; showGroup(c.dataset.group); });
+    });
+    document.querySelectorAll('.card.folder[data-project]').forEach(c => {
+      c.addEventListener('click', e => { if (e.target.closest('a')) return; showProject(c.dataset.project); });
+    });
+  }
+
+  function projectCard(pr){
+    const r = rollup(pr);
+    return '<div class="card folder" data-project="' + pr.id + '">'
+      + '<div class="cardtop"><span class="tag">' + pr.tag + '</span>'
+        + '<span class="count">' + pr.pages.length + (pr.pages.length > 1 ? ' pages' : ' page') + '</span></div>'
+      + '<div class="name"><span>' + pr.icon + '</span>' + pr.name + '</div>'
+      + '<p class="desc">' + pr.description + '</p>'
+      + convBlock(r.cv, 'Conversion')
+      + '<div class="micro"><span><b>' + n(r.views) + '</b> views</span>'
+        + '<span><b>' + n(r.visitors) + '</b> visitors</span>'
+        + '<span><b>' + n(r.optins) + '</b> opt-ins</span></div>'
+      + tagBlock(projectTags(pr))
+      + '<div class="actions">'
+        + '<button type="button" class="btn" data-open="' + pr.id + '">Open \u2192</button>'
+        + '<a class="btn ghost" href="' + entryUrl(pr) + '" target="_blank" rel="noopener">View live</a>'
+        + '<button type="button" class="btn ghost copy" data-copy="' + entryUrl(pr) + '" title="Copy the opt-in link \u2014 the one you send people">Copy opt-in link \u29c9</button>'
+      + '</div></div>';
+  }
+
+  // ---------- level 2: the magnets inside a group ----------
+  function renderGroup(g){
+    document.getElementById('title').textContent = g.icon + '  ' + g.name;
+    document.getElementById('subtitle').textContent = g.description;
+    document.getElementById('crumbSlot').innerHTML =
+      '<div class="crumb"><button type="button" id="upBtn">\u2190 All projects</button>'
+      + '<span class="where">Projects / <b>' + g.name + '</b></span></div>';
+    document.getElementById('upBtn').addEventListener('click', showFolders);
+
+    document.getElementById('grid').innerHTML = inGroup(g.id).map(pr => projectCard(pr)).join('');
+    document.querySelectorAll('.card.folder[data-project]').forEach(c => {
+      c.addEventListener('click', e => { if (e.target.closest('a')) return; showProject(c.dataset.project); });
     });
   }
 
   function renderProject(pr){
     document.getElementById('title').textContent = pr.icon + '  ' + pr.name;
     document.getElementById('subtitle').textContent = pr.description;
+    const g = groupOf(pr);
     document.getElementById('crumbSlot').innerHTML =
-      '<div class="crumb"><button type="button" id="upBtn">← All projects</button>'
-      + '<span class="where">Projects / <b>' + pr.name + '</b></span></div>';
-    document.getElementById('upBtn').addEventListener('click', showFolders);
+      '<div class="crumb"><button type="button" id="upBtn">← ' + (g ? g.name : 'All projects') + '</button>'
+      + '<span class="where">Projects / ' + (g ? g.name + ' / ' : '') + '<b>' + pr.name + '</b></span></div>';
+    document.getElementById('upBtn').addEventListener('click', () => g ? showGroup(g.id) : showFolders());
 
     document.getElementById('grid').innerHTML = pr.pages.map((p, i) => {
-      const s = st(p.key), isGate = p.kind === 'gate';
+      const s = st(p.key), isGate = p.kind === 'gate', isThanks = p.kind === 'thanks';
       const cv = isGate && s.visitors ? (s.optins/s.visitors)*100 : null;
+      const kindLabel = isGate ? 'Opt-in page' : isThanks ? 'Thank-you page' : 'Asset page';
       return '<div class="card">'
-        + '<div class="cardtop"><span class="tag">' + (isGate ? 'Opt-in page' : 'Asset page') + '</span></div>'
+        + '<div class="cardtop"><span class="tag">' + kindLabel + '</span></div>'
         + '<div class="name">' + p.name + '</div>'
         + '<p class="desc">' + p.description + '</p>'
-        + convBlock(cv, isGate ? 'Conversion' : 'Behind an opt-in')
+        + convBlock(cv, isGate ? 'Conversion' : isThanks ? 'After the opt-in' : 'Behind an opt-in')
         + '<div class="micro"><span><b>' + n(s.views) + '</b> views</span>'
           + '<span><b>' + n(s.visitors) + '</b> visitors</span>'
           + (isGate ? '<span><b>' + n(s.optins) + '</b> opt-ins</span>' : '') + '</div>'
-        + tagBlock(p.tags)
+        + (isThanks && !(p.tags || []).length
+             ? '<div class="taghead">GHL tags</div><div class="tag-none">tagged on the opt-in step: '
+               + (projectTags(pr).join(', ') || 'none') + '</div>'
+             : tagBlock(p.tags))
         + '<div class="actions">'
           + '<button type="button" class="btn" data-idx="' + i + '">Edit ↗</button>'
           + '<a class="btn ghost" href="' + p.url + '" target="_blank" rel="noopener">View live</a>'
-          + '<button type="button" class="btn ghost copy-link" data-copy="' + p.url + '">🔗 Copy link</button>'
+          + '<button type="button" class="btn ghost copy" data-copy="' + p.url + '" title="Copy this page\u2019s own link">Copy link ⧉</button>'
+          + (p.pdf ? '<a class="btn ghost" href="' + p.pdf + '" download>Download PDF ↓</a>' : '')
         + '</div></div>';
     }).join('');
 
@@ -476,17 +992,28 @@
   }
 
   function showFolders(){
-    openProject = null;
-    if (location.hash.startsWith('#p/')) history.pushState({}, '', '#');
+    openProject = null; openGroup = null;
+    if (location.hash && location.hash !== '#') history.pushState({}, '', '#');
     renderFolders();
+  }
+  function showGroup(id, skipHash){
+    const g = GROUPS.find(x => x.id === id); if (!g) return;
+    openGroup = g; openProject = null;
+    if (!skipHash) history.pushState({group:id}, '', '#g/' + id);
+    renderGroup(g);
   }
   function showProject(id, skipHash){
     const pr = PROJECTS.find(p => p.id === id); if (!pr) return;
-    openProject = pr;
+    openProject = pr; openGroup = null;
     if (!skipHash) history.pushState({project:id}, '', '#p/' + id);
     renderProject(pr);
   }
-  function repaint(){ renderTotals(); openProject ? renderProject(openProject) : renderFolders(); }
+  function repaint(){
+    renderTotals();
+    if (openProject) renderProject(openProject);
+    else if (openGroup) renderGroup(openGroup);
+    else renderFolders();
+  }
 
   async function loadStats(){
     const rows = await Promise.all(ALL.map(async p => {
@@ -500,11 +1027,64 @@
     repaint();
   }
 
+  const datesEl = document.getElementById('dates');
+
   document.getElementById('range').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
+    if (b.id === 'applyDates' || b.id === 'resetBtn' || b.id === 'meBtn') return;   // handled separately
+
     document.querySelectorAll('#range button').forEach(x => x.classList.toggle('on', x === b));
+
+    if (b.dataset.custom) { datesEl.classList.add('on'); document.getElementById('dFrom').focus(); return; }
+
+    datesEl.classList.remove('on');
+    customFrom = customTo = null;
     rangeDays = +b.dataset.days;
     loadStats();
+  });
+
+  document.getElementById('applyDates').addEventListener('click', e => {
+    e.stopPropagation();
+    const f = document.getElementById('dFrom').value, t = document.getElementById('dTo').value;
+    if (!f && !t) return;
+    customFrom = f || null;
+    customTo   = t || null;
+    rangeDays  = 0;
+    document.getElementById('customBtn').classList.add('on');
+    loadStats();
+  });
+
+  const ME_KEY = 'td-notrack';
+  const meOn = () => { try { return localStorage.getItem(ME_KEY) === '1'; } catch (e) { return false; } };
+  function paintMe(){
+    const b = document.getElementById('meBtn');
+    b.classList.toggle('on', meOn());
+    b.textContent = meOn() ? 'Ignoring me \u2713' : 'Ignore me';
+  }
+  document.getElementById('meBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    try { meOn() ? localStorage.removeItem(ME_KEY) : localStorage.setItem(ME_KEY, '1'); } catch (err) {}
+    paintMe();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const today = ymd(new Date());
+    if (!confirm('Ignore everything before ' + today + '?\n\nNothing is deleted \u2014 the dashboard just stops counting earlier traffic, including your own testing. You can undo this any time.')) return;
+    setBaseline(today);
+    paintBaseline();
+  paintMe();
+    loadStats();
+  });
+
+  function paintBaseline(){
+    const el = document.getElementById('baseline'), b = getBaseline();
+    el.classList.toggle('on', !!b);
+    if (b) el.innerHTML = 'Counting from ' + b + ' <button id="undoBase" type="button">Undo</button>';
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#undoBase')) return;
+    setBaseline(''); paintBaseline(); loadStats();
   });
 
   /* ── editor overlay ── */
@@ -538,17 +1118,41 @@
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (overlay.classList.contains('open')) closeEditor();
-    else if (openProject) showFolders();
+    else if (openProject) { const g = groupOf(openProject); g ? showGroup(g.id) : showFolders(); }
+    else if (openGroup) showFolders();
   });
   window.addEventListener('popstate', () => {
     if (overlay.classList.contains('open')) closeEditor();
-    const m = location.hash.match(/^#p\/(.+)$/);
-    if (m) showProject(m[1], true); else { openProject = null; renderFolders(); }
+    const p = location.hash.match(/^#p\/(.+)$/);
+    const g = location.hash.match(/^#g\/(.+)$/);
+    if (p) showProject(p[1], true);
+    else if (g) showGroup(g[1], true);
+    else { openProject = null; openGroup = null; renderFolders(); }
+  });
+
+  // copy a page URL straight to the clipboard — no need to open it first
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('.btn.copy'); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var url = b.dataset.copy, old = b.textContent;
+    var done = function(ok){
+      b.textContent = ok ? 'Copied \u2713' : 'Press \u2318C';
+      b.classList.add('copied');
+      setTimeout(function(){ b.textContent = old; b.classList.remove('copied'); }, 1200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function(){ done(true); }, function(){ done(false); });
+    } else {
+      var ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta);
+      ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (x) {}
+      document.body.removeChild(ta); done(ok);
+    }
   });
 
   // copy a tag with one click, ready to paste into a GHL contact search
   document.addEventListener('click', function(e){
     var chip = e.target.closest('.tag-chip'); if (!chip) return;
+    if (chip.dataset.noc) return;                 // group card's "Inside" list
     var t = chip.dataset.tag;
     var done = function(){
       var old = chip.textContent;
@@ -563,20 +1167,612 @@
     }
   });
 
-  // copy a page's link with one click
-  document.addEventListener('click', function(e){
-    var b = e.target.closest('.copy-link'); if (!b) return;
-    e.preventDefault(); e.stopPropagation();
-    var url = b.dataset.copy, old = b.textContent;
-    var done = function(){ b.textContent = 'Copied ✓'; b.classList.add('copied'); setTimeout(function(){ b.textContent = old; b.classList.remove('copied'); }, 1200); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done);
-    else { var ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (x) {} document.body.removeChild(ta); done(); }
-  }, true);
+  /* ── To-do ────────────────────────────────────────────────────────────────
+     Same list, same store as the phone app (site key td-todos), so whichever
+     screen is nearest is the right one to write it down on. Local copy first
+     so the drawer opens instantly; last write wins on sync — no merge, which
+     is what keeps one list from forking into two.
+
+     An item is {id, text, kind, pri, notes, done, at, doneAt}. `pri` is 1..3,
+     high to low, and the list is ordered by it — the point of the list is what
+     to do next, not what you happened to type last. `notes` is the body: open
+     an item and the VSL script lives inside the task to film the VSL. Both
+     were added after the phone app shipped, so both are optional everywhere
+     and old items read as Medium with no notes. */
+  const TODO_API   = 'https://jv-dashboard-chi.vercel.app/api/content?site=td-todos&page=1';
+  const TODO_LOCAL = 'trtguy-todos';
+  const PRI = { 1:{label:'High', cls:'p1'}, 2:{label:'Medium', cls:'p2'}, 3:{label:'Low', cls:'p3'} };
+  let todo = { items: [], updatedAt: 0 };
+  let todoKind = 'task', todoPri = 2, todoView = 'open', todoPushing = false, todoOpenId = null;
+
+  const $todo = document.getElementById('todo');
+  const $todoList = document.getElementById('todoList');
+  const $todoBtn = document.getElementById('todoBtn');
+  const $todoText = document.getElementById('todoText');
+  const $detail = document.getElementById('todoDetail');
+
+  function todoUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function todoPriOf(it){ return PRI[it.pri] ? it.pri : 2; }          // old items: Medium
+  function todoSync(cls, txt){
+    document.getElementById('todoDot').className = cls;
+    document.getElementById('todoSync').textContent = txt;
+  }
+  function todoLoadLocal(){
+    try {
+      const v = JSON.parse(localStorage.getItem(TODO_LOCAL) || 'null');
+      if (v && Array.isArray(v.items)) todo = v;
+    } catch (e) {}
+  }
+  function todoSave(rerender){
+    todo.updatedAt = Date.now();
+    try { localStorage.setItem(TODO_LOCAL, JSON.stringify(todo)); } catch (e) {}
+    if (rerender !== false) todoRender();
+    todoPush();
+  }
+  function todoPush(){
+    if (todoPushing) return;
+    todoPushing = true;
+    fetch(TODO_API, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ password:'', edits:[{ eid:'todos', html: JSON.stringify(todo) }] }) })
+      .then(r => todoSync(r.ok ? 'on' : 'err', r.ok ? 'synced' : 'not synced'))
+      .catch(() => todoSync('err','offline'))
+      .then(() => { todoPushing = false; });
+  }
+  function todoPull(){
+    fetch(TODO_API + '&t=' + Date.now(), { cache:'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const rec = d && Array.isArray(d.edits) && d.edits[0];
+        if (rec && rec.html) {
+          const remote = JSON.parse(rec.html);
+          if (remote && Array.isArray(remote.items) && (remote.updatedAt||0) > (todo.updatedAt||0)) {
+            todo = remote;
+            try { localStorage.setItem(TODO_LOCAL, JSON.stringify(todo)); } catch (e) {}
+            // never yank the item out from under someone mid-sentence
+            if (!todoOpenId || !document.activeElement || !$detail.contains(document.activeElement)) todoRender();
+          }
+        }
+        todoSync('on','synced');
+      })
+      .catch(() => todoSync('err','offline'));
+  }
+  function todoFind(id){ return todo.items.find(x => x.id === id); }
+
+  function todoRender(){
+    const open = todo.items.filter(i => !i.done);
+    const done = todo.items.filter(i =>  i.done).sort((a,b) => (b.doneAt||b.at) - (a.doneAt||a.at));
+    $todoBtn.classList.toggle('has', open.length > 0);
+    document.getElementById('todoN').textContent = open.length;
+    if (todoOpenId) { todoPaintDetail(); return; }
+
+    if (todoView === 'done') return todoPaintRows(done, null,
+      '<b>Nothing crossed off yet</b>Things you tick show up here.');
+
+    // highest priority first, newest first inside a band
+    open.sort((a,b) => (todoPriOf(a) - todoPriOf(b)) || (b.at - a.at));
+    todoPaintRows(open, it => PRI[todoPriOf(it)].label,
+      '<b>Nothing on the list</b>A task, an idea for content, or a note you don\'t want to lose.');
+  }
+
+  function todoPaintRows(list, groupOf, empty){
+    if (!list.length) { $todoList.innerHTML = '<div class="todo-empty">' + empty + '</div>'; return; }
+    let html = '', last = null;
+    list.forEach(it => {
+      const g = groupOf ? groupOf(it) : null;
+      if (g && g !== last) { html += '<div class="todo-day">' + g + '</div>'; last = g; }
+      const p = todoPriOf(it);
+      html += '<div class="ti' + (it.done ? ' done' : '') + '" data-id="' + it.id + '">' +
+        '<button class="ck" type="button" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>' +
+        '<div class="bd"><div class="tx"></div>' +
+          '<div class="mt"><span class="kd ' + it.kind + '">' + it.kind + '</span>' +
+          '<span class="pi ' + PRI[p].cls + '">' + PRI[p].label + '</span>' +
+          ((it.notes || '').trim() ? '<span class="nt">📝 notes</span>' : '') + '</div>' +
+        '</div>' +
+        '<button class="go" type="button" aria-label="Open">›</button></div>';
+    });
+    $todoList.innerHTML = html;
+    // text goes in as textContent — a note can never inject markup into the dashboard
+    const nodes = $todoList.querySelectorAll('.ti');
+    list.forEach((it, i) => { if (nodes[i]) nodes[i].querySelector('.tx').textContent = it.text; });
+  }
+
+  /* ── one item, opened ───────────────────────────────────────────────────── */
+  function todoShowDetail(id){
+    todoOpenId = id;
+    $todo.classList.add('detail');
+    todoPaintDetail();
+    setTimeout(() => { const n = document.getElementById('dNotes'); if (n) n.focus(); }, 190);
+  }
+  function todoCloseDetail(){
+    todoOpenId = null;
+    $todo.classList.remove('detail');
+    todoRender();
+  }
+  function todoPaintDetail(){
+    const it = todoFind(todoOpenId);
+    if (!it) return todoCloseDetail();
+    const p = todoPriOf(it);
+    $detail.querySelector('.d-title').value = it.text;
+    $detail.querySelector('#dNotes').value = it.notes || '';
+    $detail.querySelectorAll('.d-pri button').forEach(b => b.classList.toggle('on', +b.dataset.pri === p));
+    $detail.querySelectorAll('.d-kind button').forEach(b => b.classList.toggle('on', b.dataset.kind === it.kind));
+    const dn = $detail.querySelector('#dDone');
+    dn.classList.toggle('on', !!it.done);
+    dn.textContent = it.done ? '✓ Done' : 'Mark done';
+    $detail.querySelector('.d-when').textContent =
+      'Added ' + new Date(it.at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+    todoGrow($detail.querySelector('.d-title'));
+  }
+  function todoGrow(el){ el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+  let todoTypeTimer = null;
+  function todoTyped(){                    // debounced: one sync per pause, not per keystroke
+    clearTimeout(todoTypeTimer);
+    todoSync('', 'typing…');
+    todoTypeTimer = setTimeout(() => todoSave(false), 700);
+  }
+
+  function todoOpenDrawer(on){
+    $todo.classList.toggle('open', on);
+    const inboxUp = document.getElementById('inbox').classList.contains('open');
+    document.getElementById('todoScrim').classList.toggle('open', on || inboxUp);
+    $todoBtn.classList.toggle('on', on);
+    if (on) { todoPull(); if (!todoOpenId) setTimeout(() => $todoText.focus(), 210); }
+  }
+
+  $todoBtn.addEventListener('click', () => {
+    const on = !$todo.classList.contains('open');
+    if (on && document.getElementById('inbox').classList.contains('open')) inDrawer(false);
+    todoOpenDrawer(on);
+  });
+  document.getElementById('todoClose').addEventListener('click', () => todoOpenDrawer(false));
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || !$todo.classList.contains('open')) return;
+    if (todoOpenId) todoCloseDetail(); else todoOpenDrawer(false);
+  });
+
+  $todo.addEventListener('click', e => {
+    const seg = e.target.closest('.todo-seg button');
+    if (seg) {
+      todoView = seg.dataset.view;
+      $todo.querySelectorAll('.todo-seg button').forEach(b => b.classList.toggle('on', b === seg));
+      todoRender(); return;
+    }
+    const np = e.target.closest('.todo-newpri button');
+    if (np) {
+      todoPri = +np.dataset.pri;
+      $todo.querySelectorAll('.todo-newpri button').forEach(b => b.classList.toggle('on', b === np));
+      return;
+    }
+    const k = e.target.closest('.todo-kinds button');
+    if (k) {
+      todoKind = k.dataset.kind;
+      $todo.querySelectorAll('.todo-kinds:not(.todo-newpri) button').forEach(b => b.classList.toggle('on', b === k));
+      return;
+    }
+    const row = e.target.closest('.ti');
+    if (row) {
+      const it = todoFind(row.dataset.id); if (!it) return;
+      if (e.target.closest('.ck')) { it.done = !it.done; it.doneAt = Date.now(); todoSave(); }
+      else todoShowDetail(it.id);
+      return;
+    }
+    // ── inside the open item ──
+    if (e.target.closest('.d-back')) return todoCloseDetail();
+    const it = todoFind(todoOpenId); if (!it) return;
+    const dp = e.target.closest('.d-pri button');
+    if (dp) { it.pri = +dp.dataset.pri; todoSave(); todoPaintDetail(); return; }
+    const dk = e.target.closest('.d-kind button');
+    if (dk) { it.kind = dk.dataset.kind; todoSave(); todoPaintDetail(); return; }
+    if (e.target.closest('#dDone')) { it.done = !it.done; it.doneAt = Date.now(); todoSave(); todoPaintDetail(); return; }
+    if (e.target.closest('#dDel')) {
+      if (!confirm('Delete this one? The notes go with it.')) return;
+      todo.items = todo.items.filter(x => x.id !== it.id);
+      todoOpenId = null; $todo.classList.remove('detail');
+      todoSave(); return;
+    }
+  });
+
+  $detail.querySelector('.d-title').addEventListener('input', e => {
+    const it = todoFind(todoOpenId); if (!it) return;
+    it.text = e.target.value; todoGrow(e.target); todoTyped();
+  });
+  document.getElementById('dNotes').addEventListener('input', e => {
+    const it = todoFind(todoOpenId); if (!it) return;
+    it.notes = e.target.value; todoTyped();
+  });
+
+  $todoText.addEventListener('input', () => {
+    $todoText.style.height = 'auto';
+    $todoText.style.height = Math.min($todoText.scrollHeight, 130) + 'px';
+  });
+  $todoText.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('todoForm').requestSubmit(); }
+  });
+  document.getElementById('todoForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const text = $todoText.value.trim(); if (!text) return;
+    todo.items.push({ id: todoUid(), text, kind: todoKind, pri: todoPri, notes:'', done:false, at: Date.now() });
+    $todoText.value = ''; $todoText.style.height = 'auto';
+    if (todoView !== 'open') {
+      todoView = 'open';
+      $todo.querySelectorAll('.todo-seg button').forEach(b => b.classList.toggle('on', b.dataset.view === 'open'));
+    }
+    todoSave();
+  });
+  window.addEventListener('focus', () => { if ($todo.classList.contains('open')) todoPull(); });
+
+  todoLoadLocal();
+  todoRender();
+  todoPull();
+
+  /* ── Inbox ────────────────────────────────────────────────────────────────
+     GoHighLevel is the system of record for every conversation — email, IG,
+     SMS. This reads and replies through it rather than keeping its own copy,
+     so a reply sent here is in the same thread GHL shows on the phone.
+
+     The GHL token never reaches this page. Everything goes through the proxy
+     on trt-guy-site, which holds the token server-side and demands a passcode,
+     because a lead's phone number has no business being on a public URL. */
+  const IN_API = 'https://trt-guy-site.vercel.app/api/inbox';
+  const IN_KEY = 'trtguy-cc-key';
+  const CH = { email:'Email', ig:'Instagram', sms:'SMS', fb:'Facebook', wa:'WhatsApp', chat:'Chat', other:'Other' };
+
+  const $in = document.getElementById('inbox');
+  const $inList = document.getElementById('inList');
+  const $inBtn = document.getElementById('inboxBtn');
+  let inKey = '';
+  let inConvos = [], inFilter = '', inBox = 'inbox', inOpen = null, inTimer = null, inSendOn = '';
+
+  try { inKey = localStorage.getItem(IN_KEY) || ''; } catch (e) {}
+
+  function inSay(cls, txt){
+    document.getElementById('inDot').className = cls;
+    document.getElementById('inSync').textContent = txt;
+  }
+  function inCall(qs, body){
+    return fetch(IN_API + '?' + qs, {
+      method: body ? 'POST' : 'GET',
+      headers: Object.assign({ 'X-CC-Key': inKey }, body ? {'Content-Type':'application/json'} : {}),
+      body: body ? JSON.stringify(body) : undefined,
+    }).then(r => r.json().then(j => ({ ok: r.ok, status: r.status, j })));
+  }
+  function inAgo(ts){
+    if (!ts) return '';
+    const s = Math.max(0, (Date.now() - new Date(ts).getTime()) / 1000);
+    if (s < 90) return 'now';
+    if (s < 3600) return Math.round(s/60) + 'm';
+    if (s < 86400) return Math.round(s/3600) + 'h';
+    if (s < 604800) return Math.round(s/86400) + 'd';
+    return new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+  }
+  function inInitial(n){ return (n || '?').trim().charAt(0).toUpperCase() || '?'; }
+
+  function inLoad(quiet){
+    if (!inKey) return;
+    if (!quiet) inSay('', 'loading…');
+    inCall('action=list&limit=30').then(r => {
+      if (r.status === 401) { inLock('That passcode was not it.'); return; }
+      if (!r.ok) { inSay('err', 'GHL error'); return; }
+      inConvos = r.j.conversations || [];
+      inUnlock();
+      inPaintList();
+      const unread = inConvos.filter(c => c.unread > 0 && !c.archived).length;
+      $inBtn.classList.toggle('has', unread > 0);
+      document.getElementById('inboxN').textContent = unread;
+      inSay('on', 'synced');
+      if (inOpen) inPaintThread();
+    }).catch(() => inSay('err','offline'));
+  }
+  function inLock(msg){
+    $in.classList.add('locked');
+    document.getElementById('inFilters').hidden = true;
+    $inList.hidden = true;
+    document.getElementById('inGateErr').textContent = msg || '';
+    inSay('err', 'locked');
+  }
+  function inUnlock(){
+    $in.classList.remove('locked');
+    document.getElementById('inFilters').hidden = false;
+    $inList.hidden = false;
+  }
+
+  function inPaintList(){
+    const inThisBox = c => (inBox === 'archived' ? c.archived : !c.archived);
+    const rows = inConvos.filter(c => inThisBox(c) && (!inFilter || c.channel === inFilter));
+    if (!rows.length) {
+      $inList.innerHTML = '<div class="todo-empty"><b>Nothing here</b>' +
+        (inBox === 'archived' ? 'Nothing archived yet.'
+         : inFilter ? 'No ' + CH[inFilter] + ' conversations in the last 30.'
+         : 'No conversations came back from GoHighLevel.') + '</div>';
+      return;
+    }
+    $inList.innerHTML = rows.map(c =>
+      '<div class="cv' + (c.unread ? ' unread' : '') + '" data-id="' + c.id + '">' +
+        '<div class="acts">' +
+          '<button type="button" class="ar">' + (c.archived ? 'Restore' : 'Archive') + '</button>' +
+          '<button type="button" class="rm">Delete</button>' +
+        '</div>' +
+        '<div class="av"></div>' +
+        '<div class="bd"><div class="nm"><b></b>' +
+          '<span class="ch ' + c.channel + '">' + (CH[c.channel] || c.channel) + '</span>' +
+          (c.unread ? '<span class="un"></span>' : '') +
+          '<span class="ago">' + inAgo(c.at) + '</span></div>' +
+          '<div class="pv">' + (c.direction === 'outbound' ? '<i>You: </i>' : '') + '<span class="pvt"></span></div>' +
+        '</div></div>').join('');
+    // names and previews are other people's words — never build them into HTML
+    const nodes = $inList.querySelectorAll('.cv');
+    rows.forEach((c, i) => {
+      if (!nodes[i]) return;
+      nodes[i].querySelector('.av').textContent = inInitial(c.name);
+      nodes[i].querySelector('.nm b').textContent = c.name;
+      nodes[i].querySelector('.pvt').textContent = c.preview || '(no text)';
+    });
+  }
+
+  function inShow(id){
+    inOpen = inConvos.find(c => c.id === id) || null;
+    if (!inOpen) return;
+    inSendOn = inOpen.channel;                 // default: answer where they wrote
+    $in.classList.add('detail');
+    document.getElementById('inWho').textContent = inOpen.name;
+    document.getElementById('inGhl').href =
+      'https://app.gohighlevel.com/v2/location/' + 'WmcafLXT7njeQOu3fqlP' + '/conversations/conversations/' + inOpen.id;
+    document.getElementById('inErr').textContent = '';
+    document.getElementById('inMsgs').innerHTML = '<div class="todo-empty">Loading…</div>';
+    document.getElementById('inArch').textContent = inOpen.archived ? 'Restore' : 'Archive';
+    inPaintChannels(inOpen.can || [inOpen.channel]);
+    inPaintThread();
+  }
+
+  /* Answering an Instagram lead by email is a real move — but only when GHL
+     actually has an email for them, so the row is built from what the contact
+     record says, not from what's convenient. */
+  function inPaintChannels(can){
+    const list = (can || []).filter(c => ['email','sms','ig','fb','wa','chat'].includes(c));
+    if (!list.length) list.push(inOpen.channel);
+    if (!list.includes(inSendOn)) inSendOn = list[0];
+    document.getElementById('inOn').textContent = list.length > 1 ? 'Reply on' : 'Replying on';
+    document.getElementById('inCh').innerHTML = list.map(c =>
+      '<button type="button" data-ch="' + c + '"' + (c === inSendOn ? ' class="on"' : '') + '>' +
+      (CH[c] || c) + '</button>').join('');
+    document.getElementById('inSubj').hidden = inSendOn !== 'email';
+  }
+  function inPaintThread(){
+    if (!inOpen) return;
+    inCall('action=thread&id=' + encodeURIComponent(inOpen.id) +
+           '&contactId=' + encodeURIComponent(inOpen.contactId || '')).then(r => {
+      // the contact record knows every address; the conversation only knows one
+      if (r.ok && r.j.contact) {
+        const can = [];
+        if (r.j.contact.email) can.push('email');
+        if (r.j.contact.phone) can.push('sms');
+        if (!can.includes(inOpen.channel)) can.push(inOpen.channel);
+        inOpen.can = can;
+        inPaintChannels(can);
+      }
+      const box = document.getElementById('inMsgs');
+      if (!r.ok) { box.innerHTML = '<div class="todo-empty"><b>Could not load it</b>' +
+        ((r.j && r.j.error) || 'GoHighLevel said no.') + '</div>'; return; }
+      const ms = r.j.messages || [];
+      if (!ms.length) { box.innerHTML = '<div class="todo-empty">No messages in this one.</div>'; return; }
+      box.innerHTML = ms.map(m =>
+        '<div class="bub ' + (m.inbound ? 'in' : 'out') + '"><span class="tx"></span>' +
+        '<span class="st">' + (CH[m.channel] || m.channel) + ' · ' + inAgo(m.at) +
+        (m.attachments ? ' · ' + m.attachments + ' attachment' + (m.attachments > 1 ? 's' : '') : '') +
+        '</span></div>').join('');
+      const nodes = box.querySelectorAll('.bub .tx');
+      ms.forEach((m, i) => { if (nodes[i]) nodes[i].textContent = m.body || '(no text)'; });
+      box.scrollTop = box.scrollHeight;
+    });
+  }
+  function inClose(){ inOpen = null; $in.classList.remove('detail'); }
+
+  function inDrawer(on){
+    $in.classList.toggle('open', on);
+    document.getElementById('todoScrim').classList.toggle('open', on || $todo.classList.contains('open'));
+    $inBtn.classList.toggle('on', on);
+    clearInterval(inTimer);
+    if (on) {
+      if ($todo.classList.contains('open')) todoOpenDrawer(false);
+      if (!inKey) inLock(''); else inLoad();
+      inTimer = setInterval(() => inLoad(true), 45000);       // GHL has no push to us
+    }
+  }
+
+  $inBtn.addEventListener('click', () => inDrawer(!$in.classList.contains('open')));
+  document.getElementById('inClose').addEventListener('click', () => inDrawer(false));
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || !$in.classList.contains('open')) return;
+    if (inOpen) inClose(); else inDrawer(false);
+  });
+  document.getElementById('inGateForm').addEventListener('submit', e => {
+    e.preventDefault();
+    inKey = document.getElementById('inKey').value.trim();
+    try { localStorage.setItem(IN_KEY, inKey); } catch (x) {}
+    document.getElementById('inGateErr').textContent = '';
+    inLoad();
+  });
+  $in.addEventListener('click', e => {
+    const f = e.target.closest('.in-filters button');
+    if (f) {
+      if (f.dataset.box) {                       // Archived is a view, not a channel
+        inBox = inBox === 'archived' ? 'inbox' : 'archived';
+        f.classList.toggle('on', inBox === 'archived');
+      } else {
+        inFilter = f.dataset.ch;
+        $in.querySelectorAll('.in-filters button:not(.seg-arch)').forEach(b => b.classList.toggle('on', b === f));
+      }
+      inPaintList(); return;
+    }
+    const ar = e.target.closest('.cv .ar');
+    if (ar) { inArchive(ar.closest('.cv').dataset.id); return; }
+    const rm = e.target.closest('.cv .rm');
+    if (rm) { inDelete(rm.closest('.cv').dataset.id); return; }
+    const chb = e.target.closest('.in-ch button');
+    if (chb) {
+      inSendOn = chb.dataset.ch;
+      $in.querySelectorAll('.in-ch button').forEach(b => b.classList.toggle('on', b === chb));
+      document.getElementById('inSubj').hidden = inSendOn !== 'email';
+      document.getElementById('inErr').textContent = '';
+      return;
+    }
+    if (e.target.closest('.in-back')) return inClose();
+    if (e.target.closest('.cm-back')) { $in.classList.remove('compose'); return; }
+    const cv = e.target.closest('.cv');
+    if (cv) inShow(cv.dataset.id);
+  });
+
+  const $inText = document.getElementById('inText');
+  $inText.addEventListener('input', () => {
+    $inText.style.height = 'auto';
+    $inText.style.height = Math.min($inText.scrollHeight, 130) + 'px';
+  });
+  document.getElementById('inForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const text = $inText.value.trim();
+    if (!text || !inOpen) return;
+    const err = document.getElementById('inErr');
+    err.textContent = ''; inSay('', 'sending…');
+    const subj = document.getElementById('inSubj').value.trim();
+    inCall('action=send', { contactId: inOpen.contactId, conversationId: inOpen.id,
+      channel: inSendOn || inOpen.channel, text,
+      subject: subj || ('Re: ' + (inOpen.name || 'your message')) })
+      .then(r => {
+        if (!r.ok) {
+          // Instagram and Facebook refuse a reply more than 24 hours after
+          // theirs; SMS needs a number on the location. Say which it was.
+          err.textContent = (r.j && r.j.error) || 'It did not send.';
+          inSay('err', 'not sent'); return;
+        }
+        $inText.value = ''; $inText.style.height = 'auto';
+        document.getElementById('inSubj').value = '';
+        inSay('on', 'sent');
+        inPaintThread(); inLoad(true);
+      })
+      .catch(() => { err.textContent = 'No connection.'; inSay('err','offline'); });
+  });
+  /* ── Archive and delete ───────────────────────────────────────────────────
+     Archive is GoHighLevel's own inbox flag, so archiving here archives there —
+     it is not a local hide this dashboard invented. Delete is GHL's delete:
+     the thread and every message in it, permanently, with no undo anywhere. */
+  function inArchive(id){
+    const c = inConvos.find(x => x.id === id); if (!c) return;
+    const want = !c.archived;
+    inSay('', want ? 'archiving…' : 'restoring…');
+    inCall('action=archive', { id, archived: want }).then(r => {
+      if (!r.ok) { inSay('err', 'not archived'); return; }
+      c.archived = want;
+      inSay('on', want ? 'archived' : 'restored');
+      if (inOpen && inOpen.id === id && want) inClose();
+      inPaintList();
+      const unread = inConvos.filter(x => x.unread > 0 && !x.archived).length;
+      $inBtn.classList.toggle('has', unread > 0);
+      document.getElementById('inboxN').textContent = unread;
+    }).catch(() => inSay('err', 'offline'));
+  }
+  function inDelete(id){
+    const c = inConvos.find(x => x.id === id); if (!c) return;
+    if (!confirm('Delete the whole conversation with ' + c.name + '?\n\n' +
+                 'Every message in it goes, in GoHighLevel too. This cannot be undone.\n\n' +
+                 'Archive instead if you just want it out of the way.')) return;
+    inSay('', 'deleting…');
+    inCall('action=delete', { id, confirm: 'DELETE' }).then(r => {
+      if (!r.ok) { alert((r.j && r.j.error) || 'GoHighLevel would not delete it.'); inSay('err','not deleted'); return; }
+      inConvos = inConvos.filter(x => x.id !== id);
+      if (inOpen && inOpen.id === id) inClose();
+      inSay('on', 'deleted');
+      inPaintList();
+    }).catch(() => inSay('err', 'offline'));
+  }
+  document.getElementById('inArch').addEventListener('click', () => { if (inOpen) inArchive(inOpen.id); });
+  document.getElementById('inDel').addEventListener('click', () => { if (inOpen) inDelete(inOpen.id); });
+
+  /* ── Compose ──────────────────────────────────────────────────────────────
+     A first email to someone with no thread yet. Type-ahead over GHL contacts,
+     or a bare address — writing to an address that isn't in the CRM creates the
+     contact, which is the point: the reply has to land somewhere GHL can thread. */
+  let cmPick = null, cmTimer = null;
+  const $cmTo = document.getElementById('cmTo'), $cmHits = document.getElementById('cmHits');
+
+  function cmOpen(){
+    cmPick = null;
+    $cmTo.value = ''; document.getElementById('cmSubj').value = '';
+    document.getElementById('cmText').value = '';
+    document.getElementById('cmErr').textContent = '';
+    document.getElementById('cmPicked').hidden = true;
+    $cmTo.hidden = false; $cmHits.hidden = true;
+    $in.classList.add('compose');
+    setTimeout(() => $cmTo.focus(), 200);
+  }
+  function cmSet(c){
+    cmPick = c;
+    const box = document.getElementById('cmPicked');
+    box.querySelector('span').textContent = c.name + (c.email ? '  ·  ' + c.email : '');
+    box.hidden = false; $cmTo.hidden = true; $cmHits.hidden = true;
+    document.getElementById('cmSubj').focus();
+  }
+  $cmTo.addEventListener('input', () => {
+    clearTimeout(cmTimer);
+    const q = $cmTo.value.trim();
+    if (q.length < 2) { $cmHits.hidden = true; return; }
+    cmTimer = setTimeout(() => {
+      inCall('action=contacts&q=' + encodeURIComponent(q)).then(r => {
+        const hits = (r.ok && r.j.contacts) || [];
+        if (!hits.length) { $cmHits.hidden = true; return; }
+        $cmHits.innerHTML = hits.map(() => '<div><b></b><span></span></div>').join('');
+        // contact names come out of the CRM — set as text, never built into HTML
+        const nodes = $cmHits.querySelectorAll('div');
+        hits.forEach((c, i) => {
+          nodes[i].querySelector('b').textContent = c.name;
+          nodes[i].querySelector('span').textContent = c.email || c.phone;
+          nodes[i].addEventListener('click', () => cmSet(c));
+        });
+        $cmHits.hidden = false;
+      });
+    }, 260);
+  });
+  document.getElementById('cmClear').addEventListener('click', () => {
+    cmPick = null;
+    document.getElementById('cmPicked').hidden = true;
+    $cmTo.hidden = false; $cmTo.value = ''; $cmTo.focus();
+  });
+  document.getElementById('inNew').addEventListener('click', cmOpen);
+  document.getElementById('cmSend').addEventListener('click', () => {
+    const err = document.getElementById('cmErr');
+    const body = { subject: document.getElementById('cmSubj').value.trim(),
+                   text: document.getElementById('cmText').value.trim() };
+    if (cmPick) body.contactId = cmPick.id; else body.email = $cmTo.value.trim();
+    if (!body.subject) return err.textContent = 'Give it a subject.';
+    if (!body.text) return err.textContent = 'Nothing to send.';
+    if (!cmPick && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) return err.textContent = 'Pick a contact or type a real address.';
+    err.textContent = ''; inSay('', 'sending…');
+    inCall('action=compose', body).then(r => {
+      if (!r.ok) { err.textContent = (r.j && r.j.error) || 'It did not send.'; inSay('err','not sent'); return; }
+      inSay('on', 'sent');
+      $in.classList.remove('compose');
+      inLoad();                                  // the new thread shows up in the list
+    }).catch(() => { err.textContent = 'No connection.'; inSay('err','offline'); });
+  });
+
+  window.addEventListener('focus', () => { if ($in.classList.contains('open')) inLoad(true); });
+
+  // the two drawers share one scrim, so closing it has to close whichever is up
+  document.getElementById('todoScrim').addEventListener('click', () => {
+    todoOpenDrawer(false); inDrawer(false);
+  });
+  if (inKey) inLoad(true);          // badge count on load, without opening anything
 
   buildEditUrls();
   paintLock();
-  const deep = location.hash.match(/^#p\/(.+)$/);
-  if (deep) showProject(deep[1], true); else renderFolders();
+  paintBaseline();
+  paintMe();
+  const deepP = location.hash.match(/^#p\/(.+)$/);
+  const deepG = location.hash.match(/^#g\/(.+)$/);
+  if (deepP) showProject(deepP[1], true);
+  else if (deepG) showGroup(deepG[1], true);
+  else renderFolders();
   loadStats();
 </script>
 
