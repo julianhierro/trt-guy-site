@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Current Protocol | TRT Guy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor.css?v=1">
+<!-- Paint-hold: never flash the old version -->
+<style>html.jv-pending body{visibility:hidden}</style>
+<script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
+<style>
+  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;
+    --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 18px 70px}
+  .wrap{max-width:680px;margin:0 auto}
+  .wordmark{font-family:var(--display);font-weight:700;font-size:clamp(30px,7vw,42px);line-height:.9;letter-spacing:.04em;text-transform:uppercase;display:inline-block;margin:36px 0 4px}
+  .head{text-align:center;margin-bottom:8px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(40px,10vw,64px);line-height:1;text-transform:uppercase;margin:10px 0 8px;text-align:center}
+  .sub{color:var(--mut);font-size:16px;text-align:center;max-width:520px;margin:0 auto 8px}
+  .updated{text-align:center;font-size:12.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:26px}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 22px;margin:16px 0;box-shadow:0 1px 2px rgba(11,13,16,.04)}
+  .sec-title{font-family:var(--display);font-weight:700;font-size:24px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px}
+  .sec-sub{color:var(--mut);font-size:13.5px;margin-bottom:14px}
+  ul.list{list-style:none;margin:0}
+  ul.list li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15.5px}
+  ul.list li:last-child{border-bottom:0}
+  ul.list li b{font-weight:700}
+  ul.list li .meta{color:var(--mut);font-size:13.5px;display:block;margin-top:2px}
+  .ph{color:var(--acc);font-weight:600}
+  .note{background:#eef2f8;border-radius:10px;padding:14px 16px;font-size:14px;color:var(--mut);line-height:1.6}
+  .disc{font-size:12px;color:var(--mut);text-align:center;margin-top:24px;line-height:1.6}
+  .foot{text-align:center;color:var(--mut);font-size:12px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="wordmark">TRT-GUY</div>
+    <h1>My Current Protocol</h1>
+    <p class="sub">Exactly what I'm running right now — click any line to edit it. (Replace this line with your own intro.)</p>
+    <p class="updated">Last updated — edit me</p>
+  </div>
+
+  <section class="card">
+    <div class="sec-title">Current Protocol</div>
+    <p class="sec-sub">Compounds — name, dose, frequency. Duplicate a line in the editor to add more.</p>
+    <ul class="list">
+      <li><b class="ph">Compound name</b> — dose — frequency<span class="meta">Notes (why, timing, adjustments)</span></li>
+      <li><b class="ph">Compound name</b> — dose — frequency<span class="meta">Notes</span></li>
+      <li><b class="ph">Compound name</b> — dose — frequency<span class="meta">Notes</span></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">Supplements</div>
+    <p class="sec-sub">Everything else you take daily.</p>
+    <ul class="list">
+      <li><b class="ph">Supplement</b> — dose<span class="meta">Notes</span></li>
+      <li><b class="ph">Supplement</b> — dose<span class="meta">Notes</span></li>
+      <li><b class="ph">Supplement</b> — dose<span class="meta">Notes</span></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">Training</div>
+    <p class="sec-sub">Your current split and approach.</p>
+    <ul class="list">
+      <li><b class="ph">Day / focus</b><span class="meta">Add the details</span></li>
+      <li><b class="ph">Day / focus</b><span class="meta">Add the details</span></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">Notes</div>
+    <p class="sec-sub">Anything you want people to know — bloodwork, how you feel, what you're changing.</p>
+    <div class="note">Write your notes here. Click to edit.</div>
+  </section>
+
+  <p class="disc">This is what I personally do — it is not medical advice or a prescription. Talk to a licensed physician before starting anything.</p>
+  <div class="foot">© TRT Guy</div>
+</div>
+
+<script>
+/* ── Analytics ── */
+var TRACK_URL='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtguy-protocol';
+function tgVisitor(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'anon';}}
+function track(evt){var u=TRACK_URL+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+evt+'&v='+encodeURIComponent(tgVisitor());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(e){}try{new Image().src=u;}catch(e){}}
+if(!/[?&]edit=1/.test(location.search)) track('view');
+</script>
+
+<!-- ═══ Inline editor (add ?edit=1) — passwordless, same as your other pages ═══ -->
+<script>window.JV_EDITOR={ site:"td-protocol", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
+  var n=0;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
+  var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var c=el.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(c.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
+  (function walk(el){ var c=el.children; for(var i=0;i<c.length;i++){ var ch=c[i]; if(skip(ch))continue; if(isTextLeaf(ch)) ch.setAttribute("data-etext","1"); else walk(ch); } })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+})();
+</script>
+<script src="/editor.js?v=1"></script>
+</body>
+</html>
