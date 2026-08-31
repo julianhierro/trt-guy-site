@@ -17,8 +17,11 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 18px 70px}
   .wrap{max-width:600px;margin:0 auto;text-align:center}
-  .wordmark{font-family:var(--display);font-weight:700;font-size:clamp(30px,7vw,44px);line-height:.9;letter-spacing:.04em;text-transform:uppercase;display:inline-block;margin:34px 0 18px}
-  .tabs{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#eef1f6;margin-bottom:26px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin:24px 0 26px}
+  .wordmark{font-family:var(--display);font-weight:700;font-size:clamp(24px,6vw,34px);line-height:.9;letter-spacing:.04em;text-transform:uppercase;display:inline-block}
+  .tabs{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#eef1f6}
+  .tabs button{padding:10px 16px;font-size:14px}
+  @media (max-width:440px){.topbar{justify-content:center}.tabs button{padding:9px 12px;font-size:13px}}
   .tabs button{background:transparent;border:none;padding:11px 20px;font-family:var(--body);font-weight:700;font-size:14.5px;color:var(--mut);cursor:pointer;transition:all .15s}
   .tabs button.active{background:var(--acc);color:#fff}
   .kicker{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
@@ -48,12 +51,13 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="wordmark">TRT-GUY</div>
-
-  <nav class="tabs" id="tabs" data-noedit>
-    <button type="button" data-tab="guide" class="active">TRT 101 Guide</button>
-    <button type="button" data-tab="waitlist">Coaching Waitlist</button>
-  </nav>
+  <div class="topbar">
+    <div class="wordmark">TRT-GUY</div>
+    <nav class="tabs" id="tabs" data-noedit>
+      <button type="button" data-tab="guide" class="active">TRT 101 Guide</button>
+      <button type="button" data-tab="waitlist">Coaching Waitlist</button>
+    </nav>
+  </div>
 
   <!-- ===== TAB 1: TRT 101 GUIDE (copy verbatim from the guide) ===== -->
   <div class="tab-panel on" id="tab-guide">
