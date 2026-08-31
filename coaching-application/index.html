@@ -111,6 +111,9 @@
       <label>What are you looking to get out of coaching? (guidance, accountability, a protocol that works, TRT guidance, PED guidance, etc) <span class="req">*</span></label>
       <textarea id="wants_from_coaching" required></textarea>
 
+      <label>If we worked to together, what would you like me to help you accomplish? <span class="req">*</span></label>
+      <textarea id="help_accomplish" required></textarea>
+
       <button class="btn" id="appBtn" type="submit">Submit my application →</button>
       <div class="err" id="appErr"></div>
     </form>
@@ -135,7 +138,7 @@ $('#appForm').addEventListener('submit', async function(e){
   if(!name){ err.textContent='Please enter your first name.'; return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
   if(!phone){ err.textContent='Please enter your phone.'; return; }
-  var ids=['short_term_goals','long_term_goals','on_trt','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching'];
+  var ids=['short_term_goals','long_term_goals','on_trt','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
   var payload={firstName:name,email:email,phone:phone,qa:[]};
   for(var i=0;i<ids.length;i++){ var v=$('#'+ids[i]).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+ids[i]).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[ids[i]]=v; payload.qa.push({q:labelFor(ids[i]),a:v}); }
   err.textContent=''; var b=$('#appBtn'); b.disabled=true; b.textContent='Submitting…';
