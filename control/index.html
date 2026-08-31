@@ -205,6 +205,16 @@
   ───────────────────────────────────────────────────────────────────────── */
   const PROJECTS = [
     {
+      id:'start', icon:'🚪', tag:'Hub', name:'TRT 101 + Coaching',
+      description:'One page, two tabs — the TRT 101 guide and the coaching waitlist. Reuses your existing copy.',
+      home:'https://trt-guy.com/start/',
+      pages:[
+        { kind:'gate', key:'trtguy-start', tags:["trt-guy", "trt-101"], name:'TRT 101 + Waitlist (2 tabs)',
+          description:'Tab 1: TRT 101 guide opt-in (tags trt-101). Tab 2: coaching waitlist that links to the full application.',
+          url:'https://trt-guy.com/start/' }
+      ]
+    },
+    {
       id:'coaching', icon:'📝', tag:'Offer', name:'Coaching Waitlist',
       description:'Two-step waitlist then a qualifying application. Tags coaching-waitlist, then coaching-application.',
       home:'https://trt-guy.com/waitlist/',
