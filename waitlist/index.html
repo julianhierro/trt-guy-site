@@ -53,6 +53,7 @@
   /* In edit mode, show all steps stacked so the application questions can be edited */
   body.jv-editing .stepwrap{display:block!important;border-top:1px dashed rgba(26,92,255,.35);margin-top:18px;padding-top:14px}
   body.jv-editing .stepwrap::before{content:attr(id);display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
+  body.jv-editing #cycle_wrap{display:block!important}
 </style>
 </head>
 <body>
@@ -92,6 +93,9 @@
     <p class="lead">A few quick questions so we can see if you're the right fit. Be honest — it helps us build the right plan.</p>
     <div class="card">
       <form id="appForm" novalidate>
+        <label data-eid="e800">Instagram handle</label>
+        <input type="text" id="instagram" data-eid="e801" placeholder="@yourhandle" autocomplete="off">
+
         <label>What are your short-term goals? <span class="req">*</span></label>
         <textarea id="short_term_goals" placeholder="Next 1–3 months" required></textarea>
 
@@ -105,6 +109,9 @@
           <option value="No — not yet, want to start">Thinking about it / want to start</option>
           <option value="No — just exploring">Just exploring</option>
         </select>
+
+        <label data-eid="e802">Describe your current TRT protocol (total amount, injection frequency, and anything else you're taking) <span class="req" data-eid="e803">*</span></label>
+        <textarea id="trt_protocol" data-eid="e804" required></textarea>
 
         <label>Have you ever used steroids? <span class="req">*</span></label>
         <select id="ever_used_steroids" required>
@@ -120,7 +127,12 @@
           <option value="No">No</option>
         </select>
 
-        <label>Are you willing to invest significantly to hit your goals? <span class="req">*</span></label>
+        <div id="cycle_wrap" data-eid="e805" style="display:none">
+          <label data-eid="e806">Describe your current cycle <span class="req" data-eid="e807">*</span></label>
+          <textarea id="cycle_describe" data-eid="e808"></textarea>
+        </div>
+
+        <label>If you find the right program, are you willing to invest significantly to hit your goals? <span class="req">*</span></label>
         <select id="investment_ready" required>
           <option value="">Select…</option>
           <option value="Yes — finances arent an issue">Yes — finances aren't an issue</option>
@@ -128,7 +140,7 @@
           <option value="Not right now">Not right now</option>
         </select>
 
-        <label>If accepted, when would you look to start? <span class="req">*</span></label>
+        <label>If accepted, when are you looking to start? <span class="req">*</span></label>
         <select id="ready_to_start" required>
           <option value="">Select…</option>
           <option value="As soon as possible">As soon as possible</option>
@@ -142,6 +154,18 @@
           <option value="I would discuss with my spouse/partner">I'd discuss with my spouse/partner</option>
           <option value="I would need someone elses sign-off">I'd need someone else's sign-off</option>
         </select>
+
+        <label data-eid="e809">Why are you looking to make a change now versus waiting 1-2 months? <span class="req" data-eid="e810">*</span></label>
+        <textarea id="why_now_vs_wait" data-eid="e811" required></textarea>
+
+        <label data-eid="e812">What's your biggest struggle right now when it comes to accomplishing your goals? <span class="req" data-eid="e813">*</span></label>
+        <textarea id="biggest_struggle" data-eid="e814" required></textarea>
+
+        <label data-eid="e815">What are you looking to get out of coaching? (guidance, accountability, a protocol that works, TRT guidance, PED guidance, etc) <span class="req" data-eid="e816">*</span></label>
+        <textarea id="wants_from_coaching" data-eid="e817" required></textarea>
+
+        <label data-eid="e818">Anything else I should know? <span class="req" data-eid="e819">*</span></label>
+        <textarea id="help_accomplish" data-eid="e820" required></textarea>
 
         <button class="btn" id="appBtn" type="submit">Submit my application →</button>
         <div class="err" id="appErr"></div>
@@ -199,9 +223,13 @@ function labelFor(id){ var el=document.getElementById(id); var p=el&&el.previous
 $('#appForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const err=$('#appErr');
-  const ids=['short_term_goals','long_term_goals','on_trt','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker'];
+  const ids=['short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
   const payload={firstName:lead.firstName,email:lead.email,phone:lead.phone,qa:[]};
+  // Instagram handle — optional, sent only if filled.
+  const ig=$('#instagram').value.trim(); if(ig){ payload['instagram']=ig; payload.qa.push({q:labelFor('instagram'),a:ig}); }
   for(const id of ids){ const v=$('#'+id).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+id).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[id]=v; payload.qa.push({q:labelFor(id),a:v}); }
+  // If currently on a cycle, they must describe it (hidden otherwise).
+  if($('#on_cycle_now').value.trim()==='Yes'){ const cd=$('#cycle_describe'); const cv=cd.value.trim(); if(!cv){ err.textContent='Please describe your current cycle.'; cd.scrollIntoView({behavior:'smooth',block:'center'}); return; } payload['cycle_describe']=cv; payload.qa.push({q:labelFor('cycle_describe'),a:cv}); }
   err.textContent=''; const b=$('#appBtn'); b.disabled=true; b.textContent='Submitting…';
   try{
     const r=await fetch(API+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -209,6 +237,9 @@ $('#appForm').addEventListener('submit', async e=>{
     location.href='/waitlist/thanks/';   // dedicated thank-you page (data is saved first)
   }catch(e){ err.textContent='Something went wrong — please try again.'; b.disabled=false; b.textContent='Submit my application →'; }
 });
+
+// Reveal the "describe your cycle" question only when they say they're on a cycle.
+$('#on_cycle_now').addEventListener('change',function(){ document.getElementById('cycle_wrap').style.display=this.value==='Yes'?'':'none'; });
 </script>
 
 <!-- ═══ Inline editor (add ?edit=1). Labels/copy editable; form controls locked so GHL mapping stays intact. ═══ -->
