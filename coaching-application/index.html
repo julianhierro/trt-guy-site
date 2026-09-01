@@ -60,6 +60,9 @@
       <label>Phone <span class="req">*</span></label>
       <input type="tel" id="phone" placeholder="So we can reach you" autocomplete="tel" required>
 
+      <label data-eid="e731">Instagram handle</label>
+      <input type="text" id="instagram" data-eid="e732" placeholder="@yourhandle" autocomplete="off">
+
       <label>What are your short-term goals? <span class="req">*</span></label>
       <textarea id="short_term_goals" placeholder="Next 1–3 months" required></textarea>
 
@@ -157,6 +160,8 @@ $('#appForm').addEventListener('submit', async function(e){
   if(!phone){ err.textContent='Please enter your phone.'; return; }
   var ids=['short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
   var payload={firstName:name,email:email,phone:phone,qa:[]};
+  // Instagram handle — optional, sent only if they fill it in.
+  var ig=$('#instagram').value.trim(); if(ig){ payload['instagram']=ig; payload.qa.push({q:labelFor('instagram'),a:ig}); }
   for(var i=0;i<ids.length;i++){ var v=$('#'+ids[i]).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+ids[i]).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[ids[i]]=v; payload.qa.push({q:labelFor(ids[i]),a:v}); }
   // If they're currently on a cycle, they must describe it (this field is hidden otherwise).
   if($('#on_cycle_now').value.trim()==='Yes'){ var cd=$('#cycle_describe'); var cv=cd.value.trim(); if(!cv){ err.textContent='Please describe your current cycle.'; cd.scrollIntoView({behavior:'smooth',block:'center'}); return; } payload['cycle_describe']=cv; payload.qa.push({q:labelFor('cycle_describe'),a:cv}); }
