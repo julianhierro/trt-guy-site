@@ -10,7 +10,7 @@
 const GHL_API = 'https://services.leadconnectorhq.com';
 const GHL_TOKEN = process.env.GHL_API_KEY;
 const LOCATION_ID = process.env.GHL_LOCATION_ID || 'WmcafLXT7njeQOu3fqlP';
-const EMAIL_FROM = process.env.GHL_EMAIL_FROM || 'TRT Guy <admin@jackedvegans.com>';
+const EMAIL_FROM = process.env.GHL_EMAIL_FROM || 'TRT Guy <julian@trt-guy.com>';
 
 function ghl(method, path, body) {
   return fetch(`${GHL_API}${path}`, {
