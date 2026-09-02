@@ -55,17 +55,29 @@ function bloodworkEmailHtml(firstName) {
 // Delivery email for the fertility guide lead magnet. Sent through GoHighLevel.
 // (Placeholder copy — refine anytime.)
 function fertilityEmailHtml(firstName) {
-  const name = esc(firstName) || 'there';
+  const GUIDE = 'https://trt-guy.com/fertility-guide/TRT-Guy-Fertility-Guide.pdf';
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#1a1a1a;max-width:560px;margin:0 auto">
-    <p>Hey ${name},</p>
-    <p>Here's your Enhanced Male Fertility Restoration Guide — everything's inside.</p>
+    <p>Please, click the link below to access the fertility guide:</p>
     <p style="margin:22px 0">
-      <a href="https://trt-guy.com/fertility-guide/TRT-Guy-Fertility-Guide.pdf" style="display:inline-block;background:#1a5cff;color:#fff;text-decoration:none;padding:14px 26px;border-radius:10px;font-weight:700">Download the guide &rarr;</a>
+      <a href="${GUIDE}" style="display:inline-block;background:#1a5cff;color:#fff;text-decoration:none;padding:14px 26px;border-radius:10px;font-weight:700">Access the Fertility Guide &rarr;</a>
     </p>
-    <p>Any questions, just reply to this email.</p>
-    <p>&mdash; Julian<br>TRT Guy</p>
-    <p style="font-size:12px;color:#888;margin-top:24px">Educational only, not medical advice. Always confirm with a licensed physician.</p>
+    <p>Now, let's make sure you get all my emails.</p>
+    <p><strong>Two quick things for you to do now:</strong></p>
+    <p><strong>Task #1 — Drag me into your Primary inbox.</strong><br>
+    Grab this email and move it to your primary folder/inbox.</p>
+    <ul style="padding-left:20px;margin:0 0 12px">
+      <li>Gmail: drag it from "Promotions" into "Primary." (Phone: open it &rarr; three dots &rarr; "Move to &rarr; Primary.")</li>
+      <li>Apple Mail / Outlook: add my address to your contacts, or mark it "Not Junk."</li>
+    </ul>
+    <p>This tells your inbox, "I want these."</p>
+    <p><strong>Task #2 — Hit reply and tell me your #1 fitness goal and biggest challenge.</strong></p>
+    <p>One line is enough: "Lose 20 lbs." "Finally see my abs." "Optimize my hormones."</p>
+    <p>I personally ready every single reply and it helps me tailor future emails.</p>
+    <p>Whatever your goal is — reply and tell me.</p>
+    <p>Do those two things now.</p>
+    <p>I'll see your reply.</p>
+    <p>-Julian</p>
   </div>`;
 }
 
@@ -171,7 +183,7 @@ module.exports = async (req, res) => {
         const send = await ghl('POST', '/conversations/messages', {
           type: 'Email',
           contactId,
-          subject: 'Your Enhanced Male Fertility Restoration Guide',
+          subject: 'The Fertility Guide — do these 2 quick things (60 seconds)',
           html: fertilityEmailHtml(firstName),
           emailFrom: EMAIL_FROM,
         });
