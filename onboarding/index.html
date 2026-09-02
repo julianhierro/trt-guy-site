@@ -108,6 +108,9 @@
   #done p{color:var(--mut);font-size:16px;max-width:440px;margin:0 auto}
   .footer{text-align:center;color:var(--mut);font-size:12px;margin-top:30px}
 </style>
+<link rel="stylesheet" href="/editor.css?v=1">
+<style>html.jv-pending body{visibility:hidden}</style>
+<script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 </head>
 <body>
 <div class="wrap">
@@ -131,6 +134,7 @@
       <div class="sec-head"><div class="sec-num">1</div><div class="sec-title">The Basics</div></div>
       <p class="sec-sub">Make sure we can reach you.</p>
       <input type="hidden" name="firstName" id="firstName">
+      <div class="field"><label>Full name <span class="req">*</span></label><input type="text" name="onboarding_full_name" id="fullName" autocomplete="name" required></div>
       <div class="field row">
         <div><label>Email <span class="req">*</span></label><input type="email" name="email" id="email" required></div>
         <div><label>Phone <span class="req">*</span></label><input type="tel" name="phone" required></div>
@@ -139,6 +143,7 @@
         <div><label>Age <span class="req">*</span></label><input type="number" name="onboarding_age" min="18" max="99" required></div>
         <div><label>City / timezone</label><input type="text" name="onboarding_location_timezone" placeholder="e.g. Austin, CST"></div>
       </div>
+      <div class="field"><label>Instagram handle</label><input type="text" name="onboarding_instagram" placeholder="@yourhandle" autocomplete="off"></div>
     </section>
 
     <!-- 2. Body -->
@@ -155,10 +160,6 @@
       <div class="field row">
         <div><label>Height <span class="req">*</span></label><input type="text" name="onboarding_height" id="fHeight" placeholder="e.g. 5'11&quot;" required></div>
         <div><label>Current weight <span class="req">*</span></label><input type="text" name="onboarding_current_weight" id="fCurWeight" placeholder="e.g. 205 lb" required></div>
-      </div>
-      <div class="field row">
-        <div><label>Goal weight</label><input type="text" name="onboarding_goal_weight" id="fGoalWeight" placeholder="e.g. 185 lb"></div>
-        <div><label>Body fat % (if known)</label><input type="text" name="onboarding_body_fat_pct" placeholder="e.g. 22%"></div>
       </div>
     </section>
 
@@ -550,43 +551,24 @@ form.addEventListener('submit', async e=>{
   }
 });
 
-// ---- Inline text editing (open with ?edit=1) ----
-const EDIT_SEL = '.kicker,header.top h1,.lead,.sec-title,.sec-sub,.field > label,.field > .hint,.drop .t,.drop .s,.badge,#done .big,#done p,.footer';
-const editable = [...document.querySelectorAll(EDIT_SEL)];
-editable.forEach((el,i)=> el.setAttribute('data-edit','e'+i));
-const CONTENT_URL = 'https://jv-dashboard-chi.vercel.app/api/content?site=td-onboarding&page=1';
-
-(async function applyOverrides(){
-  try{
-    const r = await fetch(CONTENT_URL); if(!r.ok) return;
-    const d = await r.json(); const o = {};
-    (d.edits||[]).forEach(e=>{ if(e && e.eid) o[e.eid] = e.html; });
-    editable.forEach((el,i)=>{ if(o['e'+i]!=null) el.innerHTML = o['e'+i]; });
-  }catch(e){}
-})();
-
-if (new URLSearchParams(location.search).get('edit')==='1'){
-  editable.forEach(el=>{ el.setAttribute('contenteditable','true'); el.style.outline='1px dashed rgba(26,92,255,.55)'; el.style.borderRadius='4px'; });
-  form.addEventListener('submit', e=>{ e.preventDefault(); e.stopPropagation(); }, true);
-  const bar=document.createElement('div');
-  bar.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#0b0d10;color:#fff;padding:10px 14px;border-radius:12px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.35);font-family:var(--body)';
-  bar.innerHTML='<b style="font-weight:700">✏️ Edit mode</b>';
-  const save=document.createElement('button');
-  save.textContent='Save text';
-  save.style.cssText='background:#1a5cff;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer';
-  const note=document.createElement('span'); note.style.cssText='font-size:13px;color:#9fb0c9;min-width:70px';
-  bar.appendChild(save); bar.appendChild(note); document.body.appendChild(bar);
-  save.addEventListener('click', async ()=>{
-    const o={}; editable.forEach((el,i)=> o['e'+i]=el.innerHTML);
-    save.disabled=true; note.textContent='Saving…';
-    try{
-      const edits = Object.keys(o).map(eid=>({ eid, html:o[eid] }));
-      const r=await fetch(CONTENT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ password:'', edits })});
-      note.textContent = r.ok ? 'Saved ✓' : 'Save failed';
-    }catch(e){ note.textContent='Save failed'; }
-    save.disabled=false;
-  });
-}
 </script>
+
+<!-- ═══ Inline editor (add ?edit=1) — full editing: text, add / remove / reorder. Passwordless, saves to the shared store. ═══ -->
+<script>window.JV_EDITOR={ site:"td-onboarding", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
+  var n=0;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
+  var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var c=el.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(c.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
+  (function walk(el){ var c=el.children; for(var i=0;i<c.length;i++){ var ch=c[i]; if(skip(ch))continue; if(isTextLeaf(ch)) ch.setAttribute("data-etext","1"); else walk(ch); } })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+})();
+</script>
+<script src="/editor.js?v=1"></script>
 </body>
 </html>
