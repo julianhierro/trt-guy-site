@@ -18,7 +18,7 @@
     --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 16px 130px}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 16px}
   .wrap{max-width:720px;margin:0 auto}
 
   header.top{text-align:center;padding:34px 0 6px}
@@ -100,12 +100,26 @@
   .guide li{font-size:14px;color:var(--mut);margin-bottom:4px}
   .guide ul:last-child{margin-bottom:0}
 
-  .submit-wrap{position:sticky;bottom:0;z-index:16;padding:14px 0 12px;
-    background:linear-gradient(180deg,rgba(244,246,250,0) 0%,var(--bg) 30%)}
+  /* Action bar is pinned to the viewport, so Submit and Save are on screen the
+     whole way down the form — including past the last question. */
+  .submit-wrap{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(720px,calc(100% - 24px));z-index:40;padding:10px 0 12px;
+    background:var(--bg);box-shadow:0 -10px 18px -8px rgba(11,13,16,.18)}
+  .submit-wrap::before{content:"";position:absolute;left:-100vw;right:-100vw;top:0;bottom:0;
+    background:var(--bg);z-index:-1;box-shadow:0 -10px 18px -8px rgba(11,13,16,.18)}
   .submit-wrap .btn{padding:15px;font-size:20px}
-  .submit-wrap .btn.ghost{padding:10px;font-size:13.5px;margin-top:7px;background:var(--card)}
-  @media (max-width:520px){ .submit-wrap .btn{padding:13px;font-size:18px} }
-  body.jv-editing .submit-wrap{position:static}
+  .submit-wrap .btn.ghost{padding:9px;font-size:13.5px;margin-top:7px;background:var(--card)}
+  .submit-wrap .formerr:empty,.submit-wrap .saved:empty{min-height:0;margin:0}
+  @media (max-width:520px){
+    .submit-wrap{padding:8px 0 10px}
+    .submit-wrap .btn{padding:13px;font-size:17px}
+    .submit-wrap .btn.ghost{padding:8px;font-size:13px;margin-top:6px}
+  }
+  /* keep the last question clear of the pinned bar */
+  body{padding-bottom:190px}
+  @media (max-width:520px){ body{padding-bottom:172px} }
+  body.jv-editing .submit-wrap{position:static;transform:none;width:auto;box-shadow:none}
+  body.jv-editing .submit-wrap::before{display:none}
   .btn{width:100%;padding:17px;background:var(--acc);color:#fff;border:none;border-radius:12px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;transition:background .15s}
   .btn:hover{background:var(--acc-d)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
@@ -377,7 +391,7 @@ form.addEventListener('submit', async e=>{
 <!-- Stale-draft guard: if the page structure changed since a saved editor draft was
      captured, that draft no longer lines up with the DOM and republishing it scrambles the
      page. Bump PAGE_REV whenever the form's structure changes; older drafts are dropped. -->
-<script>(function(){ var PAGE_REV="2026-09-02d";
+<script>(function(){ var PAGE_REV="2026-09-02e";
   try{ var k="jv-rev:td-assessment";
     if(localStorage.getItem(k)!==PAGE_REV){
       Object.keys(localStorage).forEach(function(x){ if(x.indexOf("jv-draft:td-assessment")===0) localStorage.removeItem(x); });
