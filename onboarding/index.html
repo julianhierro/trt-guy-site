@@ -183,31 +183,23 @@
 
     <!-- 4. TRT status -->
     <section class="card">
-      <div class="sec-head"><div class="sec-num">4</div><div class="sec-title">TRT Status</div></div>
+      <div class="sec-head"><div class="sec-num">4</div><div class="sec-title">PED / TRT Status</div></div>
       <p class="sec-sub">Where you're at with hormones right now.</p>
-      <div class="field"><label>Are you currently on TRT? <span class="req">*</span></label>
+      <div class="field"><label>Are you currently on TRT or AAS (anabolic-androgenic steroids)? <span class="req">*</span></label>
         <select name="onboarding_on_trt_now" required>
           <option value="">Select…</option>
+          <option>Yes — using anabolic steroids</option>
           <option>Yes — currently on TRT</option>
           <option>No — not yet, want to start</option>
           <option>No — just exploring</option>
-          <option>Previously, not currently</option>
+          <option>No — I'm not interested in using TRT or PEDs</option>
         </select>
       </div>
-      <div class="field"><label>Current protocol &amp; dose</label><div class="hint">If on TRT: what, how much, how often.</div><textarea name="onboarding_trt_protocol_dose" placeholder="e.g. 120mg test cypionate/week, split E3.5D + 0.25mg anastrozole"></textarea></div>
+      <div class="field"><label>Current dose &amp; protocol</label><div class="hint">What TRT or PEDs, how much, and how often?</div><textarea name="onboarding_trt_protocol_dose" placeholder="e.g. 120mg test cypionate/week, split E3.5D + 0.25mg anastrozole; or your full cycle"></textarea></div>
       <div class="field row">
-        <div><label>How long on TRT</label><input type="text" name="onboarding_trt_duration" placeholder="e.g. 8 months"></div>
-        <div><label>Prescriber</label><input type="text" name="onboarding_trt_prescriber" placeholder="Clinic name, or self-directed"></div>
+        <div><label>How long have you been using TRT / PEDs?</label><input type="text" name="onboarding_trt_duration" placeholder="e.g. 8 months"></div>
+        <div><label>Clinic / prescriber / coach</label><input type="text" name="onboarding_trt_prescriber" placeholder="Clinic, prescriber, coach — or self-directed"></div>
       </div>
-      <div class="field"><label>Have you used anabolic steroids or other PEDs before? <span class="req">*</span></label>
-        <select name="onboarding_previous_ped_use" id="pedUse" required>
-          <option value="">Select…</option>
-          <option>No, never</option>
-          <option>Yes, in the past</option>
-          <option>Yes, currently on cycle</option>
-        </select>
-      </div>
-      <div class="field" id="pedDetailsField" style="display:none"><label>Describe it — what, when &amp; doses <span class="req">*</span></label><div class="hint">Compounds, cycles, doses, and roughly when — share as much of your history as you can. The more honest, the safer we can program.</div><textarea name="onboarding_previous_ped_details" placeholder="e.g. 2 test/deca cycles in 2021–22, last one 500mg test/wk for 12 wks"></textarea></div>
     </section>
 
     <!-- 5. Enhancement & risk -->
@@ -255,6 +247,7 @@
         </select>
       </div>
       <div class="field"><label>Current routine</label><textarea name="onboarding_current_routine" placeholder="What does your training look like right now?"></textarea></div>
+      <div class="field"><label>Any movements or exercises you'd rather not do?</label><div class="hint">List anything you want to avoid — and if so, why (injury, discomfort, preference).</div><textarea name="onboarding_avoid_exercises" placeholder="e.g. No back squats — old knee injury"></textarea></div>
       <div class="field row">
         <div><label>Days per week available <span class="req">*</span></label>
           <select name="onboarding_days_per_week" required>
@@ -455,16 +448,6 @@ function restoreProgress(){
   highlightChoices();
 }
 $('#saveBtn').addEventListener('click', ()=> saveProgress(false));
-
-// Show "describe PED use" only when they answered Yes, and require it then
-const pedUse = $('#pedUse'), pedDetailsField = $('#pedDetailsField');
-const pedDetails = pedDetailsField.querySelector('textarea');
-function togglePed(){
-  const show = /^Yes/.test(pedUse.value);
-  pedDetailsField.style.display = show ? 'block' : 'none';
-  pedDetails.required = show;
-}
-pedUse.addEventListener('change', togglePed);
 
 // Show "current calories" only if they track macros
 const tracksMacros = $('#tracksMacros'), caloriesField = $('#caloriesField');
