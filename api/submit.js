@@ -52,6 +52,23 @@ function bloodworkEmailHtml(firstName) {
   </div>`;
 }
 
+// Delivery email for the fertility guide lead magnet. Sent through GoHighLevel.
+// (Placeholder copy — refine anytime.)
+function fertilityEmailHtml(firstName) {
+  const name = esc(firstName) || 'there';
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#1a1a1a;max-width:560px;margin:0 auto">
+    <p>Hey ${name},</p>
+    <p>Here's your Enhanced Male Fertility Restoration Guide — everything's inside.</p>
+    <p style="margin:22px 0">
+      <a href="https://trt-guy.com/fertility-guide/TRT-Guy-Fertility-Guide.pdf" style="display:inline-block;background:#1a5cff;color:#fff;text-decoration:none;padding:14px 26px;border-radius:10px;font-weight:700">Download the guide &rarr;</a>
+    </p>
+    <p>Any questions, just reply to this email.</p>
+    <p>&mdash; Julian<br>TRT Guy</p>
+    <p style="font-size:12px;color:#888;margin-top:24px">Educational only, not medical advice. Always confirm with a licensed physician.</p>
+  </div>`;
+}
+
 // Tags are built server-side so the browser can't inject arbitrary ones.
 function tagsFor(source, result) {
   const base = ['trt-dad'];
@@ -73,6 +90,8 @@ function tagsFor(source, result) {
     base.push('trt-non-negotiables', 'trt-interested');
   } else if (source === 'trt-101-guide') {
     base.push('trt-101-guide', 'trt-interested');
+  } else if (source === 'fertility-guide') {
+    base.push('fertility-guide', 'trt-interested');
   }
   return base;
 }
@@ -84,6 +103,7 @@ const SOURCE_LABEL = {
   'injection-guide': 'TRT Guy TRT Injection Guide',
   'trt-rules': 'TRT Guy 5 TRT Non-Negotiables',
   'trt-101-guide': 'TRT Guy TRT 101 Guide',
+  'fertility-guide': 'TRT Guy Fertility Guide',
 };
 
 module.exports = async (req, res) => {
@@ -103,7 +123,7 @@ module.exports = async (req, res) => {
 
     const firstName = (data.firstName || data.first_name || data.name || '').toString().trim();
     const email = (data.email || '').toString().trim();
-    const source = ['quiz', 'course', 'coaching', 'injection-guide', 'trt-rules', 'trt-101-guide'].includes(data.source) ? data.source : 'course';
+    const source = ['quiz', 'course', 'coaching', 'injection-guide', 'trt-rules', 'trt-101-guide', 'fertility-guide'].includes(data.source) ? data.source : 'course';
     const result = data.result === 'positive' ? 'positive' : 'negative';
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -136,6 +156,23 @@ module.exports = async (req, res) => {
           contactId,
           subject: 'Your Low-T result — and exactly what to get tested',
           html: bloodworkEmailHtml(firstName),
+          emailFrom: EMAIL_FROM,
+        });
+        const sendJson = await send.json();
+        emailQueued = !!(sendJson && (sendJson.messageId || sendJson.emailMessageId));
+      } catch (e) {
+        // Never fail the whole request just because the email didn't queue.
+      }
+    }
+
+    // Fertility guide: deliver the PDF link by email (sent through GoHighLevel).
+    if (source === 'fertility-guide') {
+      try {
+        const send = await ghl('POST', '/conversations/messages', {
+          type: 'Email',
+          contactId,
+          subject: 'Your Enhanced Male Fertility Restoration Guide',
+          html: fertilityEmailHtml(firstName),
           emailFrom: EMAIL_FROM,
         });
         const sendJson = await send.json();
