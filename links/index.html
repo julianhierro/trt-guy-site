@@ -31,8 +31,7 @@
   body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.5;
     display:flex;flex-direction:column;align-items:center;padding:56px 20px 40px}
   .wrap{width:100%;max-width:440px;text-align:center}
-  .wordmark{font-family:var(--display);font-weight:700;font-size:clamp(38px,11vw,54px);line-height:.9;
-    letter-spacing:.04em;text-transform:uppercase;display:inline-block}
+  .wordmark{display:inline-block;height:clamp(52px,14vw,68px);aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;font-size:0;color:transparent;overflow:hidden}
   .links{margin-top:36px;display:flex;flex-direction:column;gap:14px}
   a.link{display:flex;align-items:center;justify-content:space-between;gap:12px;
     background:var(--card);border:1px solid var(--line);border-radius:14px;
@@ -56,7 +55,7 @@
 
 <script>
   var LINKS = [
-    { label: 'TRT 101 Guide',        url: 'https://trt-guy.com/trt-101-guide/get/' },
+    { label: 'Free TRT 101 Guide',   url: 'https://trt-guy.com/trt-101-guide/get/' },
     { label: 'Coaching Application', url: 'https://trt-guy.com/coaching-application/' }
     // { label: 'My Current Protocol', url: 'https://trt-guy.com/protocol/' }  // add once the page is filled in
   ];
