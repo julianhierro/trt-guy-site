@@ -200,8 +200,6 @@
         <div><label>How long have you been using TRT / PEDs?</label><input type="text" name="onboarding_trt_duration" placeholder="e.g. 8 months"></div>
         <div><label>Clinic / prescriber / coach</label><input type="text" name="onboarding_trt_prescriber" placeholder="Clinic, prescriber, coach — or self-directed"></div>
       </div>
-      <div class="field"><label>If you've used PEDs — what side effects have you experienced?</label><textarea name="onboarding_ped_side_effects" placeholder="e.g. High BP, acne, mood changes — or none"></textarea></div>
-      <div class="field"><label>One area of health you do NOT want to sacrifice?</label><textarea name="onboarding_dont_sacrifice" placeholder="Be specific"></textarea></div>
     </section>
 
     <!-- 5. Enhancement & risk -->
@@ -230,15 +228,9 @@
       <div class="sec-head"><div class="sec-num">6</div><div class="sec-title">Health &amp; Safety</div></div>
       <p class="sec-sub">So we don't hurt you. Leave blank if none.</p>
       <div class="field"><label>Medical conditions</label><textarea name="onboarding_medical_conditions" placeholder="Blood pressure, heart, liver, kidney, diabetes, mental health..."></textarea></div>
-      <div class="field"><label>Doctor-prescribed medications — what, dose &amp; when</label><textarea name="onboarding_medications_prescribed" placeholder="e.g. Lisinopril 10mg in the morning"></textarea></div>
-      <div class="field"><label>Supplements — what, dose &amp; when</label><textarea name="onboarding_medications_supplements" placeholder="Everything you take regularly"></textarea></div>
-      <div class="field row">
-        <div><label>Current blood pressure</label><input type="text" name="onboarding_blood_pressure" placeholder="e.g. 120/80"></div>
-        <div><label>Last comprehensive bloodwork?</label><input type="text" name="onboarding_last_bloodwork" placeholder="e.g. 6 weeks ago"></div>
-      </div>
-      <div class="field"><label>Family history — cardiovascular / kidney disease, diabetes, cancer, or anything else?</label><textarea name="onboarding_family_history" placeholder="Conditions that run in your family"></textarea></div>
+      <div class="field"><label>Medications &amp; supplements</label><textarea name="onboarding_medications_supplements" placeholder="Everything you take regularly"></textarea></div>
       <div class="field"><label>Injuries or physical limitations</label><textarea name="onboarding_injuries_limitations" placeholder="Bad shoulder, low back, knees..."></textarea></div>
-      <div class="field"><label>Allergies / sensitivities</label><input type="text" name="onboarding_allergies" placeholder="Food, medication, or none"></div>
+      <div class="field"><label>Allergies</label><input type="text" name="onboarding_allergies" placeholder="Food, medication, or none"></div>
     </section>
 
     <!-- 7. Training -->
@@ -264,18 +256,6 @@
         </div>
         <div><label>Gym or home?</label><input type="text" name="onboarding_gym_equipment" placeholder="Full gym / home setup + equipment"></div>
       </div>
-      <div class="field row">
-        <div><label>Years weight training</label><input type="text" name="onboarding_training_years" placeholder="e.g. 5"></div>
-        <div><label>Hours per session</label><input type="text" name="onboarding_training_hours" placeholder="e.g. 1–1.5 hrs"></div>
-      </div>
-      <div class="field"><label>What time of day do you usually train?</label><input type="text" name="onboarding_training_time" placeholder="e.g. early morning, after work"></div>
-      <div class="field"><label>Total training volume — work sets per muscle group per week, and your rep ranges</label><textarea name="onboarding_training_volume" placeholder="e.g. Chest ~12 sets/wk, 8–12 reps"></textarea></div>
-      <div class="field"><label>Any muscle groups you want to emphasize?</label><input type="text" name="onboarding_emphasis_muscles" placeholder="e.g. Shoulders, arms"></div>
-      <div class="field row">
-        <div><label>Cardio — fasted or fed?</label><input type="text" name="onboarding_cardio_state" placeholder="Fasted / fed"></div>
-        <div><label>Cardio days &amp; duration</label><input type="text" name="onboarding_cardio_days" placeholder="e.g. 3x/wk, 30 min"></div>
-      </div>
-      <div class="field"><label>Cardio machine &amp; settings (incline, speed…), and do you track heart rate?</label><textarea name="onboarding_cardio_detail" placeholder="e.g. Incline treadmill 12/3.0; yes, I watch HR"></textarea></div>
     </section>
 
     <!-- 8. Nutrition -->
@@ -291,29 +271,8 @@
         </select>
       </div>
       <div class="field" id="caloriesField" style="display:none"><label>Roughly how many calories a day are you eating now?</label><input type="text" name="onboarding_current_calories" placeholder="e.g. 2,400 kcal"></div>
-      <div class="field"><label>Current macros (if you know them)</label><div class="hint">Protein / carbs / fats.</div><input type="text" name="onboarding_current_macros" placeholder="e.g. 200p / 250c / 70f"></div>
-      <div class="field"><label>If you track — what app, and how long have you tracked?</label><input type="text" name="onboarding_macro_app" placeholder="e.g. MyFitnessPal, 6 months"></div>
-      <div class="field"><label>How long have you been on your current intake?</label><input type="text" name="onboarding_intake_duration" placeholder="e.g. 3 months"></div>
-      <div class="field"><label>How has your weight &amp; gym performance been at this intake? What's the rate of change?</label><textarea name="onboarding_intake_progress" placeholder="Losing / gaining / maintaining, how fast, and how the gym's going"></textarea></div>
       <div class="field"><label>Typical day of eating</label><textarea name="onboarding_typical_day_of_eating" placeholder="Walk me through what you ate yesterday"></textarea></div>
-      <div class="field"><label>Untracked / free / cheat meals per week — and how do you manage them?</label><input type="text" name="onboarding_cheat_meals" placeholder="e.g. 2 on weekends"></div>
-      <div class="field"><label>Can you eat snacks between meals? Do they need to be quick foods?</label><input type="text" name="onboarding_snacks" placeholder="e.g. Yes — grab-and-go"></div>
-      <div class="field row">
-        <div><label>Do you cook most meals in bulk?</label><input type="text" name="onboarding_bulk_cook" placeholder="Yes / No"></div>
-        <div><label>Eat out or prepare at home?</label><input type="text" name="onboarding_meal_location" placeholder="e.g. Mostly home"></div>
-      </div>
-      <div class="field"><label>How hungry are you on your current diet? (1–10)</label><input type="text" name="onboarding_hunger_level" placeholder="1 = never hungry, 10 = starving"></div>
-      <div class="field"><label>Do you want a meal plan (specific foods) or a flexible macro plan? <span class="req">*</span></label>
-        <select name="onboarding_plan_preference" required>
-          <option value="">Select…</option>
-          <option>Meal plan — tell me exactly what to eat</option>
-          <option>Macro plan — flexible, I choose the foods</option>
-          <option>A mix of both</option>
-        </select>
-      </div>
-      <div class="field"><label>Favorite foods / meals</label><textarea name="onboarding_favorite_foods" placeholder="Foods you love — current diet or anytime"></textarea></div>
-      <div class="field"><label>Foods you don't like</label><textarea name="onboarding_dietary_restrictions" placeholder="Foods you won't eat, vegetarian, etc."></textarea></div>
-      <div class="field"><label>How's your digestion? Bloating, reflux, constipation, diarrhea? Bowel movements per day?</label><textarea name="onboarding_digestion" placeholder="Be honest — it matters for programming"></textarea></div>
+      <div class="field"><label>Restrictions / dislikes</label><textarea name="onboarding_dietary_restrictions" placeholder="Foods you won't eat, allergies, vegetarian, etc."></textarea></div>
       <div class="field"><label>Alcohol per week</label><input type="text" name="onboarding_alcohol_per_week" placeholder="e.g. 2–3 drinks, none"></div>
     </section>
 
@@ -323,20 +282,11 @@
       <p class="sec-sub">Recovery is where results happen.</p>
       <div class="field row">
         <div><label>Average sleep / night</label><input type="text" name="onboarding_avg_sleep" placeholder="e.g. 6.5 hrs"></div>
-        <div><label>Stress level (1–10)</label><input type="text" name="onboarding_stress_level" placeholder="10 = high, 1 = none"></div>
+        <div><label>Stress level</label>
+          <select name="onboarding_stress_level"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Through the roof</option></select>
+        </div>
       </div>
-      <div class="field"><label>Do you sleep through the night? Any issues?</label><input type="text" name="onboarding_sleep_quality" placeholder="e.g. Wake 1–2x"></div>
-      <div class="field"><label>Do you feel fatigued during the day?</label><input type="text" name="onboarding_daytime_fatigue" placeholder="Yes / No — when"></div>
-      <div class="field row">
-        <div><label>What kind of work do you do?</label><input type="text" name="onboarding_job_activity" placeholder="Desk, on my feet, shift work..."></div>
-        <div><label>Hours worked per week</label><input type="text" name="onboarding_work_hours" placeholder="e.g. 45"></div>
-      </div>
-      <div class="field row">
-        <div><label>Ever diagnosed with an eating disorder?</label><input type="text" name="onboarding_eating_disorder" placeholder="Yes / No"></div>
-        <div><label>Anxiety around food decisions?</label><input type="text" name="onboarding_food_anxiety" placeholder="Yes / No / a bit"></div>
-      </div>
-      <div class="field"><label>Anything in prep or offseason you've struggled with mentally?</label><textarea name="onboarding_mental_struggles" placeholder="Be honest — it helps me support you"></textarea></div>
-      <div class="field"><label>What do you find helpful in a coach's communication — and what isn't?</label><textarea name="onboarding_coach_comms" placeholder="e.g. Direct + frequent check-ins; not a fan of long voice notes"></textarea></div>
+      <div class="field"><label>Job / daily activity</label><input type="text" name="onboarding_job_activity" placeholder="Desk job, on my feet all day, shift work..."></div>
     </section>
 
     <!-- 10. Uploads -->
