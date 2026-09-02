@@ -668,25 +668,15 @@
     },
     {
       id:'onboarding', icon:'📋', tag:'Post-Purchase', name:'Client Onboarding',
-      description:'The full intake a new client completes right after they buy. Writes every answer onto their GHL contact.',
+      description:'The full onboarding questionnaire a new client completes right after they buy. Questions and the grey example text under each box are both editable.',
       home:'https://trt-guy.com/onboarding/',
       pages:[
-        { kind:'gate', key:'trtguy-onboarding', tags:["trt-guy", "client-onboarded"], name:'Onboarding Intake',
-          description:'The intake plus photo and bloodwork uploads. Writes answers and a note to the contact and emails you.',
-          url:'https://trt-guy.com/onboarding/' }
-      ]
-    },
-    {
-      id:'onboardingv2', icon:'🧾', tag:'Post-Purchase', name:'Onboarding Questionnaire V2',
-      description:'The full onboarding questionnaire — 57 questions across goals, nutrition, PEDs/health, training and lifestyle, plus progress photos. Questions and the grey "e.g." example text are both editable.',
-      home:'https://trt-guy.com/onboarding-v2/',
-      pages:[
-        { kind:'gate', key:'trtguy-onboarding-v2', tags:["trt-guy", "client-onboarded", "assessment-v2"], name:'Onboarding Questionnaire',
-          description:'Every question from the consultation doc. Sends the full transcript to the contact note, your email and #onboarding-forms.',
-          url:'https://trt-guy.com/onboarding-v2/' },
-        { kind:'thanks', key:'trtguy-onboarding-v2-thanks', tags:[], name:'Thank You Page',
+        { kind:'gate', key:'trtguy-onboarding', tags:["trt-guy", "client-onboarded", "assessment-v2"], name:'Onboarding Questionnaire',
+          description:'Goals, nutrition, PEDs/health, training, lifestyle, plus photo and bloodwork uploads. Sends every answer to the contact note, your email and #onboarding-forms.',
+          url:'https://trt-guy.com/onboarding/' },
+        { kind:'thanks', key:'trtguy-onboarding-thanks', tags:[], name:'Thank You Page',
           description:'Where clients land the moment they submit the questionnaire.',
-          url:'https://trt-guy.com/onboarding-v2/thanks/' }
+          url:'https://trt-guy.com/onboarding/thanks/' }
       ]
     },
     {

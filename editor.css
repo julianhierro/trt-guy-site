@@ -451,3 +451,18 @@ body.jv-editing .jv-col:hover{outline-color:rgba(26,92,255,.75)}
 .jv-actions .jv-act:hover { background: #1a5cff; }
 .jv-actions .jv-act-now { padding: 8px; font-size: 11.5px; color: #8a8f98;
   border-top: 1px solid #3a3a3a; margin-top: 4px; word-break: break-all; }
+
+/* Per-item Remove button — opt-in via data-jv-removable (used by the onboarding form). */
+[data-jv-removable] { position: relative; }
+.jv-item-tools {
+  position: absolute; top: 2px; right: 0; z-index: 6;
+  opacity: 0; transition: opacity .12s; pointer-events: none;
+}
+[data-jv-removable]:hover > .jv-item-tools,
+[data-jv-removable].jv-active > .jv-item-tools { opacity: 1; pointer-events: auto; }
+.jv-item-tools .jv-item-btn {
+  font: 600 11px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 5px 8px; border: 0; border-radius: 6px; cursor: pointer;
+  background: rgba(17,17,17,.72); color: #fff;
+}
+.jv-item-tools .jv-item-btn:hover { background: #e53935; }

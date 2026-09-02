@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRT Guy — Thank You</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --acc:#1a5cff; --bg:#f4f6fa; --card:#fff; --txt:#0b0d10; --mut:#5b6572;
+    --line:rgba(11,13,16,.10); --ok:#12994a;
+    --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.6;padding:0 18px 80px;display:flex;min-height:100vh;align-items:center;justify-content:center}
+  .wrap{max-width:600px;width:100%;text-align:center}
+  .wordmark{display:inline-block;height:clamp(46px,11vw,60px);aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;margin:0 0 26px;font-size:0;color:transparent;overflow:hidden}
+  .tick{width:66px;height:66px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 20px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(38px,10vw,54px);line-height:1;text-transform:uppercase;letter-spacing:.01em;margin-bottom:14px}
+  .lead{color:var(--mut);font-size:17px;max-width:480px;margin:0 auto 14px}
+  .lead:last-of-type{margin-bottom:26px}
+  .footer{color:var(--mut);font-size:12px;margin-top:26px}
+</style>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="stylesheet" href="/editor.css?v=2">
+<style>html.jv-pending body{visibility:hidden}</style>
+<script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark" data-noedit>TRT Guy</div>
+  <div class="tick" data-noedit>✓</div>
+  <h1 data-eid="e10">Information received</h1>
+  <p class="lead" data-eid="e11">Please allow three business days for us to build your plans and we'll deliver everything for you.</p>
+  <p class="lead" data-eid="e12">We'll reach out over WhatsApp with your next steps.</p>
+
+  <div class="footer" data-eid="e30">© TRT Guy · Everything you sent is private and goes only to your coach.</div>
+</div>
+
+<script>window.JV_EDITOR={ site:"td-assessment-thanks", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
+  var n=10000;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
+  var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var c=el.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(c.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
+  (function walk(el){ var c=el.children; for(var i=0;i<c.length;i++){ var ch=c[i]; if(skip(ch))continue; if(isTextLeaf(ch)) ch.setAttribute("data-etext","1"); else walk(ch); } })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+})();
+</script>
+<script src="/editor.js?v=3"></script>
+</body>
+</html>

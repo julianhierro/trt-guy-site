@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRT Guy — Client Onboarding</title>
+<title>TRT Guy — Client Onboarding Questionnaire</title>
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,56 +13,57 @@
     --acc:#1a5cff; --acc-d:#0f3fd6;
     --bg:#f4f6fa; --card:#ffffff; --txt:#0b0d10; --mut:#5b6572;
     --line:rgba(11,13,16,.10); --line2:rgba(11,13,16,.16);
-    --ok:#12994a; --warn:#e2483a;
+    --ok:#12994a; --warn:#e2483a; --ph:#9aa4b2;
     --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;
     --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 16px 120px}
-  .wrap{max-width:680px;margin:0 auto}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 16px 130px}
+  .wrap{max-width:720px;margin:0 auto}
 
-  header.top{text-align:center;padding:40px 0 8px}
-  .wordmark{font-family:var(--display);font-weight:700;font-size:clamp(34px,9vw,52px);line-height:.9;letter-spacing:.04em;color:var(--txt);text-transform:uppercase;display:inline-block;margin-bottom:14px}
-  .kicker{font-family:var(--body);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
-  h1{font-family:var(--display);font-weight:700;font-size:44px;line-height:1;letter-spacing:.01em;text-transform:uppercase;margin:10px 0 8px}
-  .lead{color:var(--mut);font-size:16px;max-width:520px;margin:0 auto}
+  header.top{text-align:center;padding:34px 0 6px}
+  .wordmark{display:inline-block;height:clamp(44px,10vw,58px);aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;margin:0 0 18px;font-size:0;color:transparent;overflow:hidden}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,8vw,46px);line-height:1;letter-spacing:.01em;text-transform:uppercase;margin:10px 0 10px}
+  .lead{color:var(--mut);font-size:16px;max-width:560px;margin:0 auto}
   .greet{margin-top:14px;font-weight:600}
 
-  .progress{position:sticky;top:0;z-index:20;background:var(--bg);padding:14px 0 10px;margin-top:6px}
+  .progress{position:sticky;top:0;z-index:20;background:var(--bg);padding:14px 0 10px;margin-top:8px}
   .bar{height:6px;background:#e4e8ef;border-radius:999px;overflow:hidden}
   .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),#4d84ff);transition:width .3s}
   .bar-label{font-size:12px;color:var(--mut);margin-top:6px;font-weight:600}
 
-  section.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 20px;margin:16px 0;box-shadow:0 1px 2px rgba(11,13,16,.04)}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;margin:16px 0;box-shadow:0 1px 2px rgba(11,13,16,.04)}
   .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
   .sec-num{font-family:var(--display);font-weight:700;font-size:15px;color:#fff;background:var(--acc);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-  .sec-title{font-family:var(--display);font-weight:700;font-size:24px;text-transform:uppercase;letter-spacing:.02em}
-  .sec-sub{color:var(--mut);font-size:14px;margin:0 0 16px 42px}
+  .sec-title{font-family:var(--display);font-weight:700;font-size:25px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+  .sec-sub{color:var(--mut);font-size:14px;margin:0 0 20px 42px}
+  @media (max-width:520px){.sec-sub{margin-left:0}}
 
-  .field{margin-bottom:16px}
-  .field.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media (max-width:480px){.field.row{grid-template-columns:1fr}}
-  label{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+  .field{margin-bottom:20px}
+  label{display:block;font-weight:600;font-size:14.5px;margin-bottom:7px}
   label .req{color:var(--acc)}
-  .hint{font-weight:400;color:var(--mut);font-size:12.5px;margin-top:-2px;margin-bottom:6px}
-  input[type=text],input[type=email],input[type=tel],input[type=number],select,textarea{
+  .ibox{position:relative}
+  .ctl{display:block}
+  input[type=text],input[type=email],input[type=tel],textarea{
     width:100%;padding:12px 14px;border:1px solid var(--line2);border-radius:10px;background:#fff;color:var(--txt);
-    font-family:var(--body);font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s;
+    font-family:var(--body);font-size:15px;line-height:1.5;outline:none;transition:border-color .15s,box-shadow .15s;position:relative;z-index:1;background:transparent;
   }
-  input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
-  textarea{min-height:88px;resize:vertical}
-  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235b6572' d='M6 8 0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+  input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
+  textarea{min-height:52px;resize:vertical;display:block}
+
+  /* Editable "e.g." example text, shown as a hint line under each answer box. */
+  .ph{display:block;margin-top:6px;color:var(--ph);font-size:13px;line-height:1.45}
 
   /* radio cards */
-  .choices{display:flex;flex-direction:column;gap:10px}
-  .choice{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line2);border-radius:11px;padding:14px;cursor:pointer;transition:all .15s}
+  .choices{display:flex;flex-direction:column;gap:9px}
+  .choice{display:flex;gap:11px;align-items:center;border:1px solid var(--line2);border-radius:11px;padding:13px 14px;cursor:pointer;transition:all .15s;font-weight:500;margin-bottom:0}
   .choice:hover{border-color:var(--acc)}
-  .choice input{margin-top:3px;accent-color:var(--acc);width:18px;height:18px;flex:0 0 auto}
+  .choice input{accent-color:var(--acc);width:18px;height:18px;flex:0 0 auto}
   .choice.sel{border-color:var(--acc);background:rgba(26,92,255,.05)}
-  .choice b{display:block;font-size:15px}
-  .choice span{color:var(--mut);font-size:13px}
+  .choice b{font-weight:500;font-size:14.5px}
 
-  /* risk slider */
+  /* slider */
   .slider-wrap{padding:4px 2px}
   input[type=range]{width:100%;accent-color:var(--acc);height:28px}
   .slider-val{font-family:var(--display);font-weight:700;font-size:32px;color:var(--acc);text-align:center;line-height:1}
@@ -69,50 +71,52 @@
   .slider-ends span{max-width:46%}
   .slider-ends span:last-child{text-align:right}
 
-  /* file upload */
-  .drop{border:1.5px dashed var(--line2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:#fbfcfe}
+  /* muscle-group grid */
+  .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:560px){.ggrid{grid-template-columns:1fr}}
+  .grow .glab{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:5px}
+  .ggrid .ph{font-size:12.5px}
+
+  /* uploads */
+  .drop{display:block;border:1.5px dashed var(--line2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:#fbfcfe;font-weight:400}
   .drop:hover{border-color:var(--acc);background:rgba(26,92,255,.04)}
   .drop input{display:none}
-  .drop .ic{font-size:26px}
+  .drop .ic{font-size:24px;color:var(--acc)}
   .drop .t{font-weight:600;margin-top:6px}
   .drop .s{color:var(--mut);font-size:13px;margin-top:2px}
   .photo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
   @media (max-width:520px){.photo-grid{grid-template-columns:1fr}}
-  .drop.pose{padding:18px 10px}
-  .drop.pose .t{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.05em;margin-top:6px}
-  .drop.pose.filled{border-style:solid;border-color:var(--acc);background:rgba(26,92,255,.06)}
-  .drop.pose.filled .ic::after{content:" ✓";color:var(--ok)}
+  .drop.pose{padding:20px 10px}
+  .drop.pose .t{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.05em;margin-top:6px;text-transform:uppercase}
+  .drop.filled{border-style:solid;border-color:var(--acc);background:rgba(26,92,255,.06)}
   .filelist{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-  .fileitem{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt);background:#eef2f8;border-radius:8px;padding:8px 10px}
+  .fileitem{display:flex;align-items:center;gap:8px;font-size:13px;background:#eef2f8;border-radius:8px;padding:8px 10px}
   .fileitem b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .fileitem .sz{color:var(--mut);margin-left:auto;flex:0 0 auto}
 
-  .submit-wrap{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(244,246,250,0),var(--bg) 26%);padding:18px 0 10px;margin-top:8px}
-  .btn{width:100%;background:var(--acc);color:#fff;border:none;border-radius:12px;padding:17px;font-family:var(--display);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;transition:background .15s,transform .1s}
-  .btn:hover{background:var(--acc-d);transform:translateY(-1px)}
-  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-  .btn.secondary{background:#fff;color:var(--acc);border:1.5px solid var(--acc);margin-top:10px;font-size:16px;padding:13px}
-  .btn.secondary:hover{background:rgba(26,92,255,.06)}
-  .saved-note{text-align:center;font-size:13px;color:var(--ok);font-weight:600;min-height:16px;margin-top:6px}
-  .formerr{color:var(--warn);font-size:13.5px;text-align:center;margin-top:10px;font-weight:600;min-height:18px}
+  .guide{background:#f7f9fc;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .guide-t{font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+  .guide ul{margin:0 0 14px 18px}
+  .guide li{font-size:14px;color:var(--mut);margin-bottom:4px}
+  .guide ul:last-child{margin-bottom:0}
 
-  /* units toggle */
-  .unit-toggle{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:#f1f4f9}
-  .unit-btn{background:transparent;border:none;padding:9px 16px;font-family:var(--body);font-weight:600;font-size:13.5px;color:var(--mut);cursor:pointer;transition:all .15s}
-  .unit-btn.active{background:var(--acc);color:#fff}
+  .submit-wrap{padding:8px 0 18px}
+  .btn{width:100%;padding:17px;background:var(--acc);color:#fff;border:none;border-radius:12px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+  .btn:hover{background:var(--acc-d)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line2);font-family:var(--body);font-size:14px;text-transform:none;letter-spacing:0;padding:12px;margin-top:9px}
+  .btn.ghost:hover{background:#eef2f8;color:var(--txt)}
+  .formerr{color:var(--warn);font-size:14px;font-weight:600;text-align:center;margin-top:10px;min-height:20px}
+  .saved{color:var(--ok);font-size:13px;font-weight:600;text-align:center;margin-top:8px;min-height:18px}
+  .footer{text-align:center;color:var(--mut);font-size:12px;margin-top:26px}
 
-  /* done */
-  #done{display:none;text-align:center;padding:60px 20px}
-  #done.show{display:block}
-  #done .big{font-family:var(--display);font-weight:700;font-size:46px;text-transform:uppercase;color:var(--ok);margin-bottom:10px}
-  #done p{color:var(--mut);font-size:16px;max-width:440px;margin:0 auto}
-  .footer{text-align:center;color:var(--mut);font-size:12px;margin-top:30px}
-  /* Edit mode only: push section content below the editor's floating section toolbar so it doesn't cover the title. */
+  /* Edit mode: reveal the "e.g." text as a normal editable line so it can be clicked. */
   body.jv-editing .card{padding-top:56px}
+  body.jv-editing .ph{font-style:italic}
 </style>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icon-180.png">
-<link rel="stylesheet" href="/editor.css?v=1">
+<link rel="stylesheet" href="/editor.css?v=2">
 <style>html.jv-pending body{visibility:hidden}</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 </head>
@@ -120,463 +124,273 @@
 <div class="wrap">
 
   <header class="top">
-    <div class="wordmark">TRT-GUY</div>
-    <div class="kicker">Client Onboarding</div>
-    <h1>Let's Build Your Plan</h1>
-    <p class="lead">You're in. This is everything your coach needs to build your protocol and training around you. Takes about 8 minutes — be honest, it's between you and your coach.</p>
-    <p class="greet" id="greet"></p>
+    <div class="wordmark" data-noedit>TRT Guy</div>
+    <div class="kicker" data-eid="e11">onboarding form</div>
+    <h1 data-eid="e12">Let's Build Your Plan</h1>
+    <p class="lead" data-eid="e13">Please, fill in with as much detail as you can</p>
+    <p class="greet" id="greet" data-noedit></p>
   </header>
 
   <form id="form" novalidate>
-    <div class="progress">
+    <div class="progress" data-noedit>
       <div class="bar"><i id="bar"></i></div>
       <div class="bar-label" id="barLabel">0% complete</div>
     </div>
+    <input type="hidden" name="firstName" id="firstName">
+<section class="card"><div class="sec-head"><div class="sec-num" data-noedit>1</div><div class="sec-title" data-eid="e2100">Your Details</div></div><div class="field" data-jv-removable data-q="name" data-eid="e3030"><label data-eid="e3031" for="f_name">Name <span class="req" data-eid="e3032">*</span></label><div class="ibox"><div class="ctl"><input id="f_name" name="name" type="text" autocomplete="name" required data-noedit></div><span class="ph" data-eid="e3033">e.g. Mike Sanders</span></div></div><div class="field" data-jv-removable data-q="email" data-eid="e3060"><label data-eid="e3061" for="f_email">Email <span class="req" data-eid="e3062">*</span></label><div class="ibox"><div class="ctl"><input id="f_email" name="email" type="email" autocomplete="email" required data-noedit></div><span class="ph" data-eid="e3063">e.g. mike@gmail.com</span></div></div><div class="field" data-jv-removable data-q="phone" data-eid="e3090"><label data-eid="e3091" for="f_phone">Phone <span class="req" data-eid="e3092">*</span></label><div class="ibox"><div class="ctl"><input id="f_phone" name="phone" type="tel" autocomplete="tel" required data-noedit></div><span class="ph" data-eid="e3093">e.g. (305) 555-0142</span></div></div><div class="field" data-jv-removable data-q="height" data-eid="e3120"><label data-eid="e3121" for="f_height">Height</label><div class="ibox"><div class="ctl"><input id="f_height" name="height" type="text" data-noedit></div><span class="ph" data-eid="e3123">e.g. 5&#x27;11&quot; / 180 cm</span></div></div><div class="field" data-jv-removable data-q="weight" data-eid="e3150"><label data-eid="e3151" for="f_weight">Weight</label><div class="ibox"><div class="ctl"><input id="f_weight" name="weight" type="text" data-noedit></div><span class="ph" data-eid="e3153">e.g. 205 lb / 93 kg</span></div></div><div class="field" data-jv-removable data-q="age" data-eid="e3180"><label data-eid="e3181" for="f_age">Age</label><div class="ibox"><div class="ctl"><input id="f_age" name="age" type="text" data-noedit></div><span class="ph" data-eid="e3183">e.g. 34</span></div></div></section><section class="card"><div class="sec-head"><div class="sec-num" data-noedit>2</div><div class="sec-title" data-eid="e2900">Your Goals</div></div><div class="field" data-jv-removable data-q="short_term_goals" data-eid="e7000"><label data-eid="e7001" for="f_short_term_goals">Short-term goals (3&ndash;6 months)</label><div class="ibox"><div class="ctl"><textarea id="f_short_term_goals" name="short_term_goals" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e7003">e.g. Drop to 12% body fat, get my blood pressure down, and hit 315 on bench for reps.</span></div></div><div class="field" data-jv-removable data-q="long_term_goals" data-eid="e7010"><label data-eid="e7011" for="f_long_term_goals">Long-term goals (6&ndash;12 months)</label><div class="ibox"><div class="ctl"><textarea id="f_long_term_goals" name="long_term_goals" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e7013">e.g. Hold 200 lb lean year-round, bloodwork clean on my protocol, and step on stage next spring.</span></div></div></section>
 
-    <!-- 1. Contact Details -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">1</div><div class="sec-title">Contact Details</div></div>
-      <p class="sec-sub">Make sure we can reach you.</p>
-      <input type="hidden" name="firstName" id="firstName">
-      <div class="field"><label>Full name <span class="req">*</span></label><input type="text" name="onboarding_full_name" id="fullName" autocomplete="name" required></div>
-      <div class="field row">
-        <div><label>Email <span class="req">*</span></label><input type="email" name="email" id="email" required></div>
-        <div><label>Phone <span class="req">*</span></label><input type="tel" name="phone" required></div>
-      </div>
-      <div class="field row">
-        <div><label>Age <span class="req">*</span></label><input type="number" name="onboarding_age" min="18" max="99" required></div>
-        <div><label>City / timezone</label><input type="text" name="onboarding_location_timezone" placeholder="e.g. Austin, CST"></div>
-      </div>
-      <div class="field"><label>Instagram handle</label><input type="text" name="onboarding_instagram" placeholder="@yourhandle" autocomplete="off"></div>
-      <div class="field"><label>Best way to reach you</label>
-        <select name="onboarding_best_contact_method"><option value="">Select…</option><option>Text</option><option>Email</option><option>WhatsApp</option><option>Phone call</option></select>
-      </div>
-    </section>
 
-    <!-- 2. Body Stats -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">2</div><div class="sec-title">Body Stats</div></div>
-      <p class="sec-sub">Your starting point. Photos stay private — only your coach sees them.</p>
-      <input type="hidden" name="units" id="unitsField" value="imperial">
-      <div class="field">
-        <div class="unit-toggle" role="group" aria-label="Units">
-          <button type="button" class="unit-btn active" data-unit="imperial">Imperial (ft / lb)</button>
-          <button type="button" class="unit-btn" data-unit="metric">Metric (cm / kg)</button>
-        </div>
-      </div>
-      <div class="field row">
-        <div><label>Height <span class="req">*</span></label><input type="text" name="onboarding_height" id="fHeight" placeholder="e.g. 5'11&quot;" required></div>
-        <div><label>Current weight <span class="req">*</span></label><input type="text" name="onboarding_current_weight" id="fCurWeight" placeholder="e.g. 205 lb" required></div>
-      </div>
-      <div class="field">
-        <label>Progress photos <span class="req">*</span></label>
-        <div class="hint">One full-body shot of each angle — front, side, and back. Shorts/boxers (or top + shorts), no nudes. Good lighting, plain background.</div>
-        <div class="photo-grid">
-          <div>
-            <label class="drop pose" id="frontDrop">
-              <input type="file" name="photo_front" id="photo_front" accept="image/*">
-              <div class="ic">📷</div>
-              <div class="t">FRONT</div>
-              <div class="s">Relaxed, facing the camera</div>
-            </label>
-            <div class="filelist" id="frontList"></div>
-          </div>
-          <div>
-            <label class="drop pose" id="sideDrop">
-              <input type="file" name="photo_side" id="photo_side" accept="image/*">
-              <div class="ic">📷</div>
-              <div class="t">SIDE</div>
-              <div class="s">Turned sideways</div>
-            </label>
-            <div class="filelist" id="sideList"></div>
-          </div>
-          <div>
-            <label class="drop pose" id="backDrop">
-              <input type="file" name="photo_back" id="photo_back" accept="image/*">
-              <div class="ic">📷</div>
-              <div class="t">BACK</div>
-              <div class="s">Facing away</div>
-            </label>
-            <div class="filelist" id="backList"></div>
-          </div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Can we share your progress photos on social media? <span class="req">*</span></label>
-        <div class="hint">Optional — real transformations inspire other guys. Your call, either way.</div>
-        <div class="choices" data-choicegroup>
-          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="Yes, you can share my photos" required><span><b>Yes, you can share them</b></span></label>
-          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="Yes, but blur my face"><span><b>Yes, but blur my face</b></span></label>
-          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="No, keep them private"><span><b>No — keep them private</b></span></label>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. Your Goals -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">3</div><div class="sec-title">Your Goals</div></div>
-      <p class="sec-sub">What are we actually here to do.</p>
-      <div class="field"><label>Primary goal <span class="req">*</span></label><textarea name="onboarding_primary_goal" placeholder="Lose fat, build muscle, feel like yourself again..." required></textarea></div>
-      <div class="field row">
-        <div><label>Short-term goal <span class="hint" style="display:inline">(1–3 months)</span></label><textarea name="onboarding_short_term_goals" placeholder="What do you want to hit first?"></textarea></div>
-        <div><label>Long-term goal <span class="hint" style="display:inline">(6–12+ months)</span></label><textarea name="onboarding_long_term_goals" placeholder="Where do you want to be a year from now?"></textarea></div>
-      </div>
-      <div class="field"><label>Target timeline</label><input type="text" name="onboarding_target_timeline" placeholder="e.g. 90 days, by summer, no rush"></div>
-    </section>
-
-    <!-- 4. Background -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">4</div><div class="sec-title">Background</div></div>
-      <p class="sec-sub">Where you're coming from.</p>
-      <div class="field"><label>What have you tried before?</label><div class="hint">Diets, programs, coaches — what worked, and what didn't.</div><textarea name="onboarding_past_attempts" placeholder="e.g. Keto dropped weight fast but I rebounded; ran a bro-split for a year with no real change"></textarea></div>
-      <div class="field"><label>Why now? What changed?</label><textarea name="onboarding_why_now" placeholder="What made you finally pull the trigger on this?"></textarea></div>
-    </section>
-
-    <!-- 5. Training -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">5</div><div class="sec-title">Training</div></div>
-      <p class="sec-sub">How you move now.</p>
-      <div class="field"><label>Experience level <span class="req">*</span></label>
-        <select name="onboarding_training_experience" required>
-          <option value="">Select…</option>
-          <option>Beginner (under 1 year)</option>
-          <option>Intermediate (1–3 years)</option>
-          <option>Advanced (3+ years)</option>
-          <option>Returning after a long break</option>
-        </select>
-      </div>
-      <div class="field"><label>Current routine</label><textarea name="onboarding_current_routine" placeholder="What does your training look like right now?"></textarea></div>
-      <div class="field"><label>Any movements or exercises you'd rather not do?</label><div class="hint">List anything you want to avoid — and if so, why (injury, discomfort, preference).</div><textarea name="onboarding_avoid_exercises" placeholder="e.g. No back squats — old knee injury"></textarea></div>
-      <div class="field"><label>Injuries or physical limitations</label><textarea name="onboarding_injuries_limitations" placeholder="Bad shoulder, low back, knees..."></textarea></div>
-      <div class="field row">
-        <div><label>Days per week available <span class="req">*</span></label>
-          <select name="onboarding_days_per_week" required>
-            <option value="">Select…</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
-          </select>
-        </div>
-        <div><label>Gym or home?</label><input type="text" name="onboarding_gym_equipment" placeholder="Full gym / home setup + equipment"></div>
-      </div>
-    </section>
-
-    <!-- 6. Nutrition -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">6</div><div class="sec-title">Nutrition</div></div>
-      <p class="sec-sub">How you eat now — no judgment.</p>
-      <div class="field"><label>Do you know how to track macros? <span class="req">*</span></label>
-        <select name="onboarding_tracks_macros" id="tracksMacros" required>
-          <option value="">Select…</option>
-          <option>Yes, I track macros</option>
-          <option>Somewhat / used to</option>
-          <option>No, I don't</option>
-        </select>
-      </div>
-      <div class="field" id="caloriesField" style="display:none"><label>Roughly how many calories a day are you eating now?</label><input type="text" name="onboarding_current_calories" placeholder="e.g. 2,400 kcal"></div>
-      <div class="field"><label>Typical day of eating</label><textarea name="onboarding_typical_day_of_eating" placeholder="Walk me through what you ate yesterday"></textarea></div>
-      <div class="field"><label>Restrictions / dislikes</label><textarea name="onboarding_dietary_restrictions" placeholder="Foods you won't eat, allergies, vegetarian, etc."></textarea></div>
-    </section>
-
-    <!-- 7. Lifestyle -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">7</div><div class="sec-title">Lifestyle</div></div>
-      <p class="sec-sub">Recovery is where results happen.</p>
-      <div class="field row">
-        <div><label>Average sleep / night</label><input type="text" name="onboarding_avg_sleep" placeholder="e.g. 6.5 hrs"></div>
-        <div><label>Stress level</label>
-          <select name="onboarding_stress_level"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Through the roof</option></select>
-        </div>
-      </div>
-      <div class="field"><label>Job / daily activity</label><input type="text" name="onboarding_job_activity" placeholder="Desk job, on my feet all day, shift work..."></div>
-      <div class="field"><label>Alcohol per week</label><input type="text" name="onboarding_alcohol_per_week" placeholder="e.g. 2–3 drinks, none"></div>
-    </section>
-
-    <!-- 8. PED / Health -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">8</div><div class="sec-title">PED / Health</div></div>
-      <p class="sec-sub">Where you're at with hormones, and anything that keeps you safe. Leave blank if none.</p>
-      <div class="field"><label>Are you currently on TRT or AAS (anabolic-androgenic steroids)? <span class="req">*</span></label>
-        <select name="onboarding_on_trt_now" required>
-          <option value="">Select…</option>
-          <option>Yes — using anabolic steroids</option>
-          <option>Yes — currently on TRT</option>
-          <option>No — not yet, want to start</option>
-          <option>No — just exploring</option>
-          <option>No — I'm not interested in using TRT or PEDs</option>
-        </select>
-      </div>
-      <div class="field"><label>Current dose &amp; protocol</label><div class="hint">What TRT or PEDs, how much, and how often?</div><textarea name="onboarding_trt_protocol_dose" placeholder="e.g. 120mg test cypionate/week, split E3.5D + 0.25mg anastrozole; or your full cycle"></textarea></div>
-      <div class="field row">
-        <div><label>How long have you been using TRT / PEDs?</label><input type="text" name="onboarding_trt_duration" placeholder="e.g. 8 months"></div>
-        <div><label>Clinic / prescriber / coach</label><input type="text" name="onboarding_trt_prescriber" placeholder="Clinic, prescriber, coach — or self-directed"></div>
-      </div>
-      <div class="field"><label>What are you looking to do? <span class="req">*</span></label>
-        <div class="choices" id="enhChoices">
-          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Optimize while staying natural" required><span><b>Optimize while staying natural</b><span>No TRT, no PEDs — get the most out of my body naturally.</span></span></label>
-          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Optimize with TRT only"><span><b>Optimize with TRT only</b><span>Dial in my hormones and train hard. Nothing beyond TRT.</span></span></label>
-          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Open to additional enhancement beyond TRT"><span><b>Open to additional enhancement</b><span>I'm open to going beyond TRT to reach my goals.</span></span></label>
-        </div>
-      </div>
-      <div class="field"><label>Risk tolerance <span class="req">*</span></label>
-        <div class="hint">Be honest — this tells your coach how aggressive to get.</div>
-        <div class="slider-wrap">
-          <div class="slider-val" id="riskVal">5</div>
-          <input type="range" name="onboarding_risk_tolerance_1_to_10" id="risk" min="1" max="10" value="5">
-          <div class="slider-ends"><span>1 — My health is #1, I won't risk it</span><span>10 — I'll do anything to hit my goals</span></div>
-        </div>
-      </div>
-      <div class="field"><label>Medical conditions</label><textarea name="onboarding_medical_conditions" placeholder="Blood pressure, heart, liver, kidney, diabetes, mental health..."></textarea></div>
-      <div class="field"><label>Medications &amp; supplements</label><textarea name="onboarding_medications_supplements" placeholder="Everything you take regularly"></textarea></div>
-      <div class="field"><label>Allergies</label><input type="text" name="onboarding_allergies" placeholder="Food, medication, or none"></div>
-      <div class="field">
-        <label>Latest bloodwork</label>
-        <div class="hint">Upload your most recent labs — PDF or a photo of the report. Add as many as you have; you can attach more than one.</div>
-        <label class="drop" id="bloodDrop">
-          <input type="file" id="bloodwork" name="bloodwork" accept="image/*,application/pdf" multiple>
-          <div class="ic">🩸</div>
-          <div class="t">Tap to add bloodwork</div>
-          <div class="s">PDF or image — one or several</div>
-        </label>
-        <div class="filelist" id="bloodList"></div>
-        <label style="margin-top:14px">Or paste a bloodwork link <span style="font-weight:400;opacity:.6">(optional)</span></label>
-        <div class="hint">If your labs live online — a Google Sheet, Excel, or a link to a PDF — drop the link here instead of, or as well as, uploading.</div>
-        <input type="url" name="onboarding_bloodwork_link" placeholder="https://…" inputmode="url" autocomplete="off">
-      </div>
-    </section>
-
-    <!-- 9. Anything Else -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">9</div><div class="sec-title">Anything Else</div></div>
-      <div class="field"><label>Anything your coach should know?</label><textarea name="onboarding_anything_else" placeholder="Anything we didn't ask that matters"></textarea></div>
-    </section>
-
-    <div class="submit-wrap">
-      <button class="btn" id="submitBtn" type="submit">Submit &amp; start my plan →</button>
-      <button class="btn secondary" id="saveBtn" type="button">Save progress &amp; finish later</button>
-      <div class="saved-note" id="savedNote"></div>
+<section class="card"><div class="sec-head"><div class="sec-num" data-noedit>4</div><div class="sec-title" data-eid="e2400">Nutrition Assessment</div></div><div class="field" data-jv-removable data-q="macros_now" data-eid="e3570"><label data-eid="e3571" for="f_macros_now">If you know your current macronutrient intake breakdown please provide the amounts of fats/carbs/protein.</label><div class="ibox"><div class="ctl"><textarea id="f_macros_now" name="macros_now" rows="2" data-noedit></textarea></div><span class="ph" data-eid="e3573">e.g. 2,700 cal — 210 g protein / 280 g carbs / 70 g fat</span></div></div><div class="field" data-jv-removable data-q="intake_length" data-eid="e3600"><label data-eid="e3601" for="f_intake_length">How long have you been on your current intake?</label><div class="ibox"><div class="ctl"><input id="f_intake_length" name="intake_length" type="text" data-noedit></div></div></div><div class="field" data-jv-removable data-q="intake_result" data-eid="e3630"><label data-eid="e3631" for="f_intake_result">How has your weight loss (or gaining, maintenance of weight) and gym performance been at this intake? What has been the rate of weight loss or gain?</label><div class="ibox"><div class="ctl"><textarea id="f_intake_result" name="intake_result" rows="4" data-noedit></textarea></div></div></div><div class="field" data-jv-removable data-q="cheat_meals" data-eid="e3660"><label data-eid="e3661" for="f_cheat_meals">How many untracked or free/cheat meals are you having per week and how do you manage these meals?</label><div class="ibox"><div class="ctl"><textarea id="f_cheat_meals" name="cheat_meals" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e3663">e.g. Two — Friday dinner out and Sunday lunch. I keep protein high earlier in the day and don&#x27;t track those meals.</span></div></div><div class="field" data-jv-removable data-q="limitations" data-eid="e3690"><label data-eid="e3691" for="f_limitations">Are there any limitations to your eating or training due to work and/or school?</label><div class="ibox"><div class="ctl"><textarea id="f_limitations" name="limitations" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e3693">e.g. I&#x27;m on the road Tue–Thu so most lunches are eaten out, and I can only train early morning those days.</span></div></div><div class="field" data-jv-removable data-q="bulk_cook" data-eid="e3750"><label data-eid="e3751" for="f_bulk_cook">Do you cook most of your meals in bulk?</label><div class="choices" data-noedit><label class="choice"><input type="radio" name="bulk_cook" value="Yes — I meal prep" data-noedit><b data-eid="e3754">Yes — I meal prep</b></label><label class="choice"><input type="radio" name="bulk_cook" value="No — I cook meal to meal" data-noedit><b data-eid="e3755">No — I cook meal to meal</b></label><label class="choice"><input type="radio" name="bulk_cook" value="Some of both" data-noedit><b data-eid="e3756">Some of both</b></label></div></div><div class="field" data-jv-removable data-q="home_or_away" data-eid="e3780"><label data-eid="e3781" for="f_home_or_away">Do you eat most meals away from home or prepare at home?</label><div class="choices" data-noedit><label class="choice"><input type="radio" name="home_or_away" value="Mostly prepared at home" data-noedit><b data-eid="e3784">Mostly prepared at home</b></label><label class="choice"><input type="radio" name="home_or_away" value="Mostly away from home" data-noedit><b data-eid="e3785">Mostly away from home</b></label><label class="choice"><input type="radio" name="home_or_away" value="About 50/50" data-noedit><b data-eid="e3786">About 50/50</b></label></div></div><div class="field" data-jv-removable data-q="hunger" data-eid="e3810"><label data-eid="e3811" for="f_hunger">Are you hungry on your current diet (scale 1-10)?</label><div class="slider-wrap"><div class="slider-val" id="v_hunger" data-noedit>5</div><input type="range" min="1" max="10" step="1" value="5" name="hunger" id="f_hunger" data-noedit><div class="slider-ends"><span data-eid="e3814">1 — never hungry</span><span data-eid="e3815">10 — always starving</span></div></div></div><div class="field" data-jv-removable data-q="plan_type" data-eid="e3840"><label data-eid="e3841" for="f_plan_type">Do you want a Meal plan with specific foods to eat or do you want a macro plan with flexibility for you to choose the foods?</label><div class="choices" data-noedit><label class="choice"><input type="radio" name="plan_type" value="Meal plan — tell me exactly what to eat" data-noedit><b data-eid="e3844">Meal plan — tell me exactly what to eat</b></label><label class="choice"><input type="radio" name="plan_type" value="Macro plan — give me targets and let me choose" data-noedit><b data-eid="e3845">Macro plan — give me targets and let me choose</b></label><label class="choice"><input type="radio" name="plan_type" value="Not sure — you pick what fits me best" data-noedit><b data-eid="e3846">Not sure — you pick what fits me best</b></label></div></div><div class="field" data-jv-removable data-q="macro_app" data-eid="e3870"><label data-eid="e3871" for="f_macro_app">If you track macros, what app do you use and how long have you been tracking?</label><div class="ibox"><div class="ctl"><textarea id="f_macro_app" name="macro_app" rows="2" data-noedit></textarea></div><span class="ph" data-eid="e3873">e.g. MacroFactor for about 2 years, MyFitnessPal before that</span></div></div><div class="field" data-jv-removable data-q="foods_love" data-eid="e3900"><label data-eid="e3901" for="f_foods_love">List any foods or meals you really enjoy (favorite foods) in your current diet or anytime.</label><div class="ibox"><div class="ctl"><textarea id="f_foods_love" name="foods_love" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e3903">e.g. Steak and white rice, Greek yogurt with honey, chicken burritos, cereal at night</span></div></div><div class="field" data-jv-removable data-q="foods_hate" data-eid="e3930"><label data-eid="e3931" for="f_foods_hate">Also, list any foods you do not like:</label><div class="ibox"><div class="ctl"><textarea id="f_foods_hate" name="foods_hate" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e3933">e.g. Tilapia, cottage cheese, most vegetables except broccoli</span></div></div><div class="field" data-jv-removable data-q="digestion" data-eid="e3960"><label data-eid="e3961" for="f_digestion">Do you have good digestion, with no bloating, acid reflux, indigestion, constipation, diarrhea? How many bowel movements per day?</label><div class="ibox"><div class="ctl"><textarea id="f_digestion" name="digestion" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e3963">e.g. Digestion is fine, some bloating late in the day. One bowel movement most mornings.</span></div></div><div class="field" data-jv-removable data-q="periworkout" data-eid="e3990"><label data-eid="e3991" for="f_periworkout">What is your current pre and post workout nutrition?</label><div class="ibox"><div class="ctl"><textarea id="f_periworkout" name="periworkout" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e3993">e.g. Pre: 60 g cream of rice + 40 g whey. Post: 50 g dextrose shake then a real meal an hour later.</span></div></div><div class="field" data-jv-removable data-q="food_allergy" data-eid="e4020"><label data-eid="e4021" for="f_food_allergy">Any food allergies/sensitivities I should know about?</label><div class="ibox"><div class="ctl"><textarea id="f_food_allergy" name="food_allergy" rows="2" data-noedit></textarea></div><span class="ph" data-eid="e4023">e.g. Lactose gives me trouble, no true allergies</span></div></div></section>
+<section class="card"><div class="sec-head"><div class="sec-num" data-noedit>5</div><div class="sec-title" data-eid="e2500">PED / Health Assessment</div></div><div class="field" data-jv-removable data-q="meds" data-eid="e4050"><label data-eid="e4051" for="f_meds">What doctor prescribed medications are you currently taking, dosage, and when?</label><div class="ibox"><div class="ctl"><textarea id="f_meds" name="meds" rows="3" data-noedit></textarea></div></div></div><div class="field" data-jv-removable data-q="supps" data-eid="e4080"><label data-eid="e4081" for="f_supps">What dietary health or performance supplements are you taking, dosage, and when?</label><div class="ibox"><div class="ctl"><textarea id="f_supps" name="supps" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4083">e.g. Creatine 5 g daily, fish oil 2 g, vitamin D 5,000 IU, whey twice a day</span></div></div><div class="field" data-jv-removable data-q="peds_now" data-eid="e4110"><label data-eid="e4111" for="f_peds_now">If currently using PEDS, what are you using (compound and dosage) and how long have you been on this for?</label><div class="ibox"><div class="ctl"><textarea id="f_peds_now" name="peds_now" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4113">e.g. Test cyp 300 mg/wk and primobolan 400 mg/wk, 9 weeks in</span></div></div><div class="field" data-jv-removable data-q="peds_years" data-eid="e4140"><label data-eid="e4141" for="f_peds_years">How long have you been using PEDs for?</label><div class="ibox"><div class="ctl"><input id="f_peds_years" name="peds_years" type="text" data-noedit></div><span class="ph" data-eid="e4143">e.g. Around 4 years, on and off</span></div></div><div class="field" data-jv-removable data-q="ped_sides" data-eid="e4170"><label data-eid="e4171" for="f_ped_sides">What side effects have you experienced with use of PEDs?</label><div class="ibox"><div class="ctl"><textarea id="f_ped_sides" name="ped_sides" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4173">e.g. High blood pressure on higher doses, acne on my back, night sweats on tren</span></div></div><div class="field" data-jv-removable data-q="risk_tolerance" data-eid="e7100"><label data-eid="e7101" for="f_risk_tolerance">Risk tolerance</label><div class="slider-wrap"><div class="slider-val" id="v_risk_tolerance" data-noedit>5</div><input type="range" min="1" max="10" step="1" value="5" name="risk_tolerance" id="f_risk_tolerance" data-noedit><div class="slider-ends"><span data-eid="e7104">1 &mdash; no risk</span><span data-eid="e7105">10 &mdash; I&rsquo;m willing to do whatever it takes to achieve my goals</span></div></div></div><div class="field" data-jv-removable data-q="bp" data-eid="e4230"><label data-eid="e4231" for="f_bp">What is your current blood pressure?</label><div class="ibox"><div class="ctl"><input id="f_bp" name="bp" type="text" data-noedit></div><span class="ph" data-eid="e4233">e.g. 128/78, taken most mornings</span></div></div><div class="field" data-jv-removable data-q="bloodwork_when" data-eid="e4260"><label data-eid="e4261" for="f_bloodwork_when">When was the last time you had comprehensive blood work done? If you have a current lab, upload it below. If it&#x27;s longer than 12 weeks, let&#x27;s get labs conducted.</label><div class="ibox"><div class="ctl"><textarea id="f_bloodwork_when" name="bloodwork_when" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4263">e.g. Full panel in May 2026 — attaching the PDF</span></div></div><div class="field" data-jv-removable data-eid="e4290"><label data-eid="e4291" for="f_bloodwork">Upload your most recent bloodwork (PDF or photo)</label><label class="drop" id="d_bloodwork"><input type="file" name="bloodwork" multiple accept="image/*,application/pdf,video/*" data-noedit><div class="ic">⬆︎</div><div class="t" data-eid="e4294">Choose files</div><div class="s" data-eid="e4295">PDF, JPG or PNG. Add as many pages as you need.</div></label><div class="filelist" id="l_bloodwork" data-noedit></div></div><div class="field" data-jv-removable data-q="family_hx" data-eid="e4320"><label data-eid="e4321" for="f_family_hx">Do you have a family history of Cardiovascular or Kidney Disease, Diabetes, or Cancer? Any other condition that should be known of currently?</label><div class="ibox"><div class="ctl"><textarea id="f_family_hx" name="family_hx" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4323">e.g. Dad had a stent at 58, mom is type 2 diabetic. Nothing else I know of.</span></div></div></section>
+<section class="card"><div class="sec-head"><div class="sec-num" data-noedit>6</div><div class="sec-title" data-eid="e2600">Training Assessment</div></div><div class="field" data-jv-removable data-q="years_lifting" data-eid="e4350"><label data-eid="e4351" for="f_years_lifting">How many years have you been weight training for?</label><div class="ibox"><div class="ctl"><input id="f_years_lifting" name="years_lifting" type="text" data-noedit></div><span class="ph" data-eid="e4353">e.g. 12 years, 6 of them serious</span></div></div><div class="field" data-jv-removable data-q="days_train" data-eid="e4380"><label data-eid="e4381" for="f_days_train">How many days a week can you train?</label><div class="ibox"><div class="ctl"><input id="f_days_train" name="days_train" type="text" data-noedit></div><span class="ph" data-eid="e4383">e.g. 5, six if the week is quiet</span></div></div><div class="field" data-jv-removable data-q="split" data-eid="e4410"><label data-eid="e4411" for="f_split">What is your current training split?</label><div class="ibox"><div class="ctl"><textarea id="f_split" name="split" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4413">e.g. Push / pull / legs / upper / lower, Sunday off</span></div></div><div class="field" data-jv-removable data-q="hours_train" data-eid="e4440"><label data-eid="e4441" for="f_hours_train">How many hours can you spend training per day?</label><div class="ibox"><div class="ctl"><input id="f_hours_train" name="hours_train" type="text" data-noedit></div><span class="ph" data-eid="e4443">e.g. 75–90 minutes</span></div></div><div class="field" data-jv-removable data-q="time_of_day" data-eid="e4470"><label data-eid="e4471" for="f_time_of_day">What time of day do you normally train?</label><div class="ibox"><div class="ctl"><input id="f_time_of_day" name="time_of_day" type="text" data-noedit></div><span class="ph" data-eid="e4473">e.g. 5:30 am before work, weekends around 10 am</span></div></div><div class="field" data-jv-removable data-q="cardio_state" data-eid="e4500"><label data-eid="e4501" for="f_cardio_state">Do you normally do cardio in the fasted or fed state?</label><div class="choices" data-noedit><label class="choice"><input type="radio" name="cardio_state" value="Fasted" data-noedit><b data-eid="e4504">Fasted</b></label><label class="choice"><input type="radio" name="cardio_state" value="Fed" data-noedit><b data-eid="e4505">Fed</b></label><label class="choice"><input type="radio" name="cardio_state" value="A mix of both" data-noedit><b data-eid="e4506">A mix of both</b></label><label class="choice"><input type="radio" name="cardio_state" value="I don&#x27;t do cardio right now" data-noedit><b data-eid="e4507">I don&#x27;t do cardio right now</b></label></div></div><div class="field" data-jv-removable data-q="cardio_amount" data-eid="e4530"><label data-eid="e4531" for="f_cardio_amount">How many days do you do cardio and for how long?</label><div class="ibox"><div class="ctl"><textarea id="f_cardio_amount" name="cardio_amount" rows="2" data-noedit></textarea></div><span class="ph" data-eid="e4533">e.g. 4 days, 30 minutes each, plus 8k steps daily</span></div></div><div class="field" data-jv-removable data-q="cardio_machine" data-eid="e4560"><label data-eid="e4561" for="f_cardio_machine">What kind of machine do you use for cardio? What are the settings you use (rate, speed, etc)?</label><div class="ibox"><div class="ctl"><textarea id="f_cardio_machine" name="cardio_machine" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4563">e.g. StairMaster at level 7, or treadmill 3.2 mph at 12% incline</span></div></div><div class="field" data-jv-removable data-q="heart_rate" data-eid="e4590"><label data-eid="e4591" for="f_heart_rate">Do you know your heart rate during cardio or have a way to monitor it?</label><div class="ibox"><div class="ctl"><textarea id="f_heart_rate" name="heart_rate" rows="2" data-noedit></textarea></div><span class="ph" data-eid="e4593">e.g. Yes — Apple Watch, usually sits around 135 bpm</span></div></div><div class="field" data-jv-removable data-q="avoid" data-eid="e4650"><label data-eid="e4651" for="f_avoid">List any exercises to avoid in the design of your program and reason why:</label><div class="ibox"><div class="ctl"><textarea id="f_avoid" name="avoid" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4653">e.g. Back squat — old disc issue. Upright rows — they light up my shoulder.</span></div></div><div class="field" data-jv-removable data-q="where_train" data-eid="e4710"><label data-eid="e4711" for="f_where_train">Do you prefer to exercise at home, gym or somewhere else? What equipment and/or gyms do you have available to you?</label><div class="ibox"><div class="ctl"><textarea id="f_where_train" name="where_train" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4713">e.g. Commercial gym (Gold&#x27;s) — full machine setup, plus a home rack and dumbbells to 60 lb for travel weeks.</span></div></div><div class="field" data-jv-removable data-q="injuries" data-eid="e4740"><label data-eid="e4741" for="f_injuries">Please list any injuries you&#x27;ve had in the past?</label><div class="ibox"><div class="ctl"><textarea id="f_injuries" name="injuries" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4743">e.g. Left shoulder labrum 2019 (no surgery), lower back tweak last year, both fine now if I warm up.</span></div></div><div class="field" data-jv-removable data-q="weakness" data-eid="e4770"><label data-eid="e4771" for="f_weakness">What do you view as weakness in your current physique?</label><div class="ibox"><div class="ctl"><textarea id="f_weakness" name="weakness" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4773">e.g. Rear delts and hamstrings, and my upper chest lags</span></div></div><div class="field" data-jv-removable data-q="other_info" data-eid="e4890"><label data-eid="e4891" for="f_other_info">List any other info you think I should know:</label><div class="ibox"><div class="ctl"><textarea id="f_other_info" name="other_info" rows="4" data-noedit></textarea></div><span class="ph" data-eid="e4893">e.g. I travel one week a month and the gym there is barely equipped.</span></div></div></section>
+<section class="card"><div class="sec-head"><div class="sec-num" data-noedit>7</div><div class="sec-title" data-eid="e2700">Lifestyle Assessment</div></div><div class="field" data-jv-removable data-q="sleep" data-eid="e4920"><label data-eid="e4921" for="f_sleep">Do you have good sleeping patterns, and are you sleeping through the night, how many hours do you sleep for?</label><div class="ibox"><div class="ctl"><textarea id="f_sleep" name="sleep" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4923">e.g. In bed by 10, up at 5. About 6.5 hours, wake up once most nights.</span></div></div><div class="field" data-jv-removable data-q="fatigue" data-eid="e4950"><label data-eid="e4951" for="f_fatigue">Do you feel fatigued during the day?</label><div class="ibox"><div class="ctl"><textarea id="f_fatigue" name="fatigue" rows="2" data-noedit></textarea></div><span class="ph" data-eid="e4953">e.g. Yes, hard crash around 2–3 pm most days</span></div></div><div class="field" data-jv-removable data-q="ed_history" data-eid="e5070"><label data-eid="e5071" for="f_ed_history">Have you ever been diagnosed with an eating disorder?</label><div class="choices" data-noedit><label class="choice"><input type="radio" name="ed_history" value="No" data-noedit><b data-eid="e5074">No</b></label><label class="choice"><input type="radio" name="ed_history" value="Yes — in the past" data-noedit><b data-eid="e5075">Yes — in the past</b></label><label class="choice"><input type="radio" name="ed_history" value="Yes — currently" data-noedit><b data-eid="e5076">Yes — currently</b></label><label class="choice"><input type="radio" name="ed_history" value="Prefer not to say" data-noedit><b data-eid="e5077">Prefer not to say</b></label></div></div><div class="field" data-jv-removable data-q="food_anxiety" data-eid="e5100"><label data-eid="e5101" for="f_food_anxiety">Do you ever have anxiety about making food decisions?</label><div class="ibox"><div class="ctl"><textarea id="f_food_anxiety" name="food_anxiety" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e5103">e.g. Yes — eating out is stressful because I can&#x27;t weigh anything</span></div></div><div class="field" data-jv-removable data-q="stress" data-eid="e5130"><label data-eid="e5131" for="f_stress">On a scale of 1-10 how stressed are you (10 being high stress, 1 being no stress)?</label><div class="slider-wrap"><div class="slider-val" id="v_stress" data-noedit>5</div><input type="range" min="1" max="10" step="1" value="5" name="stress" id="f_stress" data-noedit><div class="slider-ends"><span data-eid="e5134">1 — no stress</span><span data-eid="e5135">10 — high stress</span></div></div></div><div class="field" data-jv-removable data-q="work_type" data-eid="e5160"><label data-eid="e5161" for="f_work_type">What kind of work do you do?</label><div class="ibox"><div class="ctl"><input id="f_work_type" name="work_type" type="text" data-noedit></div><span class="ph" data-eid="e5163">e.g. Field sales — mostly driving and client meetings</span></div></div><div class="field" data-jv-removable data-q="work_hours" data-eid="e5190"><label data-eid="e5191" for="f_work_hours">How many hours do you work per week?</label><div class="ibox"><div class="ctl"><input id="f_work_hours" name="work_hours" type="text" data-noedit></div><span class="ph" data-eid="e5193">e.g. Around 55</span></div></div><div class="field" data-jv-removable data-q="coach_comms" data-eid="e5250"><label data-eid="e5251" for="f_coach_comms">What do you find helpful in a coach&#x27;s communication and what is not helpful for you?</label><div class="ibox"><div class="ctl"><textarea id="f_coach_comms" name="coach_comms" rows="4" data-noedit></textarea></div><span class="ph" data-eid="e5253">e.g. Helpful: direct answers and a reason behind the change. Not helpful: one-word replies or being left hanging for days.</span></div></div></section>
+<section class="card"><div class="sec-head"><div class="sec-num" data-noedit>8</div><div class="sec-title" data-eid="e5000">Progress Pictures</div></div><div class="guide"><div class="guide-t" data-eid="e5011">Send a FRONT, SIDE, and BACK picture</div><ul><li data-eid="e5060">Full body (head to toe)</li><li data-eid="e5061">For competitors — wear your posing suit, send your quarter turns and all mandatory poses</li><li data-eid="e5062">For non competitors — Men: wear shorts or boxer/briefs no longer than mid-thigh. Women: shorts no longer than mid-thigh and sports bra or swimsuit.</li></ul></div><div class="photo-grid"><label class="drop pose" id="d_photo_front"><input type="file" name="photo_front" accept="image/*" data-noedit><div class="ic">⬆︎</div><div class="t" data-eid="e5100">Front</div><div class="s" data-eid="e5101">Tap to upload</div></label><label class="drop pose" id="d_photo_side"><input type="file" name="photo_side" accept="image/*" data-noedit><div class="ic">⬆︎</div><div class="t" data-eid="e5102">Side</div><div class="s" data-eid="e5103">Tap to upload</div></label><label class="drop pose" id="d_photo_back"><input type="file" name="photo_back" accept="image/*" data-noedit><div class="ic">⬆︎</div><div class="t" data-eid="e5104">Back</div><div class="s" data-eid="e5105">Tap to upload</div></label></div><div class="filelist" id="l_photos" data-noedit></div><div class="field" data-jv-removable data-q="photo_consent" data-eid="e5200" style="margin-top:22px"><label data-eid="e5201" for="f_photo_consent">Can I share your photos on social media?</label><div class="choices" data-noedit><label class="choice"><input type="radio" name="photo_consent" id="f_photo_consent" value="Yes — you can share my photos"><b data-eid="e5204">Yes — you can share my photos</b></label><label class="choice"><input type="radio" name="photo_consent" value="Yes, but blur my face"><b data-eid="e5205">Yes, but blur my face</b></label><label class="choice"><input type="radio" name="photo_consent" value="No — keep them private"><b data-eid="e5206">No — keep them private</b></label></div></div></section>
+    <div class="submit-wrap" data-noedit>
+      <button type="submit" class="btn" id="submitBtn">Submit onboarding questionnaire</button>
+      <button type="button" class="btn ghost" id="saveBtn">Save &amp; finish later</button>
       <div class="formerr" id="formErr"></div>
+      <div class="saved" id="savedMsg"></div>
     </div>
   </form>
 
-  <div id="done">
-    <div class="big">You're all set 💪</div>
-    <p>Your coach has everything and is building your plan now. It'll take 3 business days to get your plan ready — keep an eye on your inbox and texts, we'll be in touch.</p>
-  </div>
-
-  <div class="footer">© TRT Guy · Your information is private and shared only with your coach.</div>
+  <div class="footer" data-eid="e900">© TRT Guy · Everything you write here is private and goes only to your coach.</div>
 </div>
 
 <script>
-// ⬇️ After deploying the Cloudflare Worker, paste its URL here:
 const WORKER_URL = "https://trt-guy-onboarding.julianhierro.workers.dev";
-
+const STORE = 'trtguy_assessment_v2';
 const $ = s => document.querySelector(s);
+const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
 const form = $('#form');
 
-// Prefill from checkout redirect: ?name= / ?first_name= / ?email= / ?contact_id= / ?phone=
+/* ---- prefill from a post-checkout redirect ---- */
 const q = new URLSearchParams(location.search);
-const getp = (...keys) => { for (const k of keys){ const v = q.get(k); if (v) return v; } return ''; };
-const pName = getp('name','first_name','firstName');
-const pEmail = getp('email');
-const pPhone = getp('phone');
-const pContact = getp('contact_id','contactId','cid');
-if (pName){ $('#firstName').value = pName; $('#greet').textContent = 'Welcome, ' + pName.split(' ')[0] + ' — let’s get you dialed in.'; }
-if (pEmail) $('#email').value = pEmail;
-if (pPhone) form.querySelector('[name=phone]').value = pPhone;
-if (pContact){ const h=document.createElement('input'); h.type='hidden'; h.name='contact_id'; h.value=pContact; form.appendChild(h); }
+const getp = (...k) => { for (const x of k){ const v=q.get(x); if(v) return v; } return ''; };
+const pName=getp('name','first_name','firstName'), pEmail=getp('email'), pPhone=getp('phone'), pCid=getp('contact_id','contactId','cid');
+if (pName){ $('#firstName').value=pName; $('#greet').textContent='Welcome, '+pName.split(' ')[0]+' — let’s get you dialed in.'; const n=$('#f_name'); if(n&&!n.value) n.value=pName; }
+if (pEmail){ const e=$('#f_email'); if(e) e.value=pEmail; }
+if (pPhone){ const p=$('#f_phone'); if(p) p.value=pPhone; }
+if (pCid){ const h=document.createElement('input'); h.type='hidden'; h.name='contact_id'; h.value=pCid; form.appendChild(h); }
 
-// Risk slider
-const risk = $('#risk'), riskVal = $('#riskVal');
-risk.addEventListener('input', ()=> riskVal.textContent = risk.value);
+/* ---- "e.g." overlay behaves like a placeholder ---- */
+function syncBox(el){ const b=el.closest('.ibox'); if(b) b.classList.toggle('filled', !!el.value); }
+function syncAllBoxes(){ $$('.ibox').forEach(b=>{ const i=b.querySelector('input,textarea'); if(i) b.classList.toggle('filled', !!i.value); }); }
 
-// Radio card highlight (works for every .choice group)
-function highlightChoices(){
-  document.querySelectorAll('.choice').forEach(c=>{ const i=c.querySelector('input'); if(i) c.classList.toggle('sel', i.checked); });
-}
-form.addEventListener('change', ()=>{ highlightChoices(); updateProgress(); saveProgress(true); });
-form.addEventListener('input', ()=>{ updateProgress(); saveProgress(true); });
+/* ---- textareas grow with their content ---- */
+function autogrow(t){ t.style.height='auto'; t.style.height=Math.max(52, t.scrollHeight)+'px'; }
+function growAll(){ $$('textarea').forEach(autogrow); }
 
-// Units toggle (metric for people outside the US)
-const UNIT_PH = {
-  imperial: { fHeight:"e.g. 5'11\"", fCurWeight:"e.g. 205 lb", fGoalWeight:"e.g. 185 lb" },
-  metric:   { fHeight:"e.g. 180 cm", fCurWeight:"e.g. 93 kg",  fGoalWeight:"e.g. 84 kg" }
-};
-function setUnits(u){
-  u = UNIT_PH[u] ? u : 'imperial';
-  $('#unitsField').value = u;
-  document.querySelectorAll('.unit-btn').forEach(b=> b.classList.toggle('active', b.dataset.unit===u));
-  Object.entries(UNIT_PH[u]).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.placeholder=val; });
-}
-document.querySelectorAll('.unit-btn').forEach(b=> b.addEventListener('click', ()=>{ setUnits(b.dataset.unit); saveProgress(true); }));
+/* ---- sliders ---- */
+$$('input[type=range]').forEach(r=>{ const out=document.getElementById('v_'+r.name); const upd=()=>{ if(out) out.textContent=r.value; }; r.addEventListener('input',()=>{ r.dataset.touched='1'; upd(); }); upd(); });
 
-// Save / restore progress on this device
-const STORE = 'trtguy_onboarding_v1';
-function saveProgress(silent){
-  try{
-    const data = {};
-    new FormData(form).forEach((v,k)=>{ if (typeof v === 'string') data[k]=v; }); // files skipped
-    data.units = $('#unitsField').value;
-    localStorage.setItem(STORE, JSON.stringify(data));
-  }catch(e){}
-  if(!silent){ const n=$('#savedNote'); n.textContent='Progress saved on this device — you can close and come back ✓'; setTimeout(()=>{ n.textContent=''; }, 3000); }
-}
-function restoreProgress(){
-  let data; try{ data = JSON.parse(localStorage.getItem(STORE)||'null'); }catch(e){}
-  if(!data) return;
-  Object.entries(data).forEach(([k,v])=>{
-    if(v==='' || v==null) return;
-    const nodes = form.querySelectorAll('[name="'+k.replace(/"/g,'')+'"]');
-    if(!nodes.length) return;
-    if(nodes[0].type==='radio'){ nodes.forEach(r=> r.checked = (r.value===v)); }
-    else if(nodes[0].type!=='file'){ nodes[0].value = v; }
-  });
-  if(data.units) setUnits(data.units);
-  if($('#risk')) $('#riskVal').textContent = $('#risk').value;
-  highlightChoices();
-}
-$('#saveBtn').addEventListener('click', ()=> saveProgress(false));
+/* ---- radio cards ---- */
+function highlightChoices(){ $$('.choice').forEach(c=>{ const i=c.querySelector('input'); if(i) c.classList.toggle('sel', i.checked); }); }
 
-// Show "current calories" only if they track macros
-const tracksMacros = $('#tracksMacros'), caloriesField = $('#caloriesField');
-function toggleCalories(){
-  const v = tracksMacros.value;
-  caloriesField.style.display = (v.startsWith('Yes') || v.startsWith('Somewhat')) ? 'block' : 'none';
-}
-tracksMacros.addEventListener('change', toggleCalories);
-
-// File pickers
-function human(b){ return b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(1)+' MB'; }
-function wireDrop(inputId, listId){
-  const input = document.getElementById(inputId), list = document.getElementById(listId);
-  input.addEventListener('change', ()=>{
-    list.innerHTML = '';
-    [...input.files].forEach(f=>{
-      const d = document.createElement('div'); d.className='fileitem';
-      d.innerHTML = '<span>✅</span><b>'+f.name.replace(/[<>]/g,'')+'</b><span class="sz">'+human(f.size)+'</span>';
-      list.appendChild(d);
-    });
+/* ---- file pickers ---- */
+const fmt = b => b>1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1,Math.round(b/1024))+' KB';
+$$('input[type=file]').forEach(inp=>{
+  inp.addEventListener('change', ()=>{
+    const drop = inp.closest('.drop');
+    if(drop) drop.classList.toggle('filled', inp.files.length>0);
+    const pose = inp.name.indexOf('photo_')===0;
+    const list = document.getElementById(pose ? 'l_photos' : 'l_'+inp.name);
+    if(!pose && list){
+      list.innerHTML = Array.prototype.map.call(inp.files, f=>'<div class="fileitem"><b>'+f.name.replace(/[<>&]/g,'')+'</b><span class="sz">'+fmt(f.size)+'</span></div>').join('');
+    }
+    if(pose){
+      const t = drop && drop.querySelector('.s');
+      if(t && inp.files[0]) t.textContent = '✓ ' + inp.files[0].name.slice(0,26);
+    }
+    const all = document.getElementById('l_photos');
+    if(pose && all) all.innerHTML='';
     updateProgress();
+    [...inp.files].forEach((f,i)=>fdbPut(inp.name+'::'+i, f));
   });
-}
-function wirePose(inputId, dropId, listId){
-  const input=document.getElementById(inputId), drop=document.getElementById(dropId), list=document.getElementById(listId);
-  input.addEventListener('change', ()=>{
-    list.innerHTML='';
-    const f=input.files[0];
-    drop.classList.toggle('filled', !!f);
-    if(f){ const d=document.createElement('div'); d.className='fileitem'; d.innerHTML='<span>✅</span><b>'+f.name.replace(/[<>]/g,'')+'</b><span class="sz">'+human(f.size)+'</span>'; list.appendChild(d); }
-    updateProgress();
-  });
-}
-wirePose('photo_front','frontDrop','frontList');
-wirePose('photo_side','sideDrop','sideList');
-wirePose('photo_back','backDrop','backList');
-wireDrop('bloodwork','bloodList');
-
-// Progress
-const required = [...form.querySelectorAll('[required]')];
-function updateProgress(){
-  let done = 0;
-  required.forEach(el=>{
-    if (el.type === 'radio'){ if (form.querySelector('[name="'+el.name+'"]:checked')) done++; }
-    else if (el.value && el.value.trim()) done++;
-  });
-  ['photo_front','photo_side','photo_back'].forEach(id=>{ if(document.getElementById(id).files.length) done++; });
-  const total = new Set(required.map(r=>r.name)).size + 3; // +3 photos
-  const pct = Math.min(100, Math.round(done/total*100));
-  $('#bar').style.width = pct + '%';
-  $('#barLabel').textContent = pct + '% complete';
-}
-restoreProgress();
-toggleCalories();
-updateProgress();
-
-// Submit
-form.addEventListener('submit', async e=>{
-  e.preventDefault();
-  const err = $('#formErr');
-  // basic required check (live — includes conditionally-shown fields, skips hidden ones)
-  const toCheck = [...form.querySelectorAll('[required]')].filter(el => el.type==='radio' || el.offsetParent !== null);
-  for (const el of toCheck){
-    const ok = el.type==='radio' ? form.querySelector('[name="'+el.name+'"]:checked') : (el.value && el.value.trim());
-    if (!ok){ err.textContent = 'Please fill in all required fields (marked *).'; el.scrollIntoView({behavior:'smooth',block:'center'}); return; }
-  }
-  for (const [id,drop] of [['photo_front','frontDrop'],['photo_side','sideDrop'],['photo_back','backDrop']]){
-    if(!document.getElementById(id).files.length){ err.textContent='Please add all three photos — front, side, and back.'; document.getElementById(drop).scrollIntoView({behavior:'smooth',block:'center'}); return; }
-  }
-  err.textContent = '';
-
-  const btn = $('#submitBtn');
-  btn.disabled = true; btn.textContent = 'Uploading…';
-
-  const fd = new FormData(form); // includes all named inputs + files
-  try{
-    const res = await fetch(WORKER_URL, { method:'POST', body: fd });
-    if (!res.ok) throw new Error('bad status ' + res.status);
-    try{ localStorage.removeItem(STORE); }catch(e){}
-    form.style.display = 'none';
-    document.querySelector('header.top').style.display = 'none';
-    $('#done').classList.add('show');
-    window.scrollTo({top:0,behavior:'smooth'});
-  }catch(e){
-    btn.disabled = false; btn.textContent = 'Submit & start my plan →';
-    err.textContent = 'Something went wrong sending that. Please try again — if it keeps failing, text your coach.';
-  }
 });
 
-</script>
+/* ---- progress ---- */
+function answered(f){
+  if(f.dataset.group) return $$('[data-q="'+f.dataset.q+'"] input').some(i=>!!i.value.trim());
+  const r = f.querySelector('input[type=radio]');
+  if(r) return !!f.querySelector('input[type=radio]:checked');
+  const rg = f.querySelector('input[type=range]');
+  if(rg) return rg.dataset.touched === '1';
+  const el = f.querySelector('input,textarea');
+  return !!(el && el.value.trim());
+}
+function updateProgress(){
+  const fields = $$('[data-q]');
+  const done = fields.filter(answered).length;
+  const pct = fields.length ? Math.round(done/fields.length*100) : 0;
+  $('#bar').style.width = pct+'%';
+  $('#barLabel').textContent = pct+'% complete — '+done+' of '+fields.length+' answered';
+}
 
-<!-- ═══ Placeholder / example-text editor. Applies saved examples for everyone; in ?edit=1 a toggle lets you edit them. Own store (td-onboarding-ph). ═══ -->
-<script>
-(function(){
-  var PH_API="https://jv-dashboard-chi.vercel.app/api/content";
-  var PH_SITE="td-onboarding-ph";
-  var EDIT=/[?&]edit=1/.test(location.search);
-  var map={};
-  function sel(name){ try{ return document.querySelectorAll('[name="'+name.replace(/"/g,'')+'"]'); }catch(e){ return []; } }
-  function apply(){ Object.keys(map).forEach(function(name){ Array.prototype.forEach.call(sel(name),function(el){ if((el.tagName==='INPUT'||el.tagName==='TEXTAREA') && typeof map[name]==='string'){ el.setAttribute('placeholder', map[name]); } }); }); }
-  function load(cb){ fetch(PH_API+'?site='+PH_SITE+'&page=1&t='+Date.now(),{cache:'no-store'})
-    .then(function(r){return r.json();})
-    .then(function(d){ try{ var e=(d.edits||[]).filter(function(x){return x.eid==='placeholders';})[0]; if(e){ var m=JSON.parse(e.html); if(m&&typeof m==='object') map=m; } }catch(_){}} )
-    .then(function(){ apply(); if(cb)cb(); })
-    .catch(function(){ if(cb)cb(); }); }
-  var st;
-  function save(){ clearTimeout(st); st=setTimeout(function(){
-    fetch(PH_API+'?site='+PH_SITE+'&page=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:'',edits:[{eid:'placeholders',html:JSON.stringify(map)}]})})
-      .then(function(r){return r.json();}).then(function(d){ toast(d&&d.ok?'Example saved ✓':'Save failed'); }).catch(function(){ toast('Save failed'); });
-  },350); }
-  function toast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:9px;z-index:2147483647;font:600 14px system-ui,-apple-system,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.3)'; document.body.appendChild(t); setTimeout(function(){t.remove();},1600); }
-  function editable(el){ if(el.tagName==='TEXTAREA') return true; if(el.tagName!=='INPUT') return false; if(['hidden','file','radio','checkbox','range','submit','button'].indexOf(el.type)>=0) return false; if(el.id==='fHeight'||el.id==='fCurWeight') return false; return true; }
-  function initEdit(){
-    var css=document.createElement('style'); css.textContent='.jvph-on input:not([type=hidden]):not([type=file]):not([type=radio]):not([type=range]),.jvph-on textarea{outline:2px dashed #2563eb!important;outline-offset:2px;cursor:pointer!important;background:#eff6ff!important}';
-    document.head.appendChild(css);
-    var banner=document.createElement('div'); banner.id='jvph-bar';
-    banner.style.cssText='position:fixed;top:8px;left:8px;z-index:2147483646;background:#2563eb;color:#fff;font:600 13px system-ui,-apple-system,sans-serif;padding:8px 12px;border-radius:9px;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;user-select:none';
-    banner.textContent='✎ Edit examples: OFF';
-    var on=false;
-    banner.onclick=function(){ on=!on; document.body.classList.toggle('jvph-on',on); banner.textContent='✎ Edit examples: '+(on?'ON':'OFF'); banner.style.background=on?'#16a34a':'#2563eb'; if(on)toast('Click any field to edit its example text'); };
-    document.body.appendChild(banner);
-    document.addEventListener('pointerdown',function(ev){ if(!on)return; var el=ev.target; if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA')&&editable(el)){ ev.preventDefault(); ev.stopPropagation(); var name=el.getAttribute('name'); if(!name)return; var cur=el.getAttribute('placeholder')||''; var v=prompt('Edit the grey example shown inside this field.\n\n(This is only the hint text — it does not fill in an answer.)',cur); if(v===null)return; el.setAttribute('placeholder',v); el.value=''; map[name]=v; save(); } },true);
+/* ---- uploaded files are kept too, in IndexedDB (localStorage can't hold files) ---- */
+const FDB = 'trtguy_assessment_files';
+function fdb(){ return new Promise((res,rej)=>{ const r=indexedDB.open(FDB,1);
+  r.onupgradeneeded=()=>{ if(!r.result.objectStoreNames.contains('files')) r.result.createObjectStore('files'); };
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function fdbPut(key,file){ try{ const db=await fdb(); await new Promise((res,rej)=>{ const t=db.transaction('files','readwrite'); t.objectStore('files').put(file,key); t.oncomplete=res; t.onerror=()=>rej(t.error); }); }catch(e){} }
+async function fdbDel(key){ try{ const db=await fdb(); await new Promise(res=>{ const t=db.transaction('files','readwrite'); t.objectStore('files').delete(key); t.oncomplete=res; t.onerror=res; }); }catch(e){} }
+async function fdbAll(){ try{ const db=await fdb(); return await new Promise(res=>{ const t=db.transaction('files','readonly'), st=t.objectStore('files'), out={}; const kr=st.getAllKeys(), vr=st.getAll();
+  t.oncomplete=()=>{ kr.result.forEach((k,i)=>out[k]=vr.result[i]); res(out); }; t.onerror=()=>res({}); }); }catch(e){ return {}; } }
+async function fdbClear(){ try{ const db=await fdb(); await new Promise(res=>{ const t=db.transaction('files','readwrite'); t.objectStore('files').clear(); t.oncomplete=res; t.onerror=res; }); }catch(e){} }
+
+// Put a saved File back into its <input type=file> so it submits normally.
+function putFiles(inp, files){
+  try{ const dt=new DataTransfer(); files.forEach(f=>dt.items.add(f)); inp.files=dt.files; return true; }catch(e){ return false; }
+}
+async function saveFiles(){
+  for (const inp of $$('input[type=file]')){
+    const list=[...inp.files];
+    if(list.length) for(let i=0;i<list.length;i++) await fdbPut(inp.name+'::'+i, list[i]);
   }
-  function boot(){ load(EDIT?initEdit:null); }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
-})();
+}
+async function restoreFiles(){
+  const all = await fdbAll();
+  const byInput = {};
+  Object.entries(all).forEach(([k,f])=>{ const [name,i]=k.split('::'); (byInput[name] ||= [])[+i]=f; });
+  for (const [name,files] of Object.entries(byInput)){
+    const inp = form.querySelector('input[type=file][name="'+CSS.escape(name)+'"]');
+    if(!inp) continue;
+    const clean = files.filter(Boolean);
+    if(clean.length && putFiles(inp, clean)) inp.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+}
+
+/* ---- save / restore on this device ---- */
+function saveProgress(){
+  try{
+    const d={};
+    new FormData(form).forEach((v,k)=>{ if(typeof v==='string') d[k]=v; });
+    localStorage.setItem(STORE, JSON.stringify(d));
+  }catch(e){}
+}
+function restoreProgress(){
+  let d; try{ d=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(e){}
+  if(!d) return;
+  Object.entries(d).forEach(([k,v])=>{
+    const els = form.querySelectorAll('[name="'+CSS.escape(k)+'"]');
+    if(!els.length) return;
+    if(els[0].type==='radio'){ els.forEach(e=>{ if(e.value===v) e.checked=true; }); }
+    else if(!els[0].value || els[0].type==='range' || (k!=='email'&&k!=='phone'&&k!=='name')) els[0].value=v;
+    else els[0].value = els[0].value || v;
+  });
+  $$('input[type=range]').forEach(r=>{ if(d[r.name]!=null) r.dataset.touched='1'; const o=document.getElementById('v_'+r.name); if(o) o.textContent=r.value; });
+}
+
+form.addEventListener('input', e=>{ if(e.target.matches('input,textarea')) syncBox(e.target); if(e.target.tagName==='TEXTAREA') autogrow(e.target); updateProgress(); saveProgress(); });
+form.addEventListener('change', ()=>{ highlightChoices(); updateProgress(); saveProgress(); });
+$('#saveBtn').addEventListener('click', async ()=>{
+  const m=$('#savedMsg'); m.textContent='Saving…';
+  saveProgress();
+  await saveFiles();
+  const nf = $$('input[type=file]').reduce((n,i)=>n+i.files.length,0);
+  m.textContent = 'Saved on this device' + (nf ? ' — including '+nf+' file'+(nf>1?'s':'') : '') + '. Come back to this link any time.';
+  setTimeout(()=>m.textContent='',6000);
+});
+
+window.renumberSections = function renumberSections(){
+  $$('#form .sec-num').forEach((el,i)=>{ const n=String(i+1); if(el.textContent!==n) el.textContent=n; });
+}
+restoreProgress(); syncAllBoxes(); growAll(); highlightChoices(); updateProgress(); renumberSections();
+restoreFiles();
+// Sections can be added, removed or reordered in the inline editor — keep the numbers honest.
+try{
+  let t; new MutationObserver(()=>{ clearTimeout(t); t=setTimeout(()=>{ renumberSections(); updateProgress(); },120); })
+    .observe(document.getElementById('form'), {childList:true, subtree:true});
+}catch(e){}
+
+/* ---- build the Q&A transcript from the LIVE labels, so edited wording flows through ---- */
+function labelOf(f){
+  const l = f.querySelector(':scope > label');
+  return l ? l.textContent.replace(/\s*\*\s*$/,'').replace(/\s+/g,' ').trim() : (f.dataset.q||'');
+}
+function buildQA(){
+  return $$('[data-q]').map(f=>{
+    let a='';
+    if(f.dataset.group){
+      a = $$('[data-q="'+f.dataset.q+'"] .grow').map(g=>{
+        const lab=g.querySelector('.glab').textContent.trim(), v=g.querySelector('input').value.trim();
+        return v ? lab+': '+v : '';
+      }).filter(Boolean).join('\n');
+    } else {
+      const rg = f.querySelector('input[type=range]');
+      if(f.querySelector('input[type=radio]')){
+        // A radio group with nothing selected has no answer — never fall through to
+        // the first option's value attribute.
+        const c = f.querySelector('input[type=radio]:checked');
+        a = c ? (c.parentNode.querySelector('b')||{textContent:c.value}).textContent.trim() : '';
+      }
+      else if(rg) a = rg.dataset.touched==='1' ? rg.value+' / 10' : '';
+      else { const el=f.querySelector('input:not([type=radio]):not([type=range]),textarea'); a = el ? el.value.trim() : ''; }
+    }
+    return { q: labelOf(f), a: a };
+  }).filter(x=>x.a);
+}
+
+/* ---- submit ---- */
+form.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const err=$('#formErr'); err.textContent='';
+  for (const id of ['f_name','f_email','f_phone']){
+    const el=document.getElementById(id);
+    if(el && !el.value.trim()){ err.textContent='Please fill in your name, email and phone so I know who this is.'; el.scrollIntoView({behavior:'smooth',block:'center'}); el.focus(); return; }
+  }
+  const em=document.getElementById('f_email');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value.trim())){ err.textContent='That email doesn’t look right — double-check it.'; em.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+
+  const btn=$('#submitBtn'); btn.disabled=true; btn.textContent='Sending…';
+  const fd = new FormData(form);
+  fd.set('email', em.value.trim());
+  fd.set('phone', document.getElementById('f_phone').value.trim());
+  fd.set('qa', JSON.stringify(buildQA()));
+  try{
+    const res = await fetch(WORKER_URL + '/assessment', { method:'POST', body: fd });
+    if(!res.ok) throw new Error('status '+res.status);
+    try{ localStorage.removeItem(STORE); }catch(e){}
+    await fdbClear();
+    location.href = './thanks/';
+  }catch(e){
+    btn.disabled=false; btn.textContent='Submit onboarding questionnaire';
+    err.textContent='Something went wrong sending that. Please try again — if it keeps failing, text your coach.';
+  }
+});
 </script>
 
-<!-- ═══ Inline editor (add ?edit=1) — full editing: text, add / remove / reorder. Passwordless, saves to the shared store. ═══ -->
-<script>window.JV_EDITOR={ site:"td-onboarding-v2", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<!-- ═══ Inline editor (add ?edit=1) — edit questions and the "e.g." text. Passwordless. ═══ -->
+<!-- Stale-draft guard: if the page structure changed since a saved editor draft was
+     captured, that draft no longer lines up with the DOM and republishing it scrambles the
+     page. Bump PAGE_REV whenever the form's structure changes; older drafts are dropped. -->
+<script>(function(){ var PAGE_REV="2026-09-02c";
+  try{ var k="jv-rev:td-assessment";
+    if(localStorage.getItem(k)!==PAGE_REV){
+      Object.keys(localStorage).forEach(function(x){ if(x.indexOf("jv-draft:td-assessment")===0) localStorage.removeItem(x); });
+      localStorage.setItem(k,PAGE_REV);
+    }
+  }catch(e){}
+})();</script>
+<script>window.JV_EDITOR={ site:"td-assessment", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <script>
 (function () {
   if (!document.body) return;
   var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
   var SVG = "http://www.w3.org/2000/svg";
   function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
-  var n=0;
+  var n=10000; // every authored element already carries an explicit data-eid; start high so any stray one never collides
   Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
   var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
   function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var c=el.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(c.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
   (function walk(el){ var c=el.children; for(var i=0;i<c.length;i++){ var ch=c[i]; if(skip(ch))continue; if(isTextLeaf(ch)) ch.setAttribute("data-etext","1"); else walk(ch); } })(document.body);
   Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+  // After the editor applies published copy, re-sync the fake placeholders + autogrow.
+  window.addEventListener("load", function(){ setTimeout(function(){
+    document.querySelectorAll(".ibox").forEach(function(b){ var i=b.querySelector("input,textarea"); if(i) b.classList.toggle("filled", !!i.value); });
+    if(window.renumberSections) window.renumberSections();
+  }, 300); });
 })();
 </script>
-<script src="/editor.js?v=1"></script>
+<script src="/editor.js?v=3"></script>
 </body>
 </html>

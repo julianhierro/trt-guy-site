@@ -971,8 +971,24 @@
   // its headline) and a small bar: ✥ drag-to-move · ⧉ duplicate · 🗑 delete.
   // The bar/label carry no data-eid/-etext/-ins and are stripped by cleanOuter
   // + duplicateActive, so they never publish and never shift ids.
+  // Delegated so it survives re-decoration / re-render (per-node listeners get lost).
+  var _itemDelBound = false;
+  function bindItemTools() {
+    if (_itemDelBound) return;
+    _itemDelBound = true;
+    document.addEventListener("click", function (e) {
+      var b = e.target && e.target.closest && e.target.closest(".jv-item-del");
+      if (!b || !editMode) return;
+      var item = b.closest("[data-jv-removable]");
+      if (!item) return;
+      e.stopPropagation(); e.preventDefault();
+      removeActive(item, false);
+      decorateSections();
+    }, true);
+  }
+
   function removeSectionDecor() {
-    Array.prototype.forEach.call(document.querySelectorAll(".jv-section-tools"), function (e) { if (e.parentNode) e.parentNode.removeChild(e); });
+    Array.prototype.forEach.call(document.querySelectorAll(".jv-section-tools, .jv-item-tools"), function (e) { if (e.parentNode) e.parentNode.removeChild(e); });
     Array.prototype.forEach.call(document.querySelectorAll("[data-jv-label]"), function (e) { e.removeAttribute("data-jv-label"); });
   }
   function sectionLabel(sec) {
@@ -1064,6 +1080,7 @@
   function decorateSections() {
     removeSectionDecor();
     if (!editMode) return;
+    bindItemTools();
     Array.prototype.forEach.call(document.querySelectorAll("section"), function (sec) {
       if (!sec.getAttribute("data-eid")) return;        // need an id to move/remove
       sec.setAttribute("data-jv-label", sectionLabel(sec));
@@ -1077,6 +1094,17 @@
       del.addEventListener("click", function (e) { e.stopPropagation(); e.preventDefault(); removeActive(sec, false); decorateSections(); });
       bar.appendChild(drag); bar.appendChild(lbl); bar.appendChild(dup); bar.appendChild(del);
       sec.appendChild(bar);
+    });
+    // Opt-in per-item tools: any element marked data-jv-removable gets its own
+    // small Remove button, so a single question/field can be deleted without
+    // hunting for it with select-parent. Nothing else on the page is affected.
+    Array.prototype.forEach.call(document.querySelectorAll("[data-jv-removable]"), function (item) {
+      if (!item.getAttribute("data-eid")) return;
+      var ibar = document.createElement("div"); ibar.className = "jv-item-tools"; ibar.contentEditable = "false";
+      var idel = document.createElement("button"); idel.type = "button"; idel.className = "jv-item-btn jv-item-del";
+      idel.title = "Remove this question"; idel.textContent = "🗑 Remove";
+      ibar.appendChild(idel);
+      item.appendChild(ibar);
     });
     if (outlinePanel && outlinePanel.classList.contains("open")) renderOutline();   // keep the navigator in sync
   }
