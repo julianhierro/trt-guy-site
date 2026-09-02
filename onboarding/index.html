@@ -100,7 +100,12 @@
   .guide li{font-size:14px;color:var(--mut);margin-bottom:4px}
   .guide ul:last-child{margin-bottom:0}
 
-  .submit-wrap{padding:8px 0 18px}
+  .submit-wrap{position:sticky;bottom:0;z-index:16;padding:14px 0 12px;
+    background:linear-gradient(180deg,rgba(244,246,250,0) 0%,var(--bg) 30%)}
+  .submit-wrap .btn{padding:15px;font-size:20px}
+  .submit-wrap .btn.ghost{padding:10px;font-size:13.5px;margin-top:7px;background:var(--card)}
+  @media (max-width:520px){ .submit-wrap .btn{padding:13px;font-size:18px} }
+  body.jv-editing .submit-wrap{position:static}
   .btn{width:100%;padding:17px;background:var(--acc);color:#fff;border:none;border-radius:12px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;transition:background .15s}
   .btn:hover{background:var(--acc-d)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
@@ -219,7 +224,9 @@ function answered(f){
   return !!(el && el.value.trim());
 }
 function updateProgress(){
-  const fields = $$('[data-q]');
+  // Recounted from the live DOM every time, so questions removed in the editor
+  // drop out of the total and the bar can still reach 100%.
+  const fields = $$('[data-q]').filter(f => f.offsetParent !== null || f.closest('section'));
   const done = fields.filter(answered).length;
   const pct = fields.length ? Math.round(done/fields.length*100) : 0;
   $('#bar').style.width = pct+'%';
@@ -296,6 +303,7 @@ window.renumberSections = function renumberSections(){
 }
 restoreProgress(); syncAllBoxes(); growAll(); highlightChoices(); updateProgress(); renumberSections();
 restoreFiles();
+[400,1200,2500].forEach(ms=>setTimeout(()=>{ renumberSections(); updateProgress(); }, ms));
 // Sections can be added, removed or reordered in the inline editor — keep the numbers honest.
 try{
   let t; new MutationObserver(()=>{ clearTimeout(t); t=setTimeout(()=>{ renumberSections(); updateProgress(); },120); })
@@ -341,7 +349,10 @@ form.addEventListener('submit', async e=>{
   const em=document.getElementById('f_email');
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value.trim())){ err.textContent='That email doesn’t look right — double-check it.'; em.scrollIntoView({behavior:'smooth',block:'center'}); return; }
 
-  const btn=$('#submitBtn'); btn.disabled=true; btn.textContent='Sending…';
+  const btn=$('#submitBtn'); btn.disabled=true;
+  const nFiles = $$('input[type=file]').reduce((n,i)=>n+i.files.length,0);
+  btn.textContent = nFiles ? 'Uploading '+nFiles+' file'+(nFiles>1?'s':'')+'…' : 'Sending…';
+  let dots=0; const tick=setInterval(()=>{ dots=(dots+1)%4; btn.textContent=(nFiles?'Uploading your files':'Sending')+'.'.repeat(dots||1)+' this can take a moment'; }, 900);
   const fd = new FormData(form);
   fd.set('email', em.value.trim());
   fd.set('phone', document.getElementById('f_phone').value.trim());
@@ -349,10 +360,13 @@ form.addEventListener('submit', async e=>{
   try{
     const res = await fetch(WORKER_URL + '/assessment', { method:'POST', body: fd });
     if(!res.ok) throw new Error('status '+res.status);
+    clearInterval(tick);
+    btn.textContent='Sent ✓';
     try{ localStorage.removeItem(STORE); }catch(e){}
     await fdbClear();
     location.href = './thanks/';
   }catch(e){
+    clearInterval(tick);
     btn.disabled=false; btn.textContent='Submit onboarding questionnaire';
     err.textContent='Something went wrong sending that. Please try again — if it keeps failing, text your coach.';
   }
@@ -363,7 +377,7 @@ form.addEventListener('submit', async e=>{
 <!-- Stale-draft guard: if the page structure changed since a saved editor draft was
      captured, that draft no longer lines up with the DOM and republishing it scrambles the
      page. Bump PAGE_REV whenever the form's structure changes; older drafts are dropped. -->
-<script>(function(){ var PAGE_REV="2026-09-02c";
+<script>(function(){ var PAGE_REV="2026-09-02d";
   try{ var k="jv-rev:td-assessment";
     if(localStorage.getItem(k)!==PAGE_REV){
       Object.keys(localStorage).forEach(function(x){ if(x.indexOf("jv-draft:td-assessment")===0) localStorage.removeItem(x); });
