@@ -375,7 +375,7 @@
 
   <div id="done">
     <div class="big">You're all set 💪</div>
-    <p>Your coach has everything and is building your plan now. Keep an eye on your inbox and texts — we'll be in touch shortly.</p>
+    <p>Your coach has everything and is building your plan now. It'll take 3 business days to get your plan ready — keep an eye on your inbox and texts, we'll be in touch.</p>
   </div>
 
   <div class="footer">© TRT Guy · Your information is private and shared only with your coach.</div>
@@ -554,19 +554,18 @@ form.addEventListener('submit', async e=>{
 const EDIT_SEL = '.kicker,header.top h1,.lead,.sec-title,.sec-sub,.field > label,.field > .hint,.drop .t,.drop .s,.badge,#done .big,#done p,.footer';
 const editable = [...document.querySelectorAll(EDIT_SEL)];
 editable.forEach((el,i)=> el.setAttribute('data-edit','e'+i));
-const CONTENT_URL = WORKER_URL.replace(/\/+$/,'') + '/content';
+const CONTENT_URL = 'https://jv-dashboard-chi.vercel.app/api/content?site=td-onboarding&page=1';
 
 (async function applyOverrides(){
   try{
     const r = await fetch(CONTENT_URL); if(!r.ok) return;
-    const o = await r.json();
+    const d = await r.json(); const o = {};
+    (d.edits||[]).forEach(e=>{ if(e && e.eid) o[e.eid] = e.html; });
     editable.forEach((el,i)=>{ if(o['e'+i]!=null) el.innerHTML = o['e'+i]; });
   }catch(e){}
 })();
 
 if (new URLSearchParams(location.search).get('edit')==='1'){
-  let key = sessionStorage.getItem('trg_editkey');
-  if(!key){ key = prompt('Edit passcode:') || ''; sessionStorage.setItem('trg_editkey', key); }
   editable.forEach(el=>{ el.setAttribute('contenteditable','true'); el.style.outline='1px dashed rgba(26,92,255,.55)'; el.style.borderRadius='4px'; });
   form.addEventListener('submit', e=>{ e.preventDefault(); e.stopPropagation(); }, true);
   const bar=document.createElement('div');
@@ -581,9 +580,9 @@ if (new URLSearchParams(location.search).get('edit')==='1'){
     const o={}; editable.forEach((el,i)=> o['e'+i]=el.innerHTML);
     save.disabled=true; note.textContent='Saving…';
     try{
-      const r=await fetch(CONTENT_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Edit-Key':sessionStorage.getItem('trg_editkey')||''},body:JSON.stringify(o)});
-      if(r.status===401){ note.textContent='Wrong passcode'; sessionStorage.removeItem('trg_editkey'); }
-      else note.textContent = r.ok ? 'Saved ✓' : 'Save failed';
+      const edits = Object.keys(o).map(eid=>({ eid, html:o[eid] }));
+      const r=await fetch(CONTENT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ password:'', edits })});
+      note.textContent = r.ok ? 'Saved ✓' : 'Save failed';
     }catch(e){ note.textContent='Save failed'; }
     save.disabled=false;
   });
