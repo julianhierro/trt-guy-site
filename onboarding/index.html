@@ -524,6 +524,43 @@ form.addEventListener('submit', async e=>{
 
 </script>
 
+<!-- ═══ Placeholder / example-text editor. Applies saved examples for everyone; in ?edit=1 a toggle lets you edit them. Own store (td-onboarding-ph). ═══ -->
+<script>
+(function(){
+  var PH_API="https://jv-dashboard-chi.vercel.app/api/content";
+  var PH_SITE="td-onboarding-ph";
+  var EDIT=/[?&]edit=1/.test(location.search);
+  var map={};
+  function sel(name){ try{ return document.querySelectorAll('[name="'+name.replace(/"/g,'')+'"]'); }catch(e){ return []; } }
+  function apply(){ Object.keys(map).forEach(function(name){ Array.prototype.forEach.call(sel(name),function(el){ if((el.tagName==='INPUT'||el.tagName==='TEXTAREA') && typeof map[name]==='string'){ el.setAttribute('placeholder', map[name]); } }); }); }
+  function load(cb){ fetch(PH_API+'?site='+PH_SITE+'&page=1&t='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(d){ try{ var e=(d.edits||[]).filter(function(x){return x.eid==='placeholders';})[0]; if(e){ var m=JSON.parse(e.html); if(m&&typeof m==='object') map=m; } }catch(_){}} )
+    .then(function(){ apply(); if(cb)cb(); })
+    .catch(function(){ if(cb)cb(); }); }
+  var st;
+  function save(){ clearTimeout(st); st=setTimeout(function(){
+    fetch(PH_API+'?site='+PH_SITE+'&page=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:'',edits:[{eid:'placeholders',html:JSON.stringify(map)}]})})
+      .then(function(r){return r.json();}).then(function(d){ toast(d&&d.ok?'Example saved ✓':'Save failed'); }).catch(function(){ toast('Save failed'); });
+  },350); }
+  function toast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:9px;z-index:2147483647;font:600 14px system-ui,-apple-system,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.3)'; document.body.appendChild(t); setTimeout(function(){t.remove();},1600); }
+  function editable(el){ if(el.tagName==='TEXTAREA') return true; if(el.tagName!=='INPUT') return false; if(['hidden','file','radio','checkbox','range','submit','button'].indexOf(el.type)>=0) return false; if(el.id==='fHeight'||el.id==='fCurWeight') return false; return true; }
+  function initEdit(){
+    var css=document.createElement('style'); css.textContent='.jvph-on input:not([type=hidden]):not([type=file]):not([type=radio]):not([type=range]),.jvph-on textarea{outline:2px dashed #2563eb!important;outline-offset:2px;cursor:pointer!important;background:#eff6ff!important}';
+    document.head.appendChild(css);
+    var banner=document.createElement('div'); banner.id='jvph-bar';
+    banner.style.cssText='position:fixed;top:8px;left:8px;z-index:2147483646;background:#2563eb;color:#fff;font:600 13px system-ui,-apple-system,sans-serif;padding:8px 12px;border-radius:9px;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;user-select:none';
+    banner.textContent='✎ Edit examples: OFF';
+    var on=false;
+    banner.onclick=function(){ on=!on; document.body.classList.toggle('jvph-on',on); banner.textContent='✎ Edit examples: '+(on?'ON':'OFF'); banner.style.background=on?'#16a34a':'#2563eb'; if(on)toast('Click any field to edit its example text'); };
+    document.body.appendChild(banner);
+    document.addEventListener('pointerdown',function(ev){ if(!on)return; var el=ev.target; if(el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA')&&editable(el)){ ev.preventDefault(); ev.stopPropagation(); var name=el.getAttribute('name'); if(!name)return; var cur=el.getAttribute('placeholder')||''; var v=prompt('Edit the grey example shown inside this field.\n\n(This is only the hint text — it does not fill in an answer.)',cur); if(v===null)return; el.setAttribute('placeholder',v); el.value=''; map[name]=v; save(); } },true);
+  }
+  function boot(){ load(EDIT?initEdit:null); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+
 <!-- ═══ Inline editor (add ?edit=1) — full editing: text, add / remove / reorder. Passwordless, saves to the shared store. ═══ -->
 <script>window.JV_EDITOR={ site:"td-onboarding-v2", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <script>
