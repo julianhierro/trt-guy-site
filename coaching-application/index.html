@@ -43,6 +43,9 @@
   .err{color:var(--red);font-size:13.5px;min-height:18px;margin-top:6px;font-weight:600;text-align:center}
   .fine{font-size:12px;color:var(--mut);text-align:center;margin-top:12px}
   .foot{color:var(--mut);font-size:12px;margin-top:34px;text-align:center}
+  /* Mobile: while a field is focused the on-screen keyboard covers the bottom.
+     Add scroll room so the Submit button can be scrolled up above the keyboard. */
+  body.kb-open{padding-bottom:65vh}
 </style>
 </head>
 <body>
@@ -178,6 +181,11 @@ $('#appForm').addEventListener('submit', async function(e){
 });
 // Reveal the "describe your cycle" question only when they say they're on a cycle.
 $('#on_cycle_now').addEventListener('change',function(){ document.getElementById('cycle_wrap').style.display=this.value==='Yes'?'':'none'; });
+
+// Mobile keyboard fix: add bottom scroll room while any field is focused so the
+// Submit button can be scrolled clear of the on-screen keyboard.
+document.addEventListener('focusin', function(e){ if(e.target.closest('input,textarea,select')) document.body.classList.add('kb-open'); });
+document.addEventListener('focusout', function(){ setTimeout(function(){ if(!document.activeElement || !document.activeElement.closest || !document.activeElement.closest('input,textarea,select')) document.body.classList.remove('kb-open'); }, 120); });
 </script>
 
 <!-- ═══ Inline editor (add ?edit=1) — labels editable, controls locked so GHL mapping stays intact ═══ -->
