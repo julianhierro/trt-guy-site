@@ -52,9 +52,8 @@
   input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
   textarea{min-height:52px;resize:vertical;display:block}
 
-  /* Editable "e.g." text that sits inside the answer box like a placeholder. */
-  .ph{position:absolute;left:15px;right:15px;top:12px;z-index:0;color:var(--ph);font-size:14.5px;line-height:1.5;pointer-events:none;transition:opacity .12s}
-  .ibox.filled .ph{opacity:0}
+  /* Editable "e.g." example text, shown as a hint line under each answer box. */
+  .ph{display:block;margin-top:6px;color:var(--ph);font-size:13px;line-height:1.45}
 
   /* radio cards */
   .choices{display:flex;flex-direction:column;gap:9px}
@@ -76,8 +75,7 @@
   .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media (max-width:560px){.ggrid{grid-template-columns:1fr}}
   .grow .glab{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:5px}
-  .ggrid .ph{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  body.jv-editing .ggrid .ph{white-space:normal;overflow:visible}
+  .ggrid .ph{font-size:12.5px}
 
   /* uploads */
   .drop{display:block;border:1.5px dashed var(--line2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:#fbfcfe;font-weight:400}
@@ -114,8 +112,7 @@
 
   /* Edit mode: reveal the "e.g." text as a normal editable line so it can be clicked. */
   body.jv-editing .card{padding-top:56px}
-  body.jv-editing .ph{position:static;opacity:1!important;pointer-events:auto;display:block;margin-top:6px;font-style:italic;font-size:13.5px}
-  body.jv-editing .ibox{padding-bottom:2px}
+  body.jv-editing .ph{font-style:italic}
 </style>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icon-180.png">
