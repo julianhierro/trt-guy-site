@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>The TRT Guy Newsletter</title>
+<meta content="Weekly emails on PEDs, training and nutrition from TRT Guy." name="description"/>
+<meta property="og:title" content="The TRT Guy Newsletter"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://trt-guy.com/newsletter/"/>
+<meta property="og:image" content="https://trt-guy.com/og-image.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://trt-guy.com/og-image.png"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff; --bg-2:#f4f5f7; --card:#ffffff;
+  --line:rgba(11,13,16,.10); --line-2:rgba(11,13,16,.16);
+  --txt:#0b0d10; --mut:#5b6572;
+  --acc:#1a5cff; --acc-d:#0f3fd6; --acc-soft:rgba(26,92,255,.08);
+  --ok:#15803d;
+  --display:"Barlow Condensed",Impact,"Haettenschweiler","Arial Narrow",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--txt);
+  font:400 16px/1.62 Inter,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+h1,h2{font-family:var(--display);font-weight:700;margin:0;line-height:1.02;letter-spacing:.005em}
+p{margin:0 0 12px}
+
+.deco{position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column}
+.deco::before{
+  content:"";position:absolute;inset:-30% -10% auto -10%;height:120%;pointer-events:none;
+  background:radial-gradient(62% 54% at 50% 8%,rgba(26,92,255,.14),transparent 66%);
+}
+.deco::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(11,13,16,.07) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(11,13,16,.07) 1px,transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(70% 56% at 50% 16%,#000,transparent 76%);
+  mask-image:radial-gradient(70% 56% at 50% 16%,#000,transparent 76%);
+}
+.wrap{position:relative;z-index:2;width:100%;max-width:560px;margin:0 auto;padding:34px 22px 56px}
+
+.brand{
+  font-family:var(--display);font-size:21px;letter-spacing:.12em;text-transform:uppercase;
+  text-align:center;margin-bottom:clamp(34px,9vw,74px);
+}
+.head{text-align:center}
+h1{font-size:clamp(44px,11vw,62px);text-transform:uppercase}
+h1 em{font-style:normal;color:var(--acc)}
+.rule{height:3px;width:78px;background:var(--acc);border-radius:3px;margin:18px auto 0}
+.sub{
+  font-family:var(--display);font-size:clamp(17px,4.4vw,20px);line-height:1.2;
+  text-transform:uppercase;font-weight:600;margin:18px auto 0;max-width:26ch;
+}
+.lede{color:var(--mut);margin:16px auto 0;max-width:44ch;font-size:15.5px}
+.bullets{list-style:none;margin:22px auto 0;padding:0;max-width:34ch;text-align:left;display:inline-block}
+.bullets li{position:relative;padding:9px 0 9px 30px;font-size:16px;line-height:1.45;color:var(--txt)}
+.bullets li::before{content:"✓";position:absolute;left:0;top:8px;color:var(--acc);font-weight:700;font-size:17px;line-height:1}
+
+form{margin:clamp(26px,6vw,36px) 0 0}
+.field{
+  width:100%;font:500 16px/1 Inter,sans-serif;color:var(--txt);background:#fff;
+  border:1px solid var(--line-2);border-radius:12px;padding:17px 16px;outline:0;margin-bottom:10px;
+  transition:border-color .16s,box-shadow .16s;
+}
+.field::placeholder{color:#8b939f}
+.field:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(26,92,255,.14)}
+.btn{
+  width:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  font:700 17px/1 Inter,sans-serif;padding:19px 28px;border:0;border-radius:12px;cursor:pointer;
+  color:#fff;background:var(--acc);box-shadow:0 8px 22px rgba(26,92,255,.26);
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.btn:hover{background:var(--acc-d);transform:translateY(-2px);box-shadow:0 14px 30px rgba(26,92,255,.32)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.btn .arr{transition:transform .16s ease}
+.btn:hover .arr{transform:translateX(4px)}
+.err{color:#b91c1c;font-size:14px;margin:8px 0 0;min-height:20px}
+.fine{margin:14px 0 0;font-size:13px;color:#79828f;text-align:center;line-height:1.5}
+
+.done{display:none;text-align:center;padding:12px 0 0}
+.done.on{display:block}
+.done .tick{
+  width:60px;height:60px;border-radius:50%;margin:0 auto 18px;
+  background:rgba(21,128,61,.1);border:2px solid rgba(21,128,61,.35);
+  display:flex;align-items:center;justify-content:center;
+}
+.done .tick svg{width:28px;height:28px;color:var(--ok)}
+.done h2{font-size:32px;text-transform:uppercase;margin-bottom:10px}
+.done p{color:var(--mut);max-width:38ch;margin-inline:auto}
+form.hide{display:none}
+
+footer{
+  position:relative;z-index:2;text-align:center;padding:0 22px 30px;
+  font-size:12.5px;color:#8b939f;
+}
+</style>
+<script>window.JV_EDITOR_EARLY={ site:"td-newsletter", page:1, noAuth:true, pwKey:"trtdad", api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<style>html.jv-hold body,html.jv-pending body{visibility:hidden}</style>
+<script>
+(function () {
+  var p = new URLSearchParams(location.search);
+  var editing = p.get("edit") === "1" || p.get("view") === "preview" || p.get("mecanvas") === "1";
+  try { if (window.self !== window.top) editing = true; } catch (e) { editing = true; }
+  if (editing) {
+    // editor.js clears jv-pending in reveal(), once published edits AND any local
+    // draft have been applied. Without this the editor showed the old file first.
+    document.documentElement.classList.add("jv-pending");
+    setTimeout(function () { document.documentElement.classList.remove("jv-pending"); }, 4000);
+    return;
+  }
+  var cfg = window.JV_EDITOR_EARLY || null;  // set just below, before this runs
+  // Hold the paint only when the last visit found the store ahead of this file —
+  // i.e. someone published and it hasn't been baked back in yet. In the normal
+  // case (file is current) nothing is hidden and the page paints immediately.
+  // Hold unless the last check proved THIS build is already current. Keyed by the
+  // bake stamp, so a redeploy invalidates it automatically.
+  window.__jvFreshKey = "jv-fresh:" + (cfg ? cfg.site : "");
+  var stamp = window.JV_BAKED_AT || "none";
+  var knownCurrent = false;
+  try {
+    var hasCache = !!localStorage.getItem("jv-edits:" + (cfg ? cfg.site : ""));
+    // Cached edits mean this file is behind the published copy, whatever any
+    // older freshness flag claims. Hold either way — the replay is synchronous.
+    knownCurrent = !hasCache && localStorage.getItem(window.__jvFreshKey) === stamp;
+  } catch (e) {}
+  var release = function () { document.documentElement.classList.remove("jv-hold"); };
+  window.__jvRelease = release;
+  if (!knownCurrent) {
+    document.documentElement.classList.add("jv-hold");
+    setTimeout(release, 3000);               // only a first-ever visit waits here; every later
+                                             // visit replays from cache and never holds at all
+  }
+  window.__jvFresh = cfg ? fetch(cfg.api + "?site=" + encodeURIComponent(cfg.site) + "&page=" + (cfg.page || 1) + "&t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; }) : Promise.resolve(null);
+})();
+</script>
+<style>.brand{display:inline-block!important;height:30px!important;width:auto!important;aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat!important;font-size:0!important;color:transparent!important;overflow:hidden;letter-spacing:0!important}</style>
+</head>
+<body>
+<div class="deco" data-eid="e1">
+<div class="wrap" data-eid="e2">
+<div class="brand" data-eid="e3">TRT Guy</div>
+<div class="head" data-eid="e4" id="head">
+<h1 data-eid="e5">Fertility Guide<br><em data-eid="e6">For Men</em></h1>
+<div class="rule" data-eid="e7"></div>
+<ul class="bullets" data-eid="e8">
+<li data-eid="e8a">Add your first bullet point here — click to edit.</li>
+<li data-eid="e8b">Add your second bullet point here — click to edit.</li>
+<li data-eid="e8c">Add your third bullet point here — click to edit.</li>
+</ul>
+</div>
+<form data-eid="e10" id="form" novalidate="">
+<input autocomplete="email" class="field" data-eid="e12" id="email" inputmode="email" name="email" placeholder="Email address" required="" type="email"/>
+<input autocomplete="given-name" class="field" data-eid="e11" id="fname" name="firstName" placeholder="First name" required="" type="text"/>
+<button class="btn" data-eid="e13" id="go" type="submit">Send me the guide <span class="arr" data-eid="e14">→</span></button>
+<p class="err" data-eid="e15" id="err" role="alert"></p>
+<p class="fine" data-eid="e16">I'll email it straight over. Unsubscribe any time.</p>
+</form>
+<div class="done" data-eid="e17" id="done">
+<div class="tick" data-eid="e18">
+<svg data-eid="e19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5" data-eid="e20"></path></svg>
+</div>
+<h2 data-eid="e21">Check your inbox</h2>
+<p data-eid="e22">The guide is on its way. If it's not there in a couple of minutes, have a look in promotions or spam.</p>
+</div>
+</div>
+</div>
+<footer data-eid="e23">© <span data-eid="e24" id="yr"></span> TRT Guy · Educational only, not medical advice.</footer>
+<script>
+/* Leads go through the TRT Guy site's own serverless proxy, which talks to
+   GoHighLevel. The token stays on the server. Tags are applied server-side
+   from `source`, so the browser can't inject its own. */
+var TRACK_URL = 'https://jv-dashboard-chi.vercel.app/api/pageview';
+var PAGE_KEY  = 'trtguy-newsletter';
+function tdVisitor(){
+  try {
+    var k = 'td-vid', v = localStorage.getItem(k);
+    if (!v) { v = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem(k, v); }
+    return v;
+  } catch (e) { return 'anon'; }
+}
+function tdUtm(){
+  var keys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+  var sp = new URLSearchParams(location.search), store = {}, out = '';
+  try { store = JSON.parse(sessionStorage.getItem('td-utm') || '{}'); } catch (e) {}
+  keys.forEach(function(k){ var v = sp.get(k); if (v) store[k] = v; });
+  try { sessionStorage.setItem('td-utm', JSON.stringify(store)); } catch (e) {}
+  keys.forEach(function(k){ if (store[k]) out += '&' + k + '=' + encodeURIComponent(store[k]); });
+  return out;
+}
+function track(evt){
+  var u = TRACK_URL + '?p=' + encodeURIComponent(PAGE_KEY) + '&e=' + evt +
+          '&v=' + encodeURIComponent(tdVisitor()) + tdUtm();
+  // sendBeacon survives the redirect that follows; fetch/keepalive does not
+  try { if (navigator.sendBeacon && navigator.sendBeacon(u)) return; } catch (e) {}
+  try { new Image().src = u; } catch (e) {}
+}
+track('view');
+
+var SUBMIT_URL = 'https://trt-guy-site.vercel.app/api/submit';
+var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+var form = document.getElementById('form');
+var fname = document.getElementById('fname');
+var email = document.getElementById('email');
+var err = document.getElementById('err');
+var go = document.getElementById('go');
+
+form.addEventListener('submit', async function (e) {
+  e.preventDefault();
+  err.textContent = '';
+
+  var first = fname.value.trim();
+  var mail = email.value.trim();
+
+  if (!EMAIL_RE.test(mail)) { err.textContent = 'That email does not look right.'; email.focus(); return; }
+  if (!first) { err.textContent = 'What should I call you?'; fname.focus(); return; }
+
+  go.disabled = true;
+  go.innerHTML = 'Sending&hellip;';
+
+  try {
+    var res = await fetch(SUBMIT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName: first, email: mail, source: 'newsletter' })
+    });
+    if (!res.ok) throw new Error('bad status ' + res.status);
+
+    track('optin');
+    location.href = 'thanks/';
+  } catch (e2) {
+    go.disabled = false;
+    go.innerHTML = 'Send me the guide <span class="arr">&rarr;</span>';
+    err.textContent = 'That did not go through. Give it one more try.';
+  }
+});
+</script>
+<script>window.JV_EDITOR={ site:"td-newsletter", page:1, noAuth:true, pwKey:"trtdad", api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el) {
+    return !!(SKIP[el.tagName]
+      || (el.namespaceURI === SVG && el.tagName.toLowerCase() !== "svg")
+      || (el.closest && el.closest(".jv-toolbar, .jv-launcher"))
+      || (el.closest && el.closest("[data-noedit]")));
+  }
+  var n = 0;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function (el) {
+    if (skip(el)) return;
+    if (!el.hasAttribute("data-eid")) el.setAttribute("data-eid", "e" + (++n));
+  });
+  var BLOCKSEL = "address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el) {
+    if (skip(el)) return false;
+    if (!(el.textContent || "").replace(/\s+/g, " ").trim()) return false;
+    if (el.querySelector(BLOCKSEL)) return false;
+    var anchors = el.querySelectorAll("a");
+    if (anchors.length) {
+      var clone = el.cloneNode(true);
+      Array.prototype.forEach.call(clone.querySelectorAll("a"), function (a) { if (a.parentNode) a.parentNode.removeChild(a); });
+      if (!(clone.textContent || "").replace(/\s+/g, " ").trim()) return false;
+    }
+    return true;
+  }
+  (function walk(el) {
+    var c = el.children;
+    for (var i = 0; i < c.length; i++) {
+      var child = c[i];
+      if (skip(child)) continue;
+      if (isTextLeaf(child)) child.setAttribute("data-etext", "1");
+      else walk(child);
+    }
+  })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function (el) {
+    if (skip(el) || el.closest("[data-etext]")) return;
+    Array.prototype.slice.call(el.childNodes).forEach(function (node) {
+      if (node.nodeType === 3 && node.nodeValue && node.nodeValue.replace(/\s+/g, " ").trim()) {
+        var span = document.createElement("span");
+        span.setAttribute("data-eid", "e" + (++n));
+        span.setAttribute("data-etext", "1");
+        node.parentNode.replaceChild(span, node);
+        span.appendChild(node);
+      }
+    });
+  });
+})();
+</script>
+<script>
+/* ── fast path ────────────────────────────────────────────────────────────
+   The HTML above already contains every published edit (baked at deploy time),
+   so a visitor needs no editor and no API call — the page you see first paint
+   IS the final page. The editor is fetched only when you're editing.
+   If something was published after this file was baked, the tiny check at the
+   bottom pulls it in; normally it matches and nothing moves.
+------------------------------------------------------------------------- */
+(function () {
+  var p = new URLSearchParams(location.search);
+  var editing = p.get("edit") === "1" || p.get("view") === "preview" || p.get("mecanvas") === "1";
+  try { if (window.self !== window.top) editing = true; } catch (e) { editing = true; }
+
+  if (editing) {
+    var l = document.createElement("link");
+    l.rel = "stylesheet"; l.href = "/editor.css?v=27";
+    document.head.appendChild(l);
+    var s = document.createElement("script");
+    s.src = "/editor.js?v=27";
+    document.body.appendChild(s);
+    return;
+  }
+
+  var cfg = window.JV_EDITOR || {};
+  if (!cfg.api || !cfg.site) { if (window.__jvRelease) window.__jvRelease(); return; }
+  var baked = window.JV_BAKED_AT || "";
+  var CACHE = "jv-edits:" + cfg.site;
+
+  var ATTR_OK = ["href","target","rel","data-buy","src","alt"];
+  var byEid = function (id) { return id ? document.querySelector('[data-eid="' + id + '"]') : null; };
+
+  // Same order the editor applies them in: patch, insert, reorder, attrs, remove.
+  function applyAll(edits) {
+    if (!Array.isArray(edits)) return;
+    var patches = [], inserts = [], reorders = [], removals = [], css = [], attrs = [];
+    edits.forEach(function (e) {
+      if (!e) return;
+      if (e.css && e.eid && e.props && (e.d === "m" || e.d === "d")) css.push(e);
+      else if (e.insert) inserts.push(e);
+      else if (e.reorder) reorders.push(e);
+      else if (e.removed && e.eid) removals.push(e.eid);
+      else if (e.attrs && e.eid) attrs.push(e);
+      else if (e.eid) patches.push(e);
+    });
+    patches.forEach(function (e) {
+      var el = byEid(e.eid); if (!el) return;
+      if (typeof e.html === "string") el.innerHTML = e.html;
+      if (typeof e.style === "string") el.setAttribute("style", e.style);
+    });
+    inserts.forEach(function (e) {
+      if (!e.id || typeof e.html !== "string" || byEid(e.id)) return;
+      var tmp = document.createElement("div"); tmp.innerHTML = e.html.trim();
+      var node = tmp.firstElementChild; if (!node) return;
+      var after = byEid(e.afterEid), parent = byEid(e.parentEid);
+      if (after && after.parentNode) after.parentNode.insertBefore(node, after.nextSibling);
+      else if (parent) parent.appendChild(node);
+    });
+    reorders.forEach(function (e) {
+      var c = byEid(e.eid); if (!c || !Array.isArray(e.order)) return;
+      e.order.forEach(function (id) { var ch = byEid(id); if (ch && ch.parentElement === c) c.appendChild(ch); });
+    });
+    attrs.forEach(function (e) {
+      var el = byEid(e.eid); if (!el) return;
+      var gone = (e.attrs["-removed"] || "").split(",");
+      Object.keys(e.attrs).forEach(function (k) {
+        if (k === "-removed" || ATTR_OK.indexOf(k) === -1) return;
+        el.setAttribute(k, e.attrs[k]);
+      });
+      gone.forEach(function (k) { if (k && ATTR_OK.indexOf(k) !== -1) el.removeAttribute(k); });
+    });
+    removals.forEach(function (id) { var el = byEid(id); if (el && el.parentNode) el.parentNode.removeChild(el); });
+    if (css.length) {
+      var sheet = "", media = { m: "@media (max-width:767px)", d: "@media (min-width:1024px)" };
+      ["m", "d"].forEach(function (k) {
+        var items = css.filter(function (c) { return c.d === k; });
+        if (!items.length) return;
+        sheet += media[k] + "{";
+        items.forEach(function (c) {
+          sheet += '[data-eid="' + c.eid + '"]{';
+          Object.keys(c.props).forEach(function (p) { sheet += p + ":" + c.props[p] + " !important;"; });
+          sheet += "}";
+        });
+        sheet += "}";
+      });
+      if (sheet) { var st = document.createElement("style"); st.textContent = sheet; document.head.appendChild(st); }
+    }
+  }
+
+  // ── 1. replay the cached copy synchronously, before the browser paints ──
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem(CACHE) || "null"); } catch (e) {}
+  if (cached && Array.isArray(cached.edits) && (!baked || cached.updatedAt > baked)) {
+    try { applyAll(cached.edits); } catch (e) {}
+  }
+  if (window.__jvRelease) window.__jvRelease();     // nothing left to wait for
+
+  // ── 2. revalidate in the background; only touch the page if it changed ──
+  (window.__jvFresh || Promise.resolve(null))
+    .then(function (d) {
+      if (!d || !d.updatedAt || !Array.isArray(d.edits)) return;
+      var current = baked && d.updatedAt <= baked;
+      try {
+        if (current) { localStorage.setItem(window.__jvFreshKey, baked); localStorage.removeItem(CACHE); }
+        else { localStorage.setItem(CACHE, JSON.stringify({ updatedAt: d.updatedAt, edits: d.edits })); }
+      } catch (e) {}
+      if (current) return;                          // the file is already right
+      if (cached && cached.updatedAt === d.updatedAt) return;   // already replayed from cache
+      applyAll(d.edits);
+    })
+    .catch(function () {})
+    .then(function () { if (window.__jvRelease) window.__jvRelease(); });
+})();
+</script>
+</body>
+</html>

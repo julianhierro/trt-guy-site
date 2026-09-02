@@ -202,7 +202,7 @@
           <option>Yes, currently on cycle</option>
         </select>
       </div>
-      <div class="field" id="pedDetailsField" style="display:none"><label>Describe it — what, when &amp; doses <span class="req">*</span></label><div class="hint">Compounds, cycles, and roughly when. The more honest, the safer we can program.</div><textarea name="onboarding_previous_ped_details" placeholder="e.g. 2 test/deca cycles in 2021–22, last one 500mg test/wk for 12 wks"></textarea></div>
+      <div class="field" id="pedDetailsField" style="display:none"><label>Describe it — what, when &amp; doses <span class="req">*</span></label><div class="hint">Compounds, cycles, doses, and roughly when — share as much of your history as you can. The more honest, the safer we can program.</div><textarea name="onboarding_previous_ped_details" placeholder="e.g. 2 test/deca cycles in 2021–22, last one 500mg test/wk for 12 wks"></textarea></div>
     </section>
 
     <!-- 5. Enhancement & risk -->
@@ -332,14 +332,17 @@
 
       <div class="field">
         <label>Latest bloodwork</label>
-        <div class="hint">Upload your most recent labs — PDF or a photo of the report.</div>
+        <div class="hint">Upload your most recent labs — PDF or a photo of the report. Add as many as you have; you can attach more than one.</div>
         <label class="drop" id="bloodDrop">
           <input type="file" id="bloodwork" name="bloodwork" accept="image/*,application/pdf" multiple>
           <div class="ic">🩸</div>
           <div class="t">Tap to add bloodwork</div>
-          <div class="s">PDF or image</div>
+          <div class="s">PDF or image — one or several</div>
         </label>
         <div class="filelist" id="bloodList"></div>
+        <label style="margin-top:14px">Or paste a bloodwork link <span style="font-weight:400;opacity:.6">(optional)</span></label>
+        <div class="hint">If your labs live online — a Google Sheet, Excel, or a link to a PDF — drop the link here instead of, or as well as, uploading.</div>
+        <input type="url" name="onboarding_bloodwork_link" placeholder="https://…" inputmode="url" autocomplete="off">
       </div>
 
       <div class="field">
