@@ -58,10 +58,14 @@
       <label>Email <span class="req">*</span></label>
       <input type="email" id="email" placeholder="Your best email" autocomplete="email" required>
       <label>Phone <span class="req">*</span></label>
-      <input type="tel" id="phone" placeholder="So we can reach you" autocomplete="tel" required>
+      <input type="tel" id="phone" placeholder="e.g. +1 555 123 4567" autocomplete="tel" required>
+      <small data-eid="e741" style="display:block;margin:-6px 0 8px;color:var(--mut);font-size:12.5px">Please include your country code (e.g. +1 for the US).</small>
 
       <label data-eid="e731">Instagram handle</label>
       <input type="text" id="instagram" data-eid="e732" placeholder="@yourhandle" autocomplete="off">
+
+      <label data-eid="e743">Where are you based? <span class="req" data-eid="e744">*</span></label>
+      <input type="text" id="based" data-eid="e745" placeholder="City, Country" autocomplete="off">
 
       <label>What are your short-term goals? <span class="req">*</span></label>
       <textarea id="short_term_goals" placeholder="Next 1–3 months" required></textarea>
@@ -158,7 +162,7 @@ $('#appForm').addEventListener('submit', async function(e){
   if(!name){ err.textContent='Please enter your first name.'; return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
   if(!phone){ err.textContent='Please enter your phone.'; return; }
-  var ids=['short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
+  var ids=['based','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
   var payload={firstName:name,email:email,phone:phone,qa:[]};
   // Instagram handle — optional, sent only if they fill it in.
   var ig=$('#instagram').value.trim(); if(ig){ payload['instagram']=ig; payload.qa.push({q:labelFor('instagram'),a:ig}); }
