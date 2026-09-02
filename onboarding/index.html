@@ -133,9 +133,9 @@
       <div class="bar-label" id="barLabel">0% complete</div>
     </div>
 
-    <!-- 1. Basics -->
+    <!-- 1. Contact Details -->
     <section class="card">
-      <div class="sec-head"><div class="sec-num">1</div><div class="sec-title">The Basics</div></div>
+      <div class="sec-head"><div class="sec-num">1</div><div class="sec-title">Contact Details</div></div>
       <p class="sec-sub">Make sure we can reach you.</p>
       <input type="hidden" name="firstName" id="firstName">
       <div class="field"><label>Full name <span class="req">*</span></label><input type="text" name="onboarding_full_name" id="fullName" autocomplete="name" required></div>
@@ -148,12 +148,15 @@
         <div><label>City / timezone</label><input type="text" name="onboarding_location_timezone" placeholder="e.g. Austin, CST"></div>
       </div>
       <div class="field"><label>Instagram handle</label><input type="text" name="onboarding_instagram" placeholder="@yourhandle" autocomplete="off"></div>
+      <div class="field"><label>Best way to reach you</label>
+        <select name="onboarding_best_contact_method"><option value="">Select…</option><option>Text</option><option>Email</option><option>WhatsApp</option><option>Phone call</option></select>
+      </div>
     </section>
 
-    <!-- 2. Body -->
+    <!-- 2. Body Stats -->
     <section class="card">
-      <div class="sec-head"><div class="sec-num">2</div><div class="sec-title">Your Body</div></div>
-      <p class="sec-sub">Your starting stats.</p>
+      <div class="sec-head"><div class="sec-num">2</div><div class="sec-title">Body Stats</div></div>
+      <p class="sec-sub">Your starting point. Photos stay private — only your coach sees them.</p>
       <input type="hidden" name="units" id="unitsField" value="imperial">
       <div class="field">
         <div class="unit-toggle" role="group" aria-label="Units">
@@ -165,138 +168,9 @@
         <div><label>Height <span class="req">*</span></label><input type="text" name="onboarding_height" id="fHeight" placeholder="e.g. 5'11&quot;" required></div>
         <div><label>Current weight <span class="req">*</span></label><input type="text" name="onboarding_current_weight" id="fCurWeight" placeholder="e.g. 205 lb" required></div>
       </div>
-    </section>
-
-    <!-- 3. Goals -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">3</div><div class="sec-title">Your Goals</div></div>
-      <p class="sec-sub">What are we actually here to do.</p>
-      <div class="field"><label>Primary goal <span class="req">*</span></label><textarea name="onboarding_primary_goal" placeholder="Lose fat, build muscle, feel like yourself again..." required></textarea></div>
-      <div class="field row">
-        <div><label>Short-term goal <span class="hint" style="display:inline">(1–3 months)</span></label><textarea name="onboarding_short_term_goals" placeholder="What do you want to hit first?"></textarea></div>
-        <div><label>Long-term goal <span class="hint" style="display:inline">(6–12+ months)</span></label><textarea name="onboarding_long_term_goals" placeholder="Where do you want to be a year from now?"></textarea></div>
-      </div>
-      <div class="field"><label>What have you tried before?</label><div class="hint">Diets, programs, coaches — what worked, and what didn't.</div><textarea name="onboarding_past_attempts" placeholder="e.g. Keto dropped weight fast but I rebounded; ran a bro-split for a year with no real change"></textarea></div>
-      <div class="field"><label>Why now? What changed?</label><textarea name="onboarding_why_now" placeholder="What made you finally pull the trigger on this?"></textarea></div>
-      <div class="field"><label>Target timeline</label><input type="text" name="onboarding_target_timeline" placeholder="e.g. 90 days, by summer, no rush"></div>
-    </section>
-
-    <!-- 4. TRT status -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">4</div><div class="sec-title">PED / TRT Status</div></div>
-      <p class="sec-sub">Where you're at with hormones right now.</p>
-      <div class="field"><label>Are you currently on TRT or AAS (anabolic-androgenic steroids)? <span class="req">*</span></label>
-        <select name="onboarding_on_trt_now" required>
-          <option value="">Select…</option>
-          <option>Yes — using anabolic steroids</option>
-          <option>Yes — currently on TRT</option>
-          <option>No — not yet, want to start</option>
-          <option>No — just exploring</option>
-          <option>No — I'm not interested in using TRT or PEDs</option>
-        </select>
-      </div>
-      <div class="field"><label>Current dose &amp; protocol</label><div class="hint">What TRT or PEDs, how much, and how often?</div><textarea name="onboarding_trt_protocol_dose" placeholder="e.g. 120mg test cypionate/week, split E3.5D + 0.25mg anastrozole; or your full cycle"></textarea></div>
-      <div class="field row">
-        <div><label>How long have you been using TRT / PEDs?</label><input type="text" name="onboarding_trt_duration" placeholder="e.g. 8 months"></div>
-        <div><label>Clinic / prescriber / coach</label><input type="text" name="onboarding_trt_prescriber" placeholder="Clinic, prescriber, coach — or self-directed"></div>
-      </div>
-    </section>
-
-    <!-- 5. Enhancement & risk -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">5</div><div class="sec-title">Direction &amp; Risk</div></div>
-      <p class="sec-sub">This shapes the entire plan — be straight with your coach.</p>
-      <div class="field"><label>What are you looking to do? <span class="req">*</span></label>
-        <div class="choices" id="enhChoices">
-          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Optimize while staying natural" required><span><b>Optimize while staying natural</b><span>No TRT, no PEDs — get the most out of my body naturally.</span></span></label>
-          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Optimize with TRT only"><span><b>Optimize with TRT only</b><span>Dial in my hormones and train hard. Nothing beyond TRT.</span></span></label>
-          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Open to additional enhancement beyond TRT"><span><b>Open to additional enhancement</b><span>I'm open to going beyond TRT to reach my goals.</span></span></label>
-        </div>
-      </div>
-      <div class="field"><label>Risk tolerance <span class="req">*</span></label>
-        <div class="hint">Be honest — this tells your coach how aggressive to get.</div>
-        <div class="slider-wrap">
-          <div class="slider-val" id="riskVal">5</div>
-          <input type="range" name="onboarding_risk_tolerance_1_to_10" id="risk" min="1" max="10" value="5">
-          <div class="slider-ends"><span>1 — My health is #1, I won't risk it</span><span>10 — I'll do anything to hit my goals</span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 6. Health -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">6</div><div class="sec-title">Health &amp; Safety</div></div>
-      <p class="sec-sub">So we don't hurt you. Leave blank if none.</p>
-      <div class="field"><label>Medical conditions</label><textarea name="onboarding_medical_conditions" placeholder="Blood pressure, heart, liver, kidney, diabetes, mental health..."></textarea></div>
-      <div class="field"><label>Medications &amp; supplements</label><textarea name="onboarding_medications_supplements" placeholder="Everything you take regularly"></textarea></div>
-      <div class="field"><label>Injuries or physical limitations</label><textarea name="onboarding_injuries_limitations" placeholder="Bad shoulder, low back, knees..."></textarea></div>
-      <div class="field"><label>Allergies</label><input type="text" name="onboarding_allergies" placeholder="Food, medication, or none"></div>
-    </section>
-
-    <!-- 7. Training -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">7</div><div class="sec-title">Training</div></div>
-      <p class="sec-sub">How you move now.</p>
-      <div class="field"><label>Experience level <span class="req">*</span></label>
-        <select name="onboarding_training_experience" required>
-          <option value="">Select…</option>
-          <option>Beginner (under 1 year)</option>
-          <option>Intermediate (1–3 years)</option>
-          <option>Advanced (3+ years)</option>
-          <option>Returning after a long break</option>
-        </select>
-      </div>
-      <div class="field"><label>Current routine</label><textarea name="onboarding_current_routine" placeholder="What does your training look like right now?"></textarea></div>
-      <div class="field"><label>Any movements or exercises you'd rather not do?</label><div class="hint">List anything you want to avoid — and if so, why (injury, discomfort, preference).</div><textarea name="onboarding_avoid_exercises" placeholder="e.g. No back squats — old knee injury"></textarea></div>
-      <div class="field row">
-        <div><label>Days per week available <span class="req">*</span></label>
-          <select name="onboarding_days_per_week" required>
-            <option value="">Select…</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
-          </select>
-        </div>
-        <div><label>Gym or home?</label><input type="text" name="onboarding_gym_equipment" placeholder="Full gym / home setup + equipment"></div>
-      </div>
-    </section>
-
-    <!-- 8. Nutrition -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">8</div><div class="sec-title">Nutrition</div></div>
-      <p class="sec-sub">How you eat now — no judgment.</p>
-      <div class="field"><label>Do you know how to track macros? <span class="req">*</span></label>
-        <select name="onboarding_tracks_macros" id="tracksMacros" required>
-          <option value="">Select…</option>
-          <option>Yes, I track macros</option>
-          <option>Somewhat / used to</option>
-          <option>No, I don't</option>
-        </select>
-      </div>
-      <div class="field" id="caloriesField" style="display:none"><label>Roughly how many calories a day are you eating now?</label><input type="text" name="onboarding_current_calories" placeholder="e.g. 2,400 kcal"></div>
-      <div class="field"><label>Typical day of eating</label><textarea name="onboarding_typical_day_of_eating" placeholder="Walk me through what you ate yesterday"></textarea></div>
-      <div class="field"><label>Restrictions / dislikes</label><textarea name="onboarding_dietary_restrictions" placeholder="Foods you won't eat, allergies, vegetarian, etc."></textarea></div>
-      <div class="field"><label>Alcohol per week</label><input type="text" name="onboarding_alcohol_per_week" placeholder="e.g. 2–3 drinks, none"></div>
-    </section>
-
-    <!-- 9. Lifestyle -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">9</div><div class="sec-title">Lifestyle</div></div>
-      <p class="sec-sub">Recovery is where results happen.</p>
-      <div class="field row">
-        <div><label>Average sleep / night</label><input type="text" name="onboarding_avg_sleep" placeholder="e.g. 6.5 hrs"></div>
-        <div><label>Stress level</label>
-          <select name="onboarding_stress_level"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Through the roof</option></select>
-        </div>
-      </div>
-      <div class="field"><label>Job / daily activity</label><input type="text" name="onboarding_job_activity" placeholder="Desk job, on my feet all day, shift work..."></div>
-    </section>
-
-    <!-- 10. Uploads -->
-    <section class="card">
-      <div class="sec-head"><div class="sec-num">10</div><div class="sec-title">Photos &amp; Bloodwork</div></div>
-      <p class="sec-sub">Your starting point. Wear shorts/boxers (or top + shorts) — no nudes. Good lighting, plain background. Stays private, only your coach sees it.</p>
-
       <div class="field">
         <label>Progress photos <span class="req">*</span></label>
-        <div class="hint">One full-body shot of each angle — front, side, and back.</div>
+        <div class="hint">One full-body shot of each angle — front, side, and back. Shorts/boxers (or top + shorts), no nudes. Good lighting, plain background.</div>
         <div class="photo-grid">
           <div>
             <label class="drop pose" id="frontDrop">
@@ -327,7 +201,131 @@
           </div>
         </div>
       </div>
+      <div class="field">
+        <label>Can we share your progress photos on social media? <span class="req">*</span></label>
+        <div class="hint">Optional — real transformations inspire other guys. Your call, either way.</div>
+        <div class="choices" data-choicegroup>
+          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="Yes, you can share my photos" required><span><b>Yes, you can share them</b></span></label>
+          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="Yes, but blur my face"><span><b>Yes, but blur my face</b></span></label>
+          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="No, keep them private"><span><b>No — keep them private</b></span></label>
+        </div>
+      </div>
+    </section>
 
+    <!-- 3. Your Goals -->
+    <section class="card">
+      <div class="sec-head"><div class="sec-num">3</div><div class="sec-title">Your Goals</div></div>
+      <p class="sec-sub">What are we actually here to do.</p>
+      <div class="field"><label>Primary goal <span class="req">*</span></label><textarea name="onboarding_primary_goal" placeholder="Lose fat, build muscle, feel like yourself again..." required></textarea></div>
+      <div class="field row">
+        <div><label>Short-term goal <span class="hint" style="display:inline">(1–3 months)</span></label><textarea name="onboarding_short_term_goals" placeholder="What do you want to hit first?"></textarea></div>
+        <div><label>Long-term goal <span class="hint" style="display:inline">(6–12+ months)</span></label><textarea name="onboarding_long_term_goals" placeholder="Where do you want to be a year from now?"></textarea></div>
+      </div>
+      <div class="field"><label>Target timeline</label><input type="text" name="onboarding_target_timeline" placeholder="e.g. 90 days, by summer, no rush"></div>
+    </section>
+
+    <!-- 4. Background -->
+    <section class="card">
+      <div class="sec-head"><div class="sec-num">4</div><div class="sec-title">Background</div></div>
+      <p class="sec-sub">Where you're coming from.</p>
+      <div class="field"><label>What have you tried before?</label><div class="hint">Diets, programs, coaches — what worked, and what didn't.</div><textarea name="onboarding_past_attempts" placeholder="e.g. Keto dropped weight fast but I rebounded; ran a bro-split for a year with no real change"></textarea></div>
+      <div class="field"><label>Why now? What changed?</label><textarea name="onboarding_why_now" placeholder="What made you finally pull the trigger on this?"></textarea></div>
+    </section>
+
+    <!-- 5. Training -->
+    <section class="card">
+      <div class="sec-head"><div class="sec-num">5</div><div class="sec-title">Training</div></div>
+      <p class="sec-sub">How you move now.</p>
+      <div class="field"><label>Experience level <span class="req">*</span></label>
+        <select name="onboarding_training_experience" required>
+          <option value="">Select…</option>
+          <option>Beginner (under 1 year)</option>
+          <option>Intermediate (1–3 years)</option>
+          <option>Advanced (3+ years)</option>
+          <option>Returning after a long break</option>
+        </select>
+      </div>
+      <div class="field"><label>Current routine</label><textarea name="onboarding_current_routine" placeholder="What does your training look like right now?"></textarea></div>
+      <div class="field"><label>Any movements or exercises you'd rather not do?</label><div class="hint">List anything you want to avoid — and if so, why (injury, discomfort, preference).</div><textarea name="onboarding_avoid_exercises" placeholder="e.g. No back squats — old knee injury"></textarea></div>
+      <div class="field"><label>Injuries or physical limitations</label><textarea name="onboarding_injuries_limitations" placeholder="Bad shoulder, low back, knees..."></textarea></div>
+      <div class="field row">
+        <div><label>Days per week available <span class="req">*</span></label>
+          <select name="onboarding_days_per_week" required>
+            <option value="">Select…</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+          </select>
+        </div>
+        <div><label>Gym or home?</label><input type="text" name="onboarding_gym_equipment" placeholder="Full gym / home setup + equipment"></div>
+      </div>
+    </section>
+
+    <!-- 6. Nutrition -->
+    <section class="card">
+      <div class="sec-head"><div class="sec-num">6</div><div class="sec-title">Nutrition</div></div>
+      <p class="sec-sub">How you eat now — no judgment.</p>
+      <div class="field"><label>Do you know how to track macros? <span class="req">*</span></label>
+        <select name="onboarding_tracks_macros" id="tracksMacros" required>
+          <option value="">Select…</option>
+          <option>Yes, I track macros</option>
+          <option>Somewhat / used to</option>
+          <option>No, I don't</option>
+        </select>
+      </div>
+      <div class="field" id="caloriesField" style="display:none"><label>Roughly how many calories a day are you eating now?</label><input type="text" name="onboarding_current_calories" placeholder="e.g. 2,400 kcal"></div>
+      <div class="field"><label>Typical day of eating</label><textarea name="onboarding_typical_day_of_eating" placeholder="Walk me through what you ate yesterday"></textarea></div>
+      <div class="field"><label>Restrictions / dislikes</label><textarea name="onboarding_dietary_restrictions" placeholder="Foods you won't eat, allergies, vegetarian, etc."></textarea></div>
+    </section>
+
+    <!-- 7. Lifestyle -->
+    <section class="card">
+      <div class="sec-head"><div class="sec-num">7</div><div class="sec-title">Lifestyle</div></div>
+      <p class="sec-sub">Recovery is where results happen.</p>
+      <div class="field row">
+        <div><label>Average sleep / night</label><input type="text" name="onboarding_avg_sleep" placeholder="e.g. 6.5 hrs"></div>
+        <div><label>Stress level</label>
+          <select name="onboarding_stress_level"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Through the roof</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Job / daily activity</label><input type="text" name="onboarding_job_activity" placeholder="Desk job, on my feet all day, shift work..."></div>
+      <div class="field"><label>Alcohol per week</label><input type="text" name="onboarding_alcohol_per_week" placeholder="e.g. 2–3 drinks, none"></div>
+    </section>
+
+    <!-- 8. PED / Health -->
+    <section class="card">
+      <div class="sec-head"><div class="sec-num">8</div><div class="sec-title">PED / Health</div></div>
+      <p class="sec-sub">Where you're at with hormones, and anything that keeps you safe. Leave blank if none.</p>
+      <div class="field"><label>Are you currently on TRT or AAS (anabolic-androgenic steroids)? <span class="req">*</span></label>
+        <select name="onboarding_on_trt_now" required>
+          <option value="">Select…</option>
+          <option>Yes — using anabolic steroids</option>
+          <option>Yes — currently on TRT</option>
+          <option>No — not yet, want to start</option>
+          <option>No — just exploring</option>
+          <option>No — I'm not interested in using TRT or PEDs</option>
+        </select>
+      </div>
+      <div class="field"><label>Current dose &amp; protocol</label><div class="hint">What TRT or PEDs, how much, and how often?</div><textarea name="onboarding_trt_protocol_dose" placeholder="e.g. 120mg test cypionate/week, split E3.5D + 0.25mg anastrozole; or your full cycle"></textarea></div>
+      <div class="field row">
+        <div><label>How long have you been using TRT / PEDs?</label><input type="text" name="onboarding_trt_duration" placeholder="e.g. 8 months"></div>
+        <div><label>Clinic / prescriber / coach</label><input type="text" name="onboarding_trt_prescriber" placeholder="Clinic, prescriber, coach — or self-directed"></div>
+      </div>
+      <div class="field"><label>What are you looking to do? <span class="req">*</span></label>
+        <div class="choices" id="enhChoices">
+          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Optimize while staying natural" required><span><b>Optimize while staying natural</b><span>No TRT, no PEDs — get the most out of my body naturally.</span></span></label>
+          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Optimize with TRT only"><span><b>Optimize with TRT only</b><span>Dial in my hormones and train hard. Nothing beyond TRT.</span></span></label>
+          <label class="choice"><input type="radio" name="onboarding_enhancement_preference" value="Open to additional enhancement beyond TRT"><span><b>Open to additional enhancement</b><span>I'm open to going beyond TRT to reach my goals.</span></span></label>
+        </div>
+      </div>
+      <div class="field"><label>Risk tolerance <span class="req">*</span></label>
+        <div class="hint">Be honest — this tells your coach how aggressive to get.</div>
+        <div class="slider-wrap">
+          <div class="slider-val" id="riskVal">5</div>
+          <input type="range" name="onboarding_risk_tolerance_1_to_10" id="risk" min="1" max="10" value="5">
+          <div class="slider-ends"><span>1 — My health is #1, I won't risk it</span><span>10 — I'll do anything to hit my goals</span></div>
+        </div>
+      </div>
+      <div class="field"><label>Medical conditions</label><textarea name="onboarding_medical_conditions" placeholder="Blood pressure, heart, liver, kidney, diabetes, mental health..."></textarea></div>
+      <div class="field"><label>Medications &amp; supplements</label><textarea name="onboarding_medications_supplements" placeholder="Everything you take regularly"></textarea></div>
+      <div class="field"><label>Allergies</label><input type="text" name="onboarding_allergies" placeholder="Food, medication, or none"></div>
       <div class="field">
         <label>Latest bloodwork</label>
         <div class="hint">Upload your most recent labs — PDF or a photo of the report. Add as many as you have; you can attach more than one.</div>
@@ -342,25 +340,12 @@
         <div class="hint">If your labs live online — a Google Sheet, Excel, or a link to a PDF — drop the link here instead of, or as well as, uploading.</div>
         <input type="url" name="onboarding_bloodwork_link" placeholder="https://…" inputmode="url" autocomplete="off">
       </div>
-
-      <div class="field">
-        <label>Can we share your progress photos on social media? <span class="req">*</span></label>
-        <div class="hint">Optional — real transformations inspire other guys. Your call, either way.</div>
-        <div class="choices" data-choicegroup>
-          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="Yes, you can share my photos" required><span><b>Yes, you can share them</b></span></label>
-          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="Yes, but blur my face"><span><b>Yes, but blur my face</b></span></label>
-          <label class="choice"><input type="radio" name="onboarding_photo_social_consent" value="No, keep them private"><span><b>No — keep them private</b></span></label>
-        </div>
-      </div>
     </section>
 
-    <!-- 11. Wrap -->
+    <!-- 9. Anything Else -->
     <section class="card">
-      <div class="sec-head"><div class="sec-num">11</div><div class="sec-title">Anything Else</div></div>
+      <div class="sec-head"><div class="sec-num">9</div><div class="sec-title">Anything Else</div></div>
       <div class="field"><label>Anything your coach should know?</label><textarea name="onboarding_anything_else" placeholder="Anything we didn't ask that matters"></textarea></div>
-      <div class="field"><label>Best way to reach you</label>
-        <select name="onboarding_best_contact_method"><option value="">Select…</option><option>Text</option><option>Email</option><option>WhatsApp</option><option>Phone call</option></select>
-      </div>
     </section>
 
     <div class="submit-wrap">
