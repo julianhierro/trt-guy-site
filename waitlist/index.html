@@ -79,6 +79,8 @@
         <input type="text" id="fname" placeholder="First name" autocomplete="given-name" required>
         <label>Email <span class="req">*</span></label>
         <input type="email" id="email" placeholder="Your best email" autocomplete="email" required>
+        <label>Phone <span class="req">*</span></label>
+        <input type="tel" id="phone" placeholder="So we can reach you when a spot opens" autocomplete="tel" required>
         <button class="btn" id="joinBtn" type="submit">Join &amp; start my application →</button>
         <div class="err" id="joinErr"></div>
         <div class="fine">🔒 No spam. We'll only reach out about coaching.</div>
@@ -195,21 +197,22 @@ const WORKER_URL = "https://trt-guy-onboarding.julianhierro.workers.dev";
 const API = WORKER_URL.replace(/\/+$/,'');
 const $=s=>document.querySelector(s);
 const re=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const lead={firstName:'',email:''};
+const lead={firstName:'',email:'',phone:''};
 
 function show(id){ document.querySelectorAll('.stepwrap').forEach(s=>s.classList.remove('show')); $('#'+id).classList.add('show'); window.scrollTo({top:0,behavior:'smooth'}); }
 
 // Step 1 → join the waitlist, then reveal the application
 $('#joinForm').addEventListener('submit', async e=>{
   e.preventDefault();
-  const name=$('#fname').value.trim(), email=$('#email').value.trim(), err=$('#joinErr');
+  const name=$('#fname').value.trim(), email=$('#email').value.trim(), phone=$('#phone').value.trim(), err=$('#joinErr');
   if(!name){ err.textContent='Please enter your first name.'; return; }
   if(!re.test(email)){ err.textContent='Please enter a valid email.'; return; }
+  if(!phone){ err.textContent='Please enter your phone.'; return; }
   err.textContent=''; const b=$('#joinBtn'); b.disabled=true; b.textContent='Joining…';
-  lead.firstName=name; lead.email=email;
+  lead.firstName=name; lead.email=email; lead.phone=phone;
   try{
     await fetch(API+'/optin',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({list:'coaching-waitlist',firstName:name,email})});
+      body:JSON.stringify({list:'coaching-waitlist',firstName:name,email,phone})});
   }catch(e){}
   track('optin');
   show('step2');
@@ -223,7 +226,7 @@ $('#appForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const err=$('#appErr');
   const ids=['short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
-  const payload={firstName:lead.firstName,email:lead.email,qa:[]};
+  const payload={firstName:lead.firstName,email:lead.email,phone:lead.phone,qa:[]};
   // Instagram handle — optional, sent only if filled.
   const ig=$('#instagram').value.trim(); if(ig){ payload['instagram']=ig; payload.qa.push({q:labelFor('instagram'),a:ig}); }
   for(const id of ids){ const v=$('#'+id).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+id).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[id]=v; payload.qa.push({q:labelFor(id),a:v}); }
