@@ -667,12 +667,12 @@
       ]
     },
     {
-      id:'protocol', icon:'💊', tag:'Draft', name:'My Current Protocol',
-      description:'Your protocol page — compounds, supplements, training, notes. Editable in the browser; not linked anywhere yet.',
+      id:'protocol', icon:'💊', tag:'Lead Magnet', name:'My Current Protocol',
+      description:'Your protocol page, gated behind a first name + email opt-in. Linked from your Instagram bio.',
       home:'https://trt-guy.com/protocol/',
       pages:[
-        { kind:'asset', key:'trtguy-protocol', tags:[], name:'My Current Protocol',
-          description:'What you are currently running. Edit it in the browser.',
+        { kind:'gate', key:'trtguy-protocol', tags:["trt-guy", "my-protocol"], name:'My Current Protocol',
+          description:'Name + email unlocks the protocol. Add ?edit=1 to edit it — the gate is skipped in edit mode.',
           url:'https://trt-guy.com/protocol/' }
       ]
     },
