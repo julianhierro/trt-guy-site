@@ -64,8 +64,8 @@
       <input type="tel" id="phone" placeholder="e.g. +1 555 123 4567" autocomplete="tel" required>
       <small data-eid="e741" style="display:block;margin:-6px 0 8px;color:var(--mut);font-size:12.5px">Please include your country code (e.g. +1 for the US).</small>
 
-      <label data-eid="e731">What&rsquo;s your IG handle?</label>
-      <input type="text" id="instagram" data-eid="e732" placeholder="@yourhandle" autocomplete="off">
+      <label data-eid="e731">What&rsquo;s your IG handle? <span class="req" data-eid="e733">*</span></label>
+      <input type="text" id="instagram" data-eid="e732" placeholder="@yourhandle" autocomplete="off" required>
 
       <label data-eid="e743">Where are you based? <span class="req" data-eid="e744">*</span></label>
       <input type="text" id="based" data-eid="e745" placeholder="City, Country" autocomplete="off">
@@ -166,10 +166,8 @@ $('#appForm').addEventListener('submit', async function(e){
   if(!name){ err.textContent='Please enter your first name.'; return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
   if(!phone){ err.textContent='Please enter your phone.'; return; }
-  var ids=['based','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
+  var ids=['instagram','based','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
   var payload={firstName:name,email:email,phone:phone,qa:[]};
-  // Instagram handle — optional, sent only if they fill it in.
-  var ig=$('#instagram').value.trim(); if(ig){ payload['instagram']=ig; payload.qa.push({q:labelFor('instagram'),a:ig}); }
   for(var i=0;i<ids.length;i++){ var v=$('#'+ids[i]).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+ids[i]).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[ids[i]]=v; payload.qa.push({q:labelFor(ids[i]),a:v}); }
   // If they're currently on a cycle, they must describe it (this field is hidden otherwise).
   if($('#on_cycle_now').value.trim()==='Yes'){ var cd=$('#cycle_describe'); var cv=cd.value.trim(); if(!cv){ err.textContent='Please describe your current cycle.'; cd.scrollIntoView({behavior:'smooth',block:'center'}); return; } payload['cycle_describe']=cv; payload.qa.push({q:labelFor('cycle_describe'),a:cv}); }
