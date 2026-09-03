@@ -163,6 +163,9 @@
   .resbox a:last-child{border-bottom:0}
   .resbox a:hover{background:var(--bg-2)}
   .resbox a .go{color:var(--mut)}
+  .resbox .res-soon{display:block;padding:14px 18px;border-bottom:1px solid var(--line);
+    font-size:14.5px;font-weight:500;color:var(--mut)}
+  .resbox .res-soon:last-child{border-bottom:0}
 
   .a2hs{display:flex;gap:12px;align-items:flex-start;background:var(--acc-soft);border:1px solid rgba(26,92,255,.22);
     border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:#213a6b}
@@ -209,7 +212,6 @@
       <section class="card macros" id="aMacros" hidden></section>
       <div id="aPast"></div>
       <div class="tiles" id="aTiles"></div>
-      <div id="aPast2"></div>
       <div id="aRes"></div>
       <div class="a2hs" id="a2hs" hidden>
         <div style="flex:1"><b id="a2hsTitle" data-copy="a2hs_title">Keep this one tap away.</b> <span id="a2hsHow" data-copy="a2hs_how"></span></div>
@@ -225,7 +227,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-09-03T20:42Z';
+const BUILD = '2026-09-03T20:58Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -470,7 +472,6 @@ function openApp(){
   if(secs.checkin && !secs.weekly_checkin) secs.weekly_checkin = secs.checkin;  // old name
   const progs = (secs.programs || []).filter(p => (p.name || '').trim() || (p.link || '').trim());
   const curProg = progs.find(p => p.current);
-  const pastProgs = progs.filter(p => p !== curProg && (p.link || '').trim());
 
   const tiles = ORDER.filter(k => {
     if(!secs[k] || !secs[k].on) return false;
@@ -495,18 +496,13 @@ function openApp(){
     `<div class="card" style="color:var(--mut)" data-copy="empty_plan">${esc(t('empty_plan'))}</div>`;
   document.querySelectorAll('#aTiles .tile[data-k]').forEach(b => b.onclick = () => openSection(b.dataset.k));
 
-  // Blocks he has already finished — each one its own sheet.
-  $('#aPast2').innerHTML = pastProgs.length ? `<details class="resbox">
-      <summary><span data-copy="prog_past_label">${esc(t('prog_past_label'))}</span><span class="go">›</span></summary>
-      ${pastProgs.map(p => `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.name || 'Program')}
-        <span class="go">↗</span></a>`).join('')}
-    </details>` : '';
-
   // Additional Resources — one shared library, the worker sends what this client may see.
   const res = RESOURCES || [];
   $('#aRes').innerHTML = res.length ? `<details class="resbox">
       <summary><span data-copy="resources_label">${esc(t('resources_label'))}</span><span class="go">›</span></summary>
-      ${res.map(r => `<a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`).join('')}
+      ${res.map(r => (r.link || '').trim()
+        ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`
+        : `<span class="res-soon">${esc(r.label)}</span>`).join('')}
     </details>` : '';
 
   a2hs();

@@ -206,7 +206,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-09-03T20:42Z';
+const BUILD = '2026-09-03T20:58Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
