@@ -977,13 +977,27 @@
     if (_itemDelBound) return;
     _itemDelBound = true;
     document.addEventListener("click", function (e) {
-      var b = e.target && e.target.closest && e.target.closest(".jv-item-del");
+      var b = e.target && e.target.closest && e.target.closest(".jv-item-btn");
       if (!b || !editMode) return;
       var item = b.closest("[data-jv-removable]");
       if (!item) return;
       e.stopPropagation(); e.preventDefault();
-      removeActive(item, false);
+      if (b.classList.contains("jv-item-del")) { removeActive(item, false); decorateSections(); return; }
+      // Reordering only works inside the question's own section: a saved order is
+      // replayed as "put these children back in this order", so a question dragged
+      // into a different section would snap back on the next load.
+      var dir = b.classList.contains("jv-item-up") ? -1 : 1;
+      var sib = dir < 0 ? item.previousElementSibling : item.nextElementSibling;
+      while (sib && !sib.hasAttribute("data-jv-removable")) sib = dir < 0 ? sib.previousElementSibling : sib.nextElementSibling;
+      if (!sib) { flash(dir < 0 ? "Already first in this section" : "Already last in this section"); return; }
+      pushUndo();
+      var parent = item.parentElement;
+      if (dir < 0) parent.insertBefore(item, sib); else parent.insertBefore(sib, item);
+      markReordered(parent);
+      setActive(item);
       decorateSections();
+      item.scrollIntoView({ block: "center", behavior: "smooth" });
+      scheduleDraft(); flash(dir < 0 ? "Moved up — Publish to make it live" : "Moved down — Publish to make it live");
     }, true);
   }
 
@@ -1101,9 +1115,13 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-jv-removable]"), function (item) {
       if (!item.getAttribute("data-eid")) return;
       var ibar = document.createElement("div"); ibar.className = "jv-item-tools"; ibar.contentEditable = "false";
+      var iup = document.createElement("button"); iup.type = "button"; iup.className = "jv-item-btn jv-item-up";
+      iup.title = "Move this question up"; iup.textContent = "↑";
+      var idn = document.createElement("button"); idn.type = "button"; idn.className = "jv-item-btn jv-item-down";
+      idn.title = "Move this question down"; idn.textContent = "↓";
       var idel = document.createElement("button"); idel.type = "button"; idel.className = "jv-item-btn jv-item-del";
       idel.title = "Remove this question"; idel.textContent = "🗑 Remove";
-      ibar.appendChild(idel);
+      ibar.appendChild(iup); ibar.appendChild(idn); ibar.appendChild(idel);
       item.appendChild(ibar);
     });
     if (outlinePanel && outlinePanel.classList.contains("open")) renderOutline();   // keep the navigator in sync

@@ -16,7 +16,7 @@
 <meta name="twitter:image" content="https://trt-guy.com/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icon-180.png">
-<link rel="stylesheet" href="/editor.css?v=3">
+<link rel="stylesheet" href="/editor.css?v=4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -93,6 +93,6 @@
   Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
 })();
 </script>
-<script src="/editor.js?v=3"></script>
+<script src="/editor.js?v=4"></script>
 </body>
 </html>

@@ -465,4 +465,7 @@ body.jv-editing .jv-col:hover{outline-color:rgba(26,92,255,.75)}
   padding: 5px 8px; border: 0; border-radius: 6px; cursor: pointer;
   background: rgba(17,17,17,.72); color: #fff;
 }
-.jv-item-tools .jv-item-btn:hover { background: #e53935; }
+.jv-item-tools .jv-item-btn + .jv-item-btn { margin-left: 4px; }
+.jv-item-tools .jv-item-up, .jv-item-tools .jv-item-down { padding: 5px 9px; font-size: 13px; line-height: 1; }
+.jv-item-tools .jv-item-up:hover, .jv-item-tools .jv-item-down:hover { background: #1a5cff; }
+.jv-item-tools .jv-item-del:hover { background: #e53935; }
