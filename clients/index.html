@@ -316,6 +316,17 @@ function renderStats(){
     <div class="stat"><div class="k">Collected · active</div><div class="v">${money(collected)}</div></div>
     <div class="stat"><div class="k">Renewing in 21 days</div><div class="v">${ending.length}</div></div>
     <div class="stat"><div class="k">New intakes</div><div class="v">${leads.length}</div></div>`;
+  renderChipCounts();
+}
+// Each chip carries its own count — the reason a fresh import "disappears" is that
+// it lands as a lead while the list is filtered to Active.
+function renderChipCounts(){
+  const n = f => f === 'all' ? CLIENTS.length : CLIENTS.filter(c => (c.status || 'lead') === f).length;
+  $$('#filters .chip').forEach(b => {
+    const base = b.dataset.label || (b.dataset.label = b.textContent.trim());
+    const count = n(b.dataset.f);
+    b.textContent = count ? `${base} ${count}` : base;
+  });
 }
 function render(){
   renderStats();
@@ -458,7 +469,13 @@ function showImport(list, have){
       const idx = CLIENTS.findIndex(x => x.id === r.client.id);
       if(idx >= 0) CLIENTS[idx] = r.client; else CLIENTS.unshift(r.client);
       b.outerHTML = '<span class="pill active">imported</span>';
+      // Imports arrive as leads; show them instead of leaving Julian on an empty Active list.
+      if(FILTER !== 'all'){
+        FILTER = 'lead';
+        $$('#filters .chip').forEach(x => x.classList.toggle('on', x.dataset.f === 'lead'));
+      }
       render();
+      toast('Imported — showing under New / leads');
     } catch(e){ b.disabled = false; b.textContent = 'Import'; alert('Failed: ' + e.message); }
   });
 }
