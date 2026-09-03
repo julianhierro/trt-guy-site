@@ -98,6 +98,9 @@
         <label data-eid="e800">What&rsquo;s your IG handle? <span class="req" data-eid="e802">*</span></label>
         <input type="text" id="instagram" data-eid="e801" placeholder="@yourhandle" autocomplete="off" required>
 
+        <label data-eid="e830">Where are you based? <span class="req" data-eid="e831">*</span></label>
+        <input type="text" id="based" data-eid="e832" placeholder="City, Country" autocomplete="off" required>
+
         <label>What are your short-term goals? <span class="req">*</span></label>
         <textarea id="short_term_goals" placeholder="Next 1–3 months" required></textarea>
 
@@ -225,7 +228,7 @@ function labelFor(id){ var el=document.getElementById(id); var p=el&&el.previous
 $('#appForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const err=$('#appErr');
-  const ids=['instagram','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
+  const ids=['instagram','based','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
   const payload={firstName:lead.firstName,email:lead.email,phone:lead.phone,qa:[]};
   for(const id of ids){ const v=$('#'+id).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+id).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[id]=v; payload.qa.push({q:labelFor(id),a:v}); }
   // If currently on a cycle, they must describe it (hidden otherwise).
