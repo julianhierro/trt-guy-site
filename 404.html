@@ -133,6 +133,23 @@
   .body strong{font-weight:700}
   .updated{font-size:12.5px;color:var(--mut);margin-top:26px}
 
+  /* edit mode — Julian only */
+  /* keep each element's own display — overriding it reflowed the tiles */
+  body.tg-edit [data-copy]{outline:1px dashed rgba(26,92,255,.55);outline-offset:3px;border-radius:3px;cursor:text}
+  body.tg-edit [data-copy]:empty{min-width:40px;display:inline-block}
+  body.tg-edit .tile{pointer-events:none}
+  body.tg-edit .tile [data-copy]{pointer-events:auto}
+  body.tg-edit [data-copy]:focus{outline:2px solid var(--acc);background:var(--acc-soft)}
+  body.tg-edit{padding-bottom:96px}
+  .editbar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:99;display:flex;gap:8px;
+    align-items:center;background:#0b0d10;color:#fff;border-radius:14px;padding:10px 12px;
+    box-shadow:0 14px 40px rgba(11,13,16,.4);font-size:13.5px;max-width:calc(100% - 24px)}
+  .editbar button{background:#20242b;color:#fff;border:0;border-radius:9px;padding:9px 13px;
+    font:600 13px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+  .editbar button.go{background:var(--acc)}
+  .editbar button:hover{filter:brightness(1.15)}
+  .editbar span{padding:0 4px;color:#aeb6c2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
   .a2hs{display:flex;gap:12px;align-items:flex-start;background:var(--acc-soft);border:1px solid rgba(26,92,255,.22);
     border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:#213a6b}
   .a2hs button{background:none;border:0;color:#213a6b;font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
@@ -148,10 +165,10 @@
 <div id="vGate" class="center" hidden>
   <div class="gate">
     <span class="logo">TRT Guy</span>
-    <h1 id="gHi">Welcome</h1>
-    <p id="gSub">Enter your 4-digit access code to open your plan.</p>
+    <h1 id="gHi" data-copy="gate_hi">Welcome</h1>
+    <p id="gSub" data-copy="gate_sub">Enter your 4-digit access code to open your plan.</p>
     <input class="pin" id="gPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="one-time-code">
-    <button class="btn" id="gGo">Open my plan</button>
+    <button class="btn" id="gGo" data-copy="gate_btn">Open my plan</button>
     <p class="err" id="gErr"></p>
   </div>
 </div>
@@ -160,9 +177,9 @@
 <div id="vNF" class="center" hidden>
   <div class="gate">
     <span class="logo">TRT Guy</span>
-    <h1 id="nfTitle">Page not found</h1>
-    <p id="nfBody">That link doesn't lead anywhere. Check the spelling, or head back to the site.</p>
-    <a class="btn ghost" id="nfBtn" href="https://trt-guy.com/">Go to trt-guy.com</a>
+    <h1 id="nfTitle" data-copy="nf_title">Page not found</h1>
+    <p id="nfBody" data-copy="nf_body">That link doesn't lead anywhere. Check the spelling, or head back to the site.</p>
+    <a class="btn ghost" id="nfBtn" data-copy="nf_btn" href="https://trt-guy.com/">Go to trt-guy.com</a>
   </div>
 </div>
 
@@ -179,13 +196,13 @@
       <div id="aPast"></div>
       <div class="tiles" id="aTiles"></div>
       <div class="a2hs" id="a2hs" hidden>
-        <div style="flex:1"><b id="a2hsTitle">Keep this one tap away.</b> <span id="a2hsHow"></span></div>
+        <div style="flex:1"><b id="a2hsTitle" data-copy="a2hs_title">Keep this one tap away.</b> <span id="a2hsHow" data-copy="a2hs_how"></span></div>
         <button id="a2hsX" aria-label="Dismiss">×</button>
       </div>
     </div>
     <section class="sview" id="aSection" hidden></section>
   </main>
-  <footer class="f" id="aFooter"></footer>
+  <footer class="f" id="aFooter" data-copy="footer"></footer>
 </div>
 
 <script>
@@ -337,9 +354,10 @@ async function boot(){
     found = r.ok ? await r.json() : null;
   } catch(e){}
   document.documentElement.classList.remove('boot');
-  if(!found || !found.found){ show('vNF'); return; }
+  if(!found || !found.found){ show('vNF'); if(EDIT) startEdit(); return; }
   $('#gHi').textContent = t('gate_hi', { first: found.first || '' });
   show('vGate');
+  if(EDIT){ startEdit(); return; }
   setTimeout(() => $('#gPin').focus(), 120);
 }
 $('#gGo').onclick = async () => {
@@ -381,10 +399,10 @@ function openApp(){
     const wkNow = Math.min(wkAll, Math.floor(gone / 7) + 1);
     const leftDays = Math.max(0, total - gone);
     bar = `<div class="prog"><i style="width:${pct}%"></i></div>
-      <div class="progtxt"><span>${esc(t('week_txt', { n: wkNow, total: wkAll }))}</span><span>${esc(t('days_txt', { n: leftDays }))}</span></div>`;
+      <div class="progtxt"><span data-copy="week_txt">${esc(t('week_txt', { n: wkNow, total: wkAll }))}</span><span data-copy="days_txt">${esc(t('days_txt', { n: leftDays }))}</span></div>`;
   }
   $('#aPhase').innerHTML = `
-    <div class="lbl">${esc(t('phase_label'))}</div>
+    <div class="lbl" data-copy="phase_label">${esc(t('phase_label'))}</div>
     <h1>${esc(ph.name || t('phase_untitled'))}</h1>
     ${(start && end) ? `<div class="dates">${fmt(start)} → ${fmt(end)}</div>` : ''}
     ${bar}
@@ -395,14 +413,14 @@ function openApp(){
   const hasMac = mac.on && [mac.calories, mac.protein, mac.carbs, mac.fat].some(v => v != null && v !== '');
   $('#aMacros').hidden = !hasMac;
   if(hasMac){
-    const cell = (v, l, suffix) => `<div class="m"><b>${v == null || v === '' ? '—' : Number(v).toLocaleString('en-US') + (suffix || '')}</b><span>${l}</span></div>`;
+    const cell = (v, l, suffix, key) => `<div class="m"><b>${v == null || v === '' ? '—' : Number(v).toLocaleString('en-US') + (suffix || '')}</b><span data-copy="${key}">${l}</span></div>`;
     $('#aMacros').innerHTML = `
-      <div class="lbl">${esc(t('macros_label'))}</div>
+      <div class="lbl" data-copy="macros_label">${esc(t('macros_label'))}</div>
       <div class="row">
-        ${cell(mac.calories, t('mac_calories'))}
-        ${cell(mac.protein, t('mac_protein'), 'g')}
-        ${cell(mac.carbs, t('mac_carbs'), 'g')}
-        ${cell(mac.fat, t('mac_fat'), 'g')}
+        ${cell(mac.calories, t('mac_calories'), '', 'mac_calories')}
+        ${cell(mac.protein, t('mac_protein'), 'g', 'mac_protein')}
+        ${cell(mac.carbs, t('mac_carbs'), 'g', 'mac_carbs')}
+        ${cell(mac.fat, t('mac_fat'), 'g', 'mac_fat')}
       </div>
       ${mac.note ? `<p class="note">${esc(mac.note)}</p>` : ''}`;
   }
@@ -410,7 +428,7 @@ function openApp(){
   // phases he's already been through
   const pastPhases = Array.isArray(ph.past) ? ph.past.filter(x => x && (x.name || x.start)) : [];
   $('#aPast').innerHTML = pastPhases.length ? `
-    <details class="past"><summary>${esc(t('past_label', { n: pastPhases.length }))}</summary>
+    <details class="past"><summary data-copy="past_label">${esc(t('past_label', { n: pastPhases.length }))}</summary>
       <ul>${pastPhases.map(x => `<li><b>${esc(x.name || 'Phase')}</b> — ${fmt(x.start)} → ${fmt(x.end)}</li>`).join('')}</ul>
     </details>` : '';
 
@@ -426,21 +444,22 @@ function openApp(){
       const sub = hasText ? m.blurb : (s.linkLabel || m.blurb);
       return hasText
         ? `<button class="tile" data-k="${k}"><span class="ic">${m.icon}</span>
-             <span class="t"><b>${esc(m.name)}</b><span>${esc(sub)}</span></span><span class="go">›</span></button>`
+             <span class="t"><b data-copy="tile_${k}">${esc(m.name)}</b><span${hasText ? ` data-copy="tile_${k}_sub"` : ''}>${esc(sub)}</span></span><span class="go">›</span></button>`
         : `<a class="tile" href="${esc(s.link)}" target="_blank" rel="noopener"><span class="ic">${m.icon}</span>
-             <span class="t"><b>${esc(m.name)}</b><span>${esc(sub)}</span></span><span class="go">↗</span></a>`;
+             <span class="t"><b data-copy="tile_${k}">${esc(m.name)}</b><span${hasText ? ` data-copy="tile_${k}_sub"` : ''}>${esc(sub)}</span></span><span class="go">↗</span></a>`;
     });
   (secs.extras || []).filter(x => (x.link || '').trim()).forEach(x => {
     tiles.push(`<a class="tile" href="${esc(x.link)}" target="_blank" rel="noopener"><span class="ic">🔗</span>
-      <span class="t"><b>${esc(x.label || 'Open')}</b><span>${esc(t('extras_sub'))}</span></span><span class="go">↗</span></a>`);
+      <span class="t"><b>${esc(x.label || 'Open')}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span><span class="go">↗</span></a>`);
   });
   $('#aTiles').innerHTML = tiles.join('') ||
-    `<div class="card" style="color:var(--mut)">${esc(t('empty_plan'))}</div>`;
+    `<div class="card" style="color:var(--mut)" data-copy="empty_plan">${esc(t('empty_plan'))}</div>`;
   document.querySelectorAll('#aTiles .tile[data-k]').forEach(b => b.onclick = () => openSection(b.dataset.k));
 
   a2hs();
   show('vApp');
   document.documentElement.classList.remove('boot');
+  if(EDIT) startEdit();
 }
 
 function openSection(k){
@@ -456,14 +475,14 @@ function openSection(k){
     const old = progs.filter(p => p !== cur);
     if(cur){
       progHtml += `<div class="curprog">
-        <div class="lbl">${esc(t('prog_current_label'))}</div>
+        <div class="lbl" data-copy="prog_current_label">${esc(t('prog_current_label'))}</div>
         <h2>${esc(cur.name || 'Current program')}</h2>
         <div class="dates">${cur.weeks ? cur.weeks + ' weeks · ' : ''}${fmt(cur.start)}${cur.end ? ' → ' + fmt(cur.end) : ''}</div>
-        ${(cur.link || '').trim() ? `<a class="btn" href="${esc(cur.link)}" target="_blank" rel="noopener">${esc(t('prog_open_btn'))}</a>` : ''}
+        ${(cur.link || '').trim() ? `<a class="btn" href="${esc(cur.link)}" target="_blank" rel="noopener" data-copy="prog_open_btn">${esc(t('prog_open_btn'))}</a>` : ''}
       </div>`;
     }
     if(old.length){
-      progHtml += `<div class="lbl" style="margin:22px 0 10px">${esc(t('prog_past_label'))}</div>` +
+      progHtml += `<div class="lbl" style="margin:22px 0 10px" data-copy="prog_past_label">${esc(t('prog_past_label'))}</div>` +
         old.map(p => (p.link || '').trim()
           ? `<a class="oldprog" href="${esc(p.link)}" target="_blank" rel="noopener">
                <span class="t"><b>${esc(p.name || 'Program')}</b>
@@ -475,14 +494,15 @@ function openSection(k){
   }
 
   $('#aSection').innerHTML = `
-    <button class="back" id="sBack">${esc(t('back'))}</button>
+    <button class="back" id="sBack" data-copy="back">${esc(t('back'))}</button>
     <h1>${m.icon} ${esc(m.name)}</h1>
     ${(s.link || '').trim()
       ? `<a class="btn" href="${esc(s.link)}" target="_blank" rel="noopener" style="margin:0 0 20px">${esc(s.linkLabel || t('open_default', { section: m.name.toLowerCase() }))} ↗</a>`
       : ''}
     <div class="body">${render(s.text)}</div>
     ${progHtml}
-    ${CLIENT.updated_at ? `<p class="updated">${esc(t('updated', { date: new Date(CLIENT.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) }))}</p>` : ''}`;
+    ${CLIENT.updated_at ? `<p class="updated" data-copy="updated">${esc(t('updated', { date: new Date(CLIENT.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) }))}</p>` : ''}`;
+  if(EDIT && document.body.classList.contains('tg-edit')) markEditable();
   $('#sBack').onclick = closeSection;
   history.pushState({ sec:k }, '', location.pathname);
   window.scrollTo(0, 0);
@@ -499,7 +519,9 @@ function a2hs(){
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if(standalone || localStorage.getItem('tgc-a2hs:' + SLUG)) return;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  $('#a2hsHow').textContent = ios ? t('a2hs_ios') : t('a2hs_android');
+  const howKey = ios ? 'a2hs_ios' : 'a2hs_android';
+  $('#a2hsHow').setAttribute('data-copy', howKey);
+  $('#a2hsHow').textContent = t(howKey);
   $('#a2hs').hidden = false;
   $('#a2hsX').onclick = () => { localStorage.setItem('tgc-a2hs:' + SLUG, '1'); $('#a2hs').hidden = true; };
 }
@@ -525,6 +547,85 @@ function installManifest(c){
     link.rel = 'manifest'; link.href = url;
     document.head.appendChild(link);
   } catch(e){}
+}
+
+/* ── edit mode: trt-guy.com/<anyone>?edit=1 ───────────────────────────────
+   Click any dashed word and type over it. It edits the wording for EVERY
+   client's page — never the client's own plan, which lives in the manager.
+   Placeholders are shown raw ({first}, {n}) so they survive an edit. */
+const EDIT = new URLSearchParams(location.search).get('edit') === '1';
+const CCKEY = 'tg-clients-key';
+
+function startEdit(){
+  let key = localStorage.getItem(CCKEY);
+  if(!key){
+    key = prompt('Passcode to edit the wording:');
+    if(!key) return;
+    localStorage.setItem(CCKEY, key);
+  }
+  document.body.classList.add('tg-edit');
+  markEditable();
+  const bar = document.createElement('div');
+  bar.className = 'editbar';
+  bar.innerHTML = `<span>Click any dashed text and type over it</span>
+    <button id="eReset">Reset all</button>
+    <button id="eExit">Exit</button>
+    <button class="go" id="eSave">Save</button>`;
+  document.body.appendChild(bar);
+  bar.querySelector('#eSave').onclick = saveEdits;
+  bar.querySelector('#eExit').onclick = () => { location.search = ''; };
+  bar.querySelector('#eReset').onclick = async () => {
+    if(!confirm('Put every line back to its default wording?')) return;
+    C = Object.assign({}, DEFAULT_COPY);
+    await pushCopy({});
+    location.reload();
+  };
+}
+
+// Show the raw wording (with its {placeholders}) so editing can't eat them.
+function markEditable(){
+  document.querySelectorAll('[data-copy]').forEach(el => {
+    const k = el.getAttribute('data-copy');
+    if(!(k in DEFAULT_COPY)) return;
+    el.textContent = (C[k] == null || C[k] === '') ? DEFAULT_COPY[k] : C[k];
+    el.contentEditable = 'true';
+    el.spellcheck = false;
+  });
+}
+
+async function pushCopy(copy){
+  const res = await fetch(WORKER + '/clients', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CC-Key': localStorage.getItem(CCKEY) || '' },
+    body: JSON.stringify({ action: 'copy_save', copy }),
+  });
+  if(res.status === 401){ localStorage.removeItem(CCKEY); throw new Error('Wrong passcode — reload and try again.'); }
+  if(!res.ok) throw new Error('Save failed (' + res.status + ')');
+}
+
+async function saveEdits(){
+  const out = {};
+  document.querySelectorAll('[data-copy]').forEach(el => {
+    const k = el.getAttribute('data-copy');
+    if(!(k in DEFAULT_COPY)) return;
+    const v = el.textContent.replace(/\s+/g, ' ').trim();
+    if(v && v !== DEFAULT_COPY[k]) out[k] = v;
+  });
+  // Anything not on screen right now keeps whatever it already had.
+  Object.keys(C).forEach(k => {
+    if(!(k in out) && C[k] && C[k] !== DEFAULT_COPY[k] && !document.querySelector(`[data-copy="${k}"]`)) out[k] = C[k];
+  });
+  const btn = document.querySelector('#eSave');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await pushCopy(out);
+    C = Object.assign({}, DEFAULT_COPY, out);
+    btn.textContent = 'Saved ✓';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Save'; }, 1400);
+  } catch(e){
+    alert(e.message);
+    btn.disabled = false; btn.textContent = 'Save';
+  }
 }
 
 boot();
