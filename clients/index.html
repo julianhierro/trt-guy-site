@@ -190,9 +190,9 @@
         <button class="chip" data-f="all">All</button>
       </div>
       <span style="flex:1"></span>
-      <button class="btn" id="btnCopy">✏️ Page wording</button>
-      <button class="btn" id="btnTemplate">⚙ Plan template</button>
-      <button class="btn" id="btnImport">⤓ Import intake</button>
+      <button class="btn" id="btnCopy">Page wording</button>
+      <button class="btn" id="btnTemplate">Plan template</button>
+      <button class="btn" id="btnImport">Import intake</button>
       <button class="btn primary" id="btnNew">+ New client</button>
     </div>
 
@@ -223,10 +223,10 @@ const PAYMETHODS = ['Stripe','PayPal','Bank transfer','Zelle','Crypto','Cash','O
 
 // The four blocks a client sees on their page. `key` is what lives in sections{}.
 const SECTIONS = [
-  { key:'training',  icon:'🏋️', name:'Training',     blurb:'Program, split, progressions' },
-  { key:'nutrition', icon:'🥗', name:'Nutrition',    blurb:'Calories, macros, meal structure' },
-  { key:'peds',      icon:'💊', name:'PED Protocol', blurb:'Compounds, doses, timing, bloodwork' },
-  { key:'checkin',   icon:'📈', name:'Check-in',     blurb:'Weekly check-in form or instructions' },
+  { key:'training',  name:'Training',     blurb:'The program sheet, and every block he has run' },
+  { key:'nutrition', name:'Nutrition',    blurb:'Calories, macros, how the food is structured' },
+  { key:'peds',      name:'PED Protocol', blurb:'Link to the protocol spreadsheet — the tile opens it straight away' },
+  { key:'checkin',   name:'Check-in',     blurb:'Weekly check-in form or instructions' },
 ];
 // Which blocks switch on by default for each client type.
 const TYPE_SECTIONS = {
@@ -352,7 +352,7 @@ function render(){
   const rows = visible();
   if(!rows.length){
     $('#list').innerHTML = `<div class="empty">No clients here yet.<br><br>
-      <span style="font-size:13px">Use <b>+ New client</b>, or <b>⤓ Import intake</b> to pull someone who has finished the onboarding form.</span></div>`;
+      <span style="font-size:13px">Use <b>+ New client</b>, or <b>Import intake</b> to pull someone who has finished the onboarding form.</span></div>`;
     return;
   }
   // Only keep selections that are still on screen.
@@ -384,7 +384,7 @@ function render(){
         <td data-l="Paid"><div>${money(c.amount_paid)}</div><div class="csub">${esc(c.pay_method || '')}</div></td>
         <td data-l="Status"><span class="pill ${esc(c.status || 'lead')}">${esc(c.status || 'lead')}</span></td>
         <td data-l="" class="acts"><button class="btn sm">Open</button>
-          <button class="btn sm danger rowdel" data-id="${c.id}" title="Delete">🗑</button></td>
+          <button class="btn sm danger rowdel" data-id="${c.id}" title="Delete">Delete</button></td>
       </tr>`;
     }).join('') + '</tbody></table>';
 
@@ -505,7 +505,7 @@ function showImport(list, have){
    and {section} are filled in live. */
 const COPY_FIELDS = [
   ['Access code screen', [
-    ['gate_hi',        'Greeting',              'Hey {first} 👋'],
+    ['gate_hi',        'Greeting',              'Hey {first},'],
     ['gate_sub',       'Line under it',         'Enter your 4-digit access code to open your plan.'],
     ['gate_btn',       'Button',                'Open my plan'],
     ['gate_btn_busy',  'Button while loading',  'Opening…'],
@@ -763,7 +763,7 @@ function drawBody(){
     const mac = ((c.sections || {}).macros) || {};
     b.innerHTML = `
       <div class="sect">
-        <div class="shead"><h3>📍 ${c.isTemplate ? 'Phase a new client starts on' : 'Current phase'}</h3>
+        <div class="shead"><h3>${c.isTemplate ? 'Phase a new client starts on' : 'Current phase'}</h3>
           ${c.isTemplate ? '' : '<button class="btn sm" id="newPhase">Start new phase</button>'}</div>
         <p class="hint" style="margin-bottom:12px">${c.isTemplate
           ? 'Dates stay out of the template — you set those per client. Everything else carries over.'
@@ -787,7 +787,7 @@ function drawBody(){
       </div>
 
       <div class="sect">
-        <div class="shead"><h3>🔢 Macros</h3>
+        <div class="shead"><h3>Macros</h3>
           <label class="sw"><input type="checkbox" id="mac_on" ${mac.on ? 'checked' : ''}><span class="track"></span>Show on home</label></div>
         <p class="hint" style="margin-bottom:12px">Sits right under the phase card, so his numbers are the first thing he reads.</p>
         <div class="grid2">
@@ -804,7 +804,7 @@ function drawBody(){
         const v = sectionOf(c, s.key);
         return `<div class="sect">
           <div class="shead">
-            <h3>${s.icon} ${s.name}</h3>
+            <h3>${s.name}</h3>
             <label class="sw"><input type="checkbox" id="s_${s.key}_on" ${v.on?'checked':''}><span class="track"></span>Show</label>
           </div>
           <p class="hint" style="margin-bottom:12px">${s.blurb}</p>
@@ -825,7 +825,7 @@ function drawBody(){
       }).join('')}
 
       <div class="sect">
-        <div class="shead"><h3>🔗 Extra quick links</h3><button class="btn sm" id="addExtra">+ Add</button></div>
+        <div class="shead"><h3>Extra quick links</h3><button class="btn sm" id="addExtra">+ Add</button></div>
         <p class="hint">Anything else worth one tap — supplement list, form check video, WhatsApp.</p>
         <div class="rowlist" id="extras"></div>
       </div>`;
