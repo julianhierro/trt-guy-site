@@ -149,7 +149,7 @@
   <div class="gate">
     <span class="logo">TRT Guy</span>
     <h1 id="gHi">Welcome</h1>
-    <p>Enter your 4-digit access code to open your plan.</p>
+    <p id="gSub">Enter your 4-digit access code to open your plan.</p>
     <input class="pin" id="gPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="one-time-code">
     <button class="btn" id="gGo">Open my plan</button>
     <p class="err" id="gErr"></p>
@@ -160,9 +160,9 @@
 <div id="vNF" class="center" hidden>
   <div class="gate">
     <span class="logo">TRT Guy</span>
-    <h1>Page not found</h1>
-    <p>That link doesn't lead anywhere. Check the spelling, or head back to the site.</p>
-    <a class="btn ghost" href="https://trt-guy.com/">Go to trt-guy.com</a>
+    <h1 id="nfTitle">Page not found</h1>
+    <p id="nfBody">That link doesn't lead anywhere. Check the spelling, or head back to the site.</p>
+    <a class="btn ghost" id="nfBtn" href="https://trt-guy.com/">Go to trt-guy.com</a>
   </div>
 </div>
 
@@ -179,13 +179,13 @@
       <div id="aPast"></div>
       <div class="tiles" id="aTiles"></div>
       <div class="a2hs" id="a2hs" hidden>
-        <div style="flex:1"><b>Keep this one tap away.</b> <span id="a2hsHow"></span></div>
+        <div style="flex:1"><b id="a2hsTitle">Keep this one tap away.</b> <span id="a2hsHow"></span></div>
         <button id="a2hsX" aria-label="Dismiss">×</button>
       </div>
     </div>
     <section class="sview" id="aSection" hidden></section>
   </main>
-  <footer class="f">TRT Guy · <span id="aFoot"></span></footer>
+  <footer class="f" id="aFooter"></footer>
 </div>
 
 <script>
@@ -200,12 +200,71 @@ const SLUG = decodeURIComponent((location.pathname.split('/').filter(Boolean)[0]
   .replace(/\.html?$/, '');
 const PINKEY = 'tgc-pin:' + SLUG;
 
-const SECTION_META = {
-  training:  { icon:'🏋️', name:'Training',     blurb:'Your program' },
-  nutrition: { icon:'🥗', name:'Nutrition',    blurb:'Calories, macros, meals' },
-  peds:      { icon:'💊', name:'PED Protocol', blurb:'Compounds, doses, timing' },
-  checkin:   { icon:'📈', name:'Check-in',     blurb:'How we track progress' },
+// Every fixed word on this page. Julian overrides any of these from the client
+// manager ("Page wording"); an override that's blank falls back to the default here.
+const DEFAULT_COPY = {
+  gate_hi: 'Hey {first} 👋',
+  gate_sub: 'Enter your 4-digit access code to open your plan.',
+  gate_btn: 'Open my plan',
+  gate_btn_busy: 'Opening…',
+  gate_empty: 'Enter your 4-digit code.',
+  header_who: 'Plan for {first}',
+  phase_label: 'Where we are',
+  phase_untitled: 'Your plan',
+  week_txt: 'Week {n} of {total}',
+  days_txt: '{n} days to go',
+  macros_label: 'Your daily numbers',
+  mac_calories: 'Calories',
+  mac_protein: 'Protein',
+  mac_carbs: 'Carbs',
+  mac_fat: 'Fat',
+  past_label: "Phases you've done ({n})",
+  tile_training: 'Training',      tile_training_sub: 'Your program',
+  tile_nutrition: 'Nutrition',    tile_nutrition_sub: 'Calories, macros, meals',
+  tile_peds: 'PED Protocol',      tile_peds_sub: 'Compounds, doses, timing',
+  tile_checkin: 'Check-in',       tile_checkin_sub: 'How we track progress',
+  extras_sub: 'Tap to open',
+  empty_plan: 'Your plan is being written up. It will appear here — nothing to do on your side.',
+  back: '← Back',
+  open_default: 'Open my {section}',
+  prog_current_label: "Program you're on",
+  prog_open_btn: 'Open the program ↗',
+  prog_past_label: "Programs you've done",
+  updated: 'Last updated {date}',
+  a2hs_title: 'Keep this one tap away.',
+  a2hs_ios: 'Tap the Share button, then “Add to Home Screen”.',
+  a2hs_android: 'Open your browser menu and choose “Add to Home screen”.',
+  footer: 'TRT Guy · Questions? Message me and I’ll sort it.',
+  nf_title: 'Page not found',
+  nf_body: "That link doesn't lead anywhere. Check the spelling, or head back to the site.",
+  nf_btn: 'Go to trt-guy.com',
 };
+let C = Object.assign({}, DEFAULT_COPY);
+// t('week_txt', {n:2, total:8}) — {placeholders} are filled from the second argument.
+const t = (k, vars) => {
+  const v = (C[k] == null || C[k] === '') ? DEFAULT_COPY[k] : C[k];
+  return String(v == null ? '' : v).replace(/\{(\w+)\}/g, (m, key) => (vars && vars[key] != null) ? vars[key] : '');
+};
+async function loadCopy(){
+  try {
+    const r = await fetch(WORKER + '/client-copy');
+    if(!r.ok) return;
+    const j = await r.json();
+    if(j && j.copy) C = Object.assign({}, DEFAULT_COPY, j.copy);
+  } catch(e){}
+}
+// The bits that live in the static markup rather than in a render function.
+function paintStaticCopy(){
+  $('#gSub').textContent = t('gate_sub');
+  $('#gGo').textContent = t('gate_btn');
+  $('#nfTitle').textContent = t('nf_title');
+  $('#nfBody').textContent = t('nf_body');
+  $('#nfBtn').textContent = t('nf_btn');
+  $('#a2hsTitle').textContent = t('a2hs_title');
+}
+
+const SECTION_ICONS = { training:'🏋️', nutrition:'🥗', peds:'💊', checkin:'📈' };
+const meta = k => ({ icon: SECTION_ICONS[k], name: t('tile_' + k), blurb: t('tile_' + k + '_sub') });
 const ORDER = ['training','nutrition','peds','checkin'];
 
 let CLIENT = null;
@@ -255,6 +314,8 @@ async function tryPin(pin){
   return j.client;
 }
 async function boot(){
+  await loadCopy();
+  paintStaticCopy();
   if(!SLUG){ show('vNF'); document.documentElement.classList.remove('boot'); return; }
 
   // A code can ride in the link (?pin=1234) so one tap opens the plan.
@@ -277,21 +338,21 @@ async function boot(){
   } catch(e){}
   document.documentElement.classList.remove('boot');
   if(!found || !found.found){ show('vNF'); return; }
-  $('#gHi').textContent = 'Hey ' + (found.first || '') + ' 👋';
+  $('#gHi').textContent = t('gate_hi', { first: found.first || '' });
   show('vGate');
   setTimeout(() => $('#gPin').focus(), 120);
 }
 $('#gGo').onclick = async () => {
   const pin = $('#gPin').value.trim();
-  if(pin.length < 4){ $('#gErr').textContent = 'Enter your 4-digit code.'; return; }
-  const btn = $('#gGo'); btn.disabled = true; btn.textContent = 'Opening…';
+  if(pin.length < 4){ $('#gErr').textContent = t('gate_empty'); return; }
+  const btn = $('#gGo'); btn.disabled = true; btn.textContent = t('gate_btn_busy');
   try {
     CLIENT = await tryPin(pin);
     localStorage.setItem(PINKEY, pin);
     openApp();
   } catch(e){
     $('#gErr').textContent = e.message;
-    btn.disabled = false; btn.textContent = 'Open my plan';
+    btn.disabled = false; btn.textContent = t('gate_btn');
   }
 };
 $('#gPin').addEventListener('keydown', e => { if(e.key === 'Enter') $('#gGo').click(); });
@@ -301,8 +362,10 @@ function openApp(){
   const c = CLIENT;
   document.title = 'TRT Guy — ' + (c.first || c.name || '');
   installManifest(c);
-  $('#aWho').innerHTML = 'Plan for <b>' + esc(c.first || c.name) + '</b>';
-  $('#aFoot').textContent = 'Questions? Message me and I’ll sort it.';
+  // Bold just the name, wherever {first} sits in his wording.
+  const whoName = c.first || c.name || '';
+  $('#aWho').innerHTML = esc(t('header_who', { first: '\u0001' })).replace('\u0001', '<b>' + esc(whoName) + '</b>');
+  $('#aFooter').textContent = t('footer');
 
   // phase
   const ph = c.phase || {};
@@ -318,11 +381,11 @@ function openApp(){
     const wkNow = Math.min(wkAll, Math.floor(gone / 7) + 1);
     const leftDays = Math.max(0, total - gone);
     bar = `<div class="prog"><i style="width:${pct}%"></i></div>
-      <div class="progtxt"><span>Week ${wkNow} of ${wkAll}</span><span>${leftDays} days to go</span></div>`;
+      <div class="progtxt"><span>${esc(t('week_txt', { n: wkNow, total: wkAll }))}</span><span>${esc(t('days_txt', { n: leftDays }))}</span></div>`;
   }
   $('#aPhase').innerHTML = `
-    <div class="lbl">Where we are</div>
-    <h1>${esc(ph.name || 'Your plan')}</h1>
+    <div class="lbl">${esc(t('phase_label'))}</div>
+    <h1>${esc(ph.name || t('phase_untitled'))}</h1>
     ${(start && end) ? `<div class="dates">${fmt(start)} → ${fmt(end)}</div>` : ''}
     ${bar}
     ${ph.focus ? `<div class="focus">${esc(ph.focus)}</div>` : ''}`;
@@ -334,12 +397,12 @@ function openApp(){
   if(hasMac){
     const cell = (v, l, suffix) => `<div class="m"><b>${v == null || v === '' ? '—' : Number(v).toLocaleString('en-US') + (suffix || '')}</b><span>${l}</span></div>`;
     $('#aMacros').innerHTML = `
-      <div class="lbl">Your daily numbers</div>
+      <div class="lbl">${esc(t('macros_label'))}</div>
       <div class="row">
-        ${cell(mac.calories, 'Calories')}
-        ${cell(mac.protein, 'Protein', 'g')}
-        ${cell(mac.carbs, 'Carbs', 'g')}
-        ${cell(mac.fat, 'Fat', 'g')}
+        ${cell(mac.calories, t('mac_calories'))}
+        ${cell(mac.protein, t('mac_protein'), 'g')}
+        ${cell(mac.carbs, t('mac_carbs'), 'g')}
+        ${cell(mac.fat, t('mac_fat'), 'g')}
       </div>
       ${mac.note ? `<p class="note">${esc(mac.note)}</p>` : ''}`;
   }
@@ -347,7 +410,7 @@ function openApp(){
   // phases he's already been through
   const pastPhases = Array.isArray(ph.past) ? ph.past.filter(x => x && (x.name || x.start)) : [];
   $('#aPast').innerHTML = pastPhases.length ? `
-    <details class="past"><summary>Phases you've done (${pastPhases.length})</summary>
+    <details class="past"><summary>${esc(t('past_label', { n: pastPhases.length }))}</summary>
       <ul>${pastPhases.map(x => `<li><b>${esc(x.name || 'Phase')}</b> — ${fmt(x.start)} → ${fmt(x.end)}</li>`).join('')}</ul>
     </details>` : '';
 
@@ -357,7 +420,7 @@ function openApp(){
   const tiles = ORDER.filter(k => secs[k] && secs[k].on &&
       ((secs[k].text || '').trim() || (secs[k].link || '').trim() || (k === 'training' && hasProgs)))
     .map(k => {
-      const s = secs[k], m = SECTION_META[k];
+      const s = secs[k], m = meta(k);
       const hasText = !!(s.text || '').trim() ||
         (k === 'training' && ((c.sections || {}).programs || []).some(p => (p.name || '').trim() || (p.link || '').trim()));
       const sub = hasText ? m.blurb : (s.linkLabel || m.blurb);
@@ -369,10 +432,10 @@ function openApp(){
     });
   (secs.extras || []).filter(x => (x.link || '').trim()).forEach(x => {
     tiles.push(`<a class="tile" href="${esc(x.link)}" target="_blank" rel="noopener"><span class="ic">🔗</span>
-      <span class="t"><b>${esc(x.label || 'Open')}</b><span>Tap to open</span></span><span class="go">↗</span></a>`);
+      <span class="t"><b>${esc(x.label || 'Open')}</b><span>${esc(t('extras_sub'))}</span></span><span class="go">↗</span></a>`);
   });
   $('#aTiles').innerHTML = tiles.join('') ||
-    `<div class="card" style="color:var(--mut)">Your plan is being written up. It will appear here — nothing to do on your side.</div>`;
+    `<div class="card" style="color:var(--mut)">${esc(t('empty_plan'))}</div>`;
   document.querySelectorAll('#aTiles .tile[data-k]').forEach(b => b.onclick = () => openSection(b.dataset.k));
 
   a2hs();
@@ -381,7 +444,7 @@ function openApp(){
 }
 
 function openSection(k){
-  const s = (CLIENT.sections || {})[k], m = SECTION_META[k];
+  const s = (CLIENT.sections || {})[k], m = meta(k);
   $('#aHome').hidden = true;
   $('#aSection').hidden = false;
 
@@ -393,14 +456,14 @@ function openSection(k){
     const old = progs.filter(p => p !== cur);
     if(cur){
       progHtml += `<div class="curprog">
-        <div class="lbl">Program you're on</div>
+        <div class="lbl">${esc(t('prog_current_label'))}</div>
         <h2>${esc(cur.name || 'Current program')}</h2>
         <div class="dates">${cur.weeks ? cur.weeks + ' weeks · ' : ''}${fmt(cur.start)}${cur.end ? ' → ' + fmt(cur.end) : ''}</div>
-        ${(cur.link || '').trim() ? `<a class="btn" href="${esc(cur.link)}" target="_blank" rel="noopener">Open the program ↗</a>` : ''}
+        ${(cur.link || '').trim() ? `<a class="btn" href="${esc(cur.link)}" target="_blank" rel="noopener">${esc(t('prog_open_btn'))}</a>` : ''}
       </div>`;
     }
     if(old.length){
-      progHtml += `<div class="lbl" style="margin:22px 0 10px">Programs you've done</div>` +
+      progHtml += `<div class="lbl" style="margin:22px 0 10px">${esc(t('prog_past_label'))}</div>` +
         old.map(p => (p.link || '').trim()
           ? `<a class="oldprog" href="${esc(p.link)}" target="_blank" rel="noopener">
                <span class="t"><b>${esc(p.name || 'Program')}</b>
@@ -412,14 +475,14 @@ function openSection(k){
   }
 
   $('#aSection').innerHTML = `
-    <button class="back" id="sBack">← Back</button>
+    <button class="back" id="sBack">${esc(t('back'))}</button>
     <h1>${m.icon} ${esc(m.name)}</h1>
     ${(s.link || '').trim()
-      ? `<a class="btn" href="${esc(s.link)}" target="_blank" rel="noopener" style="margin:0 0 20px">${esc(s.linkLabel || ('Open my ' + m.name.toLowerCase()))} ↗</a>`
+      ? `<a class="btn" href="${esc(s.link)}" target="_blank" rel="noopener" style="margin:0 0 20px">${esc(s.linkLabel || t('open_default', { section: m.name.toLowerCase() }))} ↗</a>`
       : ''}
     <div class="body">${render(s.text)}</div>
     ${progHtml}
-    ${CLIENT.updated_at ? `<p class="updated">Last updated ${new Date(CLIENT.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>` : ''}`;
+    ${CLIENT.updated_at ? `<p class="updated">${esc(t('updated', { date: new Date(CLIENT.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) }))}</p>` : ''}`;
   $('#sBack').onclick = closeSection;
   history.pushState({ sec:k }, '', location.pathname);
   window.scrollTo(0, 0);
@@ -436,9 +499,7 @@ function a2hs(){
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if(standalone || localStorage.getItem('tgc-a2hs:' + SLUG)) return;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  $('#a2hsHow').textContent = ios
-    ? 'Tap the Share button, then “Add to Home Screen”.'
-    : 'Open your browser menu and choose “Add to Home screen”.';
+  $('#a2hsHow').textContent = ios ? t('a2hs_ios') : t('a2hs_android');
   $('#a2hs').hidden = false;
   $('#a2hsX').onclick = () => { localStorage.setItem('tgc-a2hs:' + SLUG, '1'); $('#a2hs').hidden = true; };
 }

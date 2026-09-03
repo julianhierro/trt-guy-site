@@ -190,6 +190,7 @@
         <button class="chip" data-f="all">All</button>
       </div>
       <span style="flex:1"></span>
+      <button class="btn" id="btnCopy">✏️ Page wording</button>
       <button class="btn" id="btnTemplate">⚙ Plan template</button>
       <button class="btn" id="btnImport">⤓ Import intake</button>
       <button class="btn primary" id="btnNew">+ New client</button>
@@ -496,6 +497,122 @@ function showImport(list, have){
       toast('Imported — showing under New / leads');
     } catch(e){ b.disabled = false; b.textContent = 'Import'; alert('Failed: ' + e.message); }
   });
+}
+
+/* ── page wording ─────────────────────────────────────────────────────────
+   The fixed words on every client's page. Blank means "use the default",
+   which is the placeholder shown in each box. {first}, {n}, {total}, {date}
+   and {section} are filled in live. */
+const COPY_FIELDS = [
+  ['Access code screen', [
+    ['gate_hi',        'Greeting',              'Hey {first} 👋'],
+    ['gate_sub',       'Line under it',         'Enter your 4-digit access code to open your plan.'],
+    ['gate_btn',       'Button',                'Open my plan'],
+    ['gate_btn_busy',  'Button while loading',  'Opening…'],
+    ['gate_empty',     'If the box is empty',   'Enter your 4-digit code.'],
+  ]],
+  ['Header', [
+    ['header_who',     'Top right',             'Plan for {first}'],
+  ]],
+  ['Phase card', [
+    ['phase_label',    'Small label',           'Where we are'],
+    ['phase_untitled', 'Title if unnamed',      'Your plan'],
+    ['week_txt',       'Under the bar, left',   'Week {n} of {total}'],
+    ['days_txt',       'Under the bar, right',  '{n} days to go'],
+    ['past_label',     'Phase history line',    "Phases you've done ({n})"],
+  ]],
+  ['Macros card', [
+    ['macros_label',   'Small label',           'Your daily numbers'],
+    ['mac_calories',   'First number',          'Calories'],
+    ['mac_protein',    'Second number',         'Protein'],
+    ['mac_carbs',      'Third number',          'Carbs'],
+    ['mac_fat',        'Fourth number',         'Fat'],
+  ]],
+  ['Tiles', [
+    ['tile_training',      'Training — name',   'Training'],
+    ['tile_training_sub',  'Training — line',   'Your program'],
+    ['tile_nutrition',     'Nutrition — name',  'Nutrition'],
+    ['tile_nutrition_sub', 'Nutrition — line',  'Calories, macros, meals'],
+    ['tile_peds',          'PEDs — name',       'PED Protocol'],
+    ['tile_peds_sub',      'PEDs — line',       'Compounds, doses, timing'],
+    ['tile_checkin',       'Check-in — name',   'Check-in'],
+    ['tile_checkin_sub',   'Check-in — line',   'How we track progress'],
+    ['extras_sub',         'Extra links — line','Tap to open'],
+    ['empty_plan',         'When nothing is on','Your plan is being written up. It will appear here — nothing to do on your side.'],
+  ]],
+  ['Inside a tile', [
+    ['back',               'Back link',         '← Back'],
+    ['open_default',       'Default button',    'Open my {section}'],
+    ['prog_current_label', 'Above the program', "Program you're on"],
+    ['prog_open_btn',      'Program button',    'Open the program ↗'],
+    ['prog_past_label',    'Old programs',      "Programs you've done"],
+    ['updated',            'Bottom line',       'Last updated {date}'],
+  ]],
+  ['Home-screen prompt & footer', [
+    ['a2hs_title',     'Prompt',                'Keep this one tap away.'],
+    ['a2hs_ios',       'iPhone instruction',    'Tap the Share button, then “Add to Home Screen”.'],
+    ['a2hs_android',   'Android instruction',   'Open your browser menu and choose “Add to Home screen”.'],
+    ['footer',         'Footer',                'TRT Guy · Questions? Message me and I’ll sort it.'],
+  ]],
+  ['If the link is not a client', [
+    ['nf_title',       'Heading',               'Page not found'],
+    ['nf_body',        'Body',                  "That link doesn't lead anywhere. Check the spelling, or head back to the site."],
+    ['nf_btn',         'Button',                'Go to trt-guy.com'],
+  ]],
+];
+
+$('#btnCopy').onclick = async () => {
+  let copy = {};
+  try { copy = (await api('/clients?action=copy')).copy || {}; }
+  catch(e){ return alert('Could not load the wording: ' + e.message); }
+  drawCopyPanel(copy);
+};
+
+function drawCopyPanel(copy){
+  closePanel();
+  const scrim = document.createElement('div'); scrim.className = 'scrim'; scrim.id = 'scrim';
+  const p = document.createElement('div'); p.className = 'panel'; p.id = 'panel';
+  p.innerHTML = `
+    <div class="phead">
+      <div><h2>Page wording</h2>
+        <p class="hint" style="margin:4px 0 0">The fixed words on every client's page. Leave a box empty to keep the default shown in grey.</p></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <a class="btn sm" href="${SITE}/demo" target="_blank" rel="noopener">See it ↗</a>
+        <button class="btn sm" id="pClose">Close</button>
+      </div>
+    </div>
+    <div class="pbody" id="pBody">
+      ${COPY_FIELDS.map(([group, rows]) => `
+        <div class="sect">
+          <div class="shead"><h3>${esc(group)}</h3></div>
+          ${rows.map(([k, label, def]) => `
+            <div class="fld"><label class="fl">${esc(label)}</label>
+              <input data-c="${k}" value="${esc(copy[k] || '')}" placeholder="${esc(def)}"></div>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div class="pfoot">
+      <button class="btn sm" id="copyReset">Reset all to default</button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn primary" id="pSave">Save</button>
+      </div>
+    </div>`;
+  document.body.append(scrim, p);
+  scrim.onclick = closePanel;
+  p.querySelector('#pClose').onclick = closePanel;
+  p.querySelector('#copyReset').onclick = () => {
+    if(!confirm('Put every line back to its default wording?')) return;
+    $$('#pBody [data-c]').forEach(i => i.value = '');
+  };
+  p.querySelector('#pSave').onclick = async () => {
+    const out = {};
+    $$('#pBody [data-c]').forEach(i => { if(i.value.trim()) out[i.dataset.c] = i.value.trim(); });
+    const btn = $('#pSave'); btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await api('/clients', { method:'POST', body: JSON.stringify({ action:'copy_save', copy: out }) });
+      toast('Wording saved — live on every client page');
+      closePanel();
+    } catch(e){ alert('Could not save: ' + e.message); btn.disabled = false; btn.textContent = 'Save'; }
+  };
 }
 
 /* ── plan template ────────────────────────────────────────────────────────
