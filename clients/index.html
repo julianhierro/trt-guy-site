@@ -190,6 +190,7 @@
         <button class="chip" data-f="all">All</button>
       </div>
       <span style="flex:1"></span>
+      <button class="btn" id="btnTemplate">⚙ Plan template</button>
       <button class="btn" id="btnImport">⤓ Import intake</button>
       <button class="btn primary" id="btnNew">+ New client</button>
     </div>
@@ -497,6 +498,29 @@ function showImport(list, have){
   });
 }
 
+/* ── plan template ────────────────────────────────────────────────────────
+   One master plan. New clients (added or imported) inherit it; existing
+   clients are never touched by editing it. */
+$('#btnTemplate').onclick = async () => {
+  let t = {};
+  try { t = (await api('/clients?action=template')).template || {}; }
+  catch(e){ return alert('Could not load the template: ' + e.message); }
+  OPEN = { isTemplate:true, name:'Plan template', slug:'', phase:t.phase || {}, sections:t.sections || {} };
+  TAB = 'plan';
+  drawPanel();
+};
+async function saveTemplate(){
+  collect();
+  const btn = $('#pSave'); btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await api('/clients', { method:'POST', body: JSON.stringify({
+      action:'template_save', template:{ phase:OPEN.phase, sections:OPEN.sections } }) });
+    toast('Template saved');
+    closePanel();
+  } catch(e){ alert('Could not save: ' + e.message); }
+  finally { const b2 = $('#pSave'); if(b2){ b2.disabled = false; b2.textContent = 'Save'; } }
+}
+
 /* ── client panel ─────────────────────────────────────────────────────────── */
 function sectionOf(c, key){
   const s = (c.sections || {})[key] || {};
@@ -513,22 +537,26 @@ function drawPanel(){
   const c = OPEN;
   const scrim = document.createElement('div'); scrim.className = 'scrim'; scrim.id = 'scrim';
   const p = document.createElement('div'); p.className = 'panel'; p.id = 'panel';
+  const tpl = !!c.isTemplate;
   p.innerHTML = `
     <div class="phead">
       <div>
         <h2>${esc(c.name || 'Client')}</h2>
-        <a class="curl" href="${SITE}/${esc(c.slug)}" target="_blank" rel="noopener">${SITE}/${esc(c.slug)} ↗</a>
+        ${tpl
+          ? '<p class="hint" style="margin:4px 0 0">What every new client starts with. Editing it never changes anyone already on the roster.</p>'
+          : `<a class="curl" href="${SITE}/${esc(c.slug)}" target="_blank" rel="noopener">${SITE}/${esc(c.slug)} ↗</a>`}
       </div>
       <button class="btn sm" id="pClose">Close</button>
     </div>
     <div class="ptabs">
+      ${tpl ? '<button class="ptab on" data-t="plan">Plan template</button>' : `
       <button class="ptab ${TAB==='details'?'on':''}" data-t="details">Details</button>
       <button class="ptab ${TAB==='plan'?'on':''}" data-t="plan">Plan</button>
-      <button class="ptab ${TAB==='intake'?'on':''}" data-t="intake">Intake</button>
+      <button class="ptab ${TAB==='intake'?'on':''}" data-t="intake">Intake</button>`}
     </div>
     <div class="pbody" id="pBody"></div>
     <div class="pfoot">
-      <button class="btn danger sm" id="pDelete">Delete</button>
+      ${tpl ? '<span class="hint">Applies to new clients only.</span>' : '<button class="btn danger sm" id="pDelete">Delete</button>'}
       <div style="display:flex;gap:10px;align-items:center">
         <span class="hint" id="pSaved"></span>
         <button class="btn primary" id="pSave">Save</button>
@@ -538,8 +566,8 @@ function drawPanel(){
   scrim.onclick = closePanel;
   p.querySelector('#pClose').onclick = closePanel;
   p.querySelectorAll('.ptab').forEach(b => b.onclick = () => { collect(); TAB = b.dataset.t; drawPanel(); });
-  p.querySelector('#pSave').onclick = save;
-  p.querySelector('#pDelete').onclick = del;
+  p.querySelector('#pSave').onclick = tpl ? saveTemplate : save;
+  if(!tpl) p.querySelector('#pDelete').onclick = del;
   drawBody();
 }
 function closePanel(){ const s = $('#scrim'), p = $('#panel'); if(s) s.remove(); if(p) p.remove(); }
@@ -610,24 +638,27 @@ function drawBody(){
     const mac = ((c.sections || {}).macros) || {};
     b.innerHTML = `
       <div class="sect">
-        <div class="shead"><h3>📍 Current phase</h3><button class="btn sm" id="newPhase">Start new phase</button></div>
-        <p class="hint" style="margin-bottom:12px">The first thing he sees. “Start new phase” files this one under his history and clears the fields for the next one.</p>
+        <div class="shead"><h3>📍 ${c.isTemplate ? 'Phase a new client starts on' : 'Current phase'}</h3>
+          ${c.isTemplate ? '' : '<button class="btn sm" id="newPhase">Start new phase</button>'}</div>
+        <p class="hint" style="margin-bottom:12px">${c.isTemplate
+          ? 'Dates stay out of the template — you set those per client. Everything else carries over.'
+          : 'The first thing he sees. “Start new phase” files this one under his history and clears the fields for the next one.'}</p>
         <div class="grid2">
           <div class="fld"><label class="fl">Phase</label><select id="ph_type">
             ${PHASES.map(p => `<option value="${p[0]}" ${((ph.type || 'fatloss') === p[0]) ? 'selected' : ''}>${p[1]}</option>`).join('')}
           </select></div>
           <div class="fld"><label class="fl">Shown as</label>
             <input id="ph_name" value="${esc(ph.name || '')}" placeholder="Fat Loss Phase"></div>
-          <div class="fld"><label class="fl">Starts</label><input type="date" id="ph_start" value="${esc(ph.start || '')}"></div>
+          ${c.isTemplate ? '' : `<div class="fld"><label class="fl">Starts</label><input type="date" id="ph_start" value="${esc(ph.start || '')}"></div>`}
           <div class="fld"><label class="fl">Length (weeks)</label>
             <input type="number" min="1" max="52" id="ph_weeks" value="${ph.weeks == null ? '' : esc(ph.weeks)}" placeholder="8"></div>
-          <div class="fld"><label class="fl">Ends</label><input type="date" id="ph_end" value="${esc(ph.end || '')}">
-            <p class="hint">Fills in from start + weeks.</p></div>
+          ${c.isTemplate ? '' : `<div class="fld"><label class="fl">Ends</label><input type="date" id="ph_end" value="${esc(ph.end || '')}">
+            <p class="hint">Fills in from start + weeks.</p></div>`}
         </div>
         <div class="fld"><label class="fl">Focus for this phase</label>
           <textarea id="ph_focus" placeholder="What we're chasing, and what matters most right now.">${esc(ph.focus || '')}</textarea></div>
-        <label class="fl">Phases he's done</label>
-        <div class="rowlist" id="phPast"></div>
+        ${c.isTemplate ? '' : `<label class="fl">Phases he's done</label>
+        <div class="rowlist" id="phPast"></div>`}
       </div>
 
       <div class="sect">
@@ -682,17 +713,19 @@ function drawBody(){
       if(wasDefault && $('#ph_type').value !== 'custom') nameEl.value = phDefault($('#ph_type').value);
     };
     const phRecalc = () => {
+      if(!$('#ph_start')) return;
       const end = addWeeks($('#ph_start').value, $('#ph_weeks').value);
       if(end && (!$('#ph_end').value || $('#ph_end').dataset.auto === '1')){
         $('#ph_end').value = end; $('#ph_end').dataset.auto = '1';
       }
     };
-    $('#ph_start').onchange = phRecalc;
-    $('#ph_weeks').oninput = () => { $('#ph_end').dataset.auto = '1'; phRecalc(); };
-    $('#ph_end').oninput = e => { e.target.dataset.auto = '0'; };
+    if($('#ph_start')) $('#ph_start').onchange = phRecalc;
+    $('#ph_weeks').oninput = () => { if($('#ph_end')) $('#ph_end').dataset.auto = '1'; phRecalc(); };
+    if($('#ph_end')) $('#ph_end').oninput = e => { e.target.dataset.auto = '0'; };
 
     OPEN._past = past;
     const drawPast = () => {
+      if(!$('#phPast')) return;
       $('#phPast').innerHTML = past.length ? past.map((p,i) => `<div class="r">
         <span style="flex:1;font-size:13.5px">${esc(p.name || phDefault(p.type) || 'Phase')}
           <span class="csub">${fmtDate(p.start)} → ${fmtDate(p.end)}</span></span>
@@ -700,8 +733,8 @@ function drawBody(){
         : '<p class="hint">Nothing yet — his first phase is the one above.</p>';
       $$('#phPast [data-prm]').forEach(btn => btn.onclick = () => { past.splice(+btn.dataset.prm,1); drawPast(); });
     };
-    drawPast();
-    $('#newPhase').onclick = () => {
+    if($('#phPast')) drawPast();
+    if($('#newPhase')) $('#newPhase').onclick = () => {
       const cur = { type:$('#ph_type').value, name:$('#ph_name').value.trim(), start:$('#ph_start').value,
                     weeks:$('#ph_weeks').value ? Number($('#ph_weeks').value) : null, end:$('#ph_end').value,
                     focus:$('#ph_focus').value.trim() };
@@ -816,9 +849,9 @@ function collect(){
     c.phase = {
       type: $('#ph_type').value,
       name: $('#ph_name').value.trim(),
-      start: $('#ph_start').value,
+      start: $('#ph_start') ? $('#ph_start').value : '',
       weeks: $('#ph_weeks').value === '' ? null : Number($('#ph_weeks').value),
-      end: $('#ph_end').value,
+      end: $('#ph_end') ? $('#ph_end').value : '',
       focus: $('#ph_focus').value.trim(),
       past: (c._past || []),
     };
