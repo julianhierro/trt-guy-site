@@ -157,14 +157,20 @@ if(!/[?&]edit=1/.test(location.search)) track('view');
   if(editing||already) unlock();
   // In edit mode you normally see the unlocked protocol content. This toggle lets
   // you switch to the opt-in gate and edit its wording (headline, subtext, fine print).
+  // Click handling is delegated on document so the editor's re-render can't strip it.
   if(editing){
-    var showGate=false;
-    var tb=document.createElement('button'); tb.type='button';
-    tb.style.cssText='position:fixed;top:8px;left:8px;z-index:2147483000;background:#1a5cff;color:#fff;border:0;border-radius:9px;padding:9px 13px;font:700 13px system-ui,-apple-system,sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25)';
-    function sync(){ tb.textContent = showGate ? '◄ Now editing OPT-IN — click for protocol' : 'Now editing PROTOCOL — click to edit opt-in ►'; }
-    tb.onclick=function(){ showGate=!showGate; root.classList.toggle('pregate',showGate); sync(); window.scrollTo(0,0); };
-    sync();
-    (document.body?Promise.resolve():new Promise(function(r){document.addEventListener('DOMContentLoaded',r);})).then(function(){ document.body.appendChild(tb); });
+    var showGate=/[?&]optin=1/.test(location.search);
+    if(showGate) root.classList.add('pregate');
+    function sync(){ var b=document.getElementById('jvGateToggle'); if(b) b.textContent = showGate ? '◄ Now editing OPT-IN — click for protocol' : 'Now editing PROTOCOL — click to edit opt-in ►'; }
+    document.addEventListener('click',function(e){ if(e.target && e.target.closest && e.target.closest('#jvGateToggle')){ e.preventDefault(); e.stopPropagation(); showGate=!showGate; root.classList.toggle('pregate',showGate); sync(); window.scrollTo(0,0); } }, true);
+    (document.body?Promise.resolve():new Promise(function(r){document.addEventListener('DOMContentLoaded',r);})).then(function(){
+      if(!document.getElementById('jvGateToggle')){
+        var tb=document.createElement('button'); tb.type='button'; tb.id='jvGateToggle'; tb.setAttribute('data-noedit','');
+        tb.style.cssText='position:fixed;top:8px;left:8px;z-index:2147483000;background:#1a5cff;color:#fff;border:0;border-radius:9px;padding:9px 13px;font:700 13px system-ui,-apple-system,sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25)';
+        document.body.appendChild(tb);
+      }
+      sync();
+    });
   }
   document.getElementById('gateForm').addEventListener('submit', function(e){
     e.preventDefault();
