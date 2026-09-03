@@ -190,6 +190,7 @@
         <button class="chip" data-f="all">All</button>
       </div>
       <span style="flex:1"></span>
+      <button class="btn" id="btnResources">Resources</button>
       <button class="btn" id="btnCopy">Page wording</button>
       <button class="btn" id="btnTemplate">Plan template</button>
       <button class="btn" id="btnImport">Import intake</button>
@@ -223,17 +224,17 @@ const PAYMETHODS = ['Stripe','PayPal','Bank transfer','Zelle','Crypto','Cash','O
 
 // The four blocks a client sees on their page. `key` is what lives in sections{}.
 const SECTIONS = [
-  { key:'training',  name:'Training',     blurb:'The program sheet, and every block he has run' },
-  { key:'nutrition', name:'Nutrition',    blurb:'Calories, macros, how the food is structured' },
-  { key:'peds',      name:'PED Protocol', blurb:'Link to the protocol spreadsheet — the tile opens it straight away' },
-  { key:'checkin',   name:'Check-in',     blurb:'Weekly check-in form or instructions' },
+  { key:'training',       name:'Training',       blurb:'The program sheet, and every block he has run' },
+  { key:'daily_checkin',  name:'Daily Check In', blurb:'The daily form or app he logs in' },
+  { key:'peds',           name:'PED Protocol',   blurb:'Link to the protocol spreadsheet — the tile opens it straight away' },
+  { key:'weekly_checkin', name:'Weekly Check In',blurb:'The Sunday check-in form' },
 ];
 // Which blocks switch on by default for each client type.
 const TYPE_SECTIONS = {
-  full:      ['training','nutrition','peds','checkin'],
-  training:  ['training','checkin'],
-  nutrition: ['nutrition','checkin'],
-  peds:      ['peds','checkin'],
+  full:      ['training','daily_checkin','peds','weekly_checkin'],
+  training:  ['training','daily_checkin','weekly_checkin'],
+  nutrition: ['daily_checkin','weekly_checkin'],
+  peds:      ['peds','daily_checkin','weekly_checkin'],
 };
 
 let KEY = localStorage.getItem(KEYLS) || '';
@@ -499,6 +500,77 @@ function showImport(list, have){
   });
 }
 
+/* ── additional resources ─────────────────────────────────────────────────
+   One shared library shown under the quick-access buttons on every client's
+   page. An item with no link stays hidden; "PED clients only" keeps it off
+   the pages of training- and nutrition-only clients. */
+const DEFAULT_RESOURCES = [
+  { label:'How to Check In',                     link:'', pedOnly:false, on:true },
+  { label:'Getting Started - Nutrition & Activity', link:'', pedOnly:false, on:true },
+  { label:'Getting Started PED Clients',         link:'', pedOnly:true,  on:true },
+  { label:'Recovery Strategies',                 link:'', pedOnly:false, on:true },
+  { label:'Recommended Supplement List',         link:'', pedOnly:false, on:true },
+  { label:'How to Be a Successful Client',       link:'', pedOnly:false, on:true },
+  { label:'Lab Work And Other Tests',            link:'', pedOnly:false, on:true },
+  { label:'Getting Started - Training',          link:'', pedOnly:false, on:true },
+];
+
+$('#btnResources').onclick = async () => {
+  let list;
+  try { list = (await api('/clients?action=resources')).resources; }
+  catch(e){ return alert('Could not load the resources: ' + e.message); }
+  drawResourcesPanel(Array.isArray(list) && list.length ? list : DEFAULT_RESOURCES.map(r => Object.assign({}, r)));
+};
+
+function drawResourcesPanel(list){
+  closePanel();
+  const scrim = document.createElement('div'); scrim.className = 'scrim'; scrim.id = 'scrim';
+  const p = document.createElement('div'); p.className = 'panel'; p.id = 'panel';
+  p.innerHTML = `
+    <div class="phead">
+      <div><h2>Additional resources</h2>
+        <p class="hint" style="margin:4px 0 0">Shown under the quick-access buttons on every client's page. Paste a link once and every client has it. No link, no row.</p></div>
+      <button class="btn sm" id="pClose">Close</button>
+    </div>
+    <div class="pbody"><div class="rowlist" id="resList"></div>
+      <button class="btn sm" id="addRes" style="margin-top:12px">+ Add resource</button></div>
+    <div class="pfoot"><span class="hint">Applies to every client.</span>
+      <button class="btn primary" id="pSave">Save</button></div>`;
+  document.body.append(scrim, p);
+  scrim.onclick = closePanel;
+  p.querySelector('#pClose').onclick = closePanel;
+
+  const draw = () => {
+    $('#resList').innerHTML = list.map((r,i) => `
+      <div class="prog">
+        <div class="r">
+          <input data-r="label" data-i="${i}" value="${esc(r.label || '')}" placeholder="What it's called">
+          <button class="btn sm danger" data-rrm="${i}">✕</button>
+        </div>
+        <div class="r">
+          <input data-r="link" data-i="${i}" value="${esc(r.link || '')}" placeholder="https://… doc, sheet or video">
+          <label class="sw" style="flex:0 0 auto"><input type="checkbox" data-ped="${i}" ${r.pedOnly ? 'checked' : ''}><span class="track"></span>PED only</label>
+        </div>
+      </div>`).join('') || '<p class="hint">Nothing yet.</p>';
+    $$('#resList [data-rrm]').forEach(b => b.onclick = () => { list.splice(+b.dataset.rrm,1); draw(); });
+    $$('#resList [data-r]').forEach(inp => inp.oninput = () => { list[+inp.dataset.i][inp.dataset.r] = inp.value; });
+    $$('#resList [data-ped]').forEach(cb => cb.onchange = () => { list[+cb.dataset.ped].pedOnly = cb.checked; });
+  };
+  draw();
+  $('#addRes').onclick = () => { list.push({ label:'', link:'', pedOnly:false, on:true }); draw(); };
+
+  p.querySelector('#pSave').onclick = async () => {
+    const btn = $('#pSave'); btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const clean = list.filter(r => (r.label || '').trim()).map(r => ({
+        label:(r.label || '').trim(), link:(r.link || '').trim(), pedOnly:!!r.pedOnly, on:r.on !== false }));
+      await api('/clients', { method:'POST', body: JSON.stringify({ action:'resources_save', resources: clean }) });
+      toast('Resources saved');
+      closePanel();
+    } catch(e){ alert('Could not save: ' + e.message); btn.disabled = false; btn.textContent = 'Save'; }
+  };
+}
+
 /* ── page wording ─────────────────────────────────────────────────────────
    The fixed words on every client's page. Blank means "use the default",
    which is the placeholder shown in each box. {first}, {n}, {total}, {date}
@@ -529,16 +601,17 @@ const COPY_FIELDS = [
     ['mac_fat',        'Fourth number',         'Fat'],
   ]],
   ['Tiles', [
-    ['tile_training',      'Training — name',   'Training'],
-    ['tile_training_sub',  'Training — line',   'Your program'],
-    ['tile_nutrition',     'Nutrition — name',  'Nutrition'],
-    ['tile_nutrition_sub', 'Nutrition — line',  'Calories, macros, meals'],
-    ['tile_peds',          'PEDs — name',       'PED Protocol'],
-    ['tile_peds_sub',      'PEDs — line',       'Compounds, doses, timing'],
-    ['tile_checkin',       'Check-in — name',   'Check-in'],
-    ['tile_checkin_sub',   'Check-in — line',   'How we track progress'],
-    ['extras_sub',         'Extra links — line','Tap to open'],
-    ['empty_plan',         'When nothing is on','Your plan is being written up. It will appear here — nothing to do on your side.'],
+    ['tile_training',           'Training — name',        'Training'],
+    ['tile_training_sub',       'Training — line',        'Your program'],
+    ['tile_daily_checkin',      'Daily Check In — name',  'Daily Check In'],
+    ['tile_daily_checkin_sub',  'Daily Check In — line',  ''],
+    ['tile_peds',               'PED Protocol — name',    'PED Protocol'],
+    ['tile_peds_sub',           'PED Protocol — line',    'Compounds, doses, timing'],
+    ['tile_weekly_checkin',     'Weekly Check In — name', 'Weekly Check In'],
+    ['tile_weekly_checkin_sub', 'Weekly Check In — line', ''],
+    ['resources_label',         'Resources heading',      'Additional Resources'],
+    ['extras_sub',              'Extra links — line',     'Tap to open'],
+    ['empty_plan',              'When nothing is on',     'Your plan is being written up. It will appear here — nothing to do on your side.'],
   ]],
   ['Inside a tile', [
     ['back',               'Back link',         '← Back'],
@@ -640,7 +713,9 @@ async function saveTemplate(){
 
 /* ── client panel ─────────────────────────────────────────────────────────── */
 function sectionOf(c, key){
-  const s = (c.sections || {})[key] || {};
+  // 'checkin' was the old name for the weekly one — keep those saved blocks.
+  const all = c.sections || {};
+  const s = all[key] || (key === 'weekly_checkin' ? (all.checkin || {}) : {});
   return { on: !!s.on, link: s.link || '', linkLabel: s.linkLabel || '', text: s.text || '' };
 }
 function openClient(id){
