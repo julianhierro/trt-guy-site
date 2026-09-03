@@ -546,7 +546,10 @@ function drawPanel(){
           ? '<p class="hint" style="margin:4px 0 0">What every new client starts with. Editing it never changes anyone already on the roster.</p>'
           : `<a class="curl" href="${SITE}/${esc(c.slug)}" target="_blank" rel="noopener">${SITE}/${esc(c.slug)} ↗</a>`}
       </div>
-      <button class="btn sm" id="pClose">Close</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${tpl ? '' : '<button class="btn sm" id="pPreview">Preview as client ↗</button>'}
+        <button class="btn sm" id="pClose">Close</button>
+      </div>
     </div>
     <div class="ptabs">
       ${tpl ? '<button class="ptab on" data-t="plan">Plan template</button>' : `
@@ -566,6 +569,11 @@ function drawPanel(){
   scrim.onclick = closePanel;
   p.querySelector('#pClose').onclick = closePanel;
   p.querySelectorAll('.ptab').forEach(b => b.onclick = () => { collect(); TAB = b.dataset.t; drawPanel(); });
+  // Opens his page with the code already in the link — the exact screen he sees.
+  if(p.querySelector('#pPreview')) p.querySelector('#pPreview').onclick = () => {
+    collect();
+    window.open(`${SITE}/${c.slug}${c.pin ? '?pin=' + encodeURIComponent(c.pin) : ''}`, '_blank', 'noopener');
+  };
   p.querySelector('#pSave').onclick = tpl ? saveTemplate : save;
   if(!tpl) p.querySelector('#pDelete').onclick = del;
   drawBody();
