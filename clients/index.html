@@ -128,6 +128,7 @@
     background:#6d6d78;transition:.15s}
   .sw input:checked + .track{background:var(--accent-soft);border-color:var(--accent)}
   .sw input:checked + .track:after{left:19px;background:var(--accent)}
+  .prog{border:1px solid var(--line-bright);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
   .pinbox{display:flex;align-items:center;gap:12px;border:1px solid rgba(26,92,255,.35);background:var(--accent-soft);
     border-radius:12px;padding:12px 15px;margin-bottom:16px;flex-wrap:wrap}
   .pinbox .code{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;letter-spacing:.28em}
@@ -208,6 +209,13 @@ const TYPES = [
   ['nutrition', 'Nutrition'],
   ['peds',      'PEDs'],
 ];
+// The phases Julian runs. "custom" lets him name one himself.
+const PHASES = [
+  ['fatloss',     'Fat Loss Phase'],
+  ['improvement', 'Improvement Phase'],
+  ['maintenance', 'Maintenance Phase'],
+  ['custom',      'Custom'],
+];
 const STATUSES = [['lead','New / lead'],['active','Active'],['paused','Paused'],['ended','Ended']];
 const PAYMETHODS = ['Stripe','PayPal','Bank transfer','Zelle','Crypto','Cash','Other'];
 
@@ -263,6 +271,15 @@ function addMonths(dateStr, months){
   const day = d.getDate();
   d.setMonth(d.getMonth() + Number(months));
   if(d.getDate() < day) d.setDate(0);           // clamp Jan 31 + 1mo → Feb 28/29
+  return d.toISOString().slice(0,10);
+}
+
+// start + N weeks, as a plain YYYY-MM-DD string.
+function addWeeks(dateStr, weeks){
+  if(!dateStr || !weeks) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  if(isNaN(d)) return '';
+  d.setDate(d.getDate() + Number(weeks) * 7);
   return d.toISOString().slice(0,10);
 }
 
@@ -589,19 +606,44 @@ function drawBody(){
 
   } else if(TAB === 'plan'){
     const ph = c.phase || {};
+    const past = Array.isArray(ph.past) ? ph.past : [];
+    const mac = ((c.sections || {}).macros) || {};
     b.innerHTML = `
       <div class="sect">
-        <div class="shead"><h3>📍 Current phase</h3></div>
-        <p class="hint" style="margin-bottom:12px">The first thing they see when they open their page.</p>
-        <div class="fld"><label class="fl">Phase name</label>
-          <input id="ph_name" value="${esc(ph.name || '')}" placeholder="Phase 1 — Fat loss"></div>
+        <div class="shead"><h3>📍 Current phase</h3><button class="btn sm" id="newPhase">Start new phase</button></div>
+        <p class="hint" style="margin-bottom:12px">The first thing he sees. “Start new phase” files this one under his history and clears the fields for the next one.</p>
         <div class="grid2">
-          <div class="fld"><label class="fl">Phase starts</label><input type="date" id="ph_start" value="${esc(ph.start || '')}"></div>
-          <div class="fld"><label class="fl">Phase ends</label><input type="date" id="ph_end" value="${esc(ph.end || '')}"></div>
+          <div class="fld"><label class="fl">Phase</label><select id="ph_type">
+            ${PHASES.map(p => `<option value="${p[0]}" ${((ph.type || 'fatloss') === p[0]) ? 'selected' : ''}>${p[1]}</option>`).join('')}
+          </select></div>
+          <div class="fld"><label class="fl">Shown as</label>
+            <input id="ph_name" value="${esc(ph.name || '')}" placeholder="Fat Loss Phase"></div>
+          <div class="fld"><label class="fl">Starts</label><input type="date" id="ph_start" value="${esc(ph.start || '')}"></div>
+          <div class="fld"><label class="fl">Length (weeks)</label>
+            <input type="number" min="1" max="52" id="ph_weeks" value="${ph.weeks == null ? '' : esc(ph.weeks)}" placeholder="8"></div>
+          <div class="fld"><label class="fl">Ends</label><input type="date" id="ph_end" value="${esc(ph.end || '')}">
+            <p class="hint">Fills in from start + weeks.</p></div>
         </div>
         <div class="fld"><label class="fl">Focus for this phase</label>
           <textarea id="ph_focus" placeholder="What we're chasing, and what matters most right now.">${esc(ph.focus || '')}</textarea></div>
+        <label class="fl">Phases he's done</label>
+        <div class="rowlist" id="phPast"></div>
       </div>
+
+      <div class="sect">
+        <div class="shead"><h3>🔢 Macros</h3>
+          <label class="sw"><input type="checkbox" id="mac_on" ${mac.on ? 'checked' : ''}><span class="track"></span>Show on home</label></div>
+        <p class="hint" style="margin-bottom:12px">Sits right under the phase card, so his numbers are the first thing he reads.</p>
+        <div class="grid2">
+          <div class="fld"><label class="fl">Calories</label><input type="number" id="mac_calories" value="${mac.calories == null ? '' : esc(mac.calories)}" placeholder="2450"></div>
+          <div class="fld"><label class="fl">Protein (g)</label><input type="number" id="mac_protein" value="${mac.protein == null ? '' : esc(mac.protein)}" placeholder="230"></div>
+          <div class="fld"><label class="fl">Carbs (g)</label><input type="number" id="mac_carbs" value="${mac.carbs == null ? '' : esc(mac.carbs)}" placeholder="200"></div>
+          <div class="fld"><label class="fl">Fat (g)</label><input type="number" id="mac_fat" value="${mac.fat == null ? '' : esc(mac.fat)}" placeholder="80"></div>
+        </div>
+        <div class="fld"><label class="fl">Note under the numbers</label>
+          <input id="mac_note" value="${esc(mac.note || '')}" placeholder="Same every day — training and rest."></div>
+      </div>
+
       ${SECTIONS.map(s => {
         const v = sectionOf(c, s.key);
         return `<div class="sect">
@@ -618,13 +660,98 @@ function drawBody(){
           </div>
           <div class="fld"><label class="fl">Written for them</label>
             <textarea id="s_${s.key}_text" placeholder="Plain text. **bold**, - bullets and links work.">${esc(v.text)}</textarea></div>
+          ${s.key === 'training' ? `
+          <label class="fl">Programs — the current one and everything before it</label>
+          <p class="hint" style="margin:0 0 8px">Mark one as current. The rest show under “Programs you've done”, so he can always open an old block.</p>
+          <div class="rowlist" id="progs"></div>
+          <button class="btn sm" id="addProg" style="margin-top:10px">+ Add program</button>` : ''}
         </div>`;
       }).join('')}
+
       <div class="sect">
         <div class="shead"><h3>🔗 Extra quick links</h3><button class="btn sm" id="addExtra">+ Add</button></div>
         <p class="hint">Anything else worth one tap — supplement list, form check video, WhatsApp.</p>
         <div class="rowlist" id="extras"></div>
       </div>`;
+
+    /* phase: type drives the default label, start + weeks drive the end date */
+    const phDefault = t => (PHASES.find(p => p[0] === t) || [null,''])[1];
+    $('#ph_type').onchange = () => {
+      const nameEl = $('#ph_name');
+      const wasDefault = !nameEl.value.trim() || PHASES.some(p => p[1] === nameEl.value.trim());
+      if(wasDefault && $('#ph_type').value !== 'custom') nameEl.value = phDefault($('#ph_type').value);
+    };
+    const phRecalc = () => {
+      const end = addWeeks($('#ph_start').value, $('#ph_weeks').value);
+      if(end && (!$('#ph_end').value || $('#ph_end').dataset.auto === '1')){
+        $('#ph_end').value = end; $('#ph_end').dataset.auto = '1';
+      }
+    };
+    $('#ph_start').onchange = phRecalc;
+    $('#ph_weeks').oninput = () => { $('#ph_end').dataset.auto = '1'; phRecalc(); };
+    $('#ph_end').oninput = e => { e.target.dataset.auto = '0'; };
+
+    OPEN._past = past;
+    const drawPast = () => {
+      $('#phPast').innerHTML = past.length ? past.map((p,i) => `<div class="r">
+        <span style="flex:1;font-size:13.5px">${esc(p.name || phDefault(p.type) || 'Phase')}
+          <span class="csub">${fmtDate(p.start)} → ${fmtDate(p.end)}</span></span>
+        <button class="btn sm danger" data-prm="${i}">✕</button></div>`).join('')
+        : '<p class="hint">Nothing yet — his first phase is the one above.</p>';
+      $$('#phPast [data-prm]').forEach(btn => btn.onclick = () => { past.splice(+btn.dataset.prm,1); drawPast(); });
+    };
+    drawPast();
+    $('#newPhase').onclick = () => {
+      const cur = { type:$('#ph_type').value, name:$('#ph_name').value.trim(), start:$('#ph_start').value,
+                    weeks:$('#ph_weeks').value ? Number($('#ph_weeks').value) : null, end:$('#ph_end').value,
+                    focus:$('#ph_focus').value.trim() };
+      if(!cur.name && !cur.start) return alert('Nothing to file away yet.');
+      if(!confirm(`File “${cur.name || 'this phase'}” under his history and start a new one?`)) return;
+      past.unshift(cur);
+      $('#ph_name').value = ''; $('#ph_focus').value = '';
+      $('#ph_start').value = cur.end || new Date().toISOString().slice(0,10);
+      $('#ph_weeks').value = ''; $('#ph_end').value = ''; $('#ph_end').dataset.auto = '1';
+      drawPast();
+      toast('Filed — fill in the new phase, then Save');
+    };
+
+    /* training programs, with history */
+    const progs = ((c.sections || {}).programs) || [];
+    OPEN._progs = progs;
+    const drawProgs = () => {
+      const box = $('#progs'); if(!box) return;
+      box.innerHTML = progs.length ? progs.map((p,i) => `
+        <div class="prog">
+          <div class="r">
+            <label class="sw" style="flex:0 0 auto"><input type="checkbox" data-cur="${i}" ${p.current ? 'checked' : ''}><span class="track"></span>Current</label>
+            <input data-p="name" data-i="${i}" value="${esc(p.name || '')}" placeholder="Block A — Push / Pull / Legs">
+            <button class="btn sm danger" data-prg="${i}">✕</button>
+          </div>
+          <div class="r">
+            <input data-p="start" data-i="${i}" type="date" value="${esc(p.start || '')}" style="flex:0 0 40%">
+            <input data-p="weeks" data-i="${i}" type="number" min="1" max="52" value="${p.weeks == null ? '' : esc(p.weeks)}" placeholder="weeks" style="flex:0 0 22%">
+            <input data-p="link" data-i="${i}" value="${esc(p.link || '')}" placeholder="https://… sheet or PDF">
+          </div>
+        </div>`).join('') : '<p class="hint">No programs yet.</p>';
+      $$('#progs [data-prg]').forEach(btn => btn.onclick = () => { progs.splice(+btn.dataset.prg,1); drawProgs(); });
+      $$('#progs [data-p]').forEach(inp => inp.oninput = () => {
+        const p = progs[+inp.dataset.i], k = inp.dataset.p;
+        p[k] = k === 'weeks' ? (inp.value === '' ? null : Number(inp.value)) : inp.value;
+        if(k === 'start' || k === 'weeks') p.end = addWeeks(p.start, p.weeks);
+      });
+      // Only one program is ever the current one.
+      $$('#progs [data-cur]').forEach(cb => cb.onchange = () => {
+        progs.forEach((p,j) => p.current = cb.checked && j === +cb.dataset.cur);
+        drawProgs();
+      });
+    };
+    drawProgs();
+    if($('#addProg')) $('#addProg').onclick = () => {
+      progs.forEach(p => p.current = false);
+      progs.unshift({ name:'', weeks:5, start:new Date().toISOString().slice(0,10), end:'', link:'', current:true });
+      progs[0].end = addWeeks(progs[0].start, progs[0].weeks);
+      drawProgs();
+    };
 
     const extras = ((c.sections || {}).extras) || [];
     const drawExtras = () => {
@@ -686,8 +813,25 @@ function collect(){
     c.amount_paid = a === '' ? null : Number(a);
   }
   if(TAB === 'plan' && $('#ph_name')){
-    c.phase = { name:$('#ph_name').value.trim(), start:$('#ph_start').value, end:$('#ph_end').value, focus:$('#ph_focus').value.trim() };
-    const sec = {};
+    c.phase = {
+      type: $('#ph_type').value,
+      name: $('#ph_name').value.trim(),
+      start: $('#ph_start').value,
+      weeks: $('#ph_weeks').value === '' ? null : Number($('#ph_weeks').value),
+      end: $('#ph_end').value,
+      focus: $('#ph_focus').value.trim(),
+      past: (c._past || []),
+    };
+    const num = id => { const v = $(id).value; return v === '' ? null : Number(v); };
+    const sec = {
+      macros: {
+        on: $('#mac_on').checked,
+        calories: num('#mac_calories'), protein: num('#mac_protein'),
+        carbs: num('#mac_carbs'), fat: num('#mac_fat'),
+        note: $('#mac_note').value.trim(),
+      },
+      programs: (c._progs || []).filter(p => (p.name || '').trim() || (p.link || '').trim()),
+    };
     SECTIONS.forEach(s => {
       sec[s.key] = {
         on: $('#s_' + s.key + '_on').checked,

@@ -78,6 +78,35 @@
   .prog i{display:block;height:100%;background:var(--acc);border-radius:99px}
   .progtxt{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut)}
 
+  /* macros — the numbers he opens the app for */
+  .macros{margin-bottom:16px;padding:18px 20px}
+  .macros .row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+  .macros .m{text-align:center}
+  .macros .m b{display:block;font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1.15}
+  .macros .m span{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;font-size:11px;color:var(--mut);margin-top:2px}
+  .macros .note{margin:14px 0 0;font-size:13px;color:var(--mut)}
+  @media(max-width:380px){ .macros .row{grid-template-columns:repeat(2,1fr);gap:14px} }
+
+  /* history */
+  .past{margin-bottom:16px}
+  .past summary{cursor:pointer;font-size:13.5px;color:var(--mut);padding:6px 2px;list-style:none}
+  .past summary::-webkit-details-marker{display:none}
+  .past summary:before{content:'▸ ';color:var(--mut)}
+  .past[open] summary:before{content:'▾ '}
+  .past ul{margin:6px 0 0;padding:0 0 0 18px;font-size:13.5px;color:var(--mut)}
+  .past li{margin:0 0 5px}
+  .past li b{color:var(--txt);font-weight:600}
+  .oldprog{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);
+    border-radius:12px;padding:13px 15px;background:var(--card);margin-bottom:8px;text-decoration:none;color:inherit}
+  .oldprog .t b{display:block;font-size:14.5px}
+  .oldprog .t span{display:block;font-size:12.5px;color:var(--mut)}
+  .oldprog .go{color:var(--mut)}
+  .curprog{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--card);margin-bottom:18px}
+  .curprog .lbl{margin-bottom:4px}
+  .curprog h2{margin:0 0 2px;font-size:18px;letter-spacing:-.01em}
+  .curprog .dates{font-size:13px;color:var(--mut)}
+
   /* tiles */
   .tiles{display:grid;gap:10px;margin-top:6px}
   .tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);
@@ -146,6 +175,8 @@
   <main class="wrap">
     <div id="aHome">
       <section class="card phase" id="aPhase"></section>
+      <section class="card macros" id="aMacros" hidden></section>
+      <div id="aPast"></div>
       <div class="tiles" id="aTiles"></div>
       <div class="a2hs" id="a2hs" hidden>
         <div style="flex:1"><b>Keep this one tap away.</b> <span id="a2hsHow"></span></div>
@@ -278,14 +309,16 @@ function openApp(){
   const start = ph.start || c.start_date, end = ph.end || c.end_date;
   let bar = '';
   if(start && end){
-    const s = new Date(start + 'T00:00:00'), e = new Date(end + 'T23:59:59');
+    // Whole days between the two dates: an 8-week phase must read "of 8", not 9.
+    const s = new Date(start + 'T00:00:00'), e = new Date(end + 'T00:00:00');
     const total = Math.max(1, Math.round((e - s) / 86400000));
-    const gone  = Math.min(total, Math.max(0, Math.round((Date.now() - s) / 86400000)));
+    const gone  = Math.min(total, Math.max(0, Math.floor((Date.now() - s) / 86400000)));
     const pct = Math.max(2, Math.min(100, Math.round(gone / total * 100)));
-    const wkNow = Math.floor(gone / 7) + 1, wkAll = Math.max(1, Math.ceil(total / 7));
+    const wkAll = Math.max(1, Math.round(total / 7));
+    const wkNow = Math.min(wkAll, Math.floor(gone / 7) + 1);
     const leftDays = Math.max(0, total - gone);
     bar = `<div class="prog"><i style="width:${pct}%"></i></div>
-      <div class="progtxt"><span>Week ${Math.min(wkNow, wkAll)} of ${wkAll}</span><span>${leftDays} days to go</span></div>`;
+      <div class="progtxt"><span>Week ${wkNow} of ${wkAll}</span><span>${leftDays} days to go</span></div>`;
   }
   $('#aPhase').innerHTML = `
     <div class="lbl">Where we are</div>
@@ -294,12 +327,39 @@ function openApp(){
     ${bar}
     ${ph.focus ? `<div class="focus">${esc(ph.focus)}</div>` : ''}`;
 
+  // macros — first numbers he sees, no tapping
+  const mac = (c.sections || {}).macros || {};
+  const hasMac = mac.on && [mac.calories, mac.protein, mac.carbs, mac.fat].some(v => v != null && v !== '');
+  $('#aMacros').hidden = !hasMac;
+  if(hasMac){
+    const cell = (v, l, suffix) => `<div class="m"><b>${v == null || v === '' ? '—' : Number(v).toLocaleString('en-US') + (suffix || '')}</b><span>${l}</span></div>`;
+    $('#aMacros').innerHTML = `
+      <div class="lbl">Your daily numbers</div>
+      <div class="row">
+        ${cell(mac.calories, 'Calories')}
+        ${cell(mac.protein, 'Protein', 'g')}
+        ${cell(mac.carbs, 'Carbs', 'g')}
+        ${cell(mac.fat, 'Fat', 'g')}
+      </div>
+      ${mac.note ? `<p class="note">${esc(mac.note)}</p>` : ''}`;
+  }
+
+  // phases he's already been through
+  const pastPhases = Array.isArray(ph.past) ? ph.past.filter(x => x && (x.name || x.start)) : [];
+  $('#aPast').innerHTML = pastPhases.length ? `
+    <details class="past"><summary>Phases you've done (${pastPhases.length})</summary>
+      <ul>${pastPhases.map(x => `<li><b>${esc(x.name || 'Phase')}</b> — ${fmt(x.start)} → ${fmt(x.end)}</li>`).join('')}</ul>
+    </details>` : '';
+
   // tiles
   const secs = c.sections || {};
-  const tiles = ORDER.filter(k => secs[k] && secs[k].on && ((secs[k].text || '').trim() || (secs[k].link || '').trim()))
+  const hasProgs = ((secs.programs) || []).some(p => (p.name || '').trim() || (p.link || '').trim());
+  const tiles = ORDER.filter(k => secs[k] && secs[k].on &&
+      ((secs[k].text || '').trim() || (secs[k].link || '').trim() || (k === 'training' && hasProgs)))
     .map(k => {
       const s = secs[k], m = SECTION_META[k];
-      const hasText = !!(s.text || '').trim();
+      const hasText = !!(s.text || '').trim() ||
+        (k === 'training' && ((c.sections || {}).programs || []).some(p => (p.name || '').trim() || (p.link || '').trim()));
       const sub = hasText ? m.blurb : (s.linkLabel || m.blurb);
       return hasText
         ? `<button class="tile" data-k="${k}"><span class="ic">${m.icon}</span>
@@ -324,6 +384,33 @@ function openSection(k){
   const s = (CLIENT.sections || {})[k], m = SECTION_META[k];
   $('#aHome').hidden = true;
   $('#aSection').hidden = false;
+
+  // Training carries his programs: the one he's on, then everything he's finished.
+  let progHtml = '';
+  if(k === 'training'){
+    const progs = ((CLIENT.sections || {}).programs || []).filter(p => (p.name || '').trim() || (p.link || '').trim());
+    const cur = progs.find(p => p.current);
+    const old = progs.filter(p => p !== cur);
+    if(cur){
+      progHtml += `<div class="curprog">
+        <div class="lbl">Program you're on</div>
+        <h2>${esc(cur.name || 'Current program')}</h2>
+        <div class="dates">${cur.weeks ? cur.weeks + ' weeks · ' : ''}${fmt(cur.start)}${cur.end ? ' → ' + fmt(cur.end) : ''}</div>
+        ${(cur.link || '').trim() ? `<a class="btn" href="${esc(cur.link)}" target="_blank" rel="noopener">Open the program ↗</a>` : ''}
+      </div>`;
+    }
+    if(old.length){
+      progHtml += `<div class="lbl" style="margin:22px 0 10px">Programs you've done</div>` +
+        old.map(p => (p.link || '').trim()
+          ? `<a class="oldprog" href="${esc(p.link)}" target="_blank" rel="noopener">
+               <span class="t"><b>${esc(p.name || 'Program')}</b>
+               <span>${p.weeks ? p.weeks + ' weeks · ' : ''}${fmt(p.start)}${p.end ? ' → ' + fmt(p.end) : ''}</span></span>
+               <span class="go">↗</span></a>`
+          : `<div class="oldprog"><span class="t"><b>${esc(p.name || 'Program')}</b>
+               <span>${p.weeks ? p.weeks + ' weeks · ' : ''}${fmt(p.start)}${p.end ? ' → ' + fmt(p.end) : ''}</span></span></div>`).join('');
+    }
+  }
+
   $('#aSection').innerHTML = `
     <button class="back" id="sBack">← Back</button>
     <h1>${m.icon} ${esc(m.name)}</h1>
@@ -331,6 +418,7 @@ function openSection(k){
       ? `<a class="btn" href="${esc(s.link)}" target="_blank" rel="noopener" style="margin:0 0 20px">${esc(s.linkLabel || ('Open my ' + m.name.toLowerCase()))} ↗</a>`
       : ''}
     <div class="body">${render(s.text)}</div>
+    ${progHtml}
     ${CLIENT.updated_at ? `<p class="updated">Last updated ${new Date(CLIENT.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>` : ''}`;
   $('#sBack').onclick = closeSection;
   history.pushState({ sec:k }, '', location.pathname);
