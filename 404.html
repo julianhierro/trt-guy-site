@@ -209,6 +209,7 @@
       <section class="card macros" id="aMacros" hidden></section>
       <div id="aPast"></div>
       <div class="tiles" id="aTiles"></div>
+      <div id="aPast2"></div>
       <div id="aRes"></div>
       <div class="a2hs" id="a2hs" hidden>
         <div style="flex:1"><b id="a2hsTitle" data-copy="a2hs_title">Keep this one tap away.</b> <span id="a2hsHow" data-copy="a2hs_how"></span></div>
@@ -452,19 +453,24 @@ function openApp(){
   // tiles
   const secs = c.sections || {};
   if(secs.checkin && !secs.weekly_checkin) secs.weekly_checkin = secs.checkin;  // old name
-  const hasProgs = ((secs.programs) || []).some(p => (p.name || '').trim() || (p.link || '').trim());
-  const tiles = ORDER.filter(k => secs[k] && secs[k].on &&
-      ((secs[k].text || '').trim() || (secs[k].link || '').trim() || (k === 'training' && hasProgs)))
-    .map(k => {
+  const progs = (secs.programs || []).filter(p => (p.name || '').trim() || (p.link || '').trim());
+  const curProg = progs.find(p => p.current);
+  const pastProgs = progs.filter(p => p !== curProg && (p.link || '').trim());
+
+  const tiles = ORDER.filter(k => {
+    if(!secs[k] || !secs[k].on) return false;
+    return (secs[k].link || '').trim() || (secs[k].text || '').trim() ||
+           (k === 'training' && curProg && (curProg.link || '').trim());
+  }).map(k => {
       const s = secs[k], m = meta(k);
-      const hasText = !!(s.text || '').trim() ||
-        (k === 'training' && ((c.sections || {}).programs || []).some(p => (p.name || '').trim() || (p.link || '').trim()));
-      const sub = (hasText ? m.blurb : (s.linkLabel || m.blurb)) || '';
-      return hasText
-        ? `<button class="tile" data-k="${k}">
-             <span class="t"><b data-copy="tile_${k}">${esc(m.name)}</b><span${hasText ? ` data-copy="tile_${k}_sub"` : ''}>${esc(sub)}</span></span><span class="go">›</span></button>`
-        : `<a class="tile" href="${esc(s.link)}" target="_blank" rel="noopener">
-             <span class="t"><b data-copy="tile_${k}">${esc(m.name)}</b><span${hasText ? ` data-copy="tile_${k}_sub"` : ''}>${esc(sub)}</span></span><span class="go">↗</span></a>`;
+      // Training opens the sheet for the block he is on; every other tile opens its own link.
+      const link = (k === 'training' && curProg && (curProg.link || '').trim())
+        ? curProg.link : (s.link || '').trim();
+      const sub = (link ? (s.linkLabel || m.blurb) : m.blurb) || '';
+      const inner = `<span class="t"><b data-copy="tile_${k}">${esc(m.name)}</b><span data-copy="tile_${k}_sub">${esc(sub)}</span></span>`;
+      return link
+        ? `<a class="tile" href="${esc(link)}" target="_blank" rel="noopener">${inner}<span class="go">↗</span></a>`
+        : `<button class="tile" data-k="${k}">${inner}<span class="go">›</span></button>`;
     });
   (secs.extras || []).filter(x => (x.link || '').trim()).forEach(x => {
     tiles.push(`<a class="tile" href="${esc(x.link)}" target="_blank" rel="noopener">
@@ -473,6 +479,13 @@ function openApp(){
   $('#aTiles').innerHTML = tiles.join('') ||
     `<div class="card" style="color:var(--mut)" data-copy="empty_plan">${esc(t('empty_plan'))}</div>`;
   document.querySelectorAll('#aTiles .tile[data-k]').forEach(b => b.onclick = () => openSection(b.dataset.k));
+
+  // Blocks he has already finished — each one its own sheet.
+  $('#aPast2').innerHTML = pastProgs.length ? `<details class="resbox">
+      <summary><span data-copy="prog_past_label">${esc(t('prog_past_label'))}</span><span class="go">›</span></summary>
+      ${pastProgs.map(p => `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.name || 'Program')}
+        <span class="go">↗</span></a>`).join('')}
+    </details>` : '';
 
   // Additional Resources — one shared library, the worker sends what this client may see.
   const res = RESOURCES || [];

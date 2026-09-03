@@ -223,11 +223,13 @@ const STATUSES = [['lead','New / lead'],['active','Active'],['paused','Paused'],
 const PAYMETHODS = ['Stripe','PayPal','Bank transfer','Zelle','Crypto','Cash','Other'];
 
 // The four blocks a client sees on their page. `key` is what lives in sections{}.
+// Every button on the client page opens its link straight away. The written box
+// is only used when a block has no link at all.
 const SECTIONS = [
-  { key:'training',       name:'Training',       blurb:'The program sheet, and every block he has run' },
-  { key:'daily_checkin',  name:'Daily Check In', blurb:'The daily form or app he logs in' },
-  { key:'peds',           name:'PED Protocol',   blurb:'Link to the protocol spreadsheet — the tile opens it straight away' },
-  { key:'weekly_checkin', name:'Weekly Check In',blurb:'The Sunday check-in form' },
+  { key:'training',       name:'Training',       blurb:'Opens the sheet for the program he is on (set it under Programs below)' },
+  { key:'daily_checkin',  name:'Daily Check In', blurb:'Opens the daily sheet or form' },
+  { key:'peds',           name:'PED Protocol',   blurb:'Opens the protocol sheet' },
+  { key:'weekly_checkin', name:'Weekly Check In',blurb:'Opens the weekly check-in sheet or form' },
 ];
 // Which blocks switch on by default for each client type.
 const TYPE_SECTIONS = {
@@ -889,7 +891,7 @@ function drawBody(){
             <div class="fld"><label class="fl">Button label</label>
               <input id="s_${s.key}_linkLabel" value="${esc(v.linkLabel)}" placeholder="Open my ${s.name.toLowerCase()}"></div>
           </div>
-          <div class="fld"><label class="fl">Written for them</label>
+          <div class="fld"><label class="fl">Written for them — only shown when there is no link</label>
             <textarea id="s_${s.key}_text" placeholder="Plain text. **bold**, - bullets and links work.">${esc(v.text)}</textarea></div>
           ${s.key === 'training' ? `
           <label class="fl">Programs — the current one and everything before it</label>
