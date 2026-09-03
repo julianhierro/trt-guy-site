@@ -206,7 +206,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-09-03T20:58Z';
+const BUILD = '2026-09-03T22:06Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -625,6 +625,7 @@ const COPY_FIELDS = [
     ['past_label',     'Phase history line',    "Phases you've done ({n})"],
   ]],
   ['Macros card', [
+    ['note_label',     'Note heading',          'Note'],
     ['macros_label',   'Small label',           'Your daily numbers'],
     ['mac_calories',   'First number',          'Calories'],
     ['mac_protein',    'Second number',         'Protein'],
@@ -869,6 +870,13 @@ function drawBody(){
     const mac = ((c.sections || {}).macros) || {};
     b.innerHTML = `
       <div class="sect">
+        <div class="shead"><h3>Note for the client</h3>
+          <label class="sw"><input type="checkbox" id="note_on" ${(((c.sections||{}).note)||{}).on ? 'checked' : ''}><span class="track"></span>Show</label></div>
+        <p class="hint" style="margin-bottom:12px">Sits at the top of his page, under the phase card — the first thing he reads. This one he DOES see; the notes on the Details tab stay private.</p>
+        <div class="fld"><textarea id="note_text" placeholder="Deload week — drop the top sets and keep the food the same.">${esc((((c.sections||{}).note)||{}).text || '')}</textarea></div>
+      </div>
+
+      <div class="sect">
         <div class="shead"><h3>${c.isTemplate ? 'Phase a new client starts on' : 'Current phase'}</h3>
           ${c.isTemplate ? '' : '<button class="btn sm" id="newPhase">Start new phase</button>'}</div>
         <p class="hint" style="margin-bottom:12px">${c.isTemplate
@@ -1088,6 +1096,7 @@ function collect(){
     };
     const num = id => { const v = $(id).value; return v === '' ? null : Number(v); };
     const sec = {
+      note: { on: $('#note_on').checked, text: $('#note_text').value, at: new Date().toISOString().slice(0,10) },
       macros: {
         on: $('#mac_on').checked,
         calories: num('#mac_calories'), protein: num('#mac_protein'),

@@ -78,6 +78,11 @@
   .prog i{display:block;height:100%;background:var(--acc);border-radius:99px}
   .progtxt{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut)}
 
+  /* a note from Julian — the first thing he reads when it is there */
+  .note{margin-bottom:16px;border-color:rgba(26,92,255,.28);background:var(--acc-soft)}
+  .note .body{margin-top:8px;font-size:15px;color:#1b2431}
+  .note .body p:last-child,.note .body ul:last-child,.note .body ol:last-child{margin-bottom:0}
+
   /* macros — the numbers he opens the app for */
   .macros{margin-bottom:16px;padding:18px 20px}
   .macros .row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
@@ -209,6 +214,7 @@
   <main class="wrap">
     <div id="aHome">
       <section class="card phase" id="aPhase"></section>
+      <section class="card note" id="aNote" hidden></section>
       <section class="card macros" id="aMacros" hidden></section>
       <div id="aPast"></div>
       <div class="tiles" id="aTiles"></div>
@@ -227,7 +233,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-09-03T20:58Z';
+const BUILD = '2026-09-03T22:06Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -263,6 +269,7 @@ const DEFAULT_COPY = {
   phase_untitled: 'Your plan',
   week_txt: 'Week {n} of {total}',
   days_txt: '{n} days to go',
+  note_label: 'Note',
   macros_label: 'Your daily numbers',
   mac_calories: 'Calories',
   mac_protein: 'Protein',
@@ -442,6 +449,15 @@ function openApp(){
     ${(start && end) ? `<div class="dates">${fmt(start)} → ${fmt(end)}</div>` : ''}
     ${bar}
     ${ph.focus ? `<div class="focus">${esc(ph.focus)}</div>` : ''}`;
+
+  // a note from Julian, if there is one
+  const note = (c.sections || {}).note || {};
+  const noteOn = note.on && (note.text || '').trim();
+  $('#aNote').hidden = !noteOn;
+  if(noteOn){
+    $('#aNote').innerHTML = `<div class="lbl" data-copy="note_label">${esc(t('note_label'))}</div>
+      <div class="body">${render(note.text)}</div>`;
+  }
 
   // macros — first numbers he sees, no tapping
   const mac = (c.sections || {}).macros || {};
