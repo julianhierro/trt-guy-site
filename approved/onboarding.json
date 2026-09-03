@@ -1,0 +1,233 @@
+{
+ "page": "onboarding/index.html",
+ "questions": [
+  [
+   "name",
+   "Name"
+  ],
+  [
+   "email",
+   "Email"
+  ],
+  [
+   "phone",
+   "Phone"
+  ],
+  [
+   "height",
+   "Height"
+  ],
+  [
+   "weight",
+   "Weight"
+  ],
+  [
+   "age",
+   "Age"
+  ],
+  [
+   "short_term_goals",
+   "Short-term goals (3&ndash;6 months)"
+  ],
+  [
+   "long_term_goals",
+   "Long-term goals (6&ndash;12 months)"
+  ],
+  [
+   "macros_now",
+   "If you know your current macronutrient intake breakdown please provide the amounts of fats/carbs/protein."
+  ],
+  [
+   "intake_length",
+   "For how long have you been consistent with this caloric intake? (if you haven't been fully consistent, then clarify below)"
+  ],
+  [
+   "instagram",
+   "What&rsquo;s your IG handle?"
+  ],
+  [
+   "intake_result",
+   "Have you lost, gained, or maintained your weight with your current nutrition approach?"
+  ],
+  [
+   "cheat_meals",
+   "How many untracked or free/cheat meals are you having per week and how do you manage these meals?"
+  ],
+  [
+   "limitations",
+   "Are there any limitations to your eating or training due to work and/or school?"
+  ],
+  [
+   "bulk_cook",
+   "Do you cook most of your meals in bulk?"
+  ],
+  [
+   "home_or_away",
+   "Do you eat most meals away from home or prepare at home?"
+  ],
+  [
+   "hunger",
+   "Are you hungry on your current diet (scale 1-10)?"
+  ],
+  [
+   "plan_type",
+   "Do you want a meal plan with specific foods to eat or do you want a macro plan with flexibility for you to choose the foods?"
+  ],
+  [
+   "macro_app",
+   "If you track macros, what app do you use and how long have you been tracking?"
+  ],
+  [
+   "foods_love",
+   "List any foods or meals you really enjoy (favorite foods) in your current diet or anytime."
+  ],
+  [
+   "foods_hate",
+   "Also, list any foods you do not like:"
+  ],
+  [
+   "digestion",
+   "Do you have good digestion, with no bloating, acid reflux, indigestion, constipation, diarrhea? How many bowel movements per day?"
+  ],
+  [
+   "periworkout",
+   "What is your current pre and post workout nutrition?"
+  ],
+  [
+   "food_allergy",
+   "Any food allergies/sensitivities I should know about?"
+  ],
+  [
+   "meds",
+   "What doctor prescribed medications are you currently taking, dosage, and when?"
+  ],
+  [
+   "supps",
+   "What dietary health or performance supplements are you taking, dosage, and when?"
+  ],
+  [
+   "peds_now",
+   "If currently using PEDS, what are you using (compound and dosage) and how long have you been on this for?"
+  ],
+  [
+   "peds_years",
+   "How long have you been using PEDs for?"
+  ],
+  [
+   "ped_sides",
+   "What side effects have you experienced with use of PEDs?"
+  ],
+  [
+   "risk_tolerance",
+   "Risk tolerance"
+  ],
+  [
+   "bp",
+   "What is your current blood pressure?"
+  ],
+  [
+   "bloodwork_when",
+   "When was the last time you had comprehensive blood work done? If you have a current lab, upload it below. If it&#x27;s longer than 12 weeks, let&#x27;s get labs conducted."
+  ],
+  [
+   "family_hx",
+   "Do you have a family history of Cardiovascular or Kidney Disease, Diabetes, or Cancer? Any other condition that should be known of currently?"
+  ],
+  [
+   "years_lifting",
+   "How many years have you been weight training for?"
+  ],
+  [
+   "days_train",
+   "How many days a week can you train?"
+  ],
+  [
+   "split",
+   "What is your current training split?"
+  ],
+  [
+   "hours_train",
+   "How many hours can you spend training per day?"
+  ],
+  [
+   "time_of_day",
+   "What time of day do you normally train?"
+  ],
+  [
+   "cardio_state",
+   "Do you normally do cardio in the fasted or fed state?"
+  ],
+  [
+   "cardio_amount",
+   "How many days do you do cardio and for how long?"
+  ],
+  [
+   "cardio_machine",
+   "What kind of machine do you use for cardio? What are the settings you use (rate, speed, etc)?"
+  ],
+  [
+   "heart_rate",
+   "Do you know your heart rate during cardio or have a way to monitor it?"
+  ],
+  [
+   "avoid",
+   "List any exercises to avoid in the design of your program and reason why:"
+  ],
+  [
+   "where_train",
+   "Do you prefer to exercise at home, gym or somewhere else? What equipment and/or gyms do you have available to you?"
+  ],
+  [
+   "injuries",
+   "Please list any injuries you have or have had in the past?"
+  ],
+  [
+   "weakness",
+   "What do you view as weakness in your current physique?"
+  ],
+  [
+   "other_info",
+   "List any other info you think I should know:"
+  ],
+  [
+   "sleep",
+   "Do you have good sleeping patterns, and are you sleeping through the night, how many hours do you sleep for?"
+  ],
+  [
+   "fatigue",
+   "Do you feel fatigued during the day?"
+  ],
+  [
+   "ed_history",
+   "Have you ever been diagnosed with an eating disorder?"
+  ],
+  [
+   "stress",
+   "On a scale of 1-10 how stressed are you (10 being high stress, 1 being no stress)?"
+  ],
+  [
+   "work_type",
+   "What kind of work do you do?"
+  ],
+  [
+   "work_hours",
+   "How many hours do you work per week?"
+  ],
+  [
+   "coach_comms",
+   "What do you find helpful in a coach&#x27;s communication and what is not helpful for you?"
+  ],
+  [
+   "photo_consent",
+   "Can I share your photos on social media?"
+  ],
+  [
+   "'+f.dataset.q+'",
+   ""
+  ],
+  [
+   "'+f.dataset.q+'",
+   ""
+  ]
+ ]
+}

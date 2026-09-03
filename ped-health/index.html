@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRT Guy — PED / Health Assessment</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --acc:#1a5cff; --acc-d:#0f3fd6;
+    --bg:#f4f6fa; --card:#ffffff; --txt:#0b0d10; --mut:#5b6572;
+    --line:rgba(11,13,16,.10); --line2:rgba(11,13,16,.16);
+    --ok:#12994a; --warn:#e2483a; --ph:#9aa4b2;
+    --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 16px}
+  .wrap{max-width:720px;margin:0 auto}
+
+  header.top{text-align:center;padding:34px 0 6px}
+  .wordmark{display:inline-block;height:clamp(44px,10vw,58px);aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;margin:0 0 18px;font-size:0;color:transparent;overflow:hidden}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,8vw,46px);line-height:1;letter-spacing:.01em;text-transform:uppercase;margin:10px 0 10px}
+  .lead{color:var(--mut);font-size:16px;max-width:560px;margin:0 auto}
+  .greet{margin-top:14px;font-weight:600}
+
+  .progress{position:sticky;top:0;z-index:20;background:var(--bg);padding:14px 0 10px;margin-top:8px}
+  .bar{height:6px;background:#e4e8ef;border-radius:999px;overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),#4d84ff);transition:width .3s}
+  .bar-label{font-size:12px;color:var(--mut);margin-top:6px;font-weight:600}
+
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;margin:16px 0;box-shadow:0 1px 2px rgba(11,13,16,.04)}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .sec-num{font-family:var(--display);font-weight:700;font-size:15px;color:#fff;background:var(--acc);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .sec-title{font-family:var(--display);font-weight:700;font-size:25px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+  .sec-sub{color:var(--mut);font-size:14px;margin:0 0 20px 42px}
+  @media (max-width:520px){.sec-sub{margin-left:0}}
+
+  .field{margin-bottom:20px}
+  label{display:block;font-weight:600;font-size:14.5px;margin-bottom:7px}
+  label .req{color:var(--acc)}
+  .ibox{position:relative}
+  .ctl{display:block}
+  input[type=text],input[type=email],input[type=tel],textarea{
+    width:100%;padding:12px 14px;border:1px solid var(--line2);border-radius:10px;background:#fff;color:var(--txt);
+    font-family:var(--body);font-size:15px;line-height:1.5;outline:none;transition:border-color .15s,box-shadow .15s;position:relative;z-index:1;background:transparent;
+  }
+  input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
+  textarea{min-height:52px;resize:vertical;display:block}
+
+  /* Editable "e.g." example text, shown as a hint line under each answer box. */
+  .ph{display:block;margin-top:6px;color:var(--ph);font-size:13px;line-height:1.45}
+
+  /* radio cards */
+  .choices{display:flex;flex-direction:column;gap:9px}
+  .choice{display:flex;gap:11px;align-items:center;border:1px solid var(--line2);border-radius:11px;padding:13px 14px;cursor:pointer;transition:all .15s;font-weight:500;margin-bottom:0}
+  .choice:hover{border-color:var(--acc)}
+  .choice input{accent-color:var(--acc);width:18px;height:18px;flex:0 0 auto}
+  .choice.sel{border-color:var(--acc);background:rgba(26,92,255,.05)}
+  .choice .opt{flex:1}
+  .choice b{font-weight:500;font-size:14.5px}
+
+  /* slider */
+  .slider-wrap{padding:4px 2px}
+  input[type=range]{width:100%;accent-color:var(--acc);height:28px}
+  .slider-val{font-family:var(--display);font-weight:700;font-size:32px;color:var(--acc);text-align:center;line-height:1}
+  .slider-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-top:2px;gap:12px}
+  .slider-ends span{max-width:46%}
+  .slider-ends span:last-child{text-align:right}
+
+  /* muscle-group grid */
+  .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:560px){.ggrid{grid-template-columns:1fr}}
+  .grow .glab{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:5px}
+  .ggrid .ph{font-size:12.5px}
+
+  /* uploads */
+  .drop{display:block;border:1.5px dashed var(--line2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:#fbfcfe;font-weight:400}
+  .drop:hover{border-color:var(--acc);background:rgba(26,92,255,.04)}
+  .drop input{display:none}
+  .drop .ic{font-size:24px;color:var(--acc)}
+  .drop .t{font-weight:600;margin-top:6px}
+  .drop .s{color:var(--mut);font-size:13px;margin-top:2px}
+  .photo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media (max-width:520px){.photo-grid{grid-template-columns:1fr}}
+  .drop.pose{padding:20px 10px}
+  .drop.pose .t{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.05em;margin-top:6px;text-transform:uppercase}
+  .drop.filled{border-style:solid;border-color:var(--acc);background:rgba(26,92,255,.06)}
+  .filelist{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .fileitem{display:flex;align-items:center;gap:8px;font-size:13px;background:#eef2f8;border-radius:8px;padding:8px 10px}
+  .fileitem b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fileitem .sz{color:var(--mut);margin-left:auto;flex:0 0 auto}
+
+  .guide{background:#f7f9fc;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .guide-t{font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+  .guide ul{margin:0 0 14px 18px}
+  .guide li{font-size:14px;color:var(--mut);margin-bottom:4px}
+  .guide ul:last-child{margin-bottom:0}
+
+  /* Action bar is pinned to the viewport, so Submit and Save are on screen the
+     whole way down the form — including past the last question. */
+  .submit-wrap{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(720px,calc(100% - 24px));z-index:40;padding:10px 0 12px;
+    background:var(--bg);box-shadow:0 -10px 18px -8px rgba(11,13,16,.18)}
+  .submit-wrap::before{content:"";position:absolute;left:-100vw;right:-100vw;top:0;bottom:0;
+    background:var(--bg);z-index:-1;box-shadow:0 -10px 18px -8px rgba(11,13,16,.18)}
+  .submit-wrap .btn{padding:15px;font-size:20px}
+  .submit-wrap .btn.ghost{padding:9px;font-size:13.5px;margin-top:7px;background:var(--card)}
+  .submit-wrap .formerr:empty,.submit-wrap .saved:empty{min-height:0;margin:0}
+  @media (max-width:520px){
+    .submit-wrap{padding:8px 0 10px}
+    .submit-wrap .btn{padding:13px;font-size:17px}
+    .submit-wrap .btn.ghost{padding:8px;font-size:13px;margin-top:6px}
+  }
+  /* keep the last question clear of the pinned bar */
+  body{padding-bottom:190px}
+  @media (max-width:520px){ body{padding-bottom:172px} }
+  body.jv-editing .submit-wrap{position:static;transform:none;width:auto;box-shadow:none}
+  body.jv-editing .submit-wrap::before{display:none}
+  .btn{width:100%;padding:17px;background:var(--acc);color:#fff;border:none;border-radius:12px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+  .btn:hover{background:var(--acc-d)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line2);font-family:var(--body);font-size:14px;text-transform:none;letter-spacing:0;padding:12px;margin-top:9px}
+  .btn.ghost:hover{background:#eef2f8;color:var(--txt)}
+  .formerr{color:var(--warn);font-size:14px;font-weight:600;text-align:center;margin-top:10px;min-height:20px}
+  .saved{color:var(--ok);font-size:13px;font-weight:600;text-align:center;margin-top:8px;min-height:18px}
+  .footer{text-align:center;color:var(--mut);font-size:12px;margin-top:26px}
+
+  /* Edit mode: reveal the "e.g." text as a normal editable line so it can be clicked. */
+  body.jv-editing .card{padding-top:56px}
+  body.jv-editing .ph{font-style:italic}
+</style>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="stylesheet" href="/editor.css?v=2">
+<style>html.jv-pending body{visibility:hidden}</style>
+<script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="wordmark" data-noedit>TRT Guy</div>
+    <div class="kicker">PED / Health Assessment - 100% CONFIDENTIAL</div>
+    <h1>A Few More Questions</h1>
+    <p class="lead">This is the health and PED section of your onboarding. Straight answers here matter more than anywhere else on the form &mdash; it is between you and your coach.</p>
+  </header>
+
+  <form id="form" novalidate>
+    <div class="progress" data-noedit>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="bar-label" id="barLabel">0% complete</div>
+    </div>
+    <input type="hidden" name="firstName" id="firstName">
+    <input type="hidden" name="form" value="ped-health">
+
+    <section class="card">
+      <div class="sec-head"><div class="sec-title">Your Details</div></div>
+<div class="field" data-jv-removable data-q="name" data-eid="e3030"><label data-eid="e3031" for="f_name">Name <span class="req" data-eid="e3032">*</span></label><div data-eid="s14" class="ibox"><div data-eid="s15" class="ctl"><input data-eid="s16" id="f_name" name="name" type="text" autocomplete="name" required data-noedit></div><span class="ph" data-eid="e3033">e.g. Mike Sanders</span></div></div><div class="field" data-jv-removable data-q="email" data-eid="e3060"><label data-eid="e3061" for="f_email">Email <span class="req" data-eid="e3062">*</span></label><div data-eid="s17" class="ibox"><div data-eid="s18" class="ctl"><input data-eid="s19" id="f_email" name="email" type="email" autocomplete="email" required data-noedit></div><span class="ph" data-eid="e3063">e.g. mike@gmail.com</span></div></div><div class="field" data-jv-removable data-q="phone" data-eid="e3090"><label data-eid="e3091" for="f_phone">Phone <span class="req" data-eid="e3092">*</span></label><div data-eid="s20" class="ibox"><div data-eid="s21" class="ctl"><input data-eid="s22" id="f_phone" name="phone" type="tel" autocomplete="tel" required data-noedit></div><span class="ph" data-eid="e3093">e.g. (305) 555-0142</span></div></div>    </section>
+
+<section data-eid="s103" class="card"><div data-eid="s104" class="sec-head"><div class="sec-title" data-eid="e2500">PED / Health Assessment</div></div><div class="field" data-jv-removable data-q="meds" data-eid="e4050"><label data-eid="e4051" for="f_meds">What doctor prescribed medications are you currently taking, dosage, and when?</label><div data-eid="s106" class="ibox"><div data-eid="s107" class="ctl"><textarea data-eid="s108" id="f_meds" name="meds" rows="3" data-noedit></textarea></div></div></div><div class="field" data-jv-removable data-q="supps" data-eid="e4080"><label data-eid="e4081" for="f_supps">What dietary health or performance supplements are you taking, dosage, and when?</label><div data-eid="s109" class="ibox"><div data-eid="s110" class="ctl"><textarea data-eid="s111" id="f_supps" name="supps" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4083">e.g. Creatine 5 g daily, fish oil 2 g, vitamin D 5,000 IU, whey twice a day</span></div></div><div class="field" data-jv-removable data-q="peds_now" data-eid="e4110"><label data-eid="e4111" for="f_peds_now">If currently using PEDS, what are you using (compound and dosage) and how long have you been on this for?</label><div data-eid="s112" class="ibox"><div data-eid="s113" class="ctl"><textarea data-eid="s114" id="f_peds_now" name="peds_now" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4113">e.g. Test cyp 300 mg/wk and primobolan 400 mg/wk, 9 weeks in</span></div></div><div class="field" data-jv-removable data-q="peds_years" data-eid="e4140"><label data-eid="e4141" for="f_peds_years">How long have you been using PEDs for?</label><div data-eid="s115" class="ibox"><div data-eid="s116" class="ctl"><input data-eid="s117" id="f_peds_years" name="peds_years" type="text" data-noedit></div><span class="ph" data-eid="e4143">e.g. Around 4 years, on and off</span></div></div><div class="field" data-jv-removable data-q="ped_sides" data-eid="e4170"><label data-eid="e4171" for="f_ped_sides">What side effects have you experienced with use of PEDs?</label><div data-eid="s118" class="ibox"><div data-eid="s119" class="ctl"><textarea data-eid="s120" id="f_ped_sides" name="ped_sides" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4173">e.g. High blood pressure on higher doses, acne on my back, night sweats on tren</span></div></div><div class="field" data-jv-removable data-q="risk_tolerance" data-eid="e7100"><label data-eid="e7101" for="f_risk_tolerance">Risk tolerance</label><div data-eid="s121" class="slider-wrap"><div data-eid="s122" class="slider-val" id="v_risk_tolerance" data-noedit>5</div><input data-eid="s123" type="range" min="1" max="10" step="1" value="5" name="risk_tolerance" id="f_risk_tolerance" data-noedit><div data-eid="s124" class="slider-ends"><span data-eid="e7104">1 &mdash; no risk</span><span data-eid="e7105">10 &mdash; I&rsquo;m willing to do whatever it takes to achieve my goals</span></div></div></div><div class="field" data-jv-removable data-q="bp" data-eid="e4230"><label data-eid="e4231" for="f_bp">What is your current blood pressure?</label><div data-eid="s125" class="ibox"><div data-eid="s126" class="ctl"><input data-eid="s127" id="f_bp" name="bp" type="text" data-noedit></div><span class="ph" data-eid="e4233">e.g. 128/78, taken most mornings</span></div></div><div class="field" data-jv-removable data-q="bloodwork_when" data-eid="e4260"><label data-eid="e4261" for="f_bloodwork_when">When was the last time you had comprehensive blood work done? If you have a current lab, upload it below. If it&#x27;s longer than 12 weeks, let&#x27;s get labs conducted.</label><div data-eid="s128" class="ibox"><div data-eid="s129" class="ctl"><textarea data-eid="s130" id="f_bloodwork_when" name="bloodwork_when" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4263">e.g. Full panel in May 2026 — attaching the PDF</span></div></div><div class="field" data-jv-removable data-eid="e4290"><label data-eid="e4291" for="f_bloodwork">Upload your most recent bloodwork (PDF or photo)</label><label data-eid="s131" class="drop" id="d_bloodwork"><input data-eid="s132" type="file" name="bloodwork" multiple accept="image/*,application/pdf,video/*" data-noedit><div data-eid="s133" class="ic">⬆︎</div><div class="t" data-eid="e4294">Choose files</div><div class="s" data-eid="e4295">PDF, JPG or PNG. Add as many pages as you need.</div></label><div data-eid="s134" class="filelist" id="l_bloodwork" data-noedit></div></div><div class="field" data-jv-removable data-q="family_hx" data-eid="e4320"><label data-eid="e4321" for="f_family_hx">Do you have a family history of Cardiovascular or Kidney Disease, Diabetes, or Cancer? Any other condition that should be known of currently?</label><div data-eid="s135" class="ibox"><div data-eid="s136" class="ctl"><textarea data-eid="s137" id="f_family_hx" name="family_hx" rows="3" data-noedit></textarea></div><span class="ph" data-eid="e4323">e.g. Dad had a stent at 58, mom is type 2 diabetic. Nothing else I know of.</span></div></div></section>
+
+    <div class="submit-wrap" data-noedit>
+      <button type="submit" class="btn" id="submitBtn">Submit</button>
+      <button type="button" class="btn ghost" id="saveBtn">Save &amp; finish later</button>
+      <div class="formerr" id="formErr"></div>
+      <div class="saved" id="savedMsg"></div>
+    </div>
+  </form>
+
+  <div class="footer">&copy; TRT Guy &middot; Everything you write here is private and goes only to your coach.</div>
+</div>
+<script>
+const WORKER_URL = "https://trt-guy-onboarding.julianhierro.workers.dev";
+const STORE = 'trtguy_pedhealth_v1';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
+const form = $('#form');
+
+/* ---- prefill from a post-checkout redirect ---- */
+const q = new URLSearchParams(location.search);
+const getp = (...k) => { for (const x of k){ const v=q.get(x); if(v) return v; } return ''; };
+const pName=getp('name','first_name','firstName'), pEmail=getp('email'), pPhone=getp('phone'), pCid=getp('contact_id','contactId','cid');
+if (pName){ $('#firstName').value=pName; $('#greet').textContent='Welcome, '+pName.split(' ')[0]+' — let’s get you dialed in.'; const n=$('#f_name'); if(n&&!n.value) n.value=pName; }
+if (pEmail){ const e=$('#f_email'); if(e) e.value=pEmail; }
+if (pPhone){ const p=$('#f_phone'); if(p) p.value=pPhone; }
+if (pCid){ const h=document.createElement('input'); h.type='hidden'; h.name='contact_id'; h.value=pCid; form.appendChild(h); }
+
+/* ---- "e.g." overlay behaves like a placeholder ---- */
+function syncBox(el){ const b=el.closest('.ibox'); if(b) b.classList.toggle('filled', !!el.value); }
+function syncAllBoxes(){ $$('.ibox').forEach(b=>{ const i=b.querySelector('input,textarea'); if(i) b.classList.toggle('filled', !!i.value); }); }
+
+/* ---- textareas grow with their content ---- */
+function autogrow(t){ t.style.height='auto'; t.style.height=Math.max(52, t.scrollHeight)+'px'; }
+function growAll(){ $$('textarea').forEach(autogrow); }
+
+/* ---- sliders ---- */
+$$('input[type=range]').forEach(r=>{ const out=document.getElementById('v_'+r.name); const upd=()=>{ if(out) out.textContent=r.value; }; r.addEventListener('input',()=>{ r.dataset.touched='1'; upd(); }); upd(); });
+
+/* ---- radio cards ---- */
+function highlightChoices(){ $$('.choice').forEach(c=>{ const i=c.querySelector('input'); if(i) c.classList.toggle('sel', i.checked); }); }
+
+/* ---- file pickers ---- */
+const fmt = b => b>1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1,Math.round(b/1024))+' KB';
+$$('input[type=file]').forEach(inp=>{
+  inp.addEventListener('change', ()=>{
+    const drop = inp.closest('.drop');
+    if(drop) drop.classList.toggle('filled', inp.files.length>0);
+    const pose = inp.name.indexOf('photo_')===0;
+    const list = document.getElementById(pose ? 'l_photos' : 'l_'+inp.name);
+    if(!pose && list){
+      list.innerHTML = Array.prototype.map.call(inp.files, f=>'<div class="fileitem"><b>'+f.name.replace(/[<>&]/g,'')+'</b><span class="sz">'+fmt(f.size)+'</span></div>').join('');
+    }
+    if(pose){
+      const t = drop && drop.querySelector('.s');
+      if(t && inp.files[0]) t.textContent = '✓ ' + inp.files[0].name.slice(0,26);
+    }
+    const all = document.getElementById('l_photos');
+    if(pose && all) all.innerHTML='';
+    updateProgress();
+    [...inp.files].forEach((f,i)=>fdbPut(inp.name+'::'+i, f));
+  });
+});
+
+/* ---- progress ---- */
+function answered(f){
+  if(f.dataset.group) return $$('[data-q="'+f.dataset.q+'"] input').some(i=>!!i.value.trim());
+  const r = f.querySelector('input[type=radio]');
+  if(r) return !!f.querySelector('input[type=radio]:checked');
+  const rg = f.querySelector('input[type=range]');
+  if(rg) return rg.dataset.touched === '1';
+  const el = f.querySelector('input,textarea');
+  return !!(el && el.value.trim());
+}
+function hideOrphanFields(){
+  if (document.body.classList.contains('jv-editing')) return;
+  // A question whose label was deleted in the editor would otherwise render as a
+  // stray, unlabelled answer box. Drop it instead.
+  $$('.field').forEach(f=>{
+    if (f.querySelector('.drop, .choices, .slider-wrap')) return;
+    const l = f.querySelector(':scope > label');
+    const empty = !l || !l.textContent.replace(/[\s*]/g,'');
+    if (empty){ f.hidden = true; f.removeAttribute('data-q'); }
+  });
+}
+function updateProgress(){
+  // Recounted from the live DOM every time, so questions removed in the editor
+  // drop out of the total and the bar can still reach 100%.
+  const fields = $$('[data-q]').filter(f => f.offsetParent !== null || f.closest('section'));
+  const done = fields.filter(answered).length;
+  const pct = fields.length ? Math.round(done/fields.length*100) : 0;
+  $('#bar').style.width = pct+'%';
+  $('#barLabel').textContent = pct+'% complete — '+done+' of '+fields.length+' answered';
+}
+
+/* ---- uploaded files are kept too, in IndexedDB (localStorage can't hold files) ---- */
+const FDB = 'trtguy_pedhealth_files';
+function fdb(){ return new Promise((res,rej)=>{ const r=indexedDB.open(FDB,1);
+  r.onupgradeneeded=()=>{ if(!r.result.objectStoreNames.contains('files')) r.result.createObjectStore('files'); };
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function fdbPut(key,file){ try{ const db=await fdb(); await new Promise((res,rej)=>{ const t=db.transaction('files','readwrite'); t.objectStore('files').put(file,key); t.oncomplete=res; t.onerror=()=>rej(t.error); }); }catch(e){} }
+async function fdbDel(key){ try{ const db=await fdb(); await new Promise(res=>{ const t=db.transaction('files','readwrite'); t.objectStore('files').delete(key); t.oncomplete=res; t.onerror=res; }); }catch(e){} }
+async function fdbAll(){ try{ const db=await fdb(); return await new Promise(res=>{ const t=db.transaction('files','readonly'), st=t.objectStore('files'), out={}; const kr=st.getAllKeys(), vr=st.getAll();
+  t.oncomplete=()=>{ kr.result.forEach((k,i)=>out[k]=vr.result[i]); res(out); }; t.onerror=()=>res({}); }); }catch(e){ return {}; } }
+async function fdbClear(){ try{ const db=await fdb(); await new Promise(res=>{ const t=db.transaction('files','readwrite'); t.objectStore('files').clear(); t.oncomplete=res; t.onerror=res; }); }catch(e){} }
+
+// Put a saved File back into its <input type=file> so it submits normally.
+function putFiles(inp, files){
+  try{ const dt=new DataTransfer(); files.forEach(f=>dt.items.add(f)); inp.files=dt.files; return true; }catch(e){ return false; }
+}
+async function saveFiles(){
+  for (const inp of $$('input[type=file]')){
+    const list=[...inp.files];
+    if(list.length) for(let i=0;i<list.length;i++) await fdbPut(inp.name+'::'+i, list[i]);
+  }
+}
+async function restoreFiles(){
+  const all = await fdbAll();
+  const byInput = {};
+  Object.entries(all).forEach(([k,f])=>{ const [name,i]=k.split('::'); (byInput[name] ||= [])[+i]=f; });
+  for (const [name,files] of Object.entries(byInput)){
+    const inp = form.querySelector('input[type=file][name="'+CSS.escape(name)+'"]');
+    if(!inp) continue;
+    const clean = files.filter(Boolean);
+    if(clean.length && putFiles(inp, clean)) inp.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+}
+
+/* ---- save / restore on this device ---- */
+function saveProgress(){
+  try{
+    const d={};
+    new FormData(form).forEach((v,k)=>{ if(typeof v==='string') d[k]=v; });
+    localStorage.setItem(STORE, JSON.stringify(d));
+  }catch(e){}
+}
+function restoreProgress(){
+  let d; try{ d=JSON.parse(localStorage.getItem(STORE)||'null'); }catch(e){}
+  if(!d) return;
+  Object.entries(d).forEach(([k,v])=>{
+    const els = form.querySelectorAll('[name="'+CSS.escape(k)+'"]');
+    if(!els.length) return;
+    if(els[0].type==='radio'){ els.forEach(e=>{ if(e.value===v) e.checked=true; }); }
+    else if(!els[0].value || els[0].type==='range' || (k!=='email'&&k!=='phone'&&k!=='name')) els[0].value=v;
+    else els[0].value = els[0].value || v;
+  });
+  $$('input[type=range]').forEach(r=>{ if(d[r.name]!=null) r.dataset.touched='1'; const o=document.getElementById('v_'+r.name); if(o) o.textContent=r.value; });
+}
+
+form.addEventListener('input', e=>{ if(e.target.matches('input,textarea')) syncBox(e.target); if(e.target.tagName==='TEXTAREA') autogrow(e.target); updateProgress(); saveProgress(); });
+form.addEventListener('change', ()=>{ highlightChoices(); updateProgress(); saveProgress(); });
+$('#saveBtn').addEventListener('click', async ()=>{
+  const m=$('#savedMsg'); m.textContent='Saving…';
+  saveProgress();
+  await saveFiles();
+  const nf = $$('input[type=file]').reduce((n,i)=>n+i.files.length,0);
+  m.textContent = 'Saved on this device' + (nf ? ' — including '+nf+' file'+(nf>1?'s':'') : '') + '. Come back to this link any time.';
+  setTimeout(()=>m.textContent='',6000);
+});
+
+window.renumberSections = function renumberSections(){
+  $$('#form .sec-num').forEach((el,i)=>{ const n=String(i+1); if(el.textContent!==n) el.textContent=n; });
+}
+hideOrphanFields();
+restoreProgress(); syncAllBoxes(); growAll(); highlightChoices(); updateProgress(); renumberSections();
+restoreFiles();
+[400,1200,2500].forEach(ms=>setTimeout(()=>{ hideOrphanFields(); renumberSections(); updateProgress(); }, ms));
+// Sections can be added, removed or reordered in the inline editor — keep the numbers honest.
+try{
+  let t; new MutationObserver(()=>{ clearTimeout(t); t=setTimeout(()=>{ renumberSections(); updateProgress(); },120); })
+    .observe(document.getElementById('form'), {childList:true, subtree:true});
+}catch(e){}
+
+/* ---- build the Q&A transcript from the LIVE labels, so edited wording flows through ---- */
+function labelOf(f){
+  const l = f.querySelector(':scope > label');
+  return l ? l.textContent.replace(/\s*\*\s*$/,'').replace(/\s+/g,' ').trim() : (f.dataset.q||'');
+}
+function buildQA(){
+  return $$('[data-q]').map(f=>{
+    let a='';
+    if(f.dataset.group){
+      a = $$('[data-q="'+f.dataset.q+'"] .grow').map(g=>{
+        const lab=g.querySelector('.glab').textContent.trim(), v=g.querySelector('input').value.trim();
+        return v ? lab+': '+v : '';
+      }).filter(Boolean).join('\n');
+    } else {
+      const rg = f.querySelector('input[type=range]');
+      if(f.querySelector('input[type=radio]')){
+        // A radio group with nothing selected has no answer — never fall through to
+        // the first option's value attribute.
+        const c = f.querySelector('input[type=radio]:checked');
+        // read the option's CURRENT text, so wording edited in the editor is what gets sent
+        a = c ? (c.parentNode.textContent.replace(/\s+/g,' ').trim() || c.value) : '';
+      }
+      else if(rg) a = rg.dataset.touched==='1' ? rg.value+' / 10' : '';
+      else { const el=f.querySelector('input:not([type=radio]):not([type=range]),textarea'); a = el ? el.value.trim() : ''; }
+    }
+    return { q: labelOf(f), a: a };
+  }).filter(x=>x.a);
+}
+
+/* ---- submit ---- */
+form.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const err=$('#formErr'); err.textContent='';
+  for (const id of ['f_name','f_email','f_phone']){
+    const el=document.getElementById(id);
+    if(el && el.offsetParent!==null && !el.value.trim()){ err.textContent='Please fill in your name, email and phone so I know who this is.'; el.scrollIntoView({behavior:'smooth',block:'center'}); el.focus(); return; }
+  }
+  const em=document.getElementById('f_email');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value.trim())){ err.textContent='That email doesn’t look right — double-check it.'; em.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+
+  const btn=$('#submitBtn'); btn.disabled=true;
+  const nFiles = $$('input[type=file]').reduce((n,i)=>n+i.files.length,0);
+  btn.textContent = nFiles ? 'Uploading '+nFiles+' file'+(nFiles>1?'s':'')+'…' : 'Sending…';
+  let dots=0; const tick=setInterval(()=>{ dots=(dots+1)%4; btn.textContent=(nFiles?'Uploading your files':'Sending')+'.'.repeat(dots||1)+' this can take a moment'; }, 900);
+  const fd = new FormData(form);
+  fd.set('email', em.value.trim());
+  fd.set('phone', document.getElementById('f_phone').value.trim());
+  fd.set('qa', JSON.stringify(buildQA()));
+  try{
+    const res = await fetch(WORKER_URL + '/assessment', { method:'POST', body: fd });
+    if(!res.ok) throw new Error('status '+res.status);
+    clearInterval(tick);
+    btn.textContent='Sent ✓';
+    try{ localStorage.removeItem(STORE); }catch(e){}
+    await fdbClear();
+    location.href = '/onboarding/thanks/';
+  }catch(e){
+    clearInterval(tick);
+    btn.disabled=false; btn.textContent='Submit onboarding questionnaire';
+    err.textContent='Something went wrong sending that. Please try again — if it keeps failing, text your coach.';
+  }
+});
+</script>
+
+<!-- ═══ Inline editor (add ?edit=1) — edit questions and the "e.g." text. Passwordless. ═══ -->
+<!-- Stale-draft guard: if the page structure changed since a saved editor draft was
+     captured, that draft no longer lines up with the DOM and republishing it scrambles the
+     page. Bump PAGE_REV whenever the form's structure changes; older drafts are dropped. -->
+<script>(function(){ var PAGE_REV="2026-09-03-pinned";
+  try{ var k="jv-rev:td-assessment";
+    if(localStorage.getItem(k)!==PAGE_REV){
+      Object.keys(localStorage).forEach(function(x){ if(x.indexOf("jv-draft:td-assessment")===0) localStorage.removeItem(x); });
+      localStorage.setItem(k,PAGE_REV);
+    }
+  }catch(e){}
+})();</script>
+<script>window.JV_EDITOR={ site:"td-ped-health", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
+  var n=10000; // every authored element already carries an explicit data-eid; start high so any stray one never collides
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
+  var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var c=el.cloneNode(true); Array.prototype.forEach.call(c.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(c.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
+  (function walk(el){ var c=el.children; for(var i=0;i<c.length;i++){ var ch=c[i]; if(skip(ch))continue; if(isTextLeaf(ch)) ch.setAttribute("data-etext","1"); else walk(ch); } })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+  // After the editor applies published copy, re-sync the fake placeholders + autogrow.
+  window.addEventListener("load", function(){ setTimeout(function(){
+    document.querySelectorAll(".ibox").forEach(function(b){ var i=b.querySelector("input,textarea"); if(i) b.classList.toggle("filled", !!i.value); });
+    if(window.renumberSections) window.renumberSections();
+  }, 300); });
+})();
+</script>
+<script src="/editor.js?v=3"></script>
+</body>
+</html>

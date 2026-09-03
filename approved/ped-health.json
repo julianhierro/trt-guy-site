@@ -1,0 +1,61 @@
+{
+ "page": "ped-health/index.html",
+ "questions": [
+  [
+   "name",
+   "Name"
+  ],
+  [
+   "email",
+   "Email"
+  ],
+  [
+   "phone",
+   "Phone"
+  ],
+  [
+   "meds",
+   "What doctor prescribed medications are you currently taking, dosage, and when?"
+  ],
+  [
+   "supps",
+   "What dietary health or performance supplements are you taking, dosage, and when?"
+  ],
+  [
+   "peds_now",
+   "If currently using PEDS, what are you using (compound and dosage) and how long have you been on this for?"
+  ],
+  [
+   "peds_years",
+   "How long have you been using PEDs for?"
+  ],
+  [
+   "ped_sides",
+   "What side effects have you experienced with use of PEDs?"
+  ],
+  [
+   "risk_tolerance",
+   "Risk tolerance"
+  ],
+  [
+   "bp",
+   "What is your current blood pressure?"
+  ],
+  [
+   "bloodwork_when",
+   "When was the last time you had comprehensive blood work done? If you have a current lab, upload it below. If it&#x27;s longer than 12 weeks, let&#x27;s get labs conducted."
+  ],
+  [
+   "family_hx",
+   "Do you have a family history of Cardiovascular or Kidney Disease, Diabetes, or Cancer? Any other condition that should be known of currently?"
+  ],
+  [
+   "'+f.dataset.q+'",
+   ""
+  ],
+  [
+   "'+f.dataset.q+'",
+   ""
+  ]
+ ]
+}
