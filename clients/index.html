@@ -163,6 +163,7 @@
   <div class="right">
     <button class="btn sm" id="btnRefresh" hidden>Refresh</button>
     <a class="btn sm" href="/control/">Control Center</a>
+    <span class="mono" id="buildTag" style="font-size:9px;letter-spacing:.12em;color:var(--muted-2)"></span>
     <button class="btn sm" id="btnLock" hidden>Lock</button>
   </div>
 </header>
@@ -202,6 +203,21 @@
 </main>
 
 <script>
+// Build stamp. On load the page re-fetches itself past the browser cache and
+// compares this value; if the copy we were handed is old, it reloads once. A
+// stale cache can otherwise hide a deploy for hours without any sign.
+const BUILD = '2026-09-03T20:42Z';
+(async () => {
+  try {
+    const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
+    const m = (await r.text()).match(/const BUILD = '([^']+)'/);
+    if (m && m[1] !== BUILD && !sessionStorage.getItem('tg-reloaded')) {
+      sessionStorage.setItem('tg-reloaded', '1');
+      location.reload();
+    }
+  } catch (e) {}
+})();
+
 const WORKER = 'https://trt-guy-onboarding.julianhierro.workers.dev';
 const SITE   = 'https://trt-guy.com';
 const KEYLS  = 'tg-clients-key';
@@ -328,6 +344,18 @@ function visible(){
     return hay.includes(QUERY);
   });
 }
+// Nothing switched on means his page shows only the phase card — worth saying so.
+function pageEmpty(c){
+  const sec = c.sections || {};
+  const mac = sec.macros || {};
+  const hasMac = mac.on && [mac.calories, mac.protein, mac.carbs, mac.fat].some(v => v != null && v !== '');
+  const hasProg = (sec.programs || []).some(p => (p.link || '').trim());
+  const hasBlock = SECTIONS.some(s => {
+    const b = sec[s.key] || (s.key === 'weekly_checkin' ? sec.checkin : null) || {};
+    return b.on && ((b.link || '').trim() || (b.text || '').trim());
+  });
+  return !hasMac && !hasProg && !hasBlock;
+}
 function renderStats(){
   const act = CLIENTS.filter(c => c.status === 'active');
   const leads = CLIENTS.filter(c => (c.status || 'lead') === 'lead');
@@ -385,7 +413,8 @@ function render(){
         <td data-l="Term"><div>${fmtDate(c.start_date)} → ${fmtDate(c.end_date)}</div>
           <div class="left ${leftCls}">${leftTxt}</div></td>
         <td data-l="Paid"><div>${money(c.amount_paid)}</div><div class="csub">${esc(c.pay_method || '')}</div></td>
-        <td data-l="Status"><span class="pill ${esc(c.status || 'lead')}">${esc(c.status || 'lead')}</span></td>
+        <td data-l="Status"><span class="pill ${esc(c.status || 'lead')}">${esc(c.status || 'lead')}</span>
+          ${pageEmpty(c) ? '<div class="csub" style="color:#f5d97a;margin-top:4px">page empty</div>' : ''}</td>
         <td data-l="" class="acts"><button class="btn sm">Open</button>
           <button class="btn sm danger rowdel" data-id="${c.id}" title="Delete">Delete</button></td>
       </tr>`;
@@ -1123,6 +1152,7 @@ function copyText(t){
   }
 }
 
+$('#buildTag').textContent = 'BUILD ' + BUILD;
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closePanel(); });
 if(KEY) unlock(KEY).catch(() => { localStorage.removeItem(KEYLS); });
 </script>

@@ -222,6 +222,21 @@
 </div>
 
 <script>
+// Build stamp. On load the page re-fetches itself past the browser cache and
+// compares this value; if the copy we were handed is old, it reloads once. A
+// stale cache can otherwise hide a deploy for hours without any sign.
+const BUILD = '2026-09-03T20:42Z';
+(async () => {
+  try {
+    const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
+    const m = (await r.text()).match(/const BUILD = '([^']+)'/);
+    if (m && m[1] !== BUILD && !sessionStorage.getItem('tg-reloaded')) {
+      sessionStorage.setItem('tg-reloaded', '1');
+      location.reload();
+    }
+  } catch (e) {}
+})();
+
 const WORKER = 'https://trt-guy-onboarding.julianhierro.workers.dev';
 
 const $ = s => document.querySelector(s);
