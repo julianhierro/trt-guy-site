@@ -91,6 +91,11 @@
   .left{font-size:12.5px;color:var(--muted)}
   .left.warn{color:#f5d97a}
   .left.over{color:#ff8f8f}
+  .cbcol{width:34px}
+  .cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin:0}
+  td.acts{white-space:nowrap;display:flex;gap:6px;justify-content:flex-end}
+  .bulk{display:flex;align-items:center;gap:10px;border:1px solid rgba(26,92,255,.35);background:var(--accent-soft);
+    border-radius:11px;padding:10px 14px;margin-bottom:12px;font-size:13.5px;color:#cfd8ff}
   .empty{border:1px dashed var(--line-bright);border-radius:14px;padding:40px;text-align:center;color:var(--muted-2)}
 
   /* detail panel */
@@ -139,6 +144,9 @@
     tbody td{display:flex;justify-content:space-between;gap:14px;padding:7px 12px;border:0}
     tbody td:before{content:attr(data-l);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;
       text-transform:uppercase;color:var(--muted-2);font-weight:700;padding-top:3px}
+    tbody td.cbcol{width:auto}
+    tbody td.cbcol:before{content:'Select'}
+    tbody td.acts{justify-content:flex-start}
     tbody td.main{display:block}
     tbody td.main:before{display:none}
     .grid2{grid-template-columns:1fr}
@@ -223,6 +231,7 @@ let CLIENTS = [];
 let FILTER = 'active';
 let QUERY = '';
 let OPEN = null;   // the client currently in the panel
+let SEL = new Set();   // ids ticked for bulk delete
 let TAB = 'details';
 
 const $  = s => document.querySelector(s);
@@ -316,7 +325,18 @@ function render(){
       <span style="font-size:13px">Use <b>+ New client</b>, or <b>⤓ Import intake</b> to pull someone who has finished the onboarding form.</span></div>`;
     return;
   }
-  $('#list').innerHTML = `<table><thead><tr>
+  // Only keep selections that are still on screen.
+  SEL = new Set([...SEL].filter(id => rows.some(c => c.id === id)));
+  const allSel = rows.length && rows.every(c => SEL.has(c.id));
+  $('#list').innerHTML = `
+    <div class="bulk" ${SEL.size ? '' : 'hidden'}>
+      <span><b id="bulkN">${SEL.size}</b> selected</span>
+      <button class="btn sm" id="bulkNone">Clear</button>
+      <span style="flex:1"></span>
+      <button class="btn sm danger" id="bulkDel">Delete selected</button>
+    </div>
+    <table><thead><tr>
+      <th class="cbcol"><input type="checkbox" class="cb" id="selAll" ${allSel ? 'checked' : ''}></th>
       <th>Client</th><th>Contact</th><th>Type</th><th>Term</th><th>Paid</th><th>Status</th><th></th>
     </tr></thead><tbody>` + rows.map(c => {
       const d = daysLeft(c);
@@ -324,6 +344,7 @@ function render(){
       const leftCls = d === null ? '' : (d < 0 ? 'over' : (d <= 21 ? 'warn' : ''));
       const typeName = (TYPES.find(t => t[0] === c.client_type) || [null,'—'])[1];
       return `<tr data-id="${c.id}">
+        <td class="cbcol" data-l=""><input type="checkbox" class="cb rowsel" data-id="${c.id}" ${SEL.has(c.id) ? 'checked' : ''}></td>
         <td class="main"><div class="cname">${esc(c.name || '—')}</div>
           <div class="curl">trt-guy.com/${esc(c.slug)}</div></td>
         <td data-l="Contact"><div>${esc(c.email || '—')}</div><div class="csub">${esc(c.phone || '')}</div></td>
@@ -332,10 +353,56 @@ function render(){
           <div class="left ${leftCls}">${leftTxt}</div></td>
         <td data-l="Paid"><div>${money(c.amount_paid)}</div><div class="csub">${esc(c.pay_method || '')}</div></td>
         <td data-l="Status"><span class="pill ${esc(c.status || 'lead')}">${esc(c.status || 'lead')}</span></td>
-        <td data-l=""><button class="btn sm">Open</button></td>
+        <td data-l="" class="acts"><button class="btn sm">Open</button>
+          <button class="btn sm danger rowdel" data-id="${c.id}" title="Delete">🗑</button></td>
       </tr>`;
     }).join('') + '</tbody></table>';
+
   $$('#list tbody tr').forEach(tr => tr.onclick = () => openClient(tr.dataset.id));
+  // Checkbox and trash live inside the row, so they must not open the client.
+  $$('#list .rowsel').forEach(cb => cb.onclick = e => {
+    e.stopPropagation();
+    cb.checked ? SEL.add(cb.dataset.id) : SEL.delete(cb.dataset.id);
+    render();
+  });
+  $$('#list .rowdel').forEach(b => b.onclick = e => { e.stopPropagation(); delOne(b.dataset.id); });
+  const all = $('#selAll');
+  if(all) all.onclick = e => {
+    e.stopPropagation();
+    SEL = all.checked ? new Set(rows.map(c => c.id)) : new Set();
+    render();
+  };
+  if($('#bulkNone')) $('#bulkNone').onclick = () => { SEL = new Set(); render(); };
+  if($('#bulkDel')) $('#bulkDel').onclick = delSelected;
+}
+
+async function delOne(id){
+  const c = CLIENTS.find(x => x.id === id);
+  if(!c) return;
+  if(!confirm(`Delete ${c.name || c.slug}? Their page stops working and the record is gone.`)) return;
+  try {
+    await api('/clients', { method:'POST', body: JSON.stringify({ action:'delete', id }) });
+    CLIENTS = CLIENTS.filter(x => x.id !== id);
+    SEL.delete(id);
+    render(); toast('Deleted');
+  } catch(e){ alert('Could not delete: ' + e.message); }
+}
+async function delSelected(){
+  const ids = [...SEL];
+  if(!ids.length) return;
+  if(!confirm(`Delete ${ids.length} client${ids.length > 1 ? 's' : ''}? Their pages stop working and the records are gone.`)) return;
+  const btn = $('#bulkDel'); btn.disabled = true;
+  let done = 0, failed = 0;
+  for(const id of ids){
+    btn.textContent = `Deleting ${++done}/${ids.length}…`;
+    try {
+      await api('/clients', { method:'POST', body: JSON.stringify({ action:'delete', id }) });
+      CLIENTS = CLIENTS.filter(x => x.id !== id);
+    } catch(e){ failed++; }
+  }
+  SEL = new Set();
+  render();
+  toast(failed ? `Deleted ${ids.length - failed}, ${failed} failed` : `Deleted ${ids.length}`);
 }
 $('#q').addEventListener('input', e => { QUERY = e.target.value.trim().toLowerCase(); render(); });
 $$('#filters .chip').forEach(b => b.onclick = () => {
