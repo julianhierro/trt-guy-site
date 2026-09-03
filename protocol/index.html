@@ -10,20 +10,23 @@
 <link rel="stylesheet" href="/editor.css?v=1">
 <!-- Paint-hold: never flash the old version -->
 <style>html.jv-pending body{visibility:hidden}
-  /* Email gate */
-  #gate{max-width:440px;margin:0 auto;text-align:center}
-  #gate .gcard{background:var(--card,#fff);border:1px solid var(--line,rgba(11,13,16,.12));border-radius:16px;padding:26px 22px;box-shadow:0 1px 2px rgba(11,13,16,.05);margin-top:26px}
-  #gate h2{font-family:var(--display,inherit);font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;margin-bottom:8px}
-  #gate p.gsub{color:var(--mut,#5b6572);font-size:15px;margin-bottom:18px}
-  #gate input{width:100%;padding:13px 14px;margin-bottom:10px;border:1px solid rgba(11,13,16,.16);border-radius:10px;font-family:inherit;font-size:15px;outline:none}
-  #gate input:focus{border-color:var(--acc,#1a5cff);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
-  #gate button{width:100%;padding:15px;background:var(--acc,#1a5cff);color:#fff;border:0;border-radius:11px;font-family:var(--display,inherit);font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
+  /* Email gate — appended last in the body so it never shifts existing element ids */
+  html.pregate .wrap{display:none}
+  #gate{position:fixed;inset:0;z-index:120;background:var(--bg,#f4f6fa);overflow-y:auto;padding:52px 20px;display:none}
+  html.pregate #gate{display:block}
+  #gate .ginner{max-width:430px;margin:0 auto;text-align:center}
+  #gate .gmark{display:inline-block;height:clamp(46px,12vw,60px);aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;font-size:0;color:transparent;overflow:hidden;margin-bottom:8px}
+  #gate .gcard{background:#fff;border:1px solid rgba(11,13,16,.12);border-radius:16px;padding:26px 22px;box-shadow:0 1px 2px rgba(11,13,16,.05);margin-top:22px;text-align:left}
+  #gate h2{font-family:var(--display,"Barlow Condensed",sans-serif);font-weight:700;font-size:27px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1;margin-bottom:8px;text-align:center}
+  #gate .gsub{color:#5b6572;font-size:15px;margin-bottom:18px;text-align:center}
+  #gate input{width:100%;padding:13px 14px;margin-bottom:10px;border:1px solid rgba(11,13,16,.16);border-radius:10px;font-family:inherit;font-size:15px;outline:none;box-sizing:border-box}
+  #gate input:focus{border-color:#1a5cff;box-shadow:0 0 0 3px rgba(26,92,255,.14)}
+  #gate button{width:100%;padding:15px;background:#1a5cff;color:#fff;border:0;border-radius:11px;font-family:var(--display,"Barlow Condensed",sans-serif);font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
   #gate button:disabled{opacity:.6;cursor:not-allowed}
-  #gate .gerr{color:#e2483a;font-size:13.5px;font-weight:600;min-height:18px;margin-top:8px}
-  #gate .gfine{color:var(--mut,#5b6572);font-size:12px;margin-top:10px}
-  body.jv-editing #gate{display:none}
-  body.jv-editing #protocolBody{display:block!important}
+  #gate .gerr{color:#e2483a;font-size:13.5px;font-weight:600;min-height:18px;margin-top:8px;text-align:center}
+  #gate .gfine{color:#5b6572;font-size:12px;margin-top:12px;text-align:center}
 </style>
+<script>document.documentElement.classList.add("pregate");</script>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 <style>
   :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;
@@ -52,23 +55,6 @@
 </head>
 <body>
 <div class="wrap">
-
-  <div id="gate">
-    <div class="wordmark" data-noedit>TRT-GUY</div>
-    <div class="gcard">
-      <h2 data-eid="e900">See My Current Protocol</h2>
-      <p class="gsub" data-eid="e901">Exactly what I'm running right now. Pop your name and email in and it's yours.</p>
-      <form id="gateForm" data-noedit>
-        <input type="text" id="gname" placeholder="First name" autocomplete="given-name" required>
-        <input type="email" id="gemail" placeholder="Your best email" autocomplete="email" required>
-        <button type="submit" id="gbtn">Show me the protocol &rarr;</button>
-        <div class="gerr" id="gerr"></div>
-      </form>
-      <p class="gfine" data-eid="e902">🔒 No spam. Unsubscribe any time.</p>
-    </div>
-  </div>
-
-  <div id="protocolBody" hidden>
   <div class="head">
     <div class="wordmark">TRT-GUY</div>
     <h1>My Current Protocol</h1>
@@ -113,7 +99,6 @@
 
   <p class="disc">This is what I personally do — it is not medical advice or a prescription. Talk to a licensed physician before starting anything.</p>
   <div class="foot">© TRT Guy</div>
-  </div>
 </div>
 
 <script>
@@ -122,32 +107,6 @@ var TRACK_URL='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtg
 function tgVisitor(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'anon';}}
 function track(evt){var u=TRACK_URL+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+evt+'&v='+encodeURIComponent(tgVisitor());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(e){}try{new Image().src=u;}catch(e){}}
 if(!/[?&]edit=1/.test(location.search)) track('view');
-
-/* ── Email gate: first name + email, tagged my-protocol in GHL ── */
-(function(){
-  var WORKER='https://trt-guy-onboarding.julianhierro.workers.dev';
-  var KEY='tg-protocol-unlocked';
-  var gate=document.getElementById('gate'), body=document.getElementById('protocolBody');
-  var editing=/[?&]edit=1/.test(location.search);
-  function unlock(){ gate.style.display='none'; body.hidden=false; }
-  var already=false; try{ already=localStorage.getItem(KEY)==='1'; }catch(e){}
-  if(editing || already) unlock();
-  document.getElementById('gateForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var n=document.getElementById('gname').value.trim();
-    var em=document.getElementById('gemail').value.trim();
-    var err=document.getElementById('gerr'), btn=document.getElementById('gbtn');
-    if(!n){ err.textContent='Please enter your first name.'; return; }
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ err.textContent='Please enter a valid email.'; return; }
-    err.textContent=''; btn.disabled=true; btn.textContent='One sec…';
-    fetch(WORKER+'/optin',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({list:'my-protocol',firstName:n,email:em})})
-      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function(){ try{ localStorage.setItem(KEY,'1'); }catch(e){} track('optin'); unlock(); window.scrollTo({top:0,behavior:'smooth'}); })
-      .catch(function(){ btn.disabled=false; btn.textContent='Show me the protocol →';
-        err.textContent='Something went wrong. Please try again.'; });
-  });
-})();
 </script>
 
 <!-- ═══ Inline editor (add ?edit=1) — passwordless, same as your other pages ═══ -->
@@ -167,5 +126,48 @@ if(!/[?&]edit=1/.test(location.search)) track('view');
 })();
 </script>
 <script src="/editor.js?v=1"></script>
+
+<!-- Email gate. Deliberately the LAST element in <body>: the inline editor assigns
+     ids by document order, and Julian's published protocol content is keyed to those
+     ids, so anything inserted ahead of it would scramble his content. -->
+<div id="gate">
+  <div class="ginner">
+    <div class="gmark" data-noedit>TRT-GUY</div>
+    <div class="gcard">
+      <h2 data-eid="e900">See My Current Protocol</h2>
+      <p class="gsub" data-eid="e901">Exactly what I'm running right now — compounds, doses, supplements and training. Pop your name and email in and it's yours.</p>
+      <form id="gateForm" data-noedit>
+        <input type="text" id="gname" placeholder="First name" autocomplete="given-name" required>
+        <input type="email" id="gemail" placeholder="Your best email" autocomplete="email" required>
+        <button type="submit" id="gbtn">Show me the protocol &rarr;</button>
+        <div class="gerr" id="gerr"></div>
+      </form>
+      <p class="gfine" data-eid="e902">No spam. Unsubscribe any time.</p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var WORKER='https://trt-guy-onboarding.julianhierro.workers.dev', KEY='tg-protocol-unlocked';
+  var root=document.documentElement, editing=/[?&]edit=1/.test(location.search);
+  function unlock(){ root.classList.remove('pregate'); }
+  var already=false; try{ already=localStorage.getItem(KEY)==='1'; }catch(e){}
+  if(editing||already) unlock();
+  document.getElementById('gateForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var n=document.getElementById('gname').value.trim(), em=document.getElementById('gemail').value.trim();
+    var err=document.getElementById('gerr'), btn=document.getElementById('gbtn');
+    if(!n){ err.textContent='Please enter your first name.'; return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ err.textContent='Please enter a valid email.'; return; }
+    err.textContent=''; btn.disabled=true; btn.textContent='One sec\u2026';
+    fetch(WORKER+'/optin',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({list:'my-protocol',firstName:n,email:em})})
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(){ try{ localStorage.setItem(KEY,'1'); }catch(e){} try{ track('optin'); }catch(e){} unlock(); window.scrollTo(0,0); })
+      .catch(function(){ btn.disabled=false; btn.textContent='Show me the protocol \u2192';
+        err.textContent='Something went wrong. Please try again.'; });
+  });
+})();
+</script>
 </body>
 </html>
