@@ -657,6 +657,16 @@
       ]
     },
     {
+      id:'biolink', icon:'🔗', tag:'Instagram', name:'Bio Link',
+      description:'The link-in-bio page your Instagram profile points at. Edit the button wording in the browser.',
+      home:'https://trt-guy.com/links/',
+      pages:[
+        { kind:'asset', key:'trtguy-links', tags:[], name:'Bio Link Page',
+          description:'Your link-in-bio buttons. Rename a button or remove one; adding a brand new link still needs a URL set in the file.',
+          url:'https://trt-guy.com/links/' }
+      ]
+    },
+    {
       id:'protocol', icon:'💊', tag:'Draft', name:'My Current Protocol',
       description:'Your protocol page — compounds, supplements, training, notes. Editable in the browser; not linked anywhere yet.',
       home:'https://trt-guy.com/protocol/',
@@ -1205,14 +1215,35 @@
       b.classList.add('copied');
       setTimeout(function(){ b.textContent = old; b.classList.remove('copied'); }, 1200);
     };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(function(){ done(true); }, function(){ done(false); });
-    } else {
-      var ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta);
-      ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (x) {}
-      document.body.removeChild(ta); done(ok);
-    }
+    copyText(url, done);
   });
+
+  // The async clipboard API is blocked in plenty of real situations — an unfocused
+  // document, an in-app browser, denied permission. Fall through to the old
+  // execCommand trick, and only then give up and show the text to copy by hand.
+  function legacyCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;border:0;padding:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { ta.setSelectionRange(0, text.length); } catch (x) {}
+    var ok = false; try { ok = document.execCommand('copy'); } catch (x) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text, done){
+    try { window.focus(); } catch (x) {}
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function(){ done(true); },
+        function(){ if (legacyCopy(text)) done(true); else { done(false); window.prompt('Copy this link:', text); } }
+      );
+      return;
+    }
+    if (legacyCopy(text)) done(true);
+    else { done(false); window.prompt('Copy this link:', text); }
+  }
 
   // reset a single page's counters (views/visitors/opt-ins). Revenue is left intact.
   // Origin-guarded server-side; here we also require a typed confirmation before firing.
@@ -1243,12 +1274,7 @@
       chip.textContent = 'copied ✓'; chip.classList.add('copied');
       setTimeout(function(){ chip.textContent = old; chip.classList.remove('copied'); }, 1100);
     };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, done);
-    else {
-      var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta);
-      ta.select(); try { document.execCommand('copy'); } catch (x) {}
-      document.body.removeChild(ta); done();
-    }
+    copyText(t, done);
   });
 
   /* ── Archive ──────────────────────────────────────────────────────────────
