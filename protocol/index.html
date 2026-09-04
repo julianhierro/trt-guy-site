@@ -220,9 +220,26 @@ if(!/[?&]edit=1/.test(location.search)) track('view');
   function toast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:9px;z-index:2147483647;font:600 14px system-ui,-apple-system,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.3)'; document.body.appendChild(t); setTimeout(function(){t.remove();},1600); }
   function boot(){ load(function(){
     if(!EDIT) return;
-    var css=document.createElement('style'); css.textContent='html.pregate #gate [data-gk]{outline:2px dashed #1a5cff;outline-offset:3px;cursor:pointer!important}'; document.head.appendChild(css);
-    MAP.forEach(function(m){ var el=document.querySelector(m.sel); if(el) el.setAttribute('data-gk',m.k); });
-    document.addEventListener('click',function(ev){ var el=ev.target&&ev.target.closest?ev.target.closest('[data-gk]'):null; if(!el)return; ev.preventDefault(); ev.stopPropagation(); var m=MAP.filter(function(x){return x.k===el.getAttribute('data-gk');})[0]; if(!m)return; var cur=get(el,m.attr); var v=prompt('Edit the '+m.label+':',cur); if(v===null)return; put(el,m.attr,v); data[m.k]=v; save(); }, true);
+    var css=document.createElement('style');
+    css.textContent='html.pregate #gate [data-gk]{outline:2px dashed #1a5cff;outline-offset:3px;border-radius:4px}'
+      +'html.pregate #gate [data-gk][contenteditable="true"]{cursor:text}'
+      +'html.pregate #gate [data-gk][contenteditable="true"]:focus{outline:2px solid #1a5cff;background:rgba(26,92,255,.06)}'
+      +'html.pregate #gate input[data-gk]{cursor:pointer}';
+    document.head.appendChild(css);
+    // Keep the opt-in form from actually submitting while you're editing it.
+    var f=document.getElementById('gateForm'); if(f) f.addEventListener('submit',function(ev){ ev.preventDefault(); ev.stopPropagation(); }, true);
+    MAP.forEach(function(m){
+      var el=document.querySelector(m.sel); if(!el) return; el.setAttribute('data-gk',m.k);
+      if(m.attr==='text'){
+        if(el.tagName==='BUTTON') el.type='button';           // don't submit when clicked
+        el.setAttribute('contenteditable','true'); el.setAttribute('spellcheck','false');
+        el.addEventListener('input',function(){ data[m.k]=el.textContent.replace(/\s+/g,' ').trim(); save(); });
+        el.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); el.blur(); } });
+      } else {
+        // input placeholders can't be edited inline — click opens a quick box
+        el.addEventListener('mousedown',function(ev){ ev.preventDefault(); var cur=el.getAttribute('placeholder')||''; var v=prompt('Edit the '+m.label+':',cur); if(v===null)return; el.setAttribute('placeholder',v); data[m.k]=v; save(); });
+      }
+    });
   }); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
