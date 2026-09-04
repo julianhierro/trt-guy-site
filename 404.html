@@ -216,7 +216,6 @@
       <section class="card phase" id="aPhase"></section>
       <section class="card note" id="aNote" hidden></section>
       <section class="card macros" id="aMacros" hidden></section>
-      <div id="aPast"></div>
       <div class="tiles" id="aTiles"></div>
       <div id="aRes"></div>
       <div class="a2hs" id="a2hs" hidden>
@@ -476,12 +475,7 @@ function openApp(){
       ${mac.note ? `<p class="note">${esc(mac.note)}</p>` : ''}`;
   }
 
-  // phases he's already been through
-  const pastPhases = Array.isArray(ph.past) ? ph.past.filter(x => x && (x.name || x.start)) : [];
-  $('#aPast').innerHTML = pastPhases.length ? `
-    <details class="past"><summary data-copy="past_label">${esc(t('past_label', { n: pastPhases.length }))}</summary>
-      <ul>${pastPhases.map(x => `<li><b>${esc(x.name || 'Phase')}</b> — ${fmt(x.start)} → ${fmt(x.end)}</li>`).join('')}</ul>
-    </details>` : '';
+  // (Past phases are intentionally not shown to the client — kept in the manager only.)
 
   // tiles
   const secs = c.sections || {};
