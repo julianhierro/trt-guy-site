@@ -188,5 +188,44 @@ if(!/[?&]edit=1/.test(location.search)) track('view');
   });
 })();
 </script>
+
+<!-- ═══ Opt-in gate text editor. The gate loads after editor.js, so the normal
+     visual editor can't manage it. This self-contained editor makes the gate copy
+     click-editable in ?edit=1 (opt-in view) and applies saved copy for everyone on
+     load. Own store: td-protocol-gate. ═══ -->
+<script>
+(function(){
+  var API='https://jv-dashboard-chi.vercel.app/api/content', STORE='td-protocol-gate';
+  var EDIT=/[?&]edit=1/.test(location.search);
+  var MAP=[
+    {k:'headline', sel:'#gate [data-eid="e900"]', attr:'text', label:'opt-in headline'},
+    {k:'sub',      sel:'#gate [data-eid="e901"]', attr:'text', label:'opt-in subtext'},
+    {k:'fine',     sel:'#gate [data-eid="e902"]', attr:'text', label:'fine print'},
+    {k:'btn',      sel:'#gbtn',   attr:'text',        label:'button text'},
+    {k:'ph_name',  sel:'#gname',  attr:'placeholder', label:'name field hint'},
+    {k:'ph_email', sel:'#gemail', attr:'placeholder', label:'email field hint'}
+  ];
+  var data={};
+  function put(el,attr,val){ if(!el)return; if(attr==='placeholder') el.setAttribute('placeholder',val); else el.textContent=val; }
+  function get(el,attr){ if(!el)return''; return attr==='placeholder'?(el.getAttribute('placeholder')||''):el.textContent.trim(); }
+  function apply(){ MAP.forEach(function(m){ if(typeof data[m.k]==='string'){ put(document.querySelector(m.sel),m.attr,data[m.k]); } }); }
+  function load(cb){ fetch(API+'?site='+STORE+'&page=1&t='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(d){ try{ var e=(d.edits||[]).filter(function(x){return x.eid==='gate';})[0]; if(e){ var o=JSON.parse(e.html); if(o&&typeof o==='object') data=o; } }catch(_){}} )
+    .then(function(){ apply(); if(cb)cb(); }).catch(function(){ if(cb)cb(); }); }
+  var st; function save(){ clearTimeout(st); st=setTimeout(function(){
+    fetch(API+'?site='+STORE+'&page=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:'',edits:[{eid:'gate',html:JSON.stringify(data)}]})})
+      .then(function(r){return r.json();}).then(function(d){ toast(d&&d.ok?'Saved ✓':'Save failed'); }).catch(function(){toast('Save failed');});
+  },300); }
+  function toast(m){ var t=document.createElement('div'); t.textContent=m; t.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:9px;z-index:2147483647;font:600 14px system-ui,-apple-system,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.3)'; document.body.appendChild(t); setTimeout(function(){t.remove();},1600); }
+  function boot(){ load(function(){
+    if(!EDIT) return;
+    var css=document.createElement('style'); css.textContent='html.pregate #gate [data-gk]{outline:2px dashed #1a5cff;outline-offset:3px;cursor:pointer!important}'; document.head.appendChild(css);
+    MAP.forEach(function(m){ var el=document.querySelector(m.sel); if(el) el.setAttribute('data-gk',m.k); });
+    document.addEventListener('click',function(ev){ var el=ev.target&&ev.target.closest?ev.target.closest('[data-gk]'):null; if(!el)return; ev.preventDefault(); ev.stopPropagation(); var m=MAP.filter(function(x){return x.k===el.getAttribute('data-gk');})[0]; if(!m)return; var cur=get(el,m.attr); var v=prompt('Edit the '+m.label+':',cur); if(v===null)return; put(el,m.attr,v); data[m.k]=v; save(); }, true);
+  }); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
 </body>
 </html>
