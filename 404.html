@@ -77,6 +77,8 @@
   .prog{height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;margin:16px 0 8px}
   .prog i{display:block;height:100%;background:var(--acc);border-radius:99px}
   .progtxt{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut)}
+  .weeksin{margin-top:12px;font-size:14px;color:var(--mut)}
+  .weeksin b{color:var(--txt);font-weight:700}
 
   /* a note from Julian — the first thing he reads when it is there */
   .note{margin-bottom:16px;border-color:var(--line-2);background:var(--acc-soft)}
@@ -176,6 +178,19 @@
     border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:var(--txt)}
   .a2hs button{background:none;border:0;color:var(--txt);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
   footer.f{text-align:center;color:var(--mut);font-size:12.5px;padding:26px 0 34px}
+
+  /* Desktop: give the plan room to breathe instead of a phone-width column */
+  @media(min-width:760px){
+    .wrap{max-width:880px;padding:0 24px}
+    main{padding:30px 0 56px}
+    .card{padding:26px 28px}
+    .phase h1{font-size:28px}
+    .tiles{grid-template-columns:1fr 1fr;gap:12px}
+    .macros .m b{font-size:26px}
+  }
+  @media(min-width:1040px){
+    .wrap{max-width:960px}
+  }
 </style>
 </head>
 <body>
@@ -426,27 +441,21 @@ function openApp(){
   $('#aWho').innerHTML = esc(t('header_who', { first: '\u0001' })).replace('\u0001', '<b>' + esc(whoName) + '</b>');
   $('#aFooter').textContent = t('footer');
 
-  // phase
+  // phase — we show how long they've been IN the phase, not a fixed length
+  // (the plan's length can change, so a "week X of Y" would go stale).
   const ph = c.phase || {};
-  const start = ph.start || c.start_date, end = ph.end || c.end_date;
-  let bar = '';
-  if(start && end){
-    // Whole days between the two dates: an 8-week phase must read "of 8", not 9.
-    const s = new Date(start + 'T00:00:00'), e = new Date(end + 'T00:00:00');
-    const total = Math.max(1, Math.round((e - s) / 86400000));
-    const gone  = Math.min(total, Math.max(0, Math.floor((Date.now() - s) / 86400000)));
-    const pct = Math.max(2, Math.min(100, Math.round(gone / total * 100)));
-    const wkAll = Math.max(1, Math.round(total / 7));
-    const wkNow = Math.min(wkAll, Math.floor(gone / 7) + 1);
-    const leftDays = Math.max(0, total - gone);
-    bar = `<div class="prog"><i style="width:${pct}%"></i></div>
-      <div class="progtxt"><span data-copy="week_txt">${esc(t('week_txt', { n: wkNow, total: wkAll }))}</span><span data-copy="days_txt">${esc(t('days_txt', { n: leftDays }))}</span></div>`;
+  const start = ph.start || c.start_date;
+  let weeksIn = null;
+  if(start){
+    const s = new Date(start + 'T00:00:00');
+    const days = Math.max(0, Math.floor((Date.now() - s) / 86400000));
+    weeksIn = Math.floor(days / 7) + 1;
   }
   $('#aPhase').innerHTML = `
     <div class="lbl" data-copy="phase_label">${esc(t('phase_label'))}</div>
     <h1>${esc(ph.name || t('phase_untitled'))}</h1>
-    ${(start && end) ? `<div class="dates">${fmt(start)} → ${fmt(end)}</div>` : ''}
-    ${bar}
+    ${start ? `<div class="dates">Started ${fmt(start)}</div>` : ''}
+    ${weeksIn ? `<div class="weeksin"><b>Week ${weeksIn}</b> in this phase</div>` : ''}
     ${ph.focus ? `<div class="focus">${esc(ph.focus)}</div>` : ''}`;
 
   // a note from Julian, if there is one
