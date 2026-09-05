@@ -501,8 +501,8 @@ function openApp(){
       // Training opens the sheet for the block he is on; every other tile opens its own link.
       const link = (k === 'training' && curProg && (curProg.link || '').trim())
         ? curProg.link : (s.link || '').trim();
-      const sub = (link ? (s.linkLabel || m.blurb) : m.blurb) || '';
-      const inner = `<span class="t"><b data-copy="tile_${k}">${esc(m.name)}</b><span data-copy="tile_${k}_sub">${esc(sub)}</span></span>`;
+      // Every program tile shows the same simple prompt under its title.
+      const inner = `<span class="t"><b data-copy="tile_${k}">${esc(m.name)}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span>`;
       return link
         ? `<a class="tile" href="${esc(link)}" target="_blank" rel="noopener">${inner}<span class="go">↗</span></a>`
         : `<button class="tile" data-k="${k}">${inner}<span class="go">›</span></button>`;
