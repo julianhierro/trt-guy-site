@@ -22,8 +22,8 @@
     --bg:#ffffff; --bg-2:#f4f5f7; --card:#ffffff;
     --line:rgba(11,13,16,.10); --line-2:rgba(11,13,16,.16);
     --txt:#0b0d10; --mut:#5b6572;
-    --acc:#1a5cff; --acc-d:#0f3fd6; --acc-soft:rgba(26,92,255,.08);
-    --good:#12a150;
+    --acc:#0b0d10; --acc-d:#000000; --acc-soft:rgba(11,13,16,.06);
+    --good:#0b0d10;
     --shadow:0 18px 44px rgba(11,13,16,.12);
     --r:16px;
   }
@@ -60,7 +60,7 @@
   .pin{width:100%;text-align:center;font:700 30px/1 'Inter',sans-serif;letter-spacing:.4em;text-indent:.4em;
     padding:16px 12px;border:1px solid var(--line-2);border-radius:14px;background:#fff;color:var(--txt);outline:0}
   .pin:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
-  .err{color:#c0392b;font-size:13.5px;margin:12px 0 0;min-height:18px}
+  .err{color:var(--txt);font-size:13.5px;margin:12px 0 0;min-height:18px}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:#fff;
     border:0;border-radius:13px;padding:15px 20px;font:700 15.5px Inter,sans-serif;cursor:pointer;
     text-decoration:none;width:100%;margin-top:14px;transition:background .15s}
@@ -73,14 +73,14 @@
   .phase{margin-bottom:16px}
   .phase h1{font-size:23px;letter-spacing:-.02em;margin:8px 0 4px;line-height:1.2}
   .phase .dates{font-size:13.5px;color:var(--mut)}
-  .phase .focus{margin:14px 0 0;font-size:15px;color:#243040;white-space:pre-wrap}
+  .phase .focus{margin:14px 0 0;font-size:15px;color:var(--txt);white-space:pre-wrap}
   .prog{height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;margin:16px 0 8px}
   .prog i{display:block;height:100%;background:var(--acc);border-radius:99px}
   .progtxt{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut)}
 
   /* a note from Julian — the first thing he reads when it is there */
-  .note{margin-bottom:16px;border-color:rgba(26,92,255,.28);background:var(--acc-soft)}
-  .note .body{margin-top:8px;font-size:15px;color:#1b2431}
+  .note{margin-bottom:16px;border-color:var(--line-2);background:var(--acc-soft)}
+  .note .body{margin-top:8px;font-size:15px;color:var(--txt)}
   .note .body p:last-child,.note .body ul:last-child,.note .body ol:last-child{margin-bottom:0}
 
   /* macros — the numbers he opens the app for */
@@ -128,7 +128,7 @@
   .sview h1{font-size:24px;letter-spacing:-.02em;margin:2px 0 14px}
   .back{display:inline-flex;align-items:center;gap:7px;background:none;border:0;padding:8px 0;margin:0 0 4px;
     color:var(--mut);font:600 14px Inter,sans-serif;cursor:pointer}
-  .body{font-size:15.5px;color:#1b2431}
+  .body{font-size:15.5px;color:var(--txt)}
   .body h3{font-size:17px;margin:22px 0 8px;letter-spacing:-.01em}
   .body p{margin:0 0 12px}
   .body ul,.body ol{margin:0 0 14px;padding-left:22px}
@@ -138,7 +138,7 @@
 
   /* edit mode — Julian only */
   /* keep each element's own display — overriding it reflowed the tiles */
-  body.tg-edit [data-copy]{outline:1px dashed rgba(26,92,255,.55);outline-offset:3px;border-radius:3px;cursor:text}
+  body.tg-edit [data-copy]{outline:1px dashed rgba(11,13,16,.5);outline-offset:3px;border-radius:3px;cursor:text}
   body.tg-edit [data-copy]:empty{min-width:40px;display:inline-block}
   body.tg-edit .tile{pointer-events:none}
   body.tg-edit .tile [data-copy]{pointer-events:auto}
@@ -149,7 +149,7 @@
     box-shadow:0 14px 40px rgba(11,13,16,.4);font-size:13.5px;max-width:calc(100% - 24px)}
   .editbar button{background:#20242b;color:#fff;border:0;border-radius:9px;padding:9px 13px;
     font:600 13px Inter,sans-serif;cursor:pointer;white-space:nowrap}
-  .editbar button.go{background:var(--acc)}
+  .editbar button.go{background:#fff;color:#0b0d10}
   .editbar button:hover{filter:brightness(1.15)}
   .editbar span{padding:0 4px;color:#aeb6c2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -172,9 +172,9 @@
     font-size:14.5px;font-weight:500;color:var(--mut)}
   .resbox .res-soon:last-child{border-bottom:0}
 
-  .a2hs{display:flex;gap:12px;align-items:flex-start;background:var(--acc-soft);border:1px solid rgba(26,92,255,.22);
-    border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:#213a6b}
-  .a2hs button{background:none;border:0;color:#213a6b;font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
+  .a2hs{display:flex;gap:12px;align-items:flex-start;background:var(--acc-soft);border:1px solid rgba(11,13,16,.16);
+    border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:var(--txt)}
+  .a2hs button{background:none;border:0;color:var(--txt);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
   footer.f{text-align:center;color:var(--mut);font-size:12.5px;padding:26px 0 34px}
 </style>
 </head>
@@ -595,7 +595,7 @@ function installManifest(c){
       scope: '/' + c.slug,
       display: 'standalone',
       background_color: '#ffffff',
-      theme_color: '#1a5cff',
+      theme_color: '#0b0d10',
       icons: [
         { src: '/icon-180.png', sizes: '180x180', type: 'image/png' },
         { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
