@@ -945,15 +945,6 @@ function drawBody(){
           <input id="mac_note" value="${esc(mac.note || '')}" placeholder="Same every day — training and rest."></div>
       </div>
 
-      <div class="sect">
-        <div class="shead"><h3>Check-in day</h3></div>
-        <p class="hint" style="margin-bottom:12px">The day they submit their weekly check-in. On that day their page shows a reminder to submit before 2pm EST; on other days it just says which day is theirs.</p>
-        <select id="checkin_day">
-          ${[['','No fixed day'],['0','Sunday'],['1','Monday'],['2','Tuesday'],['3','Wednesday'],['4','Thursday'],['5','Friday'],['6','Saturday']]
-            .map(([v,l]) => `<option value="${v}" ${String((c.sections||{}).checkin_day ?? '')===v?'selected':''}>${l}</option>`).join('')}
-        </select>
-      </div>
-
       ${SECTIONS.map(s => {
         const v = sectionOf(c, s.key);
         return `<div class="sect">
@@ -1158,7 +1149,6 @@ function collect(){
       };
     });
     sec.extras = (c._extras || []).filter(x => (x.label || '').trim() || (x.link || '').trim());
-    sec.checkin_day = $('#checkin_day') ? $('#checkin_day').value : ((c.sections || {}).checkin_day ?? '');
     c.sections = sec;
   }
 }

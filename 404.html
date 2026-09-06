@@ -83,13 +83,6 @@
   /* a note from Julian — the first thing he reads when it is there */
   .note{margin-bottom:16px;border-color:var(--line-2);background:var(--acc-soft)}
   .note .body{margin-top:8px;font-size:15px;color:var(--txt)}
-  /* check-in day */
-  .checkin{margin-bottom:16px}
-  .checkin .cin-day{font-size:14.5px;color:var(--mut)}
-  .checkin .cin-day b{color:var(--txt);font-weight:700}
-  .checkin.today{border-color:var(--txt);background:var(--acc-soft);border-width:1.5px}
-  .checkin .cin-body{margin-top:6px;font-size:15.5px;color:var(--txt);font-weight:600}
-  .checkin .cin-btn{width:auto;display:inline-flex;margin-top:14px;padding:11px 18px}
   .note .body p:last-child,.note .body ul:last-child,.note .body ol:last-child{margin-bottom:0}
 
   /* macros — the numbers he opens the app for */
@@ -237,7 +230,6 @@
     <div id="aHome">
       <section class="card phase" id="aPhase"></section>
       <section class="card note" id="aNote" hidden></section>
-      <section class="card checkin" id="aCheckin" hidden></section>
       <section class="card macros" id="aMacros" hidden></section>
       <div class="tiles" id="aTiles"></div>
       <div id="aRes"></div>
@@ -255,7 +247,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-09-06T19:32Z';
+const BUILD = '2026-09-06T19:35Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -304,9 +296,6 @@ const DEFAULT_COPY = {
   tile_weekly_checkin: 'Weekly Check In', tile_weekly_checkin_sub: '',
   resources_label: 'Additional Resources',
   extras_sub: 'Tap to open',
-  checkin_today_t: "Today's check-in day",
-  checkin_today_s: 'Make sure you submit before 2pm EST.',
-  checkin_day_pre: 'Your check-in day is',
   empty_plan: 'Your plan is being written up. It will appear here — nothing to do on your side.',
   back: '← Back',
   open_default: 'Open my {section}',
@@ -476,27 +465,6 @@ function openApp(){
   if(noteOn){
     $('#aNote').innerHTML = `<div class="lbl" data-copy="note_label">${esc(t('note_label'))}</div>
       <div class="body">${render(note.text)}</div>`;
-  }
-
-  // check-in day: a reminder on their day, and which day is theirs on the others.
-  // "Today" is judged in Eastern time so it matches the 2pm EST deadline.
-  const acheck = $('#aCheckin');
-  const cinRaw = (c.sections || {}).checkin_day;
-  const cin = (cinRaw === '' || cinRaw == null) ? null : +cinRaw;
-  if(cin === null || isNaN(cin) || cin < 0 || cin > 6){
-    acheck.hidden = true;
-  } else {
-    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const estToday = new Date().toLocaleDateString('en-US', { weekday:'long', timeZone:'America/New_York' });
-    const isToday = estToday === days[cin];
-    const wl = (((c.sections || {}).weekly_checkin || {}).link || '').trim();
-    acheck.hidden = false;
-    acheck.className = 'card checkin' + (isToday ? ' today' : '');
-    acheck.innerHTML = isToday
-      ? `<div class="lbl" data-copy="checkin_today_t">${esc(t('checkin_today_t'))}</div>
-         <div class="cin-body" data-copy="checkin_today_s">${esc(t('checkin_today_s'))}</div>
-         ${wl ? `<a class="btn cin-btn" href="${esc(wl)}" target="_blank" rel="noopener">Open my check-in ↗</a>` : ''}`
-      : `<div class="cin-day"><span data-copy="checkin_day_pre">${esc(t('checkin_day_pre'))}</span> <b>${days[cin]}</b>.</div>`;
   }
 
   // macros — first numbers he sees, no tapping
