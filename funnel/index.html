@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRT Guy — Funnel</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --panel:#ffffff; --panel-2:#f5f5f6;
+    --line:#e7e7ea; --line-bright:#d5d5da;
+    --fg:#0b0b0c; --muted:#5b5b63; --muted-2:#8a8a93;
+    --accent:#0b0b0c; --good:#0b0b0c; --r:14px;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
+  a{color:var(--accent)}
+  header.topbar{border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;
+    justify-content:space-between;gap:14px;flex-wrap:wrap;position:sticky;top:0;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);z-index:10}
+  .brand{font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;text-decoration:none;color:var(--fg)}
+  .brand .dot{width:7px;height:7px;background:var(--accent);border-radius:50%;margin-right:10px}
+  .brand .slash{color:var(--muted-2);margin:0 6px}
+  main{max-width:1120px;margin:0 auto;padding:22px}
+  .btn{font:inherit;font-weight:700;font-size:13px;padding:8px 13px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--line-bright);background:transparent;color:var(--muted);transition:all .14s}
+  .btn:hover{color:var(--fg);border-color:var(--fg)}
+  .btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.sm{padding:6px 10px;font-size:12px}
+  input,select{background:#fff;border:1px solid var(--line-bright);border-radius:8px;color:var(--fg);
+    font:inherit;font-size:14px;padding:8px 10px;outline:0}
+  input:focus,select:focus{border-color:var(--accent)}
+  /* gate */
+  .gate{max-width:400px;margin:16vh auto;padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--panel);text-align:center}
+  .gate h1{font-size:20px;margin:0 0 4px}
+  .gate p{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+  .gate input{width:100%;text-align:center;margin-bottom:10px}
+  .gate .btn{width:100%;background:var(--accent);color:#fff;border-color:var(--accent);padding:12px}
+
+  .ranges{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  /* stat cards */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:6px 0 22px}
+  .stat{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:15px 17px}
+  .stat .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2)}
+  .stat .v{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:5px}
+  .stat .sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+  .sect-h{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin:26px 0 12px}
+
+  /* funnel bars */
+  .funnel{display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;background:var(--panel)}
+  .frow{display:flex;align-items:center;gap:14px}
+  .frow .lab{width:130px;flex:0 0 auto;font-size:13.5px;font-weight:600}
+  .frow .track{flex:1;background:var(--panel-2);border-radius:8px;height:30px;overflow:hidden;position:relative}
+  .frow .fill{height:100%;background:var(--accent);border-radius:8px;min-width:2px;transition:width .4s}
+  .frow .num{width:120px;flex:0 0 auto;text-align:right;font-size:13.5px}
+  .frow .num b{font-weight:800}
+  .frow .num span{color:var(--muted-2);font-size:12px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .wrap-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+  thead th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted-2);text-align:right;padding:11px 12px;white-space:nowrap;border-bottom:1px solid var(--line);background:var(--panel-2)}
+  thead th:first-child,tbody td:first-child{text-align:left}
+  tbody td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr.today td{background:rgba(11,13,16,.03)}
+  tbody td input{width:82px;text-align:right;padding:6px 8px;font-size:13px}
+  tfoot td{padding:11px 12px;text-align:right;font-weight:800;border-top:2px solid var(--line)}
+  tfoot td:first-child{text-align:left}
+
+  /* applications */
+  .app{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:8px;background:var(--panel);flex-wrap:wrap}
+  .app .who{flex:1;min-width:180px}
+  .app .who b{font-weight:700}
+  .app .who span{display:block;color:var(--muted);font-size:12.5px}
+  .app .based{font-size:12.5px;color:var(--muted);min-width:120px}
+  .pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;border:1px solid var(--line-bright)}
+  .pill.q{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .pill.d{background:var(--panel-2);color:var(--muted)}
+  .ovr{display:flex;gap:5px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;
+    padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;z-index:60}
+  .empty{color:var(--muted);font-size:13.5px;padding:14px}
+  @media(max-width:700px){ .frow .lab{width:96px} .frow .num{width:92px} main{padding:16px} }
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+  <h1>TRT Guy — Funnel</h1>
+  <p>Enter the passcode.</p>
+  <input id="pc" type="password" placeholder="Passcode" autocomplete="current-password">
+  <button class="btn" id="pcBtn">Unlock</button>
+  <p id="pcErr" style="color:#c0392b;min-height:16px" hidden>Wrong passcode.</p>
+</div>
+
+<div id="app" hidden>
+<header class="topbar">
+  <a class="brand" href="/control/"><span class="dot"></span>TRT-GUY<span class="slash">/</span>FUNNEL</a>
+  <div class="ranges">
+    <button class="btn sm" data-days="7">7d</button>
+    <button class="btn sm on" data-days="30">30d</button>
+    <button class="btn sm" data-days="90">90d</button>
+    <a class="btn sm" href="/control/">Control Center</a>
+  </div>
+</header>
+<main>
+  <div class="stats" id="stats"></div>
+
+  <div class="sect-h">The funnel</div>
+  <div class="funnel" id="funnel"></div>
+
+  <div class="sect-h">Daily — ad spend &amp; organic are yours to fill in</div>
+  <div class="wrap-scroll"><table id="tbl">
+    <thead><tr>
+      <th>Date</th><th>Ad spend</th><th>Organic</th><th>Emails</th><th>Apps</th><th>Qualified</th><th>Clients</th><th>Revenue</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+    <tfoot><tr id="foot"></tr></tfoot>
+  </table></div>
+
+  <div class="sect-h">Applications — auto‑judged by location, override any</div>
+  <div id="apps"></div>
+</main>
+</div>
+
+<script>
+const WORKER='https://trt-guy-onboarding.julianhierro.workers.dev';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS='tg-funnel-key';
+let KEY='', DATA=null, DAYS=30, saveT;
+
+function toast(m){ const t=document.createElement('div'); t.className='toast'; t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(),1600); }
+function money(n){ n=+n||0; return '$'+n.toLocaleString('en-US',{maximumFractionDigits:n%1?2:0}); }
+function num(n){ return (+n||0).toLocaleString('en-US'); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function ratio(a,b){ b=+b; return b? (a/b):null; }
+
+async function api(path, opts={}){
+  const r = await fetch(WORKER+path, { ...opts, headers:{ 'Content-Type':'application/json','X-CC-Key':KEY, ...(opts.headers||{}) } });
+  if(r.status===401) throw new Error('unauthorized');
+  const t = await r.text(); let j; try{ j=JSON.parse(t); }catch(e){ throw new Error(t.slice(0,120)); }
+  if(j && j.error) throw new Error(j.error);
+  return j;
+}
+
+function fmtDay(d){ const [y,m,dd]=d.split('-'); return new Date(+y,+m-1,+dd).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+
+async function load(){
+  const to=new Date(), from=new Date(Date.now()-(DAYS-1)*86400000);
+  const f=from.toISOString().slice(0,10), t=to.toISOString().slice(0,10);
+  DATA = await api('/funnel?from='+f+'&to='+t);
+  render();
+}
+
+function totals(){
+  const d=DATA.days||[]; const s={ad_spend:0,organic_shares:0,emails:0,applications:0,qualified:0,clients:0,revenue:0};
+  d.forEach(r=>{ for(const k in s) s[k]+=(+r[k]||0); });
+  return s;
+}
+
+function render(){
+  const s=totals();
+  // stat cards
+  const cpl = ratio(s.ad_spend,s.emails), cpa = ratio(s.ad_spend,s.applications), cpc = ratio(s.ad_spend,s.clients);
+  const roas = s.ad_spend ? (s.revenue/s.ad_spend) : null;
+  const cards=[
+    ['Ad spend', money(s.ad_spend), roas!=null? roas.toFixed(2)+'× ROAS':'—'],
+    ['Emails', num(s.emails), cpl!=null? money(cpl)+' / email':'—'],
+    ['Applications', num(s.applications), cpa!=null? money(cpa)+' / app':'—'],
+    ['Qualified apps', num(s.qualified), s.applications? Math.round(s.qualified/s.applications*100)+'% of apps':'—'],
+    ['Clients', num(s.clients), cpc!=null? money(cpc)+' / client':'—'],
+    ['Revenue', money(s.revenue), s.clients? money(ratio(s.revenue,s.clients))+' / client':'—'],
+  ];
+  $('#stats').innerHTML = cards.map(c=>`<div class="stat"><div class="k">${c[0]}</div><div class="v">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
+
+  // funnel bars — emails -> apps -> qualified -> clients
+  const steps=[['Emails',s.emails],['Applications',s.applications],['Qualified',s.qualified],['Clients',s.clients]];
+  const max=Math.max(1,...steps.map(x=>x[1]));
+  $('#funnel').innerHTML = steps.map((x,i)=>{
+    const prev=i? steps[i-1][1]:null;
+    const conv=(prev!=null&&prev>0)? Math.round(x[1]/prev*100)+'% →':'';
+    return `<div class="frow"><div class="lab">${x[0]}</div>
+      <div class="track"><div class="fill" style="width:${Math.round(x[1]/max*100)}%"></div></div>
+      <div class="num"><b>${num(x[1])}</b> <span>${conv}</span></div></div>`;
+  }).join('');
+
+  // daily rows
+  const rows=(DATA.days||[]);
+  const today=new Date().toISOString().slice(0,10);
+  $('#rows').innerHTML = rows.map(r=>`<tr class="${r.day===today?'today':''}">
+    <td>${fmtDay(r.day)}</td>
+    <td><input data-day="${r.day}" data-f="ad_spend" type="number" min="0" step="1" value="${r.ad_spend||''}" placeholder="0"></td>
+    <td><input data-day="${r.day}" data-f="organic_shares" type="number" min="0" step="1" value="${r.organic_shares||''}" placeholder="0"></td>
+    <td>${num(r.emails)}</td><td>${num(r.applications)}</td><td>${num(r.qualified)}</td>
+    <td>${num(r.clients)}</td><td>${money(r.revenue)}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">No days.</td></tr>';
+  $('#foot').innerHTML = `<td>Total</td><td>${money(s.ad_spend)}</td><td>${num(s.organic_shares)}</td>
+    <td>${num(s.emails)}</td><td>${num(s.applications)}</td><td>${num(s.qualified)}</td><td>${num(s.clients)}</td><td>${money(s.revenue)}</td>`;
+  $$('#rows input').forEach(inp=>{ inp.oninput=()=>queueSave(inp.dataset.day); });
+
+  // applications
+  const apps=(DATA.apps||[]);
+  $('#apps').innerHTML = apps.length ? apps.map(a=>{
+    const q=a.effective_qualified;
+    const cur = a.override || 'auto';
+    return `<div class="app">
+      <div class="who"><b>${esc(a.name||a.email||'—')}</b><span>${esc(a.email||'')}</span></div>
+      <div class="based">${esc(a.based||a.country||'—')}</div>
+      <span class="pill ${q?'q':'d'}">${q?'Qualified':'Disqualified'}</span>
+      <div class="ovr">
+        <button class="btn sm ${cur==='auto'?'on':''}" data-id="${a.id}" data-ov="">Auto</button>
+        <button class="btn sm ${cur==='qualified'?'on':''}" data-id="${a.id}" data-ov="qualified">Q</button>
+        <button class="btn sm ${cur==='disqualified'?'on':''}" data-id="${a.id}" data-ov="disqualified">DQ</button>
+      </div></div>`;
+  }).join('') : '<div class="empty">No applications in this range yet. New ones will appear here automatically.</div>';
+  $$('#apps [data-ov]').forEach(b=>{ b.onclick=()=>override(b.dataset.id, b.dataset.ov); });
+}
+
+function queueSave(day){
+  clearTimeout(saveT);
+  saveT=setTimeout(async ()=>{
+    const ad=$(`#rows input[data-day="${day}"][data-f="ad_spend"]`).value;
+    const og=$(`#rows input[data-day="${day}"][data-f="organic_shares"]`).value;
+    try{
+      await api('/funnel',{method:'POST',body:JSON.stringify({action:'set_day',day,ad_spend:ad===''?0:+ad,organic_shares:og===''?0:+og})});
+      const row=(DATA.days||[]).find(r=>r.day===day); if(row){ row.ad_spend=ad===''?0:+ad; row.organic_shares=og===''?0:+og; }
+      render();
+      toast('Saved');
+    }catch(e){ toast('Save failed'); }
+  },500);
+}
+
+async function override(id, ov){
+  try{
+    await api('/funnel',{method:'POST',body:JSON.stringify({action:'override_app',id,override:ov})});
+    const a=(DATA.apps||[]).find(x=>x.id===id);
+    if(a){ a.override=ov||null; a.effective_qualified = ov==='qualified'?true: ov==='disqualified'?false : a.qualified_auto; }
+    // recompute qualified per day from apps
+    recomputeQualified();
+    render(); toast('Updated');
+  }catch(e){ toast('Update failed'); }
+}
+function recomputeQualified(){
+  // adjust each day's qualified count from the apps list (client-side, mirrors the DB rule)
+  const byDay={};
+  (DATA.apps||[]).forEach(a=>{ const d=(a.created_at||'').slice(0,10); if(!byDay[d]) byDay[d]={q:0}; if(a.effective_qualified) byDay[d].q++; });
+  (DATA.days||[]).forEach(r=>{ r.qualified = byDay[r.day]? byDay[r.day].q : 0; });
+}
+
+// range buttons
+$$('[data-days]').forEach(b=>{ b.onclick=()=>{ DAYS=+b.dataset.days; $$('[data-days]').forEach(x=>x.classList.toggle('on',x===b)); load().catch(e=>toast(e.message)); }; });
+
+// gate
+async function unlock(pc){
+  KEY=pc;
+  await load();
+  try{ localStorage.setItem(LS,pc); }catch(e){}
+  $('#gate').hidden=true; $('#app').hidden=false;
+}
+$('#pcBtn').onclick=()=>{ unlock($('#pc').value.trim()).catch(()=>{ $('#pcErr').hidden=false; }); };
+$('#pc').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#pcBtn').click(); });
+(function(){ let k=''; try{ k=localStorage.getItem(LS)||''; }catch(e){} if(k) unlock(k).catch(()=>{ try{localStorage.removeItem(LS);}catch(e){} }); })();
+</script>
+</body>
+</html>
