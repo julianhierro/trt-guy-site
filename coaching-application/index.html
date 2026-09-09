@@ -55,7 +55,7 @@
   <div class="wordmark">TRT-GUY</div>
   <div class="kicker">Coaching · By Application</div>
   <h1>Coaching Application</h1>
-  <p class="lead">A few quick questions so we can see if you're the right fit. Be honest — it helps us build the right plan.</p>
+  <p class="lead">Please, fill out the information below with as much detail as possible.</p>
   <div class="card">
     <form id="appForm" novalidate>
       <label>First name <span class="req">*</span></label>
@@ -66,11 +66,17 @@
       <input type="tel" id="phone" placeholder="e.g. +1 555 123 4567" autocomplete="tel" required>
       <small data-eid="e741" style="display:block;margin:-6px 0 8px;color:var(--mut);font-size:12.5px">Please include your country code (e.g. +1 for the US).</small>
 
-      <label data-eid="e731">What&rsquo;s your IG handle? <span class="req" data-eid="e733">*</span></label>
+      <label>What’s your IG handle? <span class="req">*</span></label>
       <input type="text" id="instagram" data-eid="e732" placeholder="@yourhandle" autocomplete="off" required>
 
-      <label data-eid="e743">Where are you based? <span class="req" data-eid="e744">*</span></label>
+      <label>Where are you based? <span class="req">*</span></label>
       <input type="text" id="based" data-eid="e745" placeholder="City, Country" autocomplete="off" required>
+
+      <label>What’s your occupation? <span class="req">*</span></label>
+      <input type="text" id="occupation" placeholder="e.g. Software engineer, business owner" autocomplete="off" required>
+
+      <label>What’s your age, height, and weight? <span class="req">*</span></label>
+      <input type="text" id="age_height_weight" placeholder="e.g. 38, 5'11&quot;, 205 lb" autocomplete="off" required>
 
       <label>What are your short-term goals? <span class="req">*</span></label>
       <textarea id="short_term_goals" placeholder="Next 1–3 months" required></textarea>
@@ -86,7 +92,7 @@
         <option value="No — just exploring">Just exploring</option>
       </select>
 
-      <label data-eid="e701">Describe your current TRT protocol (total amount, injection frequency, and anything else you're taking) <span class="req" data-eid="e702">*</span></label>
+      <label>Describe your current TRT protocol (total amount, injection frequency, and anything else you're taking) <span class="req">*</span></label>
       <textarea id="trt_protocol" data-eid="e703" required></textarea>
 
       <label>Have you ever used steroids? <span class="req">*</span></label>
@@ -104,7 +110,7 @@
       </select>
 
       <div id="cycle_wrap" data-eid="e711" style="display:none">
-        <label data-eid="e712">Describe your current cycle <span class="req" data-eid="e713">*</span></label>
+        <label>Describe your current cycle <span class="req">*</span></label>
         <textarea id="cycle_describe" data-eid="e714"></textarea>
       </div>
 
@@ -132,11 +138,14 @@
         <option value="I would need someone elses sign-off">I'd need someone else's sign-off</option>
       </select>
 
-      <label>Why are you looking to make a change now versus waiting 1-2 months? <span class="req">*</span></label>
+      <label>Why are you looking to make a change now? Is there a specific event you want to look good for? Are you tired of having a mediocre physique? Looking to take things to the next level? <span class="req">*</span></label>
       <textarea id="why_now_vs_wait" required></textarea>
 
-      <label>What's your biggest struggle right now when it comes to accomplishing your goals? <span class="req">*</span></label>
+      <label>What’s your biggest challenge right now? <span class="req">*</span></label>
       <textarea id="biggest_struggle" required></textarea>
+
+      <label>What would success look like for you if we were to work together? <span class="req">*</span></label>
+      <textarea id="success_definition" required></textarea>
 
       <label>What are you looking to get out of coaching? (guidance, accountability, a protocol that works, TRT guidance, PED guidance, etc) <span class="req">*</span></label>
       <textarea id="wants_from_coaching" required></textarea>
@@ -168,7 +177,7 @@ $('#appForm').addEventListener('submit', async function(e){
   if(!name){ err.textContent='Please enter your first name.'; return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
   if(!phone){ err.textContent='Please enter your phone.'; return; }
-  var ids=['instagram','based','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
+  var ids=['instagram','based','occupation','age_height_weight','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','success_definition','wants_from_coaching','help_accomplish'];
   var payload={firstName:name,email:email,phone:phone,qa:[]};
   for(var i=0;i<ids.length;i++){ var v=$('#'+ids[i]).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+ids[i]).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[ids[i]]=v; payload.qa.push({q:labelFor(ids[i]),a:v}); }
   // If they're currently on a cycle, they must describe it (this field is hidden otherwise).

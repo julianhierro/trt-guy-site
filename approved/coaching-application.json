@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "1c904eccce1d38a4151ec9172a4b9a597d888ad83666c9f2030f78488ecd33f6",
- "approved_at": "2026-09-03T11:37:11",
- "approved_for": "baseline lock at Julian's request on 2026-09-03 — current live state he has approved",
+ "sha256": "c0b818b5fddc76ec617b80712c8ec8899829ff6cfc669a2c76d06ce2a4b85908",
+ "approved_at": "2026-09-09T07:57:46",
+ "approved_for": "Julian approved via the /coaching-application-preview mock: added Occupation, Age/height/weight, and a success-definition question; reworded the biggest-challenge and why-now questions; updated the intro line",
  "questions": [
   [
    "instagram",
@@ -10,6 +10,14 @@
   ],
   [
    "based",
+   ""
+  ],
+  [
+   "occupation",
+   ""
+  ],
+  [
+   "age_height_weight",
    ""
   ],
   [
@@ -54,6 +62,10 @@
   ],
   [
    "biggest_struggle",
+   ""
+  ],
+  [
+   "success_definition",
    ""
   ],
   [
