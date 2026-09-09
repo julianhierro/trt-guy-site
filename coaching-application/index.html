@@ -195,7 +195,7 @@ $('#appForm').addEventListener('submit', async function(e){
 $('#on_cycle_now').addEventListener('change',function(){ document.getElementById('cycle_wrap').style.display=this.value==='Yes'?'':'none'; });
 
 // Show the pricing note when they pick a country NOT on the high-income list.
-var QUALIFIED_COUNTRIES=['United States','Canada','United Kingdom','Australia','New Zealand','Germany','Switzerland','Sweden','Norway','Denmark','Netherlands','Ireland','Finland','Austria','Belgium','Luxembourg'];
+var QUALIFIED_COUNTRIES=['United States','Canada','United Kingdom','Australia','New Zealand','Germany','Switzerland','Sweden','Norway','Denmark','Netherlands','Ireland','Finland','Austria','Belgium','Luxembourg','France','Japan','Singapore','United Arab Emirates'];
 (function(){ var b=document.getElementById('based'), note=document.getElementById('invest_price');
   function upd(){ if(!note||!b)return; var v=(b.value||'').trim(); note.classList.toggle('show', !!v && QUALIFIED_COUNTRIES.indexOf(v)===-1); }
   if(b){ b.addEventListener('change',upd); upd(); }

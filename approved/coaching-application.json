@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "2e04fb512c466b51048997217442c7e0b79950a8c4767b66f42f79bc05c059ba",
- "approved_at": "2026-09-09T08:33:02",
- "approved_for": "Julian asked: removed the blue 'Coaching · By Application' kicker; replaced free-text location with a full country dropdown; added a conditional pricing note ($400-600/mo) on the invest question for non-high-income countries",
+ "sha256": "c4046a49af07b7f6cf72cfefcc4318252c92af1367448114d09770fa456fddc7",
+ "approved_at": "2026-09-09T08:45:38",
+ "approved_for": "Julian asked to add France, Japan, Singapore and UAE to the high-income list (no pricing note for those)",
  "questions": [
   [
    "instagram",
