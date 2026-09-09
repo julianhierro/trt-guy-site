@@ -1,8 +1,8 @@
 {
  "page": "waitlist/index.html",
- "sha256": "6366dbf9b7c99f5166e1a8ae41880f9a950de6a19c5f50aa68a74d399615f42d",
- "approved_at": "2026-09-03T11:37:10",
- "approved_for": "baseline lock at Julian's request on 2026-09-03 — current live state he has approved",
+ "sha256": "f18378eaa877dd63cfe074ea69e29cfafde9ea07e2338e9b09b9598f009cc256",
+ "approved_at": "2026-09-09T08:58:10",
+ "approved_for": "Julian asked to sync the waitlist's Step-2 application to match the standalone coaching application: removed kicker, country dropdown, added occupation/age-height-weight/success questions, reworded challenge + why-now, conditional pricing note for non-high-income countries, footer trimmed to © TRT Guy",
  "questions": [
   [
    "instagram",
@@ -10,6 +10,14 @@
   ],
   [
    "based",
+   ""
+  ],
+  [
+   "occupation",
+   ""
+  ],
+  [
+   "age_height_weight",
    ""
   ],
   [
@@ -54,6 +62,10 @@
   ],
   [
    "biggest_struggle",
+   ""
+  ],
+  [
+   "success_definition",
    ""
   ],
   [

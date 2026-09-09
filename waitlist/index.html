@@ -18,7 +18,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/editor.css?v=1">
 <!-- Paint-hold: keep the page hidden until published edits are applied, so it never flashes the old version. editor.js clears jv-pending in reveal() once edits (and any draft) are applied. Failsafe reveals if editor.js never loads. -->
-<style>html.jv-pending body{visibility:hidden}</style>
+<style>html.jv-pending body{visibility:hidden}  .invnote{display:none;color:var(--mut);font-size:13.5px;line-height:1.5;margin:-2px 0 10px}
+  .invnote.show{display:block}
+</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 <style>
   :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;--red:#e2483a;
@@ -66,8 +68,7 @@
 
   <!-- STEP 1: join the waitlist -->
   <div class="stepwrap show" id="step1">
-    <div class="kicker">Coaching · By Application</div>
-    <h1>Join the Waitlist</h1>
+      <h1>Join the Waitlist</h1>
     <p class="lead">TRT Guy coaching runs in small groups so every guy gets dialed in properly. Spots are limited — get on the list and complete a short application to be considered for the next opening.</p>
     <div class="card">
       <ul class="bul">
@@ -94,14 +95,20 @@
   <div class="stepwrap" id="step2">
     <div class="steptag">✓ You're on the list</div>
     <h1>Your Application</h1>
-    <p class="lead">A few quick questions so we can see if you're the right fit. Be honest — it helps us build the right plan.</p>
+    <p class="lead">Please, fill out the information below with as much detail as possible.</p>
     <div class="card">
       <form id="appForm" novalidate>
         <label data-eid="e800">What&rsquo;s your IG handle? <span class="req" data-eid="e802">*</span></label>
         <input type="text" id="instagram" data-eid="e801" placeholder="@yourhandle" autocomplete="off" required>
 
-        <label data-eid="e830">Where are you based? <span class="req" data-eid="e831">*</span></label>
-        <input type="text" id="based" data-eid="e832" placeholder="City, Country" autocomplete="off" required>
+        <label>Where are you based? <span class="req">*</span></label>
+        <select id="based" required><option value="">Select your country…</option><option>Afghanistan</option><option>Albania</option><option>Algeria</option><option>Andorra</option><option>Angola</option><option>Antigua and Barbuda</option><option>Argentina</option><option>Armenia</option><option>Australia</option><option>Austria</option><option>Azerbaijan</option><option>Bahamas</option><option>Bahrain</option><option>Bangladesh</option><option>Barbados</option><option>Belarus</option><option>Belgium</option><option>Belize</option><option>Benin</option><option>Bhutan</option><option>Bolivia</option><option>Bosnia and Herzegovina</option><option>Botswana</option><option>Brazil</option><option>Brunei</option><option>Bulgaria</option><option>Burkina Faso</option><option>Burundi</option><option>Cabo Verde</option><option>Cambodia</option><option>Cameroon</option><option>Canada</option><option>Central African Republic</option><option>Chad</option><option>Chile</option><option>China</option><option>Colombia</option><option>Comoros</option><option>Congo (Republic)</option><option>Congo (DRC)</option><option>Costa Rica</option><option>Cote d'Ivoire</option><option>Croatia</option><option>Cuba</option><option>Cyprus</option><option>Czechia</option><option>Denmark</option><option>Djibouti</option><option>Dominica</option><option>Dominican Republic</option><option>Ecuador</option><option>Egypt</option><option>El Salvador</option><option>Equatorial Guinea</option><option>Eritrea</option><option>Estonia</option><option>Eswatini</option><option>Ethiopia</option><option>Fiji</option><option>Finland</option><option>France</option><option>Gabon</option><option>Gambia</option><option>Georgia</option><option>Germany</option><option>Ghana</option><option>Greece</option><option>Grenada</option><option>Guatemala</option><option>Guinea</option><option>Guinea-Bissau</option><option>Guyana</option><option>Haiti</option><option>Honduras</option><option>Hungary</option><option>Iceland</option><option>India</option><option>Indonesia</option><option>Iran</option><option>Iraq</option><option>Ireland</option><option>Israel</option><option>Italy</option><option>Jamaica</option><option>Japan</option><option>Jordan</option><option>Kazakhstan</option><option>Kenya</option><option>Kiribati</option><option>Kosovo</option><option>Kuwait</option><option>Kyrgyzstan</option><option>Laos</option><option>Latvia</option><option>Lebanon</option><option>Lesotho</option><option>Liberia</option><option>Libya</option><option>Liechtenstein</option><option>Lithuania</option><option>Luxembourg</option><option>Madagascar</option><option>Malawi</option><option>Malaysia</option><option>Maldives</option><option>Mali</option><option>Malta</option><option>Marshall Islands</option><option>Mauritania</option><option>Mauritius</option><option>Mexico</option><option>Micronesia</option><option>Moldova</option><option>Monaco</option><option>Mongolia</option><option>Montenegro</option><option>Morocco</option><option>Mozambique</option><option>Myanmar</option><option>Namibia</option><option>Nauru</option><option>Nepal</option><option>Netherlands</option><option>New Zealand</option><option>Nicaragua</option><option>Niger</option><option>Nigeria</option><option>North Korea</option><option>North Macedonia</option><option>Norway</option><option>Oman</option><option>Pakistan</option><option>Palau</option><option>Palestine</option><option>Panama</option><option>Papua New Guinea</option><option>Paraguay</option><option>Peru</option><option>Philippines</option><option>Poland</option><option>Portugal</option><option>Qatar</option><option>Romania</option><option>Russia</option><option>Rwanda</option><option>Saint Kitts and Nevis</option><option>Saint Lucia</option><option>Saint Vincent and the Grenadines</option><option>Samoa</option><option>San Marino</option><option>Sao Tome and Principe</option><option>Saudi Arabia</option><option>Senegal</option><option>Serbia</option><option>Seychelles</option><option>Sierra Leone</option><option>Singapore</option><option>Slovakia</option><option>Slovenia</option><option>Solomon Islands</option><option>Somalia</option><option>South Africa</option><option>South Korea</option><option>South Sudan</option><option>Spain</option><option>Sri Lanka</option><option>Sudan</option><option>Suriname</option><option>Sweden</option><option>Switzerland</option><option>Syria</option><option>Taiwan</option><option>Tajikistan</option><option>Tanzania</option><option>Thailand</option><option>Timor-Leste</option><option>Togo</option><option>Tonga</option><option>Trinidad and Tobago</option><option>Tunisia</option><option>Turkey</option><option>Turkmenistan</option><option>Tuvalu</option><option>Uganda</option><option>Ukraine</option><option>United Arab Emirates</option><option>United Kingdom</option><option>United States</option><option>Uruguay</option><option>Uzbekistan</option><option>Vanuatu</option><option>Vatican City</option><option>Venezuela</option><option>Vietnam</option><option>Yemen</option><option>Zambia</option><option>Zimbabwe</option></select>
+
+        <label>What’s your occupation? <span class="req">*</span></label>
+        <input type="text" id="occupation" placeholder="e.g. Software engineer, business owner" autocomplete="off" required>
+
+        <label>What’s your age, height, and weight? <span class="req">*</span></label>
+        <input type="text" id="age_height_weight" placeholder="e.g. 38, 5'11&quot;, 205 lb" autocomplete="off" required>
 
         <label>What are your short-term goals? <span class="req">*</span></label>
         <textarea id="short_term_goals" placeholder="Next 1–3 months" required></textarea>
@@ -140,6 +147,7 @@
         </div>
 
         <label>If you find the right program, are you willing to invest significantly to hit your goals? <span class="req">*</span></label>
+        <div class="invnote" id="invest_price">(My coaching typically ranges between $400 and $600 per month. The final number is going to depend on the commitment length, level of service you need, and difficulty and complexity of your goals.)</div>
         <select id="investment_ready" required>
           <option value="">Select…</option>
           <option value="Yes — finances arent an issue">Yes — finances aren't an issue</option>
@@ -162,11 +170,14 @@
           <option value="I would need someone elses sign-off">I'd need someone else's sign-off</option>
         </select>
 
-        <label data-eid="e809">Why are you looking to make a change now versus waiting 1-2 months? <span class="req" data-eid="e810">*</span></label>
+        <label>Why are you looking to make a change now? Is there a specific event you want to look good for? Are you tired of having a mediocre physique? Looking to take things to the next level? <span class="req">*</span></label>
         <textarea id="why_now_vs_wait" data-eid="e811" required></textarea>
 
-        <label data-eid="e812">What's your biggest struggle right now when it comes to accomplishing your goals? <span class="req" data-eid="e813">*</span></label>
+        <label>What’s your biggest challenge right now? <span class="req">*</span></label>
         <textarea id="biggest_struggle" data-eid="e814" required></textarea>
+
+        <label>What would success look like for you if we were to work together? <span class="req">*</span></label>
+        <textarea id="success_definition" required></textarea>
 
         <label data-eid="e815">What are you looking to get out of coaching? (guidance, accountability, a protocol that works, TRT guidance, PED guidance, etc) <span class="req" data-eid="e816">*</span></label>
         <textarea id="wants_from_coaching" data-eid="e817" required></textarea>
@@ -186,7 +197,7 @@
     <p class="lead">You're on the waitlist and your application is submitted. We review every one — if you're a fit, we'll reach out by email or text the moment a spot opens.</p>
   </div>
 
-  <div class="foot">© TRT Guy · Educational only — not medical advice</div>
+  <div class="foot">© TRT Guy</div>
 </div>
 
 <script>
@@ -230,7 +241,7 @@ function labelFor(id){ var el=document.getElementById(id); var p=el&&el.previous
 $('#appForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const err=$('#appErr');
-  const ids=['instagram','based','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','wants_from_coaching','help_accomplish'];
+  const ids=['instagram','based','occupation','age_height_weight','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','success_definition','wants_from_coaching','help_accomplish'];
   const payload={firstName:lead.firstName,email:lead.email,phone:lead.phone,qa:[]};
   for(const id of ids){ const v=$('#'+id).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+id).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[id]=v; payload.qa.push({q:labelFor(id),a:v}); }
   // If currently on a cycle, they must describe it (hidden otherwise).
@@ -246,6 +257,12 @@ $('#appForm').addEventListener('submit', async e=>{
 // Reveal the "describe your cycle" question only when they say they're on a cycle.
 var _cw=document.getElementById('cycle_wrap');
 if(_cw){ $('#on_cycle_now').addEventListener('change',function(){ _cw.style.display=this.value==='Yes'?'':'none'; }); }
+
+var QUALIFIED_COUNTRIES=['United States','Canada','United Kingdom','Australia','New Zealand','Germany','Switzerland','Sweden','Norway','Denmark','Netherlands','Ireland','Finland','Austria','Belgium','Luxembourg','France','Japan','Singapore','United Arab Emirates'];
+(function(){ var b=document.getElementById('based'), note=document.getElementById('invest_price');
+  function upd(){ if(!note||!b)return; var v=(b.value||'').trim(); note.classList.toggle('show', !!v && QUALIFIED_COUNTRIES.indexOf(v)===-1); }
+  if(b){ b.addEventListener('change',upd); upd(); }
+})();
 
 // Mobile keyboard fix: add bottom scroll room while a field is focused so the
 // Submit button can be scrolled clear of the on-screen keyboard.
