@@ -33,6 +33,8 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;box-shadow:0 2px 10px rgba(11,13,16,.05);text-align:left}
   label{display:block;font-weight:600;font-size:14.5px;margin-bottom:6px}
   label .req{color:var(--acc)}
+  .invnote{display:none;color:var(--mut);font-size:13.5px;line-height:1.5;margin:-2px 0 10px}
+  .invnote.show{display:block}
   input,textarea,select{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:11px;font-family:var(--body);font-size:16px;margin-bottom:16px;outline:none;background:#fff;color:var(--txt)}
   textarea{min-height:76px;resize:vertical}
   input:focus,textarea:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
@@ -53,7 +55,6 @@
 <body>
 <div class="wrap">
   <div class="wordmark">TRT-GUY</div>
-  <div class="kicker">Coaching · By Application</div>
   <h1>Coaching Application</h1>
   <p class="lead">Please, fill out the information below with as much detail as possible.</p>
   <div class="card">
@@ -70,7 +71,7 @@
       <input type="text" id="instagram" data-eid="e732" placeholder="@yourhandle" autocomplete="off" required>
 
       <label>Where are you based? <span class="req">*</span></label>
-      <input type="text" id="based" data-eid="e745" placeholder="City, Country" autocomplete="off" required>
+      <select id="based" required><option value="">Select your country…</option><option>Afghanistan</option><option>Albania</option><option>Algeria</option><option>Andorra</option><option>Angola</option><option>Antigua and Barbuda</option><option>Argentina</option><option>Armenia</option><option>Australia</option><option>Austria</option><option>Azerbaijan</option><option>Bahamas</option><option>Bahrain</option><option>Bangladesh</option><option>Barbados</option><option>Belarus</option><option>Belgium</option><option>Belize</option><option>Benin</option><option>Bhutan</option><option>Bolivia</option><option>Bosnia and Herzegovina</option><option>Botswana</option><option>Brazil</option><option>Brunei</option><option>Bulgaria</option><option>Burkina Faso</option><option>Burundi</option><option>Cabo Verde</option><option>Cambodia</option><option>Cameroon</option><option>Canada</option><option>Central African Republic</option><option>Chad</option><option>Chile</option><option>China</option><option>Colombia</option><option>Comoros</option><option>Congo (Republic)</option><option>Congo (DRC)</option><option>Costa Rica</option><option>Cote d'Ivoire</option><option>Croatia</option><option>Cuba</option><option>Cyprus</option><option>Czechia</option><option>Denmark</option><option>Djibouti</option><option>Dominica</option><option>Dominican Republic</option><option>Ecuador</option><option>Egypt</option><option>El Salvador</option><option>Equatorial Guinea</option><option>Eritrea</option><option>Estonia</option><option>Eswatini</option><option>Ethiopia</option><option>Fiji</option><option>Finland</option><option>France</option><option>Gabon</option><option>Gambia</option><option>Georgia</option><option>Germany</option><option>Ghana</option><option>Greece</option><option>Grenada</option><option>Guatemala</option><option>Guinea</option><option>Guinea-Bissau</option><option>Guyana</option><option>Haiti</option><option>Honduras</option><option>Hungary</option><option>Iceland</option><option>India</option><option>Indonesia</option><option>Iran</option><option>Iraq</option><option>Ireland</option><option>Israel</option><option>Italy</option><option>Jamaica</option><option>Japan</option><option>Jordan</option><option>Kazakhstan</option><option>Kenya</option><option>Kiribati</option><option>Kosovo</option><option>Kuwait</option><option>Kyrgyzstan</option><option>Laos</option><option>Latvia</option><option>Lebanon</option><option>Lesotho</option><option>Liberia</option><option>Libya</option><option>Liechtenstein</option><option>Lithuania</option><option>Luxembourg</option><option>Madagascar</option><option>Malawi</option><option>Malaysia</option><option>Maldives</option><option>Mali</option><option>Malta</option><option>Marshall Islands</option><option>Mauritania</option><option>Mauritius</option><option>Mexico</option><option>Micronesia</option><option>Moldova</option><option>Monaco</option><option>Mongolia</option><option>Montenegro</option><option>Morocco</option><option>Mozambique</option><option>Myanmar</option><option>Namibia</option><option>Nauru</option><option>Nepal</option><option>Netherlands</option><option>New Zealand</option><option>Nicaragua</option><option>Niger</option><option>Nigeria</option><option>North Korea</option><option>North Macedonia</option><option>Norway</option><option>Oman</option><option>Pakistan</option><option>Palau</option><option>Palestine</option><option>Panama</option><option>Papua New Guinea</option><option>Paraguay</option><option>Peru</option><option>Philippines</option><option>Poland</option><option>Portugal</option><option>Qatar</option><option>Romania</option><option>Russia</option><option>Rwanda</option><option>Saint Kitts and Nevis</option><option>Saint Lucia</option><option>Saint Vincent and the Grenadines</option><option>Samoa</option><option>San Marino</option><option>Sao Tome and Principe</option><option>Saudi Arabia</option><option>Senegal</option><option>Serbia</option><option>Seychelles</option><option>Sierra Leone</option><option>Singapore</option><option>Slovakia</option><option>Slovenia</option><option>Solomon Islands</option><option>Somalia</option><option>South Africa</option><option>South Korea</option><option>South Sudan</option><option>Spain</option><option>Sri Lanka</option><option>Sudan</option><option>Suriname</option><option>Sweden</option><option>Switzerland</option><option>Syria</option><option>Taiwan</option><option>Tajikistan</option><option>Tanzania</option><option>Thailand</option><option>Timor-Leste</option><option>Togo</option><option>Tonga</option><option>Trinidad and Tobago</option><option>Tunisia</option><option>Turkey</option><option>Turkmenistan</option><option>Tuvalu</option><option>Uganda</option><option>Ukraine</option><option>United Arab Emirates</option><option>United Kingdom</option><option>United States</option><option>Uruguay</option><option>Uzbekistan</option><option>Vanuatu</option><option>Vatican City</option><option>Venezuela</option><option>Vietnam</option><option>Yemen</option><option>Zambia</option><option>Zimbabwe</option></select>
 
       <label>What’s your occupation? <span class="req">*</span></label>
       <input type="text" id="occupation" placeholder="e.g. Software engineer, business owner" autocomplete="off" required>
@@ -115,6 +116,7 @@
       </div>
 
       <label>If you find the right program, are you willing to invest significantly to hit your goals? <span class="req">*</span></label>
+      <div class="invnote" id="invest_price">(My coaching typically ranges between $400 and $600 per month. The final number is going to depend on the commitment length, level of service you need, and difficulty and complexity of your goals.)</div>
       <select id="investment_ready" required>
         <option value="">Select…</option>
         <option value="Yes — finances arent an issue">Yes — finances aren't an issue</option>
@@ -191,6 +193,13 @@ $('#appForm').addEventListener('submit', async function(e){
 });
 // Reveal the "describe your cycle" question only when they say they're on a cycle.
 $('#on_cycle_now').addEventListener('change',function(){ document.getElementById('cycle_wrap').style.display=this.value==='Yes'?'':'none'; });
+
+// Show the pricing note when they pick a country NOT on the high-income list.
+var QUALIFIED_COUNTRIES=['United States','Canada','United Kingdom','Australia','New Zealand','Germany','Switzerland','Sweden','Norway','Denmark','Netherlands','Ireland','Finland','Austria','Belgium','Luxembourg'];
+(function(){ var b=document.getElementById('based'), note=document.getElementById('invest_price');
+  function upd(){ if(!note||!b)return; var v=(b.value||'').trim(); note.classList.toggle('show', !!v && QUALIFIED_COUNTRIES.indexOf(v)===-1); }
+  if(b){ b.addEventListener('change',upd); upd(); }
+})();
 
 // Mobile keyboard fix: add bottom scroll room while any field is focused so the
 // Submit button can be scrolled clear of the on-screen keyboard.

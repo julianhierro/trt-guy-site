@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "c0b818b5fddc76ec617b80712c8ec8899829ff6cfc669a2c76d06ce2a4b85908",
- "approved_at": "2026-09-09T07:57:46",
- "approved_for": "Julian approved via the /coaching-application-preview mock: added Occupation, Age/height/weight, and a success-definition question; reworded the biggest-challenge and why-now questions; updated the intro line",
+ "sha256": "2e04fb512c466b51048997217442c7e0b79950a8c4767b66f42f79bc05c059ba",
+ "approved_at": "2026-09-09T08:33:02",
+ "approved_for": "Julian asked: removed the blue 'Coaching · By Application' kicker; replaced free-text location with a full country dropdown; added a conditional pricing note ($400-600/mo) on the invest question for non-high-income countries",
  "questions": [
   [
    "instagram",
