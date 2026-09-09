@@ -200,5 +200,25 @@ document.addEventListener('focusout', function(){ setTimeout(function(){ if(!doc
 </script>
 
 
+<!-- Inline editor for the PREVIEW ONLY (add ?edit=1). Separate store key so it never touches the live application. Form controls locked; labels/copy editable. -->
+<script>
+document.querySelectorAll('input,select,textarea,button').forEach(function(el){el.setAttribute('data-noedit','');});
+window.JV_EDITOR={ site:"td-coaching-application-preview", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };
+</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el){ return !!(SKIP[el.tagName] || (el.namespaceURI===SVG && el.tagName.toLowerCase()!=="svg") || (el.closest && el.closest(".jv-toolbar, .jv-launcher")) || (el.closest && el.closest("[data-noedit]"))); }
+  var n=0;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function(el){ if(skip(el))return; if(!el.hasAttribute("data-eid")) el.setAttribute("data-eid","e"+(++n)); });
+  var BLOCKSEL="address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el){ if(skip(el))return false; if(!(el.textContent||"").replace(/\s+/g," ").trim())return false; if(el.querySelector(BLOCKSEL))return false; var a=el.querySelectorAll("a"); if(a.length){ var cc=el.cloneNode(true); Array.prototype.forEach.call(cc.querySelectorAll("a"),function(x){if(x.parentNode)x.parentNode.removeChild(x);}); if(!(cc.textContent||"").replace(/\s+/g," ").trim())return false; } return true; }
+  (function walk(el){ var ch=el.children; for(var i=0;i<ch.length;i++){ var k=ch[i]; if(skip(k))continue; if(isTextLeaf(k)) k.setAttribute("data-etext","1"); else walk(k); } })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function(el){ if(skip(el)||el.closest("[data-etext]"))return; Array.prototype.slice.call(el.childNodes).forEach(function(node){ if(node.nodeType===3&&node.nodeValue&&node.nodeValue.replace(/\s+/g," ").trim()){ var s=document.createElement("span"); s.setAttribute("data-eid","e"+(++n)); s.setAttribute("data-etext","1"); node.parentNode.replaceChild(s,node); s.appendChild(node); } }); });
+})();
+</script>
+<script src="/editor.js?v=1"></script>
 </body>
 </html>
