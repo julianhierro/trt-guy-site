@@ -1,0 +1,14 @@
+# trt-guy.com
+User-agent: *
+Allow: /
+
+# Private / functional pages — keep these out of search
+Disallow: /control/
+Disallow: /clients/
+Disallow: /funnel/
+Disallow: /booked/
+Disallow: /start/
+Disallow: /onboarding/
+Disallow: /onboarding-v2/
+
+Sitemap: https://trt-guy.com/sitemap.xml
