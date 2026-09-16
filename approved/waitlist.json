@@ -1,8 +1,8 @@
 {
  "page": "waitlist/index.html",
- "sha256": "f18378eaa877dd63cfe074ea69e29cfafde9ea07e2338e9b09b9598f009cc256",
- "approved_at": "2026-09-09T08:58:10",
- "approved_for": "Julian asked to sync the waitlist's Step-2 application to match the standalone coaching application: removed kicker, country dropdown, added occupation/age-height-weight/success questions, reworded challenge + why-now, conditional pricing note for non-high-income countries, footer trimmed to © TRT Guy",
+ "sha256": "ed987b7b687dd2caf531b6b40fac25ee3c1512ff56b78e80458c290ad8cc3062",
+ "approved_at": "2026-09-16T09:20:19",
+ "approved_for": "Fresh editor store key (v2) to clear stale browser draft scramble",
  "questions": [
   [
    "instagram",

@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "4078faf9361a4e1713a1c049a47c04f4aeb3507246ff4a011692b5c5d25fb286",
- "approved_at": "2026-09-09T08:46:26",
- "approved_for": "Julian asked to trim the footer to just © TRT Guy (remove 'Educational only — not medical advice')",
+ "sha256": "5015fac89499d24630ccbc2d02f0f60c2416e99dbbf2042e82031e4eeaeef83e",
+ "approved_at": "2026-09-16T09:20:19",
+ "approved_for": "Fresh editor store key (v2) to clear Julian's stale browser draft that was scrambling the editor view",
  "questions": [
   [
    "instagram",
