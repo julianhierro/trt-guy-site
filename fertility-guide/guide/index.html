@@ -73,6 +73,12 @@
   .faq{margin-top:10px}
   .faq .q{font-weight:700;font-size:16.5px;margin:18px 0 4px}
   .faq .a{color:var(--mut);margin:0}
+  .faq-item{border-bottom:1px solid var(--line)}
+  .faq-item:last-child{border-bottom:0}
+  .faq-question{display:block;width:100%;text-align:left;background:none;border:0;padding:16px 0 4px;
+    font-family:var(--body);font-weight:700;font-size:16.5px;line-height:1.5;color:var(--txt);cursor:text}
+  .faq-question .arrow{display:none}
+  .faq-answer p{color:var(--mut);margin:0 0 16px}
   .sources{font-size:13px;color:var(--mut)}
   .sources li{margin-bottom:8px}
   .bottomline{background:var(--soft);border-radius:14px;padding:20px 22px;margin:18px 0}
@@ -91,9 +97,8 @@
     .jv-toolbar,.jv-launcher,.pdfbtn{display:none!important}
     .logo{margin-top:0}
     .cover{page-break-after:avoid}
-    .disclaimer{page-break-after:always;margin-bottom:0}
+    .disclaimer{margin-bottom:0}
     section.chapter{page-break-before:always;margin-bottom:0}
-    section.chapter:first-of-type{page-break-before:avoid}
     h2,h3,.num{page-break-after:avoid}
     .tbl-wrap,.callout,.bottomline,.faq .q{page-break-inside:avoid}
     .faq .q{page-break-after:avoid}
@@ -108,13 +113,14 @@
 
   <div class="logo">TRT-GUY</div>
 
-  <header class="cover">
+  <section class="cover">
     <h1>The Male Fertility Restoration Guide For Guys On TRT/PEDs</h1>
-    <p class="byline">By the TRT-Guy</p>
-    <div class="cta-wrap"><a class="cta" href="https://trt-guy.com/coaching-application/">Apply For Coaching</a><br><a class="pdfbtn" href="/fertility-guide/TRT-Guy-Fertility-Guide.pdf" data-noedit>Download the PDF</a></div>
-  </header>
+    <p class="byline" data-jv-removable>By the TRT-Guy</p>
+    <div class="cta-wrap" data-jv-removable><a class="cta" href="https://trt-guy.com/coaching-application/">Apply For Coaching</a></div>
+    <div class="pdf-wrap" data-jv-removable><a class="pdfbtn" href="/fertility-guide/TRT-Guy-Fertility-Guide.pdf">Download the PDF</a></div>
+  </section>
 
-  <div class="disclaimer">
+  <div class="disclaimer" data-jv-removable>
     <div class="dt">Important disclaimer</div>
     <p>I am not a doctor, and this is not medical advice. This guide explains my personal experience and is for educational purposes only.</p>
   </div>
@@ -126,14 +132,14 @@
     <p>I used a fertility-restoration protocol very similar to the one in this guide, brought my sperm back, and my wife and I conceived our first daughter without having to come off steroids (I was using higher doses back then).</p>
     <p>This worked for me, and I want men in a similar position to understand the approach instead of automatically assuming their fertility is permanently gone.</p>
     <h3>Before you start</h3>
-    <div class="callout">Get a formal semen analysis before starting. You need to know where things are at, and this will allow you to compare and decide if the protocol is working.</div>
+    <div class="callout" data-jv-removable>Get a formal semen analysis before starting. You need to know where things are at, and this will allow you to compare and decide if the protocol is working.</div>
   </section>
   <section class="chapter">
     <div class="num">2</div>
     <h2>The HCG + HMG protocol</h2>
     <p>This schedule follows the incremental HCG + HMG protocol used by Finkel, Phillips, and Snyder.</p>
     <h3>Timeline</h3>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" data-jv-removable>
       <table>
         <tr><th>Timeline</th><th>hCG</th><th>hMG</th><th>Checkpoint</th></tr>
         <tr><td><b>Weeks 1-16</b></td><td>2,000 IU Monday, Wednesday, Friday</td><td>75 IU Monday, Wednesday, Friday</td><td>The drugs may be administered on the same days as separate injections. You can also alternate days if you wish.</td></tr>
@@ -151,10 +157,10 @@
     <p>You need sperm to conceive, but you also need libido, erections, energy, and a healthy relationship. In my opinion, deliberately crashing your testosterone and feeling terrible is not the ideal environment for trying to make a baby.</p>
     <p>I didn’t have to stop taking PEDs to conceive my first daughter, and I started with a sperm count of zero.</p>
     <p>Removing TRT/PEDs will bring other issues since you will also experience hypogonadal symptoms which will make it harder to conceive.</p>
-    <div class="callout">Do not make yourself hypogonadal just because you are trying to conceive. Keep the androgen side as simple as possible and measure whether sperm is actually returning.</div>
+    <div class="callout" data-jv-removable>Do not make yourself hypogonadal just because you are trying to conceive. Keep the androgen side as simple as possible and measure whether sperm is actually returning.</div>
     <h3>Eat in a slight calorie surplus</h3>
     <p>This is not the time for an aggressive fat-loss phase. Sperm production is a resource-intensive biological process. I would rather give the body slightly more energy than it needs than ask it to restore fertility while dieting hard.</p>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" data-jv-removable>
       <table>
         <tr><th>Priority</th><th>What I would do</th></tr>
         <tr><td><b>Calories</b></td><td>Stay in a slight calorie surplus. The goal is enough energy for recovery without rapid, unnecessary fat gain.</td></tr>
@@ -173,7 +179,7 @@
     <p>My practical target is sex every day while trying to conceive. During the fertile window, once or twice per day is an option if both partners feel good and it does not turn the process into a chore.</p>
     <p>Use ovulation strips or another reliable method to identify the fertile window. The highest-priority days are the two days before ovulation and the day of ovulation.</p>
     <h3>Optional additions</h3>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" data-jv-removable>
       <table>
         <tr><th>Addition</th><th>How I would use it</th><th>Purpose</th></tr>
         <tr><td><b>Tadalafil</b></td><td>5-10 mg daily</td><td>More reliable erections and less performance pressure when intercourse needs to be frequent. This supports erectile function; it is not a direct libido drug.</td></tr>
@@ -182,16 +188,16 @@
     </div>
     <h3>Other basics that still matter</h3>
     <ul class="plain">
-      <li>Sleep enough to recover and maintain sexual function.</li>
-      <li>Avoid smoking, recreational drugs, excessive alcohol, and frequent high-heat exposure to the testes.</li>
-      <li>Keep moderate training in, but do not combine hard dieting, excessive cardio, poor sleep, and maximal training volume.</li>
-      <li>If erections, ejaculation, or desire are limiting intercourse, address the cause instead of pretending the problem is only motivation.</li>
+      <li data-jv-removable>Sleep enough to recover and maintain sexual function.</li>
+      <li data-jv-removable>Avoid smoking, recreational drugs, excessive alcohol, and frequent high-heat exposure to the testes.</li>
+      <li data-jv-removable>Keep moderate training in, but do not combine hard dieting, excessive cardio, poor sleep, and maximal training volume.</li>
+      <li data-jv-removable>If erections, ejaculation, or desire are limiting intercourse, address the cause instead of pretending the problem is only motivation.</li>
     </ul>
   </section>
   <section class="chapter">
     <div class="num">6</div>
     <h2>Measure the outcome and make a decision</h2>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" data-jv-removable>
       <table>
         <tr><th>Checkpoint</th><th>Action</th></tr>
         <tr><td><b>Before starting</b></td><td>Formal semen analysis plus reproductive hormones.</td></tr>
@@ -201,7 +207,7 @@
         <tr><td><b>If semen improves but conception does not occur</b></td><td>Have your partner evaluated. Fertility is a couple outcome, and the male side is only one part of the equation.</td></tr>
       </table>
     </div>
-    <div class="bottomline">
+    <div class="bottomline" data-jv-removable>
       <h3 style="margin-top:0">My bottom line</h3>
       <p>I went from zero sperm to conceiving my first daughter. I believe men should know that fertility can sometimes be restored after long-term PED use. Get the data, run a consistent plan, fuel the body, have sex often, and measure the result.</p>
     </div>
@@ -209,40 +215,64 @@
   <section class="chapter">
     <div class="num">7</div>
     <h2>Frequently asked questions</h2>
-    <div class="faq">
-      <p class="q">Do I need to come off TRT for this to work?</p>
-      <p class="a">No.</p>
-      <p class="q">Do I need to come off a steroid cycle?</p>
-      <p class="a">No.</p>
-      <p class="q">Can I guarantee that I will regain fertility?</p>
-      <p class="a">No. I regained fertility and conceived my first daughter, but that is my personal outcome. The result depends on your fertility before PED use, age, duration of suppression, testicular function, genetics, medication quality, adherence, and your partner's fertility.</p>
-      <p class="q">How long does it take for sperm to return?</p>
-      <p class="a">Sperm production takes roughly 74 days, followed by additional maturation and transport. Some men show sperm by 8-12 weeks, while others need 4-6 months or longer. A zero result at three months does not automatically mean permanent infertility.</p>
-      <p class="q">Should I test at week 8 or wait until week 12?</p>
-      <p class="a">Week 8 is an optional early look. Week 12 is the more useful first assessment because it allows approximately one sperm-production cycle. Use the same laboratory and follow its abstinence instructions so the results are easier to compare.</p>
-      <p class="q">Does using hCG while on TRT guarantee that I stay fertile?</p>
-      <p class="a">No. Men frequently assume that hCG automatically preserves fertility, but semen responses vary. The only way to know what is happening is to perform semen analyses. Test before TRT or PED use when possible, and do not rely on testicular size or ejaculate volume.</p>
-      <p class="q">Do I need Clomid, enclomiphene, or Nolvadex as well?</p>
-      <p class="a">They were not part of my protocol, therefore I can’t recommend them.</p>
-      <p class="q">How often should we have sex?</p>
-      <p class="a">The more the better, especially during the fertile window.</p>
-      <p class="q">When should my partner be evaluated?</p>
-      <p class="a">Ideally, early rather than only after months of male treatment. If the female partner is 35 or older, has irregular cycles, or has a known reproductive issue, time matters even more. Fertility is a couple outcome.</p>
-      <p class="q">Should I freeze sperm when it comes back?</p>
-      <p class="a">It is worth discussing. Sperm counts can fluctuate, medication access can change, and future TRT or PED use may suppress fertility again. Banking sperm when a usable sample appears can provide insurance for the future.</p>
-      <p class="q">Can I mix hCG and hMG in the same syringe?</p>
-      <p class="a">They may be scheduled on the same days, but you might need them in separate syringes due to the volume of each injection.</p>
+    <div class="faq faq-list">
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Do I need to come off TRT for this to work?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>No.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Do I need to come off a steroid cycle?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>No.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Can I guarantee that I will regain fertility?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>No. I regained fertility and conceived my first daughter, but that is my personal outcome. The result depends on your fertility before PED use, age, duration of suppression, testicular function, genetics, medication quality, adherence, and your partner's fertility.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">How long does it take for sperm to return?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>Sperm production takes roughly 74 days, followed by additional maturation and transport. Some men show sperm by 8-12 weeks, while others need 4-6 months or longer. A zero result at three months does not automatically mean permanent infertility.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Should I test at week 8 or wait until week 12?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>Week 8 is an optional early look. Week 12 is the more useful first assessment because it allows approximately one sperm-production cycle. Use the same laboratory and follow its abstinence instructions so the results are easier to compare.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Does using hCG while on TRT guarantee that I stay fertile?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>No. Men frequently assume that hCG automatically preserves fertility, but semen responses vary. The only way to know what is happening is to perform semen analyses. Test before TRT or PED use when possible, and do not rely on testicular size or ejaculate volume.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Do I need Clomid, enclomiphene, or Nolvadex as well?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>They were not part of my protocol, therefore I can’t recommend them.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">How often should we have sex?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>The more the better, especially during the fertile window.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">When should my partner be evaluated?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>Ideally, early rather than only after months of male treatment. If the female partner is 35 or older, has irregular cycles, or has a known reproductive issue, time matters even more. Fertility is a couple outcome.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Should I freeze sperm when it comes back?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>It is worth discussing. Sperm counts can fluctuate, medication access can change, and future TRT or PED use may suppress fertility again. Banking sperm when a usable sample appears can provide insurance for the future.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" type="button" onclick="if(window.toggleFaq)toggleFaq(this)">Can I mix hCG and hMG in the same syringe?<span class="arrow" data-noedit>+</span></button>
+        <div class="faq-answer"><p>They may be scheduled on the same days, but you might need them in separate syringes due to the volume of each injection.</p></div>
+      </div>
     </div>
   </section>
   <section class="chapter" style="text-align:center;border-top:1px solid var(--line);padding-top:28px">
     <h2>Need help getting the most out of TRT/PEDs?</h2>
     <p class="intro">Through my one-on-one coaching program, I help men dial in their nutrition, training, cardiovascular fitness, daily habits, and accountability so they can build a lean, strong, athletic body without sacrificing their health.</p>
-    <div class="cta-wrap"><a class="cta" href="https://trt-guy.com/coaching-application/">Click here to apply.</a></div>
+    <div class="cta-wrap" data-jv-removable><a class="cta" href="https://trt-guy.com/coaching-application/">Click here to apply.</a></div>
   </section>
 
   <div class="foot">© TRT Guy · Educational only, not medical advice.</div>
 
 </div>
+
+<script>window.toggleFaq=function(){};</script>
 
 <!-- Analytics beacon (page key matches the Control Center card) -->
 <script>
@@ -256,7 +286,7 @@
 </script>
 
 <!-- ═══ Inline editor (add ?edit=1) — passwordless, full editing (text, delete, reorder) ═══ -->
-<script>window.JV_EDITOR={ site:"td-fertility-guide", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script>window.JV_EDITOR={ site:"td-fertility-guide-v2", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <script>
 (function () {
   if (!document.body) return;
