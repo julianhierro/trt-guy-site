@@ -84,13 +84,29 @@
   .bottomline{background:var(--soft);border-radius:14px;padding:20px 22px;margin:18px 0}
   .foot{text-align:center;color:var(--mut);font-size:12px;margin-top:36px;letter-spacing:.02em}
 
+
+  /* ── on screen this reads as a page of the PDF, not a web page ── */
+  @media screen and (min-width:880px){
+    body{background:#e7eaef;padding:28px 0 80px}
+    .wrap{width:210mm;max-width:100%;background:#fff;padding:16mm 16mm 20mm;
+      box-shadow:0 10px 40px rgba(11,13,16,.16)}
+    .logo{margin-top:0}
+  }
+  .pdfbar{position:fixed;right:22px;bottom:96px;z-index:2147483000}
+  .pdfbar a{display:inline-flex;align-items:center;gap:9px;cursor:pointer;border:0;
+    font:700 14px/1 var(--body);color:#fff;background:var(--acc);text-decoration:none;
+    padding:15px 22px;border-radius:12px;box-shadow:0 10px 26px rgba(26,92,255,.34);
+    transition:transform .16s ease,background .16s ease}
+  .pdfbar a:hover{background:var(--acc-d);transform:translateY(-2px)}
+  @media print{.pdfbar{display:none!important}}
+
   /* PDF / download button */
   .pdfbtn{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--acc);text-decoration:none;border-bottom:1px solid rgba(26,92,255,.35)}
   .pdfbtn:hover{color:var(--acc-d)}
 
   /* ── Print / save-as-PDF: this page IS the PDF ── */
   @media print{
-    @page{size:Letter;margin:14mm 14mm 16mm}
+    @page{size:A4;margin:15mm 16mm 22mm}
     html,body{background:#fff}
     body{padding:0;font-size:10.4pt;line-height:1.55}
     .wrap{max-width:none}
@@ -117,7 +133,6 @@
     <h1>The Male Fertility Restoration Guide For Guys On TRT/PEDs</h1>
     <p class="byline" data-jv-removable>By the TRT-Guy</p>
     <div class="cta-wrap" data-jv-removable><a class="cta" href="https://trt-guy.com/coaching-application/">Apply For Coaching</a></div>
-    <div class="pdf-wrap" data-jv-removable><a class="pdfbtn" href="/fertility-guide/TRT-Guy-Fertility-Guide.pdf">Download the PDF</a></div>
   </section>
 
   <div class="disclaimer" data-jv-removable>
@@ -271,6 +286,27 @@
   <div class="foot">© TRT Guy · Educational only, not medical advice.</div>
 
 </div>
+
+<div class="pdfbar" data-noedit>
+  <a id="jvPdf" href="/fertility-guide/TRT-Guy-Fertility-Guide.pdf" download="The-Male-Fertility-Restoration-Guide.pdf">Download The PDF <span>&darr;</span></a>
+</div>
+
+<script>
+(function () {
+  // The editor cancels clicks on every <a>/<button> from a capture-phase handler on
+  // `document`. Running first on `window` and stopping propagation there keeps the
+  // blocker from seeing this one — and because we never preventDefault, the browser
+  // performs its normal download.
+  window.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('#jvPdf')) return;
+    e.stopPropagation();
+    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+  }, true);
+  window.addEventListener('mousedown', function (e) {
+    if (e.target.closest && e.target.closest('.pdfbar')) e.stopPropagation();
+  }, true);
+})();
+</script>
 
 <script>window.toggleFaq=function(){};</script>
 
