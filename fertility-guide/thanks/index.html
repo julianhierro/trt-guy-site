@@ -89,6 +89,7 @@ h1 em{font-style:normal;color:var(--acc)}
 
 footer{text-align:center;padding:0 22px 34px;font-size:12.5px;color:#8b939f}
 </style>
+<script>window.JV_BAKED_AT="2026-09-21T17:26:04.622784+00:00";</script>
 <script>window.JV_EDITOR_EARLY={ site:"td-fertility-thanks", page:1, noAuth:true, pwKey:"trtdad", api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <style>html.jv-hold body,html.jv-pending body{visibility:hidden}</style>
 <script>
@@ -140,16 +141,16 @@ footer{text-align:center;padding:0 22px 34px;font-size:12.5px;color:#8b939f}
 <div class="brand" data-eid="e3">TRT Guy</div>
 <div class="head" data-eid="e4">
 <span class="badge" data-eid="e5">
-<svg data-eid="e6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5" data-eid="e7"></path></svg>
+<svg data-eid="e6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" data-eid="e7"></path></svg>
         You're in
       </span>
-<h1 data-eid="e8">You're in. <em data-eid="e9">The guide</em> is on its way.</h1>
-<p class="lede" data-eid="e10"><b data-eid="e11">The TRT 101 Guide</b> is landing in your inbox now. Grab it below if you'd rather not wait.</p>
+<h1 data-eid="e8"><em data-eid="e9">The guide</em> is on its way.</h1>
+<p class="lede" data-eid="e10"><b data-eid="e11">The Fertility Guide</b> is landing in your inbox now.&nbsp;</p>
 </div>
 <div class="steps" data-eid="e15">
 <div class="step" data-eid="e16">
 <h3 data-eid="e17">Go and find the email</h3>
-<p data-eid="e18">It's on its way now, from <b data-eid="e19">TRT Guy</b>. If it isn't in your main inbox, it went to <b data-eid="e20">Promotions</b> or <b data-eid="e21">Spam</b> — check both.</p>
+<p data-eid="e18">It's on its way now, from <b data-eid="e19">julian@trt-guy.com</b>. If it isn't in your main inbox, it went to <b data-eid="e20">Promotions</b> or <b data-eid="e21">Spam</b> — check both.</p>
 </div>
 <div class="step" data-eid="e22">
 <h3 data-eid="e23">Move it to your main inbox</h3>
@@ -162,8 +163,7 @@ footer{text-align:center;padding:0 22px 34px;font-size:12.5px;color:#8b939f}
 </div>
 <div class="step" data-eid="e32">
 <h3 data-eid="e33">Hit reply and send me one word</h3>
-<p data-eid="e34">Anything. “Got it” is fine. Tell me what you're stuck on and it's better — I read them.</p>
-<p data-eid="e35">A reply tells your email provider you actually want these, and it does more for getting them delivered than anything else on this page.</p>
+<p data-eid="e34">Anything. “Got it” is fine, or tell me your current fitness goals so I can tailor future content - I read every email.&nbsp;</p>
 </div>
 </div>
 <div class="why" data-eid="e36">
@@ -172,7 +172,7 @@ footer{text-align:center;padding:0 22px 34px;font-size:12.5px;color:#8b939f}
 </div>
 </div>
 </div>
-<footer data-eid="e39">© <span class="yr" data-eid="e40"></span> TRT Guy · Educational only, not medical advice.</footer>
+<footer data-eid="e39">© <span class="yr" data-eid="e40">2026</span> TRT Guy · Educational only, not medical advice.</footer>
 <script>
 var TRACK_URL = 'https://jv-dashboard-chi.vercel.app/api/pageview';
 var PAGE_KEY  = 'trtguy-fertility-thanks';
@@ -348,7 +348,12 @@ Array.prototype.forEach.call(document.querySelectorAll('.yr'), function(e){ e.te
   if (cached && Array.isArray(cached.edits) && (!baked || cached.updatedAt > baked)) {
     try { applyAll(cached.edits); } catch (e) {}
   }
-  if (window.__jvRelease) window.__jvRelease();     // nothing left to wait for
+  // Release the paint-hold here ONLY if the cache gave us the current copy.
+  // On a cold visit (no cache yet — i.e. every first-time visitor, which on a
+  // thank-you page is everyone) releasing here paints the file's OLD copy and the
+  // revalidation below then swaps it in front of them. That was the flash. With no
+  // cache we keep holding until the fetch lands, or the 3s safety net fires.
+  if (cached && Array.isArray(cached.edits)) { if (window.__jvRelease) window.__jvRelease(); }
 
   // ── 2. revalidate in the background; only touch the page if it changed ──
   (window.__jvFresh || Promise.resolve(null))

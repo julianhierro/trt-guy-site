@@ -108,6 +108,7 @@ footer{
   font-size:12.5px;color:#8b939f;
 }
 </style>
+<script>window.JV_BAKED_AT="2026-09-21T17:25:06.25905+00:00";</script>
 <script>window.JV_EDITOR_EARLY={ site:"td-fertility-gate", page:1, noAuth:true, pwKey:"trtdad", api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <style>html.jv-hold body,html.jv-pending body{visibility:hidden}</style>
 <script>
@@ -158,12 +159,10 @@ footer{
 <div class="wrap" data-eid="e2">
 <div class="brand" data-eid="e3">TRT Guy</div>
 <div class="head" data-eid="e4" id="head">
-<h1 data-eid="e5">Fertility Guide<br><em data-eid="e6">For Men</em></h1>
+<h1 data-eid="e5">Fertility Guide<br><em data-eid="e6">For Men ON TRT/PEDs</em></h1>
 <div class="rule" data-eid="e7"></div>
 <ul class="bullets" data-eid="e8">
-<li data-eid="e8a">Add your first bullet point here — click to edit.</li>
-<li data-eid="e8b">Add your second bullet point here — click to edit.</li>
-<li data-eid="e8c">Add your third bullet point here — click to edit.</li>
+<li data-eid="e8a">The exact protocol I ran on myself after a doctor told me I'd never father a child.</li>
 </ul>
 </div>
 <form data-eid="e10" id="form" novalidate="">
@@ -182,7 +181,7 @@ footer{
 </div>
 </div>
 </div>
-<footer data-eid="e23">© <span data-eid="e24" id="yr"></span> TRT Guy · Educational only, not medical advice.</footer>
+<footer data-eid="e23">© <span data-eid="e24" id="yr">2026</span> TRT Guy · Educational only, not medical advice.</footer>
 <script>
 /* Leads go through the TRT Guy site's own serverless proxy, which talks to
    GoHighLevel. The token stays on the server. Tags are applied server-side
@@ -402,7 +401,12 @@ form.addEventListener('submit', async function (e) {
   if (cached && Array.isArray(cached.edits) && (!baked || cached.updatedAt > baked)) {
     try { applyAll(cached.edits); } catch (e) {}
   }
-  if (window.__jvRelease) window.__jvRelease();     // nothing left to wait for
+  // Release the paint-hold here ONLY if the cache gave us the current copy.
+  // On a cold visit (no cache yet — i.e. every first-time visitor, which on a
+  // thank-you page is everyone) releasing here paints the file's OLD copy and the
+  // revalidation below then swaps it in front of them. That was the flash. With no
+  // cache we keep holding until the fetch lands, or the 3s safety net fires.
+  if (cached && Array.isArray(cached.edits)) { if (window.__jvRelease) window.__jvRelease(); }
 
   // ── 2. revalidate in the background; only touch the page if it changed ──
   (window.__jvFresh || Promise.resolve(null))
