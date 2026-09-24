@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRT Guy</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --acc:#1a5cff;
+  --acc-d:#0f3fd6;
+  --ink:#0b0d10;
+  --text:#1c1c1c;
+  --muted:#5b6572;
+  --line:#e6e6e6;
+  --soft:#f6f7f6;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--text);font-family:Inter,-apple-system,"Segoe UI",sans-serif;font-size:19px;line-height:1.55}
+img{max-width:100%;height:auto;display:block}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+.wrap.narrow{max-width:820px}
+section{padding:28px 0}
+p{margin:0 0 18px}
+.center{text-align:center}
+.strong{font-weight:800}
+
+/* top bar */
+.topbar{padding:14px 0 6px}
+.topbar-in{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{width:120px}
+.byline{margin:0;font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-size:22px}
+
+/* hero */
+.hero{text-align:center;padding-top:10px}
+.kicker{text-transform:uppercase;letter-spacing:.04em;color:var(--acc)!important;font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:32px;line-height:1.2;margin:10px 0 12px;color:var(--ink)}
+.headline{font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:40px;line-height:1.15;margin:0 0 14px;color:var(--ink)}
+.bonus-line{font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-size:28px;line-height:1.3;text-decoration:underline;margin:0 auto 18px;max-width:760px}
+.hero-img{margin:10px auto 6px;width:100%;max-width:900px}
+
+/* headings */
+.sec-title{text-transform:uppercase;letter-spacing:.005em;font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:800;font-size:38px;line-height:1.15;text-align:center;margin:26px 0 20px;color:var(--ink)}
+.sec-title.big{font-size:46px}
+
+/* CTA */
+.cta-wrap{text-align:center;margin:24px 0 26px}
+.cta{border-radius:10px;display:inline-block;background:var(--acc);color:#fff;text-decoration:none;padding:12px 30px 10px;min-width:min(580px,100%);box-shadow:0 4px 0 var(--acc-d);transition:transform .12s ease,filter .12s ease}
+.cta:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.cta-main{text-transform:uppercase;letter-spacing:.02em;display:block;font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:28px;line-height:1.2}
+.cta-sub{display:block;font-size:15px;opacity:.95;margin-top:2px}
+.price-note{font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:17px;margin:10px 0 0}
+
+/* author */
+.author{text-align:center;padding-top:34px}
+.author-photo{width:260px;height:260px;border-radius:50%;object-fit:cover;margin:0 auto 12px}
+.author-name{font-weight:800;font-size:15px;margin:0}
+.author-cap{font-size:14px;color:var(--muted);margin:0}
+
+/* 7 day cards */
+.days{display:grid;gap:18px;max-width:640px;margin:0 auto}
+.days img{width:100%;border-radius:14px}
+
+/* checklist */
+.checklist{list-style:none;padding:0;margin:0 0 30px}
+.checklist li{position:relative;padding:0 0 18px 44px}
+.checklist li::before{content:"✓";position:absolute;left:0;top:1px;width:28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;font-weight:800;font-size:16px;line-height:28px;text-align:center}
+
+/* bonuses */
+.bonus{text-align:center;padding:10px 0 26px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.bonus:last-of-type{border-bottom:0}
+.bonus-title{font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:34px;line-height:1.2;margin:10px 0 18px}
+.bonus-img{width:100%;max-width:520px;margin:0 auto 10px}
+.bonus-badge{width:100%;max-width:520px;margin:0 auto 18px}
+
+/* guarantee */
+.wide-img{margin:10px auto 0;width:100%}
+.seal{width:220px;margin:6px auto 16px}
+
+/* PS */
+.signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:36px;margin:6px 0 26px}
+
+/* FAQ */
+.faq{margin:0 0 10px}
+.faq details{border-bottom:1px solid var(--line);padding:16px 0}
+.faq summary{cursor:pointer;list-style:none;font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:24px;line-height:1.3;position:relative;padding-right:34px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:4px;top:-2px;font-size:28px;color:var(--acc)}
+.faq details[open] summary::after{content:"–"}
+.faq details p{margin:12px 0 0}
+
+/* testimonials */
+.testi{margin:0 auto 34px;max-width:860px}
+.testi-title{font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:32px;line-height:1.2;text-align:center;margin:0 0 16px}
+.vid{position:relative;aspect-ratio:16/9;background:#0b0d10 url("ph/video.svg") center/cover no-repeat;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.vid iframe[src="about:blank"]{visibility:hidden}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.quote{font-style:italic;font-size:18px;text-align:center;color:#333}
+
+/* transformations */
+.transforms .sub{font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-size:24px;line-height:1.3}
+.transforms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:20px}
+.transform-img{width:100%;border-radius:10px}
+
+/* editor helpers: in edit mode videos don't swallow clicks so they can be swapped */
+body.jv-editing .vid iframe[src="about:blank"]{visibility:hidden}
+.vid iframe{pointer-events:none}
+body.jv-editing .vid{outline:2px dashed #1a5cff;outline-offset:4px;cursor:pointer}
+body.jv-editing .vid::after{content:"Double-click to change video";position:absolute;left:50%;top:10px;transform:translateX(-50%);background:#111;color:#fff;font:600 13px/1 Inter,sans-serif;padding:7px 10px;border-radius:6px;pointer-events:none}
+body.jv-editing img{cursor:pointer}
+
+@media (max-width:700px){
+  body{font-size:18px}
+  .logo{width:96px}
+  .byline{font-size:17px}
+  .kicker{text-transform:uppercase;letter-spacing:.04em;color:var(--acc)!important;font-size:24px}
+  .headline{font-size:28px}
+  .bonus-line{font-size:20px}
+  .sec-title{text-transform:uppercase;letter-spacing:.005em;font-size:29px}
+  .sec-title.big{font-size:34px}
+  .cta{padding:12px 16px 10px;width:100%}
+  .cta-main{font-size:21px}
+  .cta-sub{font-size:13px}
+  .author-photo{width:200px;height:200px}
+  .bonus-title{font-size:27px}
+  .faq summary{font-size:20px}
+  .testi-title{font-size:24px}
+  .transforms .sub{font-size:19px}
+  .transforms-grid{gap:8px}
+}
+</style>

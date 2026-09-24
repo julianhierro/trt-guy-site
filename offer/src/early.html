@@ -1,0 +1,42 @@
+<script>window.JV_BAKED_AT="";</script>
+<script>window.JV_EDITOR_EARLY=__CFG__;</script>
+<style>html.jv-hold body,html.jv-pending body{visibility:hidden}</style>
+<script>
+(function () {
+  var p = new URLSearchParams(location.search);
+  var editing = p.get("edit") === "1" || p.get("view") === "preview" || p.get("mecanvas") === "1";
+  try { if (window.self !== window.top) editing = true; } catch (e) { editing = true; }
+  if (editing) {
+    // editor.js clears jv-pending in reveal(), once published edits AND any local
+    // draft have been applied. Without this the editor showed the old file first.
+    document.documentElement.classList.add("jv-pending");
+    setTimeout(function () { document.documentElement.classList.remove("jv-pending"); }, 4000);
+    return;
+  }
+  var cfg = window.JV_EDITOR_EARLY || null;  // set just below, before this runs
+  // Hold the paint only when the last visit found the store ahead of this file —
+  // i.e. someone published and it hasn't been baked back in yet. In the normal
+  // case (file is current) nothing is hidden and the page paints immediately.
+  // Hold unless the last check proved THIS build is already current. Keyed by the
+  // bake stamp, so a redeploy invalidates it automatically.
+  window.__jvFreshKey = "jv-fresh:" + (cfg ? cfg.site : "");
+  var stamp = window.JV_BAKED_AT || "none";
+  var knownCurrent = false;
+  try {
+    var hasCache = !!localStorage.getItem("jv-edits:" + (cfg ? cfg.site : ""));
+    // Cached edits mean this file is behind the published copy, whatever any
+    // older freshness flag claims. Hold either way — the replay is synchronous.
+    knownCurrent = !hasCache && localStorage.getItem(window.__jvFreshKey) === stamp;
+  } catch (e) {}
+  var release = function () { document.documentElement.classList.remove("jv-hold"); };
+  window.__jvRelease = release;
+  if (!knownCurrent) {
+    document.documentElement.classList.add("jv-hold");
+    setTimeout(release, 3000);               // only a first-ever visit waits here; every later
+                                             // visit replays from cache and never holds at all
+  }
+  window.__jvFresh = cfg ? fetch(cfg.api + "?site=" + encodeURIComponent(cfg.site) + "&page=" + (cfg.page || 1) + "&t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; }) : Promise.resolve(null);
+})();
+</script>
