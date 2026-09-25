@@ -224,6 +224,11 @@
   .macro-item-grams { font-size: 20px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; line-height: 1; }
   .macro-item-grams .gu { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 2px; }
   .macro-item-grams.zero { color: var(--muted); font-weight: 500; }
+  .cnt { display: flex; align-items: center; gap: 4px; }
+  .cnt-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg-2); border: 1px solid var(--line); color: var(--text); font-size: 17px; font-weight: 700; cursor: pointer; line-height: 1; }
+  .cnt-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .cnt-val { min-width: 54px; text-align: center; font-size: 20px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .cnt-val small { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 3px; }
   .rm-food { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 2px 4px; line-height: 1; }
   .rm-food:hover { color: var(--danger); }
   .meal-footer { display: flex; align-items: flex-start; justify-content: space-between; padding: 10px 16px 14px; gap: 10px; flex-wrap: wrap; }
@@ -543,7 +548,7 @@
     <div id="pickStep2" style="display:none">
       <div class="pick-food-name" id="pickName"></div>
       <div class="muted small" id="pickPer"></div>
-      <div class="grams-row"><input type="number" inputmode="decimal" min="0" id="pickGrams" /><span>g</span></div>
+      <div class="grams-row"><input type="number" inputmode="decimal" min="0" id="pickGrams" /><span id="pickUnit">g</span></div>
       <div class="pick-hint" id="pickHint"></div>
       <div class="quick" id="pickQuick">
         <button class="chip-btn" data-g="50">50g</button>
@@ -769,6 +774,23 @@ const withTimeout = (p, ms, label) => Promise.race([
 function targets() {
   const p = +plan.protein || 0, c = +plan.carbs || 0, f = +plan.fat || 0;
   return { protein: p, carbs: c, fat: f, kcal: Math.round(p*4 + c*4 + f*9) };
+}
+// Foods eaten by the piece (eggs) are counted, not weighed. A large egg is ~50g edible.
+function unitFor(f) {
+  if (!f) return null;
+  if (f.unit && f.unitG) return { label: f.unit, g: +f.unitG };
+  if (/\beggs?\b/i.test(f.name || "") && !/white/i.test(f.name)) return { label: "egg", g: 50 };
+  return null;
+}
+function countText(n, label) {
+  const v = Math.round(n * 10) / 10;
+  return `${fmt(v)} ${label}${v === 1 ? "" : "s"}`;
+}
+const perUnit = (f, u) => ({ p: (+f.protein || 0) * u.g / 100, c: (+f.carbs || 0) * u.g / 100, f: (+f.fat || 0) * u.g / 100 });
+// How many pieces cover a protein target (at least 1, at most 6)
+function countFor(f, protein) {
+  const u = unitFor(f), per = perUnit(f, u).p;
+  return per > 0 ? Math.max(1, Math.min(6, Math.round(protein / per))) : 2;
 }
 
 /* ═══ AUTH ═══ */
@@ -1099,7 +1121,9 @@ function renderMeals() {
     const items = m.items.map((it, j) => `
       <div class="log-item">
         <div><div class="li-name">${escapeHtml(it.name)}</div><div class="li-macros">${macroLine(itemMacros(it))}</div></div>
-        <label class="li-grams"><input type="number" inputmode="decimal" min="0" step="1" value="${+it.grams || 0}" data-meal="${i}" data-item="${j}" aria-label="Grams of ${escapeHtml(it.name)}" ${ro ? "disabled" : ""} /><span>g</span></label>
+        ${it.unit
+          ? `<label class="li-grams"><input type="number" inputmode="numeric" min="0" step="1" value="${Math.round((+it.grams || 0) / it.unitG * 10) / 10}" data-meal="${i}" data-item="${j}" aria-label="Number of ${escapeHtml(it.unit)}s" ${ro ? "disabled" : ""} /><span>${it.unit}s</span></label>`
+          : `<label class="li-grams"><input type="number" inputmode="decimal" min="0" step="1" value="${+it.grams || 0}" data-meal="${i}" data-item="${j}" aria-label="Grams of ${escapeHtml(it.name)}" ${ro ? "disabled" : ""} /><span>g</span></label>`}
         ${ro ? "<span></span>" : `<button class="rm-item" data-meal="${i}" data-item="${j}" aria-label="Remove">×</button>`}
       </div>`).join("");
     const canRemove = !ro && empty && i >= plateCount();
@@ -1171,7 +1195,8 @@ $("sumCard").addEventListener("click", e => { if (e.target.closest("[data-goto]"
 $("logMeals").addEventListener("input", e => {
   const inp = e.target.closest("input[data-item]"); if (!inp || readOnly()) return;
   const it = dayLog.meals[+inp.dataset.meal].items[+inp.dataset.item];
-  it.grams = Math.max(0, parseFloat(inp.value) || 0);
+  const val = Math.max(0, parseFloat(inp.value) || 0);
+  it.grams = it.unit ? val * it.unitG : val;
   // Update in place so the field keeps focus while typing
   inp.closest(".log-item").querySelector(".li-macros").textContent = macroLine(itemMacros(it));
   const t = sumItems(dayLog.meals[+inp.dataset.meal].items);
@@ -1206,7 +1231,8 @@ function planAsMeals() {
     const r = calcPlate(plate, macrosForPlate(i));
     return { items: [...r.pPortions, ...r.cPortions, ...r.fPortions]
       .filter(x => x.grams > 0)
-      .map(x => ({ name: x.food.name, grams: Math.round(x.grams), p: x.food.protein || 0, c: x.food.carbs || 0, f: x.food.fat || 0 })) };
+      .map(x => ({ name: x.food.name, grams: Math.round(x.grams), p: x.food.protein || 0, c: x.food.carbs || 0, f: x.food.fat || 0,
+                   ...(x.unit ? { unit: x.unit.label, unitG: x.unit.g } : {}) })) };
   });
 }
 function fillFromPlan() {
@@ -1261,34 +1287,57 @@ function renderPickList() {
     const list = foods.map((f, idx) => ({ ...f, idx })).filter(f => f.cat === c && (!q || f.name.toLowerCase().includes(q)));
     if (!list.length) continue;
     if (pickCat === "all") h += `<div class="pick-cat">${labels[c]}</div>`;
-    h += list.map(f => `<button class="pick-item" data-idx="${f.idx}"><span>${escapeHtml(f.name)}</span>
-      <span class="muted small">${c === "veggies" ? "free" : `P ${fmt(f.protein || 0)} · C ${fmt(f.carbs || 0)} · F ${fmt(f.fat || 0)}`}</span></button>`).join("");
+    h += list.map(f => {
+      const u = unitFor(f), pu = u && perUnit(f, u);
+      const info = c === "veggies" ? "free"
+        : u ? `P ${fmt(pu.p)} · C ${fmt(pu.c)} · F ${fmt(pu.f)} per ${u.label}`
+        : `P ${fmt(f.protein || 0)} · C ${fmt(f.carbs || 0)} · F ${fmt(f.fat || 0)}`;
+      return `<button class="pick-item" data-idx="${f.idx}"><span>${escapeHtml(f.name)}</span><span class="muted small">${info}</span></button>`;
+    }).join("");
   }
   $("pickList").innerHTML = h || `<div class="empty">No foods match. You can add it in the Foods tab.</div>`;
 }
-function suggestGrams(f) {
+// Returns the amount in the food's own measure: grams, or a count for eggs
+function suggestAmount(f) {
+  const u = unitFor(f);
   if (f.cat === "veggies") return { g: 100, hint: "" };
   const key = f.cat, per = +f[key] || 0;
-  if (!per) return { g: 100, hint: "" };
   const tgt = pickMeal < plateCount() ? macrosForPlate(pickMeal) : mealMacros();
   const want = tgt[{ protein: "p", carbs: "c", fat: "f" }[key]];
-  const have = sumItems(dayLog.meals[pickMeal].items)[key];
-  const rem = want - have;
-  if (rem <= 1) return { g: 100, hint: "" };
+  const rem = want - sumItems(dayLog.meals[pickMeal].items)[key];
+  if (u) {
+    if (rem <= 1) return { g: 2, hint: "" };
+    const n = countFor(f, rem / 2);
+    return { g: n, hint: `${countText(n, u.label)} = ${fmt(n * perUnit(f, u).p)}g protein. Add another protein food next and it fills the rest.` };
+  }
+  if (!per || rem <= 1) return { g: 100, hint: "" };
   const g = Math.max(5, Math.round(rem / per * 100));
   return { g, hint: `${g}g covers the rest of this meal's ${key} (${fmt(rem)}g)` };
 }
+function pickGramsValue() {
+  const v = Math.max(0, parseFloat($("pickGrams").value) || 0);
+  const u = unitFor(pickFood);
+  return u ? v * u.g : v;
+}
 function updatePickPreview() {
-  const g = Math.max(0, parseFloat($("pickGrams").value) || 0);
-  const m = itemMacros({ grams: g, p: pickFood.protein, c: pickFood.carbs, f: pickFood.fat });
+  const m = itemMacros({ grams: pickGramsValue(), p: pickFood.protein, c: pickFood.carbs, f: pickFood.fat });
   $("pickPreview").textContent = pickFood.cat === "veggies" ? "Free food, doesn't count toward your macros" : macroLine(m);
 }
 $("pickList").addEventListener("click", e => {
   const b = e.target.closest(".pick-item"); if (!b) return;
   pickFood = foods[+b.dataset.idx];
-  const s = suggestGrams(pickFood);
+  const u = unitFor(pickFood), s = suggestAmount(pickFood);
   $("pickName").textContent = pickFood.name;
-  $("pickPer").textContent = pickFood.cat === "veggies" ? "" : `Per 100g: P ${fmt(pickFood.protein || 0)} · C ${fmt(pickFood.carbs || 0)} · F ${fmt(pickFood.fat || 0)}`;
+  if (u) {
+    const pu = perUnit(pickFood, u);
+    $("pickPer").textContent = `Per ${u.label} (~${u.g}g): P ${fmt(pu.p)} · C ${fmt(pu.c)} · F ${fmt(pu.f)}`;
+  } else {
+    $("pickPer").textContent = pickFood.cat === "veggies" ? "" : `Per 100g: P ${fmt(pickFood.protein || 0)} · C ${fmt(pickFood.carbs || 0)} · F ${fmt(pickFood.fat || 0)}`;
+  }
+  $("pickUnit").textContent = u ? u.label + "s" : "g";
+  $("pickGrams").step = u ? "1" : "any";
+  $("pickQuick").innerHTML = (u ? [1, 2, 3, 4, 6] : [50, 100, 150, 200, 250])
+    .map(n => `<button class="chip-btn" data-g="${n}">${u ? countText(n, u.label) : n + "g"}</button>`).join("");
   $("pickGrams").value = s.g;
   $("pickHint").textContent = s.hint;
   updatePickPreview();
@@ -1312,8 +1361,9 @@ $("pickBack").addEventListener("click", () => showPickStep(1));
 $("pickClose").addEventListener("click", () => closeOverlay("pickOverlay"));
 $("pickAdd").addEventListener("click", () => {
   if (!pickFood) return;
-  const g = Math.max(0, parseFloat($("pickGrams").value) || 0);
-  dayLog.meals[pickMeal].items.push({ name: pickFood.name, grams: Math.round(g * 10) / 10, p: +pickFood.protein || 0, c: +pickFood.carbs || 0, f: +pickFood.fat || 0 });
+  const g = pickGramsValue(), u = unitFor(pickFood);
+  dayLog.meals[pickMeal].items.push({ name: pickFood.name, grams: Math.round(g * 10) / 10, p: +pickFood.protein || 0, c: +pickFood.carbs || 0, f: +pickFood.fat || 0,
+    ...(u ? { unit: u.label, unitG: u.g } : {}) });
   dayLog.legacy = null;
   closeOverlay("pickOverlay");
   logChanged();
@@ -1399,13 +1449,18 @@ function renderCalc() {
   $("foodList").innerHTML = filtered.map(f => {
     const per100 = f[currentMacro] || 0;
     const grams  = target > 0 && per100 > 0 ? (target / per100) * 100 : 0;
+    const u = unitFor(f), pu = u && perUnit(f, u);
     return `
       <div class="food">
         <div>
           <div class="name">${escapeHtml(f.name)}</div>
-          <div class="meta">${fmt(per100)}g ${currentMacro==="fat"?"fat":currentMacro} per 100g · P ${fmt(f.protein||0)} / C ${fmt(f.carbs||0)} / F ${fmt(f.fat||0)}</div>
+          <div class="meta">${u
+            ? `Per ${u.label} (~${u.g}g): P ${fmt(pu.p)} / C ${fmt(pu.c)} / F ${fmt(pu.f)}`
+            : `${fmt(per100)}g ${currentMacro==="fat"?"fat":currentMacro} per 100g · P ${fmt(f.protein||0)} / C ${fmt(f.carbs||0)} / F ${fmt(f.fat||0)}`}</div>
         </div>
-        <div class="portion">${fmt(grams)}<span class="u">g</span></div>
+        <div class="portion">${u
+          ? `${fmt(Math.round(grams / u.g * 10) / 10)}<span class="u">${u.label}s</span>`
+          : `${fmt(grams)}<span class="u">g</span>`}</div>
         <div class="food-actions">
           <button class="icon-btn" data-edit="${f._i}" aria-label="Edit">✎</button>
           <button class="icon-btn danger" data-del="${f._i}" aria-label="Delete">✕</button>
@@ -1477,16 +1532,30 @@ function calcPlate(plate, mm) {
   const cFoods = resolve(plate.carbs,   "carbs");
   const fFoods = resolve(plate.fat,     "fat");
 
-  const pPortions = pFoods.map(f => ({ food: f, grams: f.protein > 0 ? (mm.p / pFoods.length / f.protein) * 100 : 0 }));
+  // Counted foods (eggs) use the number chosen; the other foods split whatever of the macro is left
+  const counts = plate.counts || {};
+  const portion = (list, key, target) => {
+    const fixed = {}, flex = [];
+    let fixedMacro = 0;
+    for (const f of list) {
+      const u = unitFor(f);
+      if (!u) { flex.push(f); continue; }
+      const n = counts[f.name] ?? 2;
+      fixed[f.name] = { food: f, grams: n * u.g, count: n, unit: u };
+      fixedMacro += n * u.g * (f[key] || 0) / 100;
+    }
+    const rem = Math.max(0, target - fixedMacro);
+    return list.map(f => fixed[f.name] || { food: f, grams: f[key] > 0 ? (rem / flex.length / f[key]) * 100 : 0 });
+  };
+
+  const pPortions = portion(pFoods, "protein", mm.p);
   const fatFromP   = pPortions.reduce((s,x) => s + x.grams*(x.food.fat  ||0)/100, 0);
   const carbsFromP = pPortions.reduce((s,x) => s + x.grams*(x.food.carbs||0)/100, 0);
 
-  const remC = Math.max(0, mm.c - carbsFromP);
-  const cPortions = cFoods.map(f => ({ food: f, grams: f.carbs > 0 ? (remC / cFoods.length / f.carbs) * 100 : 0 }));
+  const cPortions = portion(cFoods, "carbs", Math.max(0, mm.c - carbsFromP));
   const fatFromC = cPortions.reduce((s,x) => s + x.grams*(x.food.fat||0)/100, 0);
 
-  const remF = Math.max(0, mm.f - fatFromP - fatFromC);
-  const fPortions = fFoods.map(f => ({ food: f, grams: f.fat > 0 ? (remF / fFoods.length / f.fat) * 100 : 0 }));
+  const fPortions = portion(fFoods, "fat", Math.max(0, mm.f - fatFromP - fatFromC));
 
   const all = [...pPortions, ...cPortions, ...fPortions];
   const actualP = all.reduce((s,x) => s + x.grams*(x.food.protein||0)/100, 0);
@@ -1506,10 +1575,15 @@ function mealCardHTML(mealIdx, plate, mm, ctx, dayIdx, customLabel) {
   const pAvail = foods.filter(f => f.cat==="protein" && !(plate.protein||[]).includes(f.name));
   const cAvail = foods.filter(f => f.cat==="carbs"   && !(plate.carbs  ||[]).includes(f.name));
   const fAvail = foods.filter(f => f.cat==="fat"     && !(plate.fat    ||[]).includes(f.name));
-  const foodItems = (portions, type) => portions.map(({food,grams}) => `
+  const foodItems = (portions, type) => portions.map(({food,grams,count,unit}) => `
     <div class="macro-item">
       <span class="macro-item-name">${escapeHtml(food.name)}</span>
-      <span class="macro-item-grams${grams===0?" zero":""}">${fmt(grams)}<span class="gu">g</span></span>
+      ${unit ? `<span class="cnt">
+          <button class="cnt-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="-1" aria-label="One less">−</button>
+          <span class="cnt-val">${fmt(count)}<small>${unit.label}${count === 1 ? "" : "s"}</small></span>
+          <button class="cnt-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="1" aria-label="One more">+</button>
+        </span>`
+      : `<span class="macro-item-grams${grams===0?" zero":""}">${fmt(grams)}<span class="gu">g</span></span>`}
       <button class="rm-food" ${dataAttrs} data-type="${type}" data-name="${escapeHtml(food.name)}" aria-label="Remove">×</button>
     </div>`).join("");
   const addOpts = (list, label) =>
@@ -1665,8 +1739,10 @@ function renderWeekPrep() {
   for (const cat of ["protein","carbs","fat"]) {
     if (!groups[cat].length) continue;
     html += `<div class="prep-section"><div class="prep-section-label">${catLabels[cat]}</div>`;
-    for (const {name,grams} of groups[cat])
-      html += `<div class="prep-item"><span class="prep-item-name">${escapeHtml(name)}</span><span class="prep-item-grams">${Math.round(grams)}g</span></div>`;
+    for (const {name,grams} of groups[cat]) {
+      const u = unitFor(foods.find(f => f.name === name));
+      html += `<div class="prep-item"><span class="prep-item-name">${escapeHtml(name)}</span><span class="prep-item-grams">${u ? countText(grams / u.g, u.label) : Math.round(grams) + "g"}</span></div>`;
+    }
     html += `</div>`;
   }
   $("weekPrep").innerHTML = html;
@@ -1692,8 +1768,11 @@ function handleAddFood(sel) {
   const name = sel.value; if (!name) return;
   const type = sel.dataset.type, mealIdx = parseInt(sel.dataset.meal, 10);
   const plates = sel.dataset.ctx === "plan" ? plan.plates : weekPlan.days[parseInt(sel.dataset.day, 10)].plates;
-  if (!(plates[mealIdx][type]||[]).includes(name))
+  if (!(plates[mealIdx][type]||[]).includes(name)) {
     plates[mealIdx][type] = [...(plates[mealIdx][type]||[]), name];
+    const food = foods.find(f => f.name === name && f.cat === type);
+    if (unitFor(food)) plates[mealIdx].counts = { ...(plates[mealIdx].counts || {}), [name]: countFor(food, macrosForPlate(mealIdx).p / 2) };
+  }
   scheduleSave();
   sel.dataset.ctx === "plan" ? renderPlan() : renderWeek(parseInt(sel.dataset.day, 10));
 }
@@ -1702,6 +1781,16 @@ function handleRemoveFood(btn) {
   const name = btn.dataset.name, type = btn.dataset.type, mealIdx = parseInt(btn.dataset.meal, 10);
   const plates = btn.dataset.ctx === "plan" ? plan.plates : weekPlan.days[parseInt(btn.dataset.day, 10)].plates;
   plates[mealIdx][type] = (plates[mealIdx][type]||[]).filter(n => n !== name);
+  if (plates[mealIdx].counts) delete plates[mealIdx].counts[name];
+  scheduleSave();
+  btn.dataset.ctx === "plan" ? renderPlan() : renderWeek(parseInt(btn.dataset.day, 10));
+}
+function handleCount(btn) {
+  if (readOnly()) return;
+  const mealIdx = parseInt(btn.dataset.meal, 10);
+  const plates = btn.dataset.ctx === "plan" ? plan.plates : weekPlan.days[parseInt(btn.dataset.day, 10)].plates;
+  const counts = plates[mealIdx].counts = plates[mealIdx].counts || {};
+  counts[btn.dataset.name] = Math.max(1, Math.min(12, (counts[btn.dataset.name] ?? 2) + parseInt(btn.dataset.delta, 10)));
   scheduleSave();
   btn.dataset.ctx === "plan" ? renderPlan() : renderWeek(parseInt(btn.dataset.day, 10));
 }
@@ -1710,6 +1799,7 @@ document.addEventListener("change", e => {
 });
 document.addEventListener("click", e => {
   const btn = e.target.closest(".rm-food"); if (btn) handleRemoveFood(btn);
+  const cnt = e.target.closest(".cnt-btn"); if (cnt) handleCount(cnt);
 });
 
 /* ═══ CLIENTS (coach) ═══ */
