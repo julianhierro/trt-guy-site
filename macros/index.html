@@ -227,6 +227,9 @@
   .cnt { display: flex; align-items: center; gap: 4px; }
   .cnt-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg-2); border: 1px solid var(--line); color: var(--text); font-size: 17px; font-weight: 700; cursor: pointer; line-height: 1; }
   .cnt-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .adj-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg-2); border: 1px solid var(--line); color: var(--text); font-size: 17px; font-weight: 700; cursor: pointer; line-height: 1; }
+  .adj-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .cnt-val.pinned { color: var(--text); }
   .cnt-val { min-width: 54px; text-align: center; font-size: 20px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
   .cnt-val small { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 3px; }
   .rm-food { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 2px 4px; line-height: 1; }
@@ -344,6 +347,10 @@
     .week-nav .icon-btn { width: 44px; height: 44px; }
     .log-item { padding: 10px 12px 10px 14px; gap: 8px; }
     .li-grams input { width: 56px; }
+    .macro-item { gap: 8px; padding: 9px 10px; }
+    .macro-item-name { white-space: normal; line-height: 1.25; font-size: 13px; }
+    .cnt { gap: 3px; }
+    .cnt-val { min-width: 46px; font-size: 18px; }
   }
 </style>
 </head>
@@ -1532,36 +1539,45 @@ function calcPlate(plate, mm) {
   const cFoods = resolve(plate.carbs,   "carbs");
   const fFoods = resolve(plate.fat,     "fat");
 
-  // Counted foods (eggs) use the number chosen; the other foods split whatever of the macro is left
-  const counts = plate.counts || {};
+  // Counted foods (eggs) use the number chosen and foods set with +/- keep their grams;
+  // the remaining foods split whatever of the macro is left, so the meal stays on target
+  const counts = plate.counts || {}, pins = plate.pins || {};
   const portion = (list, key, target) => {
     const fixed = {}, flex = [];
     let fixedMacro = 0;
+    const adjustable = list.filter(f => !unitFor(f)).length;
     for (const f of list) {
       const u = unitFor(f);
-      if (!u) { flex.push(f); continue; }
-      const n = counts[f.name] ?? 2;
-      fixed[f.name] = { food: f, grams: n * u.g, count: n, unit: u };
-      fixedMacro += n * u.g * (f[key] || 0) / 100;
+      if (u) {
+        const n = counts[f.name] ?? 2;
+        fixed[f.name] = { food: f, grams: n * u.g, count: n, unit: u };
+      } else if (pins[f.name] != null && adjustable > 1) {
+        fixed[f.name] = { food: f, grams: pins[f.name], pinned: true, adjustable };
+      } else { flex.push(f); continue; }
+      fixedMacro += fixed[f.name].grams * (f[key] || 0) / 100;
     }
     const rem = Math.max(0, target - fixedMacro);
-    return list.map(f => fixed[f.name] || { food: f, grams: f[key] > 0 ? (rem / flex.length / f[key]) * 100 : 0 });
+    return list.map(f => fixed[f.name] || { food: f, grams: f[key] > 0 ? (rem / flex.length / f[key]) * 100 : 0, adjustable });
   };
 
-  const pPortions = portion(pFoods, "protein", mm.p);
+  const pTarget = mm.p;
+  const pPortions = portion(pFoods, "protein", pTarget);
   const fatFromP   = pPortions.reduce((s,x) => s + x.grams*(x.food.fat  ||0)/100, 0);
   const carbsFromP = pPortions.reduce((s,x) => s + x.grams*(x.food.carbs||0)/100, 0);
 
-  const cPortions = portion(cFoods, "carbs", Math.max(0, mm.c - carbsFromP));
+  const cTarget = Math.max(0, mm.c - carbsFromP);
+  const cPortions = portion(cFoods, "carbs", cTarget);
   const fatFromC = cPortions.reduce((s,x) => s + x.grams*(x.food.fat||0)/100, 0);
 
-  const fPortions = portion(fFoods, "fat", Math.max(0, mm.f - fatFromP - fatFromC));
+  const fTarget = Math.max(0, mm.f - fatFromP - fatFromC);
+  const fPortions = portion(fFoods, "fat", fTarget);
 
   const all = [...pPortions, ...cPortions, ...fPortions];
   const actualP = all.reduce((s,x) => s + x.grams*(x.food.protein||0)/100, 0);
   const actualC = all.reduce((s,x) => s + x.grams*(x.food.carbs  ||0)/100, 0);
   const actualF = all.reduce((s,x) => s + x.grams*(x.food.fat    ||0)/100, 0);
-  return { pPortions, cPortions, fPortions, actualP, actualC, actualF };
+  return { pPortions, cPortions, fPortions, actualP, actualC, actualF,
+           groupTarget: { protein: pTarget, carbs: cTarget, fat: fTarget } };
 }
 
 /* ═══ MEAL CARD HTML (plan + week) ═══ */
@@ -1575,13 +1591,18 @@ function mealCardHTML(mealIdx, plate, mm, ctx, dayIdx, customLabel) {
   const pAvail = foods.filter(f => f.cat==="protein" && !(plate.protein||[]).includes(f.name));
   const cAvail = foods.filter(f => f.cat==="carbs"   && !(plate.carbs  ||[]).includes(f.name));
   const fAvail = foods.filter(f => f.cat==="fat"     && !(plate.fat    ||[]).includes(f.name));
-  const foodItems = (portions, type) => portions.map(({food,grams,count,unit}) => `
+  const foodItems = (portions, type) => portions.map(({food,grams,count,unit,pinned,adjustable}) => `
     <div class="macro-item">
       <span class="macro-item-name">${escapeHtml(food.name)}</span>
       ${unit ? `<span class="cnt">
           <button class="cnt-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="-1" aria-label="One less">−</button>
           <span class="cnt-val">${fmt(count)}<small>${unit.label}${count === 1 ? "" : "s"}</small></span>
           <button class="cnt-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="1" aria-label="One more">+</button>
+        </span>`
+      : adjustable > 1 ? `<span class="cnt">
+          <button class="adj-btn" ${dataAttrs} data-type="${type}" data-name="${escapeHtml(food.name)}" data-delta="-5" aria-label="5 grams less">−</button>
+          <span class="cnt-val${pinned ? " pinned" : ""}">${fmt(grams)}<small>g</small></span>
+          <button class="adj-btn" ${dataAttrs} data-type="${type}" data-name="${escapeHtml(food.name)}" data-delta="5" aria-label="5 grams more">+</button>
         </span>`
       : `<span class="macro-item-grams${grams===0?" zero":""}">${fmt(grams)}<span class="gu">g</span></span>`}
       <button class="rm-food" ${dataAttrs} data-type="${type}" data-name="${escapeHtml(food.name)}" aria-label="Remove">×</button>
@@ -1611,7 +1632,10 @@ function mealCardHTML(mealIdx, plate, mm, ctx, dayIdx, customLabel) {
           <span class="free-note">+ 1 cup veggies</span>
           <span class="veggie-names">${veggieNames}</span>
         </div>
-        ${anySelected ? `<span class="meal-actual">Actual · P ${fmt(actualP)} / C ${fmt(actualC)} / F ${fmt(actualF)}</span>` : ""}
+        <div style="text-align:right">
+          ${anySelected ? `<div class="meal-actual">Actual · P ${fmt(actualP)} / C ${fmt(actualC)} / F ${fmt(actualF)}</div>` : ""}
+          ${plate.pins && Object.keys(plate.pins).length ? `<button class="link-btn reset-split" ${dataAttrs} style="margin-top:6px">Reset to even split</button>` : ""}
+        </div>
       </div>
     </div>`;
 }
@@ -1782,8 +1806,55 @@ function handleRemoveFood(btn) {
   const plates = btn.dataset.ctx === "plan" ? plan.plates : weekPlan.days[parseInt(btn.dataset.day, 10)].plates;
   plates[mealIdx][type] = (plates[mealIdx][type]||[]).filter(n => n !== name);
   if (plates[mealIdx].counts) delete plates[mealIdx].counts[name];
+  if (plates[mealIdx].pins) {
+    delete plates[mealIdx].pins[name];
+    // Something in the group has to stay free to absorb the difference
+    const left = (plates[mealIdx][type] || []).map(n => foods.find(f => f.name === n && f.cat === type)).filter(f => f && !unitFor(f));
+    if (left.length && left.every(f => plates[mealIdx].pins[f.name] != null)) left.forEach(f => delete plates[mealIdx].pins[f.name]);
+  }
   scheduleSave();
   btn.dataset.ctx === "plan" ? renderPlan() : renderWeek(parseInt(btn.dataset.day, 10));
+}
+// +/- on a weighed food: move it to the next 5g step and let the other foods in its group rebalance
+function handleAdjust(btn) {
+  if (readOnly()) return;
+  const mealIdx = parseInt(btn.dataset.meal, 10), type = btn.dataset.type, name = btn.dataset.name;
+  const dayIdx = parseInt(btn.dataset.day, 10);
+  const plates = btn.dataset.ctx === "plan" ? plan.plates : weekPlan.days[dayIdx].plates;
+  const plate = plates[mealIdx];
+  const key = { protein: "protein", carbs: "carbs", fat: "fat" }[type];
+  const res = calcPlate(plate, macrosForPlate(mealIdx));
+  const group = { protein: res.pPortions, carbs: res.cPortions, fat: res.fPortions }[type];
+  const me = group.find(x => x.food.name === name);
+  if (!me) return;
+  const delta = parseInt(btn.dataset.delta, 10);
+  let g = delta > 0 ? Math.floor(me.grams / 5 + 1e-6) * 5 + 5 : Math.ceil(me.grams / 5 - 1e-6) * 5 - 5;
+  // Most this food can take before the others in the group would drop below zero
+  const per = +me.food[key] || 0;
+  const othersFixed = group.filter(x => x !== me && (x.unit || x.pinned)).reduce((s, x) => s + x.grams * (x.food[key] || 0) / 100, 0);
+  if (per > 0) g = Math.min(g, Math.floor((res.groupTarget[key] - othersFixed) / per * 100 / 5) * 5);
+  g = Math.max(0, g);
+  if (Math.abs(g - me.grams) < 0.5 && !me.pinned) return;
+  const pins = { ...(plate.pins || {}) };
+  delete pins[name];
+  pins[name] = g;   // most recent last
+  // Keep at least one weighed food free so the group still lands on target
+  const weighed = group.filter(x => !x.unit).map(x => x.food.name);
+  if (weighed.every(n => pins[n] != null)) {
+    const oldest = Object.keys(pins).find(n => n !== name && weighed.includes(n));
+    if (oldest) delete pins[oldest];
+  }
+  plate.pins = pins;
+  scheduleSave();
+  btn.dataset.ctx === "plan" ? renderPlan() : renderWeek(dayIdx);
+}
+function handleResetSplit(btn) {
+  if (readOnly()) return;
+  const dayIdx = parseInt(btn.dataset.day, 10);
+  const plates = btn.dataset.ctx === "plan" ? plan.plates : weekPlan.days[dayIdx].plates;
+  delete plates[parseInt(btn.dataset.meal, 10)].pins;
+  scheduleSave();
+  btn.dataset.ctx === "plan" ? renderPlan() : renderWeek(dayIdx);
 }
 function handleCount(btn) {
   if (readOnly()) return;
@@ -1800,6 +1871,8 @@ document.addEventListener("change", e => {
 document.addEventListener("click", e => {
   const btn = e.target.closest(".rm-food"); if (btn) handleRemoveFood(btn);
   const cnt = e.target.closest(".cnt-btn"); if (cnt) handleCount(cnt);
+  const adj = e.target.closest(".adj-btn"); if (adj) handleAdjust(adj);
+  const rs = e.target.closest(".reset-split"); if (rs) handleResetSplit(rs);
 });
 
 /* ═══ CLIENTS (coach) ═══ */
