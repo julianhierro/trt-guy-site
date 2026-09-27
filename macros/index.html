@@ -107,7 +107,8 @@
   .fill.kc { background: var(--accent); }
   .fill.p { background: var(--p); } .fill.c { background: var(--c); } .fill.f { background: var(--f); }
   .fill.over { background: var(--danger); }
-  .mbars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .mbars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .fill.fb { background: #48c78e; }
   .mbar-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; gap: 4px; flex-wrap: wrap; }
   .mbar-top b { color: var(--text); font-variant-numeric: tabular-nums; }
   .legacy-note { margin-top: 14px; font-size: 12px; color: var(--muted); background: var(--bg-3); border-radius: 8px; padding: 9px 12px; line-height: 1.45; }
@@ -142,7 +143,7 @@
   .seg { display: inline-flex; gap: 2px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
   .seg button { padding: 7px 16px; border-radius: 7px; background: transparent; border: none; color: var(--muted); font-weight: 600; font-size: 13px; cursor: pointer; }
   .seg button.active { background: var(--bg-3); color: var(--text); }
-  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; }
   .stat { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
   .stat-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
   .stat-val { font-size: 24px; font-weight: 800; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
@@ -227,21 +228,19 @@
   .cnt { display: flex; align-items: center; gap: 4px; }
   .cnt-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg-2); border: 1px solid var(--line); color: var(--text); font-size: 17px; font-weight: 700; cursor: pointer; line-height: 1; }
   .cnt-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .adj-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg-2); border: 1px solid var(--line); color: var(--text); font-size: 17px; font-weight: 700; cursor: pointer; line-height: 1; }
-  .adj-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .v-dot { background: rgba(72,199,142,.18); color: #48c78e; }
+  .veg-btn, .adj-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--bg-2); border: 1px solid var(--line); color: var(--text); font-size: 17px; font-weight: 700; cursor: pointer; line-height: 1; }
+  .adj-btn:hover, .veg-btn:hover { border-color: var(--accent); color: var(--accent); }
   .cnt-val.pinned { color: var(--text); }
   .cnt-val { min-width: 54px; text-align: center; font-size: 20px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
   .cnt-val small { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 3px; }
   .rm-food { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 2px 4px; line-height: 1; }
   .rm-food:hover { color: var(--danger); }
   .meal-footer { display: flex; align-items: flex-start; justify-content: space-between; padding: 10px 16px 14px; gap: 10px; flex-wrap: wrap; }
-  .veggie-list-wrap { display: flex; flex-direction: column; gap: 6px; }
-  .free-note { font-size: 12px; color: var(--accent); font-weight: 600; background: var(--accent-dim); padding: 3px 9px; border-radius: 999px; width: fit-content; }
-  .veggie-names { font-size: 11px; color: var(--muted); line-height: 1.5; }
   .meal-actual { font-size: 12px; color: var(--muted); }
   .day-totals { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
   .totals-title { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
-  .totals-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .totals-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
   .totals-macro, .totals-kcal { display: flex; flex-direction: column; gap: 4px; background: var(--bg-3); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
   .totals-macro.hit { border-color: rgba(184,255,60,.3); }
   .totals-macro-label, .totals-kcal-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
@@ -451,6 +450,11 @@
         <div class="plan-input-unit">grams / day</div>
       </div>
       <div class="plan-field">
+        <label for="pFiber">Fiber</label>
+        <input class="plan-input" type="number" inputmode="numeric" id="pFiber" min="0" placeholder="auto" />
+        <div class="plan-input-unit" id="fiberUnit">grams / day</div>
+      </div>
+      <div class="plan-field">
         <label for="pMeals">Meals</label>
         <input class="plan-input" type="number" inputmode="numeric" id="pMeals" min="1" max="8" value="4" />
         <div class="plan-input-unit">per day</div>
@@ -508,7 +512,7 @@
       <span class="target-meta" id="foodCount"></span>
     </div>
     <div id="veggieBanner" class="veggie-banner" style="display:none">
-      <strong>Free foods.</strong> Eat as much as you want — these don't count toward your macros.
+      Values are per 100g raw. Veggies count toward your calories and macros in the Plan and the Log.
     </div>
     <div class="list" id="foodList"></div>
     <button class="add-btn edit-only" id="addBtn">+ Add food</button>
@@ -605,14 +609,18 @@
         <input type="number" inputmode="decimal" id="fFat" min="0" step="0.1" placeholder="0" />
       </div>
       <div class="field">
-        <label for="fCategory">Category</label>
-        <select id="fCategory">
-          <option value="protein">Protein</option>
-          <option value="carbs">Carbs</option>
-          <option value="fat">Fats</option>
-          <option value="veggies">Veggies</option>
-        </select>
+        <label for="fFiber">Fiber / 100g</label>
+        <input type="number" inputmode="decimal" id="fFiber" min="0" step="0.1" placeholder="0" />
       </div>
+    </div>
+    <div class="field">
+      <label for="fCategory">Category</label>
+      <select id="fCategory">
+        <option value="protein">Protein</option>
+        <option value="carbs">Carbs</option>
+        <option value="fat">Fats</option>
+        <option value="veggies">Veggies</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn" id="cancelBtn">Cancel</button>
@@ -639,77 +647,77 @@ const sb = (typeof supabase !== "undefined")
   : null;
 
 const DEFAULT_FOODS = [
-  { name:"Tuna (uncooked)",            protein:23,   carbs:0,    fat:1,    cat:"protein" },
-  { name:"Salmon (uncooked)",          protein:20,   carbs:0,    fat:13,   cat:"protein" },
-  { name:"Chicken breast (uncooked)",  protein:23,   carbs:0,    fat:2.6,  cat:"protein" },
-  { name:"White fish (uncooked)",      protein:18,   carbs:0,    fat:1,    cat:"protein" },
-  { name:"Lean ground beef 95% (uncooked)", protein:22, carbs:0,    fat:5,    cat:"protein" },
-  { name:"Egg whites",                 protein:11,   carbs:0.7,  fat:0.2,  cat:"protein" },
-  { name:"Eggs (whole)",               protein:12.6, carbs:1.1,  fat:9.5,  cat:"protein" },
-  { name:"Whey protein powder",        protein:80,   carbs:4,    fat:1,    cat:"protein" },
-  { name:"Casein protein powder",      protein:78,   carbs:4,    fat:2,    cat:"protein" },
-  { name:"Turkey breast (uncooked)",   protein:22,   carbs:0,    fat:1,    cat:"protein" },
-  { name:"Shrimp (uncooked)",          protein:20,   carbs:0.2,  fat:0.5,  cat:"protein" },
-  { name:"Scallops (uncooked)",        protein:20,   carbs:3,    fat:1,    cat:"protein" },
-  { name:"Octopus (uncooked)",         protein:15,   carbs:2.2,  fat:1,    cat:"protein" },
-  { name:"Canned tuna (in water)",     protein:25,   carbs:0,    fat:1,    cat:"protein" },
-  { name:"Tilapia (uncooked)",         protein:20,   carbs:0,    fat:2,    cat:"protein" },
-  { name:"Nonfat Greek yogurt",        protein:10.6, carbs:4.1,  fat:0,    cat:"protein" },
-  { name:"Black beans (canned in water, drained)", protein:7, carbs:20, fat:0.5, cat:"carbs" },
-  { name:"Black beans (uncooked)",     protein:21.6, carbs:62.4, fat:1.4,  cat:"carbs" },
-  { name:"White rice (uncooked)",      protein:7,    carbs:80,   fat:0.7,  cat:"carbs" },
-  { name:"Brown rice (uncooked)",      protein:7.5,  carbs:77,   fat:2.7,  cat:"carbs" },
-  { name:"Quinoa (uncooked)",          protein:14,   carbs:64,   fat:6,    cat:"carbs" },
-  { name:"Oatmeal (uncooked)",         protein:13,   carbs:67,   fat:7,    cat:"carbs" },
-  { name:"White bread (untoasted)",    protein:9,    carbs:49,   fat:3.3,  cat:"carbs" },
-  { name:"Wheat bread (untoasted)",    protein:13,   carbs:43,   fat:4,    cat:"carbs" },
-  { name:"Wheat spaghetti (uncooked)", protein:13,   carbs:71,   fat:1.5,  cat:"carbs" },
-  { name:"Sweet potato (uncooked)",    protein:1.6,  carbs:20,   fat:0.1,  cat:"carbs" },
-  { name:"Potato (uncooked)",          protein:2,    carbs:17,   fat:0.1,  cat:"carbs" },
-  { name:"Apple (fresh)",              protein:0.3,  carbs:14,   fat:0.2,  cat:"carbs" },
-  { name:"Banana (fresh)",             protein:1.1,  carbs:23,   fat:0.3,  cat:"carbs" },
-  { name:"Berries / blueberries (fresh)",        protein:0.7,  carbs:14,   fat:0.3,  cat:"carbs" },
-  { name:"Strawberry (fresh)",         protein:0.7,  carbs:8,    fat:0.3,  cat:"carbs" },
-  { name:"Cantaloupe (fresh)",         protein:0.8,  carbs:8,    fat:0.2,  cat:"carbs" },
-  { name:"Watermelon (fresh)",         protein:0.6,  carbs:8,    fat:0.2,  cat:"carbs" },
-  { name:"Peach (fresh)",              protein:0.9,  carbs:10,   fat:0.3,  cat:"carbs" },
-  { name:"Pineapple (fresh)",          protein:0.5,  carbs:13,   fat:0.1,  cat:"carbs" },
-  { name:"Mango (fresh)",              protein:0.8,  carbs:15,   fat:0.4,  cat:"carbs" },
-  { name:"Papaya (fresh)",             protein:0.5,  carbs:11,   fat:0.3,  cat:"carbs" },
-  { name:"Kiwi (fresh)",               protein:1.1,  carbs:15,   fat:0.5,  cat:"carbs" },
-  { name:"Orange (fresh)",             protein:0.9,  carbs:12,   fat:0.1,  cat:"carbs" },
-  { name:"Grapefruit (fresh)",         protein:0.8,  carbs:11,   fat:0.1,  cat:"carbs" },
-  { name:"Pear (fresh)",               protein:0.4,  carbs:15,   fat:0.1,  cat:"carbs" },
-  { name:"Raspberries (fresh)",        protein:1.2,  carbs:12,   fat:0.7,  cat:"carbs" },
-  { name:"Grapes (fresh)",             protein:0.7,  carbs:17,   fat:0.2,  cat:"carbs" },
-  { name:"Mandarin (fresh)",           protein:0.8,  carbs:13,   fat:0.3,  cat:"carbs" },
-  { name:"Cherries (fresh)",           protein:1.1,  carbs:16,   fat:0.2,  cat:"carbs" },
-  { name:"Olive oil",                  protein:0,    carbs:0,    fat:100,  cat:"fat" },
-  { name:"Peanuts",                    protein:26,   carbs:16,   fat:49,   cat:"fat" },
-  { name:"Almonds",                    protein:21,   carbs:22,   fat:50,   cat:"fat" },
-  { name:"Cashews",                    protein:18,   carbs:30,   fat:44,   cat:"fat" },
-  { name:"Walnuts",                    protein:15,   carbs:14,   fat:65,   cat:"fat" },
-  { name:"Mixed nuts",                 protein:17,   carbs:25,   fat:52,   cat:"fat" },
-  { name:"Chia seeds",                 protein:16.5, carbs:42,   fat:31,   cat:"fat" },
-  { name:"Parmesan cheese",            protein:36,   carbs:3.2,  fat:26,   cat:"fat" },
-  { name:"Cheese (cheddar)",           protein:23,   carbs:3.1,  fat:33,   cat:"fat" },
-  { name:"Peanut or almond butter",    protein:22,   carbs:20,   fat:50,   cat:"fat" },
-  { name:"Avocado",                    protein:2,    carbs:9,    fat:15,   cat:"fat" },
-  { name:"Canola oil",                 protein:0,    carbs:0,    fat:100,  cat:"fat" },
-  { name:"Broccoli",    protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Tomato",      protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Onion",       protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Zucchini",    protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Spinach",     protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Cauliflower", protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Bell peppers", protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Asparagus",   protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Mushrooms",   protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Cucumber",    protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Celery",      protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Cabbage",     protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Lettuce",     protein:0, carbs:0, fat:0, cat:"veggies" },
-  { name:"Mixed vegetables", protein:0, carbs:0, fat:0, cat:"veggies" },
+  { name:"Tuna (uncooked)",            protein:23, carbs:0, fat:1, fiber:0, cat:"protein" },
+  { name:"Salmon (uncooked)",          protein:20, carbs:0, fat:13, fiber:0, cat:"protein" },
+  { name:"Chicken breast (uncooked)",  protein:23, carbs:0, fat:2.6, fiber:0, cat:"protein" },
+  { name:"White fish (uncooked)",      protein:18, carbs:0, fat:1, fiber:0, cat:"protein" },
+  { name:"Lean ground beef 95% (uncooked)", protein:22, carbs:0, fat:5, fiber:0, cat:"protein" },
+  { name:"Egg whites",                 protein:11, carbs:0.7, fat:0.2, fiber:0, cat:"protein" },
+  { name:"Eggs (whole)",               protein:12.6, carbs:1.1, fat:9.5, fiber:0, cat:"protein" },
+  { name:"Whey protein powder",        protein:80, carbs:4, fat:1, fiber:0, cat:"protein" },
+  { name:"Casein protein powder",      protein:78, carbs:4, fat:2, fiber:0, cat:"protein" },
+  { name:"Turkey breast (uncooked)",   protein:22, carbs:0, fat:1, fiber:0, cat:"protein" },
+  { name:"Shrimp (uncooked)",          protein:20, carbs:0.2, fat:0.5, fiber:0, cat:"protein" },
+  { name:"Scallops (uncooked)",        protein:20, carbs:3, fat:1, fiber:0, cat:"protein" },
+  { name:"Octopus (uncooked)",         protein:15, carbs:2.2, fat:1, fiber:0, cat:"protein" },
+  { name:"Canned tuna (in water)",     protein:25, carbs:0, fat:1, fiber:0, cat:"protein" },
+  { name:"Tilapia (uncooked)",         protein:20, carbs:0, fat:2, fiber:0, cat:"protein" },
+  { name:"Nonfat Greek yogurt",        protein:10.6, carbs:4.1, fat:0, fiber:0, cat:"protein" },
+  { name:"Black beans (canned in water, drained)", protein:7, carbs:20, fat:0.5, fiber:7, cat:"carbs" },
+  { name:"Black beans (uncooked)",     protein:21.6, carbs:62.4, fat:1.4, fiber:15.5, cat:"carbs" },
+  { name:"White rice (uncooked)",      protein:7, carbs:80, fat:0.7, fiber:1.3, cat:"carbs" },
+  { name:"Brown rice (uncooked)",      protein:7.5, carbs:77, fat:2.7, fiber:3.5, cat:"carbs" },
+  { name:"Quinoa (uncooked)",          protein:14, carbs:64, fat:6, fiber:7, cat:"carbs" },
+  { name:"Oatmeal (uncooked)",         protein:13, carbs:67, fat:7, fiber:10, cat:"carbs" },
+  { name:"White bread (untoasted)",    protein:9, carbs:49, fat:3.3, fiber:2.7, cat:"carbs" },
+  { name:"Wheat bread (untoasted)",    protein:13, carbs:43, fat:4, fiber:6, cat:"carbs" },
+  { name:"Wheat spaghetti (uncooked)", protein:13, carbs:71, fat:1.5, fiber:8, cat:"carbs" },
+  { name:"Sweet potato (uncooked)",    protein:1.6, carbs:20, fat:0.1, fiber:3, cat:"carbs" },
+  { name:"Potato (uncooked)",          protein:2, carbs:17, fat:0.1, fiber:2.2, cat:"carbs" },
+  { name:"Apple (fresh)",              protein:0.3, carbs:14, fat:0.2, fiber:2.4, cat:"carbs" },
+  { name:"Banana (fresh)",             protein:1.1, carbs:23, fat:0.3, fiber:2.6, cat:"carbs" },
+  { name:"Berries / blueberries (fresh)",        protein:0.7, carbs:14, fat:0.3, fiber:2.4, cat:"carbs" },
+  { name:"Strawberry (fresh)",         protein:0.7, carbs:8, fat:0.3, fiber:2, cat:"carbs" },
+  { name:"Cantaloupe (fresh)",         protein:0.8, carbs:8, fat:0.2, fiber:0.9, cat:"carbs" },
+  { name:"Watermelon (fresh)",         protein:0.6, carbs:8, fat:0.2, fiber:0.4, cat:"carbs" },
+  { name:"Peach (fresh)",              protein:0.9, carbs:10, fat:0.3, fiber:1.5, cat:"carbs" },
+  { name:"Pineapple (fresh)",          protein:0.5, carbs:13, fat:0.1, fiber:1.4, cat:"carbs" },
+  { name:"Mango (fresh)",              protein:0.8, carbs:15, fat:0.4, fiber:1.6, cat:"carbs" },
+  { name:"Papaya (fresh)",             protein:0.5, carbs:11, fat:0.3, fiber:1.7, cat:"carbs" },
+  { name:"Kiwi (fresh)",               protein:1.1, carbs:15, fat:0.5, fiber:3, cat:"carbs" },
+  { name:"Orange (fresh)",             protein:0.9, carbs:12, fat:0.1, fiber:2.4, cat:"carbs" },
+  { name:"Grapefruit (fresh)",         protein:0.8, carbs:11, fat:0.1, fiber:1.6, cat:"carbs" },
+  { name:"Pear (fresh)",               protein:0.4, carbs:15, fat:0.1, fiber:3.1, cat:"carbs" },
+  { name:"Raspberries (fresh)",        protein:1.2, carbs:12, fat:0.7, fiber:6.5, cat:"carbs" },
+  { name:"Grapes (fresh)",             protein:0.7, carbs:17, fat:0.2, fiber:0.9, cat:"carbs" },
+  { name:"Mandarin (fresh)",           protein:0.8, carbs:13, fat:0.3, fiber:1.8, cat:"carbs" },
+  { name:"Cherries (fresh)",           protein:1.1, carbs:16, fat:0.2, fiber:2.1, cat:"carbs" },
+  { name:"Olive oil",                  protein:0, carbs:0, fat:100, fiber:0, cat:"fat" },
+  { name:"Peanuts",                    protein:26, carbs:16, fat:49, fiber:8.5, cat:"fat" },
+  { name:"Almonds",                    protein:21, carbs:22, fat:50, fiber:12.5, cat:"fat" },
+  { name:"Cashews",                    protein:18, carbs:30, fat:44, fiber:3.3, cat:"fat" },
+  { name:"Walnuts",                    protein:15, carbs:14, fat:65, fiber:6.7, cat:"fat" },
+  { name:"Mixed nuts",                 protein:17, carbs:25, fat:52, fiber:8, cat:"fat" },
+  { name:"Chia seeds",                 protein:16.5, carbs:42, fat:31, fiber:34.4, cat:"fat" },
+  { name:"Parmesan cheese",            protein:36, carbs:3.2, fat:26, fiber:0, cat:"fat" },
+  { name:"Cheese (cheddar)",           protein:23, carbs:3.1, fat:33, fiber:0, cat:"fat" },
+  { name:"Peanut or almond butter",    protein:22, carbs:20, fat:50, fiber:6, cat:"fat" },
+  { name:"Avocado",                    protein:2, carbs:9, fat:15, fiber:6.7, cat:"fat" },
+  { name:"Canola oil",                 protein:0, carbs:0, fat:100, fiber:0, cat:"fat" },
+  { name:"Broccoli",                    protein:2.8, carbs:6.6, fat:0.4, fiber:2.6, cat:"veggies" },
+  { name:"Tomato",                      protein:0.9, carbs:3.9, fat:0.2, fiber:1.2, cat:"veggies" },
+  { name:"Onion",                       protein:1.1, carbs:9.3, fat:0.1, fiber:1.7, cat:"veggies" },
+  { name:"Zucchini",                    protein:1.2, carbs:3.1, fat:0.3, fiber:1, cat:"veggies" },
+  { name:"Spinach",                     protein:2.9, carbs:3.6, fat:0.4, fiber:2.2, cat:"veggies" },
+  { name:"Cauliflower",                 protein:1.9, carbs:5, fat:0.3, fiber:2, cat:"veggies" },
+  { name:"Bell peppers",                protein:1, carbs:6, fat:0.3, fiber:2.1, cat:"veggies" },
+  { name:"Asparagus",                   protein:2.2, carbs:3.9, fat:0.1, fiber:2.1, cat:"veggies" },
+  { name:"Mushrooms",                   protein:3.1, carbs:3.3, fat:0.3, fiber:1, cat:"veggies" },
+  { name:"Cucumber",                    protein:0.7, carbs:3.6, fat:0.1, fiber:0.5, cat:"veggies" },
+  { name:"Celery",                      protein:0.7, carbs:3, fat:0.2, fiber:1.6, cat:"veggies" },
+  { name:"Cabbage",                     protein:1.3, carbs:5.8, fat:0.1, fiber:2.5, cat:"veggies" },
+  { name:"Lettuce",                     protein:1.4, carbs:2.9, fat:0.2, fiber:1.3, cat:"veggies" },
+  { name:"Mixed vegetables",            protein:3.3, carbs:13.1, fat:0.5, fiber:4, cat:"veggies" },
 ];
 
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -780,7 +788,9 @@ const withTimeout = (p, ms, label) => Promise.race([
 ]);
 function targets() {
   const p = +plan.protein || 0, c = +plan.carbs || 0, f = +plan.fat || 0;
-  return { protein: p, carbs: c, fat: f, kcal: Math.round(p*4 + c*4 + f*9) };
+  const kcal = Math.round(p*4 + c*4 + f*9);
+  // No fiber goal set: 14g per 1,000 kcal (the standard dietary guideline)
+  return { protein: p, carbs: c, fat: f, kcal, fiber: +plan.fiber > 0 ? +plan.fiber : Math.round(kcal * 14 / 1000) };
 }
 // Foods eaten by the piece (eggs) are counted, not weighed. A large egg is ~50g edible.
 function unitFor(f) {
@@ -961,10 +971,23 @@ function syncPlanInputs() {
   $("pProtein").value  = plan.protein;
   $("pCarbs").value    = plan.carbs;
   $("pFat").value      = plan.fat;
+  $("pFiber").value    = plan.fiber > 0 ? plan.fiber : "";
   $("pSnackPct").value = plan.snackPct ?? 15;
   $("pHasSnack").checked = !!plan.hasSnack;
   $("snackPctField").style.display = plan.hasSnack ? "flex" : "none";
   $("snackToggleLabel").textContent = plan.hasSnack ? "Snack on" : "Add snack";
+}
+// Saved food lists from before fiber/counted veggies: fill fiber, and veggie macros that used to be 0
+function upgradeFoods(list) {
+  if (!list) return clone(DEFAULT_FOODS);
+  return list.map(f => {
+    const d = DEFAULT_FOODS.find(x => x.name === f.name), out = { ...f };
+    if (out.fiber == null) out.fiber = d?.fiber ?? 0;
+    if (out.cat === "veggies" && d && !(+out.protein || +out.carbs || +out.fat)) {
+      out.protein = d.protein; out.carbs = d.carbs; out.fat = d.fat; out.fiber = d.fiber;
+    }
+    return out;
+  });
 }
 async function loadState(uid) {
   let data = null;
@@ -975,7 +998,7 @@ async function loadState(uid) {
   } else {
     data = readJSON(STATE_KEY, null);
   }
-  foods    = data?.foods || clone(DEFAULT_FOODS);
+  foods    = upgradeFoods(data?.foods);
   plan     = { ...clone(DEFAULT_PLAN), ...(data?.plan || {}) };
   weekPlan = data?.week_plan || clone(DEFAULT_WEEK);
   syncPlanInputs();
@@ -1057,14 +1080,21 @@ function logFromRow(row) {
   }
   return { meals: emptyMeals(), notes: "", legacy: null };
 }
+// Fiber per 100g: saved on the item, or looked up for items logged before fiber was tracked
+const fiberPer = it => it.fb != null ? +it.fb : +(foods.find(f => f.name === it.name)?.fiber || 0);
 function itemMacros(it) {
   const g = +it.grams || 0;
-  return { protein: g * (+it.p || 0) / 100, carbs: g * (+it.c || 0) / 100, fat: g * (+it.f || 0) / 100 };
+  return { protein: g * (+it.p || 0) / 100, carbs: g * (+it.c || 0) / 100, fat: g * (+it.f || 0) / 100, fiber: g * fiberPer(it) / 100 };
 }
 function sumItems(items) {
-  let p = 0, c = 0, f = 0;
-  for (const it of items) { const m = itemMacros(it); p += m.protein; c += m.carbs; f += m.fat; }
-  return { protein: p, carbs: c, fat: f, kcal: p*4 + c*4 + f*9 };
+  let p = 0, c = 0, f = 0, fb = 0;
+  for (const it of items) { const m = itemMacros(it); p += m.protein; c += m.carbs; f += m.fat; fb += m.fiber; }
+  return { protein: p, carbs: c, fat: f, fiber: fb, kcal: p*4 + c*4 + f*9 };
+}
+// Fiber for a saved day (worked out from its foods; days from the old version have none)
+function rowFiber(r) {
+  if (!r?.plates || r.plates.v !== 2) return null;
+  return sumItems((r.plates.meals || []).flatMap(m => m.items || [])).fiber;
 }
 const hasItems = log => log.meals.some(m => m.items.length);
 function logTotals(log) {
@@ -1105,7 +1135,7 @@ function renderSummary() {
   const t = logTotals(dayLog), tg = targets();
   const bar = (label, val, target, cls) => {
     const pct = target > 0 ? Math.min(100, val / target * 100) : 0;
-    const over = target > 0 && val > target * 1.1;
+    const over = cls !== "fb" && target > 0 && val > target * 1.1;   // more fiber than the goal is fine
     return `<div><div class="mbar-top"><span>${label}</span><span><b>${fmt(val)}</b>/${fmt(target)}g</span></div>
       <div class="track"><div class="fill ${cls}${over ? " over" : ""}" style="width:${pct}%"></div></div></div>`;
   };
@@ -1118,7 +1148,7 @@ function renderSummary() {
       <div class="kcal-left${left < 0 ? " over" : ""}">${left >= 0 ? left.toLocaleString() + " kcal left" : (-left).toLocaleString() + " kcal over"}</div>
     </div>
     <div class="track big"><div class="fill kc${t.kcal > tg.kcal * 1.1 ? " over" : ""}" style="width:${kPct}%"></div></div>
-    <div class="mbars">${bar("Protein", t.protein, tg.protein, "p")}${bar("Carbs", t.carbs, tg.carbs, "c")}${bar("Fat", t.fat, tg.fat, "f")}</div>
+    <div class="mbars">${bar("Protein", t.protein, tg.protein, "p")}${bar("Carbs", t.carbs, tg.carbs, "c")}${bar("Fat", t.fat, tg.fat, "f")}${bar("Fiber", t.fiber || 0, tg.fiber, "fb")}</div>
     ${dayLog.legacy && !hasItems(dayLog) ? `<div class="legacy-note">This day was logged with the old version, so only the totals were saved. Adding foods here replaces them.</div>` : ""}`;
 }
 function renderMeals() {
@@ -1236,9 +1266,9 @@ function planAsMeals() {
   ensurePlates();
   return plan.plates.map((plate, i) => {
     const r = calcPlate(plate, macrosForPlate(i));
-    return { items: [...r.pPortions, ...r.cPortions, ...r.fPortions]
+    return { items: [...r.pPortions, ...r.cPortions, ...r.fPortions, ...r.vPortions]
       .filter(x => x.grams > 0)
-      .map(x => ({ name: x.food.name, grams: Math.round(x.grams), p: x.food.protein || 0, c: x.food.carbs || 0, f: x.food.fat || 0,
+      .map(x => ({ name: x.food.name, grams: Math.round(x.grams), p: x.food.protein || 0, c: x.food.carbs || 0, f: x.food.fat || 0, fb: x.food.fiber || 0,
                    ...(x.unit ? { unit: x.unit.label, unitG: x.unit.g } : {}) })) };
   });
 }
@@ -1296,9 +1326,8 @@ function renderPickList() {
     if (pickCat === "all") h += `<div class="pick-cat">${labels[c]}</div>`;
     h += list.map(f => {
       const u = unitFor(f), pu = u && perUnit(f, u);
-      const info = c === "veggies" ? "free"
-        : u ? `P ${fmt(pu.p)} · C ${fmt(pu.c)} · F ${fmt(pu.f)} per ${u.label}`
-        : `P ${fmt(f.protein || 0)} · C ${fmt(f.carbs || 0)} · F ${fmt(f.fat || 0)}`;
+      const info = u ? `P ${fmt(pu.p)} · C ${fmt(pu.c)} · F ${fmt(pu.f)} per ${u.label}`
+        : `P ${fmt(f.protein || 0)} · C ${fmt(f.carbs || 0)} · F ${fmt(f.fat || 0)}${f.fiber ? ` · Fb ${fmt(+f.fiber)}` : ""}`;
       return `<button class="pick-item" data-idx="${f.idx}"><span>${escapeHtml(f.name)}</span><span class="muted small">${info}</span></button>`;
     }).join("");
   }
@@ -1327,8 +1356,8 @@ function pickGramsValue() {
   return u ? v * u.g : v;
 }
 function updatePickPreview() {
-  const m = itemMacros({ grams: pickGramsValue(), p: pickFood.protein, c: pickFood.carbs, f: pickFood.fat });
-  $("pickPreview").textContent = pickFood.cat === "veggies" ? "Free food, doesn't count toward your macros" : macroLine(m);
+  const m = itemMacros({ grams: pickGramsValue(), p: pickFood.protein, c: pickFood.carbs, f: pickFood.fat, fb: pickFood.fiber || 0 });
+  $("pickPreview").textContent = `${macroLine(m)} · ${fmt(m.fiber)}g fiber`;
 }
 $("pickList").addEventListener("click", e => {
   const b = e.target.closest(".pick-item"); if (!b) return;
@@ -1339,7 +1368,7 @@ $("pickList").addEventListener("click", e => {
     const pu = perUnit(pickFood, u);
     $("pickPer").textContent = `Per ${u.label} (~${u.g}g): P ${fmt(pu.p)} · C ${fmt(pu.c)} · F ${fmt(pu.f)}`;
   } else {
-    $("pickPer").textContent = pickFood.cat === "veggies" ? "" : `Per 100g: P ${fmt(pickFood.protein || 0)} · C ${fmt(pickFood.carbs || 0)} · F ${fmt(pickFood.fat || 0)}`;
+    $("pickPer").textContent = `Per 100g: P ${fmt(pickFood.protein || 0)} · C ${fmt(pickFood.carbs || 0)} · F ${fmt(pickFood.fat || 0)} · Fiber ${fmt(+pickFood.fiber || 0)}`;
   }
   $("pickUnit").textContent = u ? u.label + "s" : "g";
   $("pickGrams").step = u ? "1" : "any";
@@ -1370,7 +1399,7 @@ $("pickAdd").addEventListener("click", () => {
   if (!pickFood) return;
   const g = pickGramsValue(), u = unitFor(pickFood);
   dayLog.meals[pickMeal].items.push({ name: pickFood.name, grams: Math.round(g * 10) / 10, p: +pickFood.protein || 0, c: +pickFood.carbs || 0, f: +pickFood.fat || 0,
-    ...(u ? { unit: u.label, unitG: u.g } : {}) });
+    fb: +pickFood.fiber || 0, ...(u ? { unit: u.label, unitG: u.g } : {}) });
   dayLog.legacy = null;
   closeOverlay("pickOverlay");
   logChanged();
@@ -1390,6 +1419,10 @@ function renderHistory() {
     ["Days logged", `${logged.length}<span class="muted" style="font-size:15px">/${histDays}</span>`, ""],
     ["Avg calories", logged.length ? Math.round(avg("kcal")).toLocaleString() : "—", `target ${tg.kcal.toLocaleString()}`],
     ["Avg protein", logged.length ? Math.round(avg("protein")) + "g" : "—", `target ${fmt(tg.protein)}g`],
+    (() => {
+      const fibs = logged.map(x => rowFiber(x.r)).filter(v => v != null);
+      return ["Avg fiber", fibs.length ? Math.round(fibs.reduce((s, v) => s + v, 0) / fibs.length) + "g" : "—", `goal ${tg.fiber}g`];
+    })(),
     ["On target", String(onTarget), "days within 10% of calories"],
   ].map(([l, v, s]) => `<div class="stat"><div class="stat-label">${l}</div><div class="stat-val">${v}</div><div class="stat-sub">${s}</div></div>`).join("");
 
@@ -1408,7 +1441,7 @@ function renderHistory() {
   $("histList").innerHTML = logged.slice().reverse().map(({ d, r }) => `
     <button class="hist-item" data-date="${d}">
       <div><div class="hist-date">${dayTitle(d)}</div>
-        <div class="hist-macros">P ${fmt(+r.protein || 0)}g · C ${fmt(+r.carbs || 0)}g · F ${fmt(+r.fat || 0)}g</div></div>
+        <div class="hist-macros">P ${fmt(+r.protein || 0)}g · C ${fmt(+r.carbs || 0)}g · F ${fmt(+r.fat || 0)}g${rowFiber(r) != null ? ` · Fiber ${fmt(rowFiber(r))}g` : ""}</div></div>
       <div class="hist-kcal">${(+r.kcal || 0).toLocaleString()}<small>kcal</small></div>
     </button>`).join("");
 }
@@ -1443,10 +1476,14 @@ function renderCalc() {
 
   if (isVeggies) {
     $("foodList").innerHTML = filtered.map(f => `
-      <div class="food veggie">
-        <div class="name">${escapeHtml(f.name)}</div>
+      <div class="food">
+        <div>
+          <div class="name">${escapeHtml(f.name)}</div>
+          <div class="meta">Per 100g · P ${fmt(f.protein||0)} / C ${fmt(f.carbs||0)} / F ${fmt(f.fat||0)} · Fiber ${fmt(+f.fiber||0)}g</div>
+        </div>
+        <div class="portion">${Math.round((f.protein||0)*4 + (f.carbs||0)*4 + (f.fat||0)*9)}<span class="u">kcal</span></div>
         <div class="food-actions">
-          <span class="free-tag">Free</span>
+          <button class="icon-btn" data-edit="${f._i}" aria-label="Edit">✎</button>
           <button class="icon-btn danger" data-del="${f._i}" aria-label="Delete">✕</button>
         </div>
       </div>`).join("");
@@ -1463,7 +1500,7 @@ function renderCalc() {
           <div class="name">${escapeHtml(f.name)}</div>
           <div class="meta">${u
             ? `Per ${u.label} (~${u.g}g): P ${fmt(pu.p)} / C ${fmt(pu.c)} / F ${fmt(pu.f)}`
-            : `${fmt(per100)}g ${currentMacro==="fat"?"fat":currentMacro} per 100g · P ${fmt(f.protein||0)} / C ${fmt(f.carbs||0)} / F ${fmt(f.fat||0)}`}</div>
+            : `${fmt(per100)}g ${currentMacro==="fat"?"fat":currentMacro} per 100g · P ${fmt(f.protein||0)} / C ${fmt(f.carbs||0)} / F ${fmt(f.fat||0)}${f.fiber ? ` · Fiber ${fmt(+f.fiber)}g` : ""}`}</div>
         </div>
         <div class="portion">${u
           ? `${fmt(Math.round(grams / u.g * 10) / 10)}<span class="u">${u.label}s</span>`
@@ -1505,13 +1542,13 @@ function openModal(index) {
   editIndex = index;
   if (index == null) {
     $("modalTitle").textContent = "Add food";
-    $("fName").value = $("fCarbs").value = $("fProtein").value = $("fFat").value = "";
+    $("fName").value = $("fCarbs").value = $("fProtein").value = $("fFat").value = $("fFiber").value = "";
     $("fCategory").value = currentMacro;
   } else {
     const f = foods[index];
     $("modalTitle").textContent = "Edit food";
     $("fName").value = f.name; $("fCarbs").value = f.carbs??0;
-    $("fProtein").value = f.protein??0; $("fFat").value = f.fat??0;
+    $("fProtein").value = f.protein??0; $("fFat").value = f.fat??0; $("fFiber").value = f.fiber??0;
     $("fCategory").value = f.cat||"carbs";
   }
   openOverlay("overlay");
@@ -1521,7 +1558,7 @@ function closeModal() { closeOverlay("overlay"); editIndex = null; }
 $("cancelBtn").addEventListener("click", closeModal);
 $("saveBtn").addEventListener("click", () => {
   const name = $("fName").value.trim(); if (!name) { $("fName").focus(); return; }
-  const food = { name, protein: parseFloat($("fProtein").value)||0, carbs: parseFloat($("fCarbs").value)||0, fat: parseFloat($("fFat").value)||0, cat: $("fCategory").value };
+  const food = { name, protein: parseFloat($("fProtein").value)||0, carbs: parseFloat($("fCarbs").value)||0, fat: parseFloat($("fFat").value)||0, fiber: parseFloat($("fFiber").value)||0, cat: $("fCategory").value };
   if (editIndex == null) foods.push(food); else foods[editIndex] = food;
   scheduleSave(); renderCalc(); closeModal();
 });
@@ -1560,41 +1597,50 @@ function calcPlate(plate, mm) {
     return list.map(f => fixed[f.name] || { food: f, grams: f[key] > 0 ? (rem / flex.length / f[key]) * 100 : 0, adjustable });
   };
 
-  const pTarget = mm.p;
+  // Veggies are the grams chosen (100g default); their macros come off the meal's targets first
+  const vegG = plate.vegG || {};
+  const vPortions = resolve(plate.veggies, "veggies").map(f => ({ food: f, grams: vegG[f.name] ?? 100, veg: true }));
+  const fromVeg = k => vPortions.reduce((s,x) => s + x.grams*(x.food[k]||0)/100, 0);
+
+  const pTarget = Math.max(0, mm.p - fromVeg("protein"));
   const pPortions = portion(pFoods, "protein", pTarget);
   const fatFromP   = pPortions.reduce((s,x) => s + x.grams*(x.food.fat  ||0)/100, 0);
   const carbsFromP = pPortions.reduce((s,x) => s + x.grams*(x.food.carbs||0)/100, 0);
 
-  const cTarget = Math.max(0, mm.c - carbsFromP);
+  const cTarget = Math.max(0, mm.c - fromVeg("carbs") - carbsFromP);
   const cPortions = portion(cFoods, "carbs", cTarget);
   const fatFromC = cPortions.reduce((s,x) => s + x.grams*(x.food.fat||0)/100, 0);
 
-  const fTarget = Math.max(0, mm.f - fatFromP - fatFromC);
+  const fTarget = Math.max(0, mm.f - fromVeg("fat") - fatFromP - fatFromC);
   const fPortions = portion(fFoods, "fat", fTarget);
 
-  const all = [...pPortions, ...cPortions, ...fPortions];
-  const actualP = all.reduce((s,x) => s + x.grams*(x.food.protein||0)/100, 0);
-  const actualC = all.reduce((s,x) => s + x.grams*(x.food.carbs  ||0)/100, 0);
-  const actualF = all.reduce((s,x) => s + x.grams*(x.food.fat    ||0)/100, 0);
-  return { pPortions, cPortions, fPortions, actualP, actualC, actualF,
+  const all = [...pPortions, ...cPortions, ...fPortions, ...vPortions];
+  const sum = k => all.reduce((s,x) => s + x.grams*(x.food[k]||0)/100, 0);
+  return { pPortions, cPortions, fPortions, vPortions,
+           actualP: sum("protein"), actualC: sum("carbs"), actualF: sum("fat"), actualFb: sum("fiber"),
            groupTarget: { protein: pTarget, carbs: cTarget, fat: fTarget } };
 }
 
 /* ═══ MEAL CARD HTML (plan + week) ═══ */
 function mealCardHTML(mealIdx, plate, mm, ctx, dayIdx, customLabel) {
-  const { pPortions, cPortions, fPortions, actualP, actualC, actualF } = calcPlate(plate, mm);
-  const anySelected = pPortions.length || cPortions.length || fPortions.length;
-  const veggieNames = foods.filter(f => f.cat==="veggies").map(f => escapeHtml(f.name)).join(" · ");
+  const { pPortions, cPortions, fPortions, vPortions, actualP, actualC, actualF, actualFb } = calcPlate(plate, mm);
+  const anySelected = pPortions.length || cPortions.length || fPortions.length || vPortions.length;
   const dataAttrs = ctx === "week"
     ? `data-ctx="week" data-day="${dayIdx}" data-meal="${mealIdx}"`
     : `data-ctx="plan" data-meal="${mealIdx}"`;
   const pAvail = foods.filter(f => f.cat==="protein" && !(plate.protein||[]).includes(f.name));
   const cAvail = foods.filter(f => f.cat==="carbs"   && !(plate.carbs  ||[]).includes(f.name));
   const fAvail = foods.filter(f => f.cat==="fat"     && !(plate.fat    ||[]).includes(f.name));
-  const foodItems = (portions, type) => portions.map(({food,grams,count,unit,pinned,adjustable}) => `
+  const vAvail = foods.filter(f => f.cat==="veggies" && !(plate.veggies||[]).includes(f.name));
+  const foodItems = (portions, type) => portions.map(({food,grams,count,unit,pinned,adjustable,veg}) => `
     <div class="macro-item">
       <span class="macro-item-name">${escapeHtml(food.name)}</span>
-      ${unit ? `<span class="cnt">
+      ${veg ? `<span class="cnt">
+          <button class="veg-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="-25" aria-label="25 grams less">−</button>
+          <span class="cnt-val">${fmt(grams)}<small>g</small></span>
+          <button class="veg-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="25" aria-label="25 grams more">+</button>
+        </span>`
+      : unit ? `<span class="cnt">
           <button class="cnt-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="-1" aria-label="One less">−</button>
           <span class="cnt-val">${fmt(count)}<small>${unit.label}${count === 1 ? "" : "s"}</small></span>
           <button class="cnt-btn" ${dataAttrs} data-name="${escapeHtml(food.name)}" data-delta="1" aria-label="One more">+</button>
@@ -1627,13 +1673,10 @@ function mealCardHTML(mealIdx, plate, mm, ctx, dayIdx, customLabel) {
       ${group("P", "p-dot", "protein", pAvail, "protein", pPortions)}
       ${group("C", "c-dot", "carbs",   cAvail, "carb",    cPortions)}
       ${group("F", "f-dot", "fat",     fAvail, "fat",     fPortions)}
+      ${group("V", "v-dot", "veggies", vAvail, "veggies", vPortions)}
       <div class="meal-footer">
-        <div class="veggie-list-wrap">
-          <span class="free-note">+ 1 cup veggies</span>
-          <span class="veggie-names">${veggieNames}</span>
-        </div>
-        <div style="text-align:right">
-          ${anySelected ? `<div class="meal-actual">Actual · P ${fmt(actualP)} / C ${fmt(actualC)} / F ${fmt(actualF)}</div>` : ""}
+        <div style="margin-left:auto;text-align:right">
+          ${anySelected ? `<div class="meal-actual">Actual · P ${fmt(actualP)} / C ${fmt(actualC)} / F ${fmt(actualF)} · Fiber ${fmt(actualFb)}g</div>` : ""}
           ${plate.pins && Object.keys(plate.pins).length ? `<button class="link-btn reset-split" ${dataAttrs} style="margin-top:6px">Reset to even split</button>` : ""}
         </div>
       </div>
@@ -1661,22 +1704,24 @@ function macrosForPlate(i) { return isSnackIdx(i) ? snackMacros() : mealMacros()
 function labelForPlate(i) { return isSnackIdx(i) ? "Snack" : `Meal ${i+1}`; }
 function renderPlan() {
   ensurePlates();
-  $("planKcal").innerHTML = `That's <b>${targets().kcal.toLocaleString()} kcal</b> a day. These targets are what your Log measures against.`;
+  const tg = targets();
+  $("planKcal").innerHTML = `That's <b>${tg.kcal.toLocaleString()} kcal</b> a day. These targets are what your Log measures against.`;
+  $("fiberUnit").textContent = plan.fiber > 0 ? "grams / day" : `auto: ${tg.fiber}g`;
   $("mealsGrid").innerHTML = plan.plates.map((plate,i) =>
     mealCardHTML(i, plate, macrosForPlate(i), "plan", null, labelForPlate(i))
   ).join("");
   renderDayTotals();
 }
 function dayTotals() {
-  let tP=0,tC=0,tF=0;
+  let tP=0,tC=0,tF=0,tFb=0;
   for (let i=0;i<plan.plates.length;i++) {
-    const {actualP,actualC,actualF} = calcPlate(plan.plates[i], macrosForPlate(i));
-    tP+=actualP; tC+=actualC; tF+=actualF;
+    const {actualP,actualC,actualF,actualFb} = calcPlate(plan.plates[i], macrosForPlate(i));
+    tP+=actualP; tC+=actualC; tF+=actualF; tFb+=actualFb;
   }
-  return { protein: tP, carbs: tC, fat: tF, kcal: Math.round(tP*4 + tC*4 + tF*9) };
+  return { protein: tP, carbs: tC, fat: tF, fiber: tFb, kcal: Math.round(tP*4 + tC*4 + tF*9) };
 }
 function renderDayTotals() {
-  const t = dayTotals();
+  const t = dayTotals(), tg = targets();
   const close = (a,target) => target>0 && Math.abs(a-target) <= target*0.05;
   const cell = (label, val, target) => `
       <div class="totals-macro${close(val,target)?" hit":""}">
@@ -1688,16 +1733,22 @@ function renderDayTotals() {
     <div class="totals-title">Day Total</div>
     <div class="totals-row">
       ${cell("Protein", t.protein, plan.protein)}${cell("Carbs", t.carbs, plan.carbs)}${cell("Fat", t.fat, plan.fat)}
+      <div class="totals-macro${t.fiber >= tg.fiber * 0.95 ? " hit" : ""}">
+        <span class="totals-macro-label">Fiber</span>
+        <span class="totals-macro-val${t.fiber >= tg.fiber * 0.95 ? " hit" : ""}">${fmt(t.fiber)}g</span>
+        <span class="totals-macro-target">goal: ${tg.fiber}g</span>
+      </div>
       <div class="totals-kcal"><span class="totals-kcal-label">Calories</span><span class="totals-kcal-val">${t.kcal}</span></div>
     </div>`;
 }
-["pMeals","pProtein","pCarbs","pFat","pSnackPct"].forEach(id => {
+["pMeals","pProtein","pCarbs","pFat","pFiber","pSnackPct"].forEach(id => {
   $(id).addEventListener("input", () => {
     if (readOnly()) return;
     plan.meals    = Math.max(1, Math.min(8, parseInt($("pMeals").value)||1));
     plan.protein  = parseFloat($("pProtein").value)||0;
     plan.carbs    = parseFloat($("pCarbs").value)||0;
     plan.fat      = parseFloat($("pFat").value)||0;
+    plan.fiber    = parseFloat($("pFiber").value) || null;
     plan.snackPct = Math.max(5, Math.min(40, parseFloat($("pSnackPct").value)||15));
     scheduleSave(); renderPlan();
   });
@@ -1742,8 +1793,8 @@ function renderWeekPrep() {
   const totals = {};
   for (const day of weekPlan.days) {
     for (let i=0;i<day.plates.length;i++) {
-      const {pPortions,cPortions,fPortions} = calcPlate(day.plates[i], macrosForPlate(i));
-      for (const {food,grams} of [...pPortions,...cPortions,...fPortions]) {
+      const {pPortions,cPortions,fPortions,vPortions} = calcPlate(day.plates[i], macrosForPlate(i));
+      for (const {food,grams} of [...pPortions,...cPortions,...fPortions,...vPortions]) {
         if (grams <= 0) continue;
         if (!totals[food.name]) totals[food.name] = { grams:0, cat:food.cat };
         totals[food.name].grams += grams;
@@ -1755,12 +1806,12 @@ function renderWeekPrep() {
     $("weekPrep").innerHTML = `<div class="prep-title">Weekly Prep List</div><p style="color:var(--muted);font-size:14px;margin:0">Fill in meals across the week to generate your shopping list.</p>`;
     return;
   }
-  const groups = { protein:[], carbs:[], fat:[] };
+  const groups = { protein:[], carbs:[], fat:[], veggies:[] };
   for (const [name,{grams,cat}] of entries.sort((a,b) => b[1].grams - a[1].grams))
     if (groups[cat]) groups[cat].push({name,grams});
-  const catLabels = { protein:"Proteins", carbs:"Carbs", fat:"Fats" };
+  const catLabels = { protein:"Proteins", carbs:"Carbs", fat:"Fats", veggies:"Veggies" };
   let html = `<div class="prep-title">Weekly Prep List</div>`;
-  for (const cat of ["protein","carbs","fat"]) {
+  for (const cat of ["protein","carbs","fat","veggies"]) {
     if (!groups[cat].length) continue;
     html += `<div class="prep-section"><div class="prep-section-label">${catLabels[cat]}</div>`;
     for (const {name,grams} of groups[cat]) {
@@ -1806,6 +1857,7 @@ function handleRemoveFood(btn) {
   const plates = btn.dataset.ctx === "plan" ? plan.plates : weekPlan.days[parseInt(btn.dataset.day, 10)].plates;
   plates[mealIdx][type] = (plates[mealIdx][type]||[]).filter(n => n !== name);
   if (plates[mealIdx].counts) delete plates[mealIdx].counts[name];
+  if (plates[mealIdx].vegG) delete plates[mealIdx].vegG[name];
   if (plates[mealIdx].pins) {
     delete plates[mealIdx].pins[name];
     // Something in the group has to stay free to absorb the difference
@@ -1848,6 +1900,17 @@ function handleAdjust(btn) {
   scheduleSave();
   btn.dataset.ctx === "plan" ? renderPlan() : renderWeek(dayIdx);
 }
+// Veggies: +/- 25g; the other foods in the meal shrink or grow to absorb their calories
+function handleVeg(btn) {
+  if (readOnly()) return;
+  const dayIdx = parseInt(btn.dataset.day, 10);
+  const plates = btn.dataset.ctx === "plan" ? plan.plates : weekPlan.days[dayIdx].plates;
+  const plate = plates[parseInt(btn.dataset.meal, 10)];
+  const vegG = plate.vegG = plate.vegG || {};
+  vegG[btn.dataset.name] = Math.max(25, Math.min(600, (vegG[btn.dataset.name] ?? 100) + parseInt(btn.dataset.delta, 10)));
+  scheduleSave();
+  btn.dataset.ctx === "plan" ? renderPlan() : renderWeek(dayIdx);
+}
 function handleResetSplit(btn) {
   if (readOnly()) return;
   const dayIdx = parseInt(btn.dataset.day, 10);
@@ -1872,6 +1935,7 @@ document.addEventListener("click", e => {
   const btn = e.target.closest(".rm-food"); if (btn) handleRemoveFood(btn);
   const cnt = e.target.closest(".cnt-btn"); if (cnt) handleCount(cnt);
   const adj = e.target.closest(".adj-btn"); if (adj) handleAdjust(adj);
+  const vb = e.target.closest(".veg-btn"); if (vb) handleVeg(vb);
   const rs = e.target.closest(".reset-split"); if (rs) handleResetSplit(rs);
 });
 
