@@ -41,9 +41,13 @@
 <label class="choice"><input type="radio" name="goal" value="other" data-noedit><div class="opt"><b>Something else</b></div></label>
 </div>
 </div>
+<div class="field cond" data-q="goal_other" data-show-if="goal=other">
+<label>Tell me more</label>
+<div class="ctl"><textarea name="goal_other" rows="3" data-noedit></textarea></div>
+</div>
 <div class="field" data-q="long_term_goal">
 <label>What's your long-term fitness goal?</label>
-<div class="ctl"><textarea name="long_term_goal" rows="3" data-noedit></textarea></div>
+<div class="ctl"><textarea name="long_term_goal" rows="4" data-noedit></textarea></div>
 </div>
 </section>
 
@@ -82,6 +86,10 @@
 <label class="choice"><input type="checkbox" name="trt_topics" value="none" data-noedit><div class="opt"><b>Not interested</b></div></label>
 </div>
 </div>
+<div class="field" data-q="trt_topics_other">
+<label>Any other TRT topic you'd want me to cover?</label>
+<div class="ctl"><textarea name="trt_topics_other" rows="3" data-noedit></textarea></div>
+</div>
 </section>
 
 <section class="card">
@@ -108,6 +116,10 @@
 <label class="choice"><input type="checkbox" name="aas_topics" value="peptides" data-noedit><div class="opt"><b>Peptides and SARMs</b></div></label>
 </div>
 </div>
+<div class="field cond" data-q="aas_topics_other" data-show-if="aas_interest=yes,maybe">
+<label>Any other steroid topic you'd want me to cover?</label>
+<div class="ctl"><textarea name="aas_topics_other" rows="3" data-noedit></textarea></div>
+</div>
 <div class="field" data-q="considering">
 <label>Thinking about TRT or using steroids?</label>
 <div class="choices">
@@ -131,7 +143,23 @@
 </div>
 <div class="field cond" data-q="health_details" data-show-if="health=yes">
 <label>What are they?</label>
-<div class="ctl"><textarea name="health_details" rows="3" data-noedit></textarea></div>
+<div class="ctl"><textarea name="health_details" rows="4" data-noedit></textarea></div>
+</div>
+</section>
+
+<section class="card">
+<div class="sec-head"><div class="sec-num">6</div><h2 class="sec-title">In Your Own Words</h2></div>
+<div class="field" data-q="holding_back">
+<label>What's the biggest thing holding you back right now?</label>
+<div class="ctl"><textarea name="holding_back" rows="4" data-noedit></textarea></div>
+</div>
+<div class="field" data-q="ask_me">
+<label>What's one question you'd want me to answer in an email?</label>
+<div class="ctl"><textarea name="ask_me" rows="4" data-noedit></textarea></div>
+</div>
+<div class="field" data-q="anything_else">
+<label>Anything else you'd like me to know about you?</label>
+<div class="ctl"><textarea name="anything_else" rows="5" data-noedit></textarea></div>
 </div>
 </section>
 

@@ -35,6 +35,9 @@
   });
   refreshConds();
 
+  function grow(t) { t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight + 2, 600) + "px"; }
+  form.addEventListener("input", function (e) { if (e.target.tagName === "TEXTAREA") grow(e.target); });
+
   function txt(el) { return el ? el.textContent.replace(/\s+/g, " ").trim() : ""; }
   function visible(el) { return el && el.offsetParent !== null; }
 

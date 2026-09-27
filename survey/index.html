@@ -44,7 +44,7 @@
     font-family:var(--body);font-size:16px;line-height:1.5;outline:none;transition:border-color .15s,box-shadow .15s;
   }
   input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
-  textarea{resize:vertical;display:block}
+  textarea{resize:vertical;display:block;min-height:84px;overflow:hidden}
   .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .minilab{display:block;font-size:12.5px;font-weight:600;color:var(--mut);margin-bottom:5px}
 
@@ -160,109 +160,137 @@
 <label data-eid="s60" class="choice"><input data-eid="s61" type="radio" name="goal" value="other" data-noedit><div data-eid="s62" class="opt"><b data-eid="s63">Something else</b></div></label>
 </div>
 </div>
-<div data-eid="s64" class="field" data-q="long_term_goal">
-<label data-eid="s65">What's your long-term fitness goal?</label>
-<div data-eid="s66" class="ctl"><textarea data-eid="s67" name="long_term_goal" rows="3" data-noedit></textarea></div>
+<div data-eid="s64" class="field cond" data-q="goal_other" data-show-if="goal=other">
+<label data-eid="s65">Tell me more</label>
+<div data-eid="s66" class="ctl"><textarea data-eid="s67" name="goal_other" rows="3" data-noedit></textarea></div>
+</div>
+<div data-eid="s68" class="field" data-q="long_term_goal">
+<label data-eid="s69">What's your long-term fitness goal?</label>
+<div data-eid="s70" class="ctl"><textarea data-eid="s71" name="long_term_goal" rows="4" data-noedit></textarea></div>
 </div>
 </section>
 
-<section data-eid="s68" class="card">
-<div data-eid="s69" class="sec-head"><div data-eid="s70" class="sec-num">3</div><h2 data-eid="s71" class="sec-title">TRT</h2></div>
-<div data-eid="s72" class="field" data-q="on_trt">
-<label data-eid="s73">Are you currently on TRT?</label>
-<div data-eid="s74" class="choices">
-<label data-eid="s75" class="choice"><input data-eid="s76" type="radio" name="on_trt" value="yes" data-noedit><div data-eid="s77" class="opt"><b data-eid="s78">Yes</b></div></label>
-<label data-eid="s79" class="choice"><input data-eid="s80" type="radio" name="on_trt" value="no" data-noedit><div data-eid="s81" class="opt"><b data-eid="s82">No</b></div></label>
-<label data-eid="s83" class="choice"><input data-eid="s84" type="radio" name="on_trt" value="used-to" data-noedit><div data-eid="s85" class="opt"><b data-eid="s86">I used to be</b></div></label>
+<section data-eid="s72" class="card">
+<div data-eid="s73" class="sec-head"><div data-eid="s74" class="sec-num">3</div><h2 data-eid="s75" class="sec-title">TRT</h2></div>
+<div data-eid="s76" class="field" data-q="on_trt">
+<label data-eid="s77">Are you currently on TRT?</label>
+<div data-eid="s78" class="choices">
+<label data-eid="s79" class="choice"><input data-eid="s80" type="radio" name="on_trt" value="yes" data-noedit><div data-eid="s81" class="opt"><b data-eid="s82">Yes</b></div></label>
+<label data-eid="s83" class="choice"><input data-eid="s84" type="radio" name="on_trt" value="no" data-noedit><div data-eid="s85" class="opt"><b data-eid="s86">No</b></div></label>
+<label data-eid="s87" class="choice"><input data-eid="s88" type="radio" name="on_trt" value="used-to" data-noedit><div data-eid="s89" class="opt"><b data-eid="s90">I used to be</b></div></label>
 </div>
 </div>
-<div data-eid="s87" class="field" data-q="trt_interest">
-<label data-eid="s88">Are you interested in TRT?</label>
-<div data-eid="s89" class="choices">
-<label data-eid="s90" class="choice"><input data-eid="s91" type="radio" name="trt_interest" value="yes" data-noedit><div data-eid="s92" class="opt"><b data-eid="s93">Yes</b></div></label>
-<label data-eid="s94" class="choice"><input data-eid="s95" type="radio" name="trt_interest" value="maybe" data-noedit><div data-eid="s96" class="opt"><b data-eid="s97">Maybe</b></div></label>
-<label data-eid="s98" class="choice"><input data-eid="s99" type="radio" name="trt_interest" value="no" data-noedit><div data-eid="s100" class="opt"><b data-eid="s101">No</b></div></label>
+<div data-eid="s91" class="field" data-q="trt_interest">
+<label data-eid="s92">Are you interested in TRT?</label>
+<div data-eid="s93" class="choices">
+<label data-eid="s94" class="choice"><input data-eid="s95" type="radio" name="trt_interest" value="yes" data-noedit><div data-eid="s96" class="opt"><b data-eid="s97">Yes</b></div></label>
+<label data-eid="s98" class="choice"><input data-eid="s99" type="radio" name="trt_interest" value="maybe" data-noedit><div data-eid="s100" class="opt"><b data-eid="s101">Maybe</b></div></label>
+<label data-eid="s102" class="choice"><input data-eid="s103" type="radio" name="trt_interest" value="no" data-noedit><div data-eid="s104" class="opt"><b data-eid="s105">No</b></div></label>
 </div>
 </div>
-<div data-eid="s102" class="field" data-q="trt_topics">
-<label data-eid="s103">Are you interested in troubleshooting TRT content? If so, can you specify which topics below?</label>
-<p data-eid="s104" class="hint">Pick as many as you like.</p>
-<div data-eid="s105" class="choices">
-<label data-eid="s106" class="choice"><input data-eid="s107" type="checkbox" name="trt_topics" value="estrogen" data-noedit><div data-eid="s108" class="opt"><b data-eid="s109">High estrogen / estradiol side effects</b></div></label>
-<label data-eid="s110" class="choice"><input data-eid="s111" type="checkbox" name="trt_topics" value="hematocrit" data-noedit><div data-eid="s112" class="opt"><b data-eid="s113">High hematocrit / red blood cells</b></div></label>
-<label data-eid="s114" class="choice"><input data-eid="s115" type="checkbox" name="trt_topics" value="libido" data-noedit><div data-eid="s116" class="opt"><b data-eid="s117">Low libido or ED while on TRT</b></div></label>
-<label data-eid="s118" class="choice"><input data-eid="s119" type="checkbox" name="trt_topics" value="still-tired" data-noedit><div data-eid="s120" class="opt"><b data-eid="s121">Still tired or flat on TRT</b></div></label>
-<label data-eid="s122" class="choice"><input data-eid="s123" type="checkbox" name="trt_topics" value="dosing" data-noedit><div data-eid="s124" class="opt"><b data-eid="s125">Dosing and injection frequency</b></div></label>
-<label data-eid="s126" class="choice"><input data-eid="s127" type="checkbox" name="trt_topics" value="bloodwork" data-noedit><div data-eid="s128" class="opt"><b data-eid="s129">Bloodwork: what to test and how to read it</b></div></label>
-<label data-eid="s130" class="choice"><input data-eid="s131" type="checkbox" name="trt_topics" value="fertility" data-noedit><div data-eid="s132" class="opt"><b data-eid="s133">Fertility and HCG</b></div></label>
-<label data-eid="s134" class="choice"><input data-eid="s135" type="checkbox" name="trt_topics" value="hair-skin" data-noedit><div data-eid="s136" class="opt"><b data-eid="s137">Hair loss and acne</b></div></label>
-<label data-eid="s138" class="choice"><input data-eid="s139" type="checkbox" name="trt_topics" value="blood-pressure" data-noedit><div data-eid="s140" class="opt"><b data-eid="s141">Blood pressure and heart health</b></div></label>
-<label data-eid="s142" class="choice"><input data-eid="s143" type="checkbox" name="trt_topics" value="doctor" data-noedit><div data-eid="s144" class="opt"><b data-eid="s145">Finding a good doctor or clinic</b></div></label>
-<label data-eid="s146" class="choice"><input data-eid="s147" type="checkbox" name="trt_topics" value="none" data-noedit><div data-eid="s148" class="opt"><b data-eid="s149">Not interested</b></div></label>
+<div data-eid="s106" class="field" data-q="trt_topics">
+<label data-eid="s107">Are you interested in troubleshooting TRT content? If so, can you specify which topics below?</label>
+<p data-eid="s108" class="hint">Pick as many as you like.</p>
+<div data-eid="s109" class="choices">
+<label data-eid="s110" class="choice"><input data-eid="s111" type="checkbox" name="trt_topics" value="estrogen" data-noedit><div data-eid="s112" class="opt"><b data-eid="s113">High estrogen / estradiol side effects</b></div></label>
+<label data-eid="s114" class="choice"><input data-eid="s115" type="checkbox" name="trt_topics" value="hematocrit" data-noedit><div data-eid="s116" class="opt"><b data-eid="s117">High hematocrit / red blood cells</b></div></label>
+<label data-eid="s118" class="choice"><input data-eid="s119" type="checkbox" name="trt_topics" value="libido" data-noedit><div data-eid="s120" class="opt"><b data-eid="s121">Low libido or ED while on TRT</b></div></label>
+<label data-eid="s122" class="choice"><input data-eid="s123" type="checkbox" name="trt_topics" value="still-tired" data-noedit><div data-eid="s124" class="opt"><b data-eid="s125">Still tired or flat on TRT</b></div></label>
+<label data-eid="s126" class="choice"><input data-eid="s127" type="checkbox" name="trt_topics" value="dosing" data-noedit><div data-eid="s128" class="opt"><b data-eid="s129">Dosing and injection frequency</b></div></label>
+<label data-eid="s130" class="choice"><input data-eid="s131" type="checkbox" name="trt_topics" value="bloodwork" data-noedit><div data-eid="s132" class="opt"><b data-eid="s133">Bloodwork: what to test and how to read it</b></div></label>
+<label data-eid="s134" class="choice"><input data-eid="s135" type="checkbox" name="trt_topics" value="fertility" data-noedit><div data-eid="s136" class="opt"><b data-eid="s137">Fertility and HCG</b></div></label>
+<label data-eid="s138" class="choice"><input data-eid="s139" type="checkbox" name="trt_topics" value="hair-skin" data-noedit><div data-eid="s140" class="opt"><b data-eid="s141">Hair loss and acne</b></div></label>
+<label data-eid="s142" class="choice"><input data-eid="s143" type="checkbox" name="trt_topics" value="blood-pressure" data-noedit><div data-eid="s144" class="opt"><b data-eid="s145">Blood pressure and heart health</b></div></label>
+<label data-eid="s146" class="choice"><input data-eid="s147" type="checkbox" name="trt_topics" value="doctor" data-noedit><div data-eid="s148" class="opt"><b data-eid="s149">Finding a good doctor or clinic</b></div></label>
+<label data-eid="s150" class="choice"><input data-eid="s151" type="checkbox" name="trt_topics" value="none" data-noedit><div data-eid="s152" class="opt"><b data-eid="s153">Not interested</b></div></label>
+</div>
+</div>
+<div data-eid="s154" class="field" data-q="trt_topics_other">
+<label data-eid="s155">Any other TRT topic you'd want me to cover?</label>
+<div data-eid="s156" class="ctl"><textarea data-eid="s157" name="trt_topics_other" rows="3" data-noedit></textarea></div>
+</div>
+</section>
+
+<section data-eid="s158" class="card">
+<div data-eid="s159" class="sec-head"><div data-eid="s160" class="sec-num">4</div><h2 data-eid="s161" class="sec-title">Anabolic Steroids</h2></div>
+<div data-eid="s162" class="field" data-q="aas_interest">
+<label data-eid="s163">Are you interested in anabolic steroid use content?</label>
+<div data-eid="s164" class="choices">
+<label data-eid="s165" class="choice"><input data-eid="s166" type="radio" name="aas_interest" value="yes" data-noedit><div data-eid="s167" class="opt"><b data-eid="s168">Yes</b></div></label>
+<label data-eid="s169" class="choice"><input data-eid="s170" type="radio" name="aas_interest" value="maybe" data-noedit><div data-eid="s171" class="opt"><b data-eid="s172">Maybe</b></div></label>
+<label data-eid="s173" class="choice"><input data-eid="s174" type="radio" name="aas_interest" value="no" data-noedit><div data-eid="s175" class="opt"><b data-eid="s176">No</b></div></label>
+</div>
+</div>
+<div data-eid="s177" class="field cond" data-q="aas_topics" data-show-if="aas_interest=yes,maybe">
+<label data-eid="s178">If so, can you specify which topics below?</label>
+<p data-eid="s179" class="hint">Pick as many as you like.</p>
+<div data-eid="s180" class="choices">
+<label data-eid="s181" class="choice"><input data-eid="s182" type="checkbox" name="aas_topics" value="first-cycle" data-noedit><div data-eid="s183" class="opt"><b data-eid="s184">Planning a first cycle</b></div></label>
+<label data-eid="s185" class="choice"><input data-eid="s186" type="checkbox" name="aas_topics" value="harm-reduction" data-noedit><div data-eid="s187" class="opt"><b data-eid="s188">Harm reduction: protecting heart, liver and lipids</b></div></label>
+<label data-eid="s189" class="choice"><input data-eid="s190" type="checkbox" name="aas_topics" value="bloodwork" data-noedit><div data-eid="s191" class="opt"><b data-eid="s192">Bloodwork before, during and after</b></div></label>
+<label data-eid="s193" class="choice"><input data-eid="s194" type="checkbox" name="aas_topics" value="side-effects" data-noedit><div data-eid="s195" class="opt"><b data-eid="s196">Managing side effects</b></div></label>
+<label data-eid="s197" class="choice"><input data-eid="s198" type="checkbox" name="aas_topics" value="orals" data-noedit><div data-eid="s199" class="opt"><b data-eid="s200">Orals vs. injectables</b></div></label>
+<label data-eid="s201" class="choice"><input data-eid="s202" type="checkbox" name="aas_topics" value="pct" data-noedit><div data-eid="s203" class="opt"><b data-eid="s204">Coming off: PCT and recovery</b></div></label>
+<label data-eid="s205" class="choice"><input data-eid="s206" type="checkbox" name="aas_topics" value="cruise" data-noedit><div data-eid="s207" class="opt"><b data-eid="s208">Blast and cruise</b></div></label>
+<label data-eid="s209" class="choice"><input data-eid="s210" type="checkbox" name="aas_topics" value="peptides" data-noedit><div data-eid="s211" class="opt"><b data-eid="s212">Peptides and SARMs</b></div></label>
+</div>
+</div>
+<div data-eid="s213" class="field cond" data-q="aas_topics_other" data-show-if="aas_interest=yes,maybe">
+<label data-eid="s214">Any other steroid topic you'd want me to cover?</label>
+<div data-eid="s215" class="ctl"><textarea data-eid="s216" name="aas_topics_other" rows="3" data-noedit></textarea></div>
+</div>
+<div data-eid="s217" class="field" data-q="considering">
+<label data-eid="s218">Thinking about TRT or using steroids?</label>
+<div data-eid="s219" class="choices">
+<label data-eid="s220" class="choice"><input data-eid="s221" type="radio" name="considering" value="trt" data-noedit><div data-eid="s222" class="opt"><b data-eid="s223">Thinking about TRT</b></div></label>
+<label data-eid="s224" class="choice"><input data-eid="s225" type="radio" name="considering" value="steroids" data-noedit><div data-eid="s226" class="opt"><b data-eid="s227">Thinking about steroids</b></div></label>
+<label data-eid="s228" class="choice"><input data-eid="s229" type="radio" name="considering" value="both" data-noedit><div data-eid="s230" class="opt"><b data-eid="s231">Both</b></div></label>
+<label data-eid="s232" class="choice"><input data-eid="s233" type="radio" name="considering" value="already" data-noedit><div data-eid="s234" class="opt"><b data-eid="s235">Already using</b></div></label>
+<label data-eid="s236" class="choice"><input data-eid="s237" type="radio" name="considering" value="neither" data-noedit><div data-eid="s238" class="opt"><b data-eid="s239">Neither</b></div></label>
 </div>
 </div>
 </section>
 
-<section data-eid="s150" class="card">
-<div data-eid="s151" class="sec-head"><div data-eid="s152" class="sec-num">4</div><h2 data-eid="s153" class="sec-title">Anabolic Steroids</h2></div>
-<div data-eid="s154" class="field" data-q="aas_interest">
-<label data-eid="s155">Are you interested in anabolic steroid use content?</label>
-<div data-eid="s156" class="choices">
-<label data-eid="s157" class="choice"><input data-eid="s158" type="radio" name="aas_interest" value="yes" data-noedit><div data-eid="s159" class="opt"><b data-eid="s160">Yes</b></div></label>
-<label data-eid="s161" class="choice"><input data-eid="s162" type="radio" name="aas_interest" value="maybe" data-noedit><div data-eid="s163" class="opt"><b data-eid="s164">Maybe</b></div></label>
-<label data-eid="s165" class="choice"><input data-eid="s166" type="radio" name="aas_interest" value="no" data-noedit><div data-eid="s167" class="opt"><b data-eid="s168">No</b></div></label>
+<section data-eid="s240" class="card">
+<div data-eid="s241" class="sec-head"><div data-eid="s242" class="sec-num">5</div><h2 data-eid="s243" class="sec-title">Health</h2></div>
+<div data-eid="s244" class="field" data-q="health">
+<label data-eid="s245">Have you had any medical or health conditions that you're working to reverse?</label>
+<div data-eid="s246" class="choices">
+<label data-eid="s247" class="choice"><input data-eid="s248" type="radio" name="health" value="yes" data-noedit><div data-eid="s249" class="opt"><b data-eid="s250">Yes</b></div></label>
+<label data-eid="s251" class="choice"><input data-eid="s252" type="radio" name="health" value="no" data-noedit><div data-eid="s253" class="opt"><b data-eid="s254">No</b></div></label>
 </div>
 </div>
-<div data-eid="s169" class="field cond" data-q="aas_topics" data-show-if="aas_interest=yes,maybe">
-<label data-eid="s170">If so, can you specify which topics below?</label>
-<p data-eid="s171" class="hint">Pick as many as you like.</p>
-<div data-eid="s172" class="choices">
-<label data-eid="s173" class="choice"><input data-eid="s174" type="checkbox" name="aas_topics" value="first-cycle" data-noedit><div data-eid="s175" class="opt"><b data-eid="s176">Planning a first cycle</b></div></label>
-<label data-eid="s177" class="choice"><input data-eid="s178" type="checkbox" name="aas_topics" value="harm-reduction" data-noedit><div data-eid="s179" class="opt"><b data-eid="s180">Harm reduction: protecting heart, liver and lipids</b></div></label>
-<label data-eid="s181" class="choice"><input data-eid="s182" type="checkbox" name="aas_topics" value="bloodwork" data-noedit><div data-eid="s183" class="opt"><b data-eid="s184">Bloodwork before, during and after</b></div></label>
-<label data-eid="s185" class="choice"><input data-eid="s186" type="checkbox" name="aas_topics" value="side-effects" data-noedit><div data-eid="s187" class="opt"><b data-eid="s188">Managing side effects</b></div></label>
-<label data-eid="s189" class="choice"><input data-eid="s190" type="checkbox" name="aas_topics" value="orals" data-noedit><div data-eid="s191" class="opt"><b data-eid="s192">Orals vs. injectables</b></div></label>
-<label data-eid="s193" class="choice"><input data-eid="s194" type="checkbox" name="aas_topics" value="pct" data-noedit><div data-eid="s195" class="opt"><b data-eid="s196">Coming off: PCT and recovery</b></div></label>
-<label data-eid="s197" class="choice"><input data-eid="s198" type="checkbox" name="aas_topics" value="cruise" data-noedit><div data-eid="s199" class="opt"><b data-eid="s200">Blast and cruise</b></div></label>
-<label data-eid="s201" class="choice"><input data-eid="s202" type="checkbox" name="aas_topics" value="peptides" data-noedit><div data-eid="s203" class="opt"><b data-eid="s204">Peptides and SARMs</b></div></label>
-</div>
-</div>
-<div data-eid="s205" class="field" data-q="considering">
-<label data-eid="s206">Thinking about TRT or using steroids?</label>
-<div data-eid="s207" class="choices">
-<label data-eid="s208" class="choice"><input data-eid="s209" type="radio" name="considering" value="trt" data-noedit><div data-eid="s210" class="opt"><b data-eid="s211">Thinking about TRT</b></div></label>
-<label data-eid="s212" class="choice"><input data-eid="s213" type="radio" name="considering" value="steroids" data-noedit><div data-eid="s214" class="opt"><b data-eid="s215">Thinking about steroids</b></div></label>
-<label data-eid="s216" class="choice"><input data-eid="s217" type="radio" name="considering" value="both" data-noedit><div data-eid="s218" class="opt"><b data-eid="s219">Both</b></div></label>
-<label data-eid="s220" class="choice"><input data-eid="s221" type="radio" name="considering" value="already" data-noedit><div data-eid="s222" class="opt"><b data-eid="s223">Already using</b></div></label>
-<label data-eid="s224" class="choice"><input data-eid="s225" type="radio" name="considering" value="neither" data-noedit><div data-eid="s226" class="opt"><b data-eid="s227">Neither</b></div></label>
-</div>
+<div data-eid="s255" class="field cond" data-q="health_details" data-show-if="health=yes">
+<label data-eid="s256">What are they?</label>
+<div data-eid="s257" class="ctl"><textarea data-eid="s258" name="health_details" rows="4" data-noedit></textarea></div>
 </div>
 </section>
 
-<section data-eid="s228" class="card">
-<div data-eid="s229" class="sec-head"><div data-eid="s230" class="sec-num">5</div><h2 data-eid="s231" class="sec-title">Health</h2></div>
-<div data-eid="s232" class="field" data-q="health">
-<label data-eid="s233">Have you had any medical or health conditions that you're working to reverse?</label>
-<div data-eid="s234" class="choices">
-<label data-eid="s235" class="choice"><input data-eid="s236" type="radio" name="health" value="yes" data-noedit><div data-eid="s237" class="opt"><b data-eid="s238">Yes</b></div></label>
-<label data-eid="s239" class="choice"><input data-eid="s240" type="radio" name="health" value="no" data-noedit><div data-eid="s241" class="opt"><b data-eid="s242">No</b></div></label>
+<section data-eid="s259" class="card">
+<div data-eid="s260" class="sec-head"><div data-eid="s261" class="sec-num">6</div><h2 data-eid="s262" class="sec-title">In Your Own Words</h2></div>
+<div data-eid="s263" class="field" data-q="holding_back">
+<label data-eid="s264">What's the biggest thing holding you back right now?</label>
+<div data-eid="s265" class="ctl"><textarea data-eid="s266" name="holding_back" rows="4" data-noedit></textarea></div>
 </div>
+<div data-eid="s267" class="field" data-q="ask_me">
+<label data-eid="s268">What's one question you'd want me to answer in an email?</label>
+<div data-eid="s269" class="ctl"><textarea data-eid="s270" name="ask_me" rows="4" data-noedit></textarea></div>
 </div>
-<div data-eid="s243" class="field cond" data-q="health_details" data-show-if="health=yes">
-<label data-eid="s244">What are they?</label>
-<div data-eid="s245" class="ctl"><textarea data-eid="s246" name="health_details" rows="3" data-noedit></textarea></div>
+<div data-eid="s271" class="field" data-q="anything_else">
+<label data-eid="s272">Anything else you'd like me to know about you?</label>
+<div data-eid="s273" class="ctl"><textarea data-eid="s274" name="anything_else" rows="5" data-noedit></textarea></div>
 </div>
 </section>
 
-<div data-eid="s247" class="actions">
-<p data-eid="s248" class="err" id="err" data-noedit></p>
-<button data-eid="s249" type="submit" class="submit" id="go"><span data-eid="s250">Submit</span></button>
+<div data-eid="s275" class="actions">
+<p data-eid="s276" class="err" id="err" data-noedit></p>
+<button data-eid="s277" type="submit" class="submit" id="go"><span data-eid="s278">Submit</span></button>
 </div>
 </form>
 
-<section data-eid="s251" class="card done" id="done" hidden>
-<h2 data-eid="s252" class="sec-title">Thank you!</h2>
-<p data-eid="s253">Got your answers.</p>
+<section data-eid="s279" class="card done" id="done" hidden>
+<h2 data-eid="s280" class="sec-title">Thank you!</h2>
+<p data-eid="s281">Got your answers.</p>
 </section>
 </div>
 
@@ -302,6 +330,9 @@
     refreshConds();
   });
   refreshConds();
+
+  function grow(t) { t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight + 2, 600) + "px"; }
+  form.addEventListener("input", function (e) { if (e.target.tagName === "TEXTAREA") grow(e.target); });
 
   function txt(el) { return el ? el.textContent.replace(/\s+/g, " ").trim() : ""; }
   function visible(el) { return el && el.offsetParent !== null; }
