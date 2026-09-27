@@ -1,0 +1,100 @@
+<script>
+/* Audience survey → trt-guy-onboarding worker /survey.
+   The email link carries ?cid={{contact.id}} so answers attach to the subscriber who
+   clicked and the email box is hidden. Without it the page asks for an email.
+   Question and option wording is read from the LIVE page at submit time, so anything
+   Julian rewords in the editor is what lands in the GHL note. Tags come from the
+   option `value`s, which the editor never touches. */
+(function () {
+  var API = "https://trt-guy-onboarding.julianhierro.workers.dev/survey";
+  var form = document.getElementById("form");
+  var q = new URLSearchParams(location.search);
+  var cid = (q.get("cid") || q.get("contact_id") || "").trim();
+  if (!/^[A-Za-z0-9]{10,40}$/.test(cid)) cid = "";
+  if (cid) {
+    ["emailField", "nameField"].forEach(function (id) { var f = document.getElementById(id); if (f) f.style.display = "none"; });
+  }
+
+  // Show follow-up questions only when they apply.
+  function refreshConds() {
+    document.querySelectorAll("[data-show-if]").forEach(function (el) {
+      var rule = el.getAttribute("data-show-if").split("="), name = rule[0], vals = rule[1].split(",");
+      var picked = form.querySelector('input[name="' + name + '"]:checked');
+      el.classList.toggle("on", !!(picked && vals.indexOf(picked.value) !== -1));
+    });
+  }
+  form.addEventListener("change", function (e) {
+    // "Not interested" clears the other topics, and picking a topic clears it.
+    var t = e.target;
+    if (t.type === "checkbox" && t.checked) {
+      form.querySelectorAll('input[name="' + t.name + '"]').forEach(function (o) {
+        if (o !== t && (t.value === "none" || o.value === "none")) o.checked = false;
+      });
+    }
+    refreshConds();
+  });
+  refreshConds();
+
+  function txt(el) { return el ? el.textContent.replace(/\s+/g, " ").trim() : ""; }
+  function visible(el) { return el && el.offsetParent !== null; }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (document.body.classList.contains("jv-editing")) return;
+    var err = document.getElementById("err"), go = document.getElementById("go");
+    err.textContent = "";
+    var email = (form.email.value || "").trim();
+    if (!cid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      err.textContent = "Please enter your email so I know who these answers are from.";
+      form.email.focus(); return;
+    }
+
+    var answers = {}, qa = [];
+    form.querySelectorAll(".field[data-q]").forEach(function (f) {
+      if (!visible(f)) return;
+      var key = f.getAttribute("data-q");
+      if (key === "email" || key === "first_name") return;
+      var label = txt(f.querySelector(":scope > label"));
+      var picked = f.querySelectorAll("input:checked");
+      if (picked.length) {
+        var vals = [], words = [];
+        picked.forEach(function (i) { vals.push(i.value); words.push(txt(i.closest(".choice").querySelector(".opt"))); });
+        answers[key] = picked[0].type === "checkbox" ? vals : vals[0];
+        qa.push({ q: label, a: words.join(", ") });
+        return;
+      }
+      if (key === "stats") {
+        ["age", "height", "weight"].forEach(function (n) { answers[n] = (form[n].value || "").trim(); });
+        var bits = [];
+        f.querySelectorAll(".mini").forEach(function (m) {
+          var v = m.querySelector("input").value.trim();
+          if (v) bits.push(txt(m.querySelector(".minilab")) + ": " + v);
+        });
+        if (bits.length) qa.push({ q: label, a: bits.join(" · ") });
+        return;
+      }
+      var box = f.querySelector("textarea, input[type=text]");
+      if (box && box.value.trim()) { answers[key] = box.value.trim(); qa.push({ q: label, a: box.value.trim() }); }
+    });
+
+    if (!qa.length) { err.textContent = "Answer at least one question first."; return; }
+
+    go.disabled = true; go.firstChild.textContent = "Sending…";
+    fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contactId: cid, email: email, firstName: (form.firstName.value || "").trim(), answers: answers, qa: qa })
+    })
+      .then(function (r) { return r.json().then(function (d) { if (!r.ok || !d.success) throw new Error(d.error || "failed"); }); })
+      .then(function () {
+        form.hidden = true;
+        var done = document.getElementById("done"); done.hidden = false;
+        done.scrollIntoView({ behavior: "smooth", block: "center" });
+      })
+      .catch(function () {
+        go.disabled = false; go.firstChild.textContent = "Submit";
+        err.textContent = "That didn't go through. Give it one more try.";
+      });
+  });
+})();
+</script>
