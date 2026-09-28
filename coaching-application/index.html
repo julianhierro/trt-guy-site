@@ -91,8 +91,10 @@
         <option value="No — just exploring">Just exploring</option>
       </select>
 
-      <label>Describe your current TRT protocol (total amount, injection frequency, and anything else you're taking) <span class="req">*</span></label>
-      <textarea id="trt_protocol" data-eid="e703" required></textarea>
+      <div id="trt_wrap" style="display:none">
+        <label>Describe your current TRT protocol (total amount, injection frequency, and anything else you're taking) <span class="req">*</span></label>
+        <textarea id="trt_protocol" data-eid="e703"></textarea>
+      </div>
 
       <label>Have you ever used steroids? <span class="req">*</span></label>
       <select id="ever_used_steroids" required>
@@ -101,15 +103,8 @@
         <option value="No">No</option>
       </select>
 
-      <label>Are you currently on a cycle? <span class="req">*</span></label>
-      <select id="on_cycle_now" required>
-        <option value="">Select…</option>
-        <option value="Yes">Yes</option>
-        <option value="No">No</option>
-      </select>
-
-      <div id="cycle_wrap" data-eid="e711" style="display:none">
-        <label>Describe your current cycle <span class="req">*</span></label>
+      <div id="steroid_wrap" data-eid="e711" style="display:none">
+        <label>Can you describe your current or past steroid usage? <span class="req">*</span></label>
         <textarea id="cycle_describe" data-eid="e714"></textarea>
       </div>
 
@@ -139,12 +134,6 @@
 
       <label>Why are you looking to make a change now? Is there a specific event you want to look good for? Are you tired of having a mediocre physique? Looking to take things to the next level? <span class="req">*</span></label>
       <textarea id="why_now_vs_wait" required></textarea>
-
-      <label>What’s your biggest challenge right now? <span class="req">*</span></label>
-      <textarea id="biggest_struggle" required></textarea>
-
-      <label>What would success look like for you if we were to work together? <span class="req">*</span></label>
-      <textarea id="success_definition" required></textarea>
 
       <label>What are you looking to get out of coaching? (guidance, accountability, a protocol that works, TRT guidance, PED guidance, etc) <span class="req">*</span></label>
       <textarea id="wants_from_coaching" required></textarea>
@@ -176,11 +165,12 @@ $('#appForm').addEventListener('submit', async function(e){
   if(!name){ err.textContent='Please enter your first name.'; return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent='Please enter a valid email.'; return; }
   if(!phone){ err.textContent='Please enter your phone.'; return; }
-  var ids=['instagram','based','occupation','age_height_weight','short_term_goals','long_term_goals','on_trt','trt_protocol','ever_used_steroids','on_cycle_now','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','biggest_struggle','success_definition','wants_from_coaching','help_accomplish'];
+  var ids=['instagram','based','occupation','age_height_weight','short_term_goals','long_term_goals','on_trt','ever_used_steroids','investment_ready','ready_to_start','decision_maker','why_now_vs_wait','wants_from_coaching','help_accomplish'];
   var payload={firstName:name,email:email,phone:phone,qa:[]};
   for(var i=0;i<ids.length;i++){ var v=$('#'+ids[i]).value.trim(); if(!v){ err.textContent='Please answer every question.'; $('#'+ids[i]).scrollIntoView({behavior:'smooth',block:'center'}); return; } payload[ids[i]]=v; payload.qa.push({q:labelFor(ids[i]),a:v}); }
-  // If they're currently on a cycle, they must describe it (this field is hidden otherwise).
-  if($('#on_cycle_now').value.trim()==='Yes'){ var cd=$('#cycle_describe'); var cv=cd.value.trim(); if(!cv){ err.textContent='Please describe your current cycle.'; cd.scrollIntoView({behavior:'smooth',block:'center'}); return; } payload['cycle_describe']=cv; payload.qa.push({q:labelFor('cycle_describe'),a:cv}); }
+  // Both follow-ups are hidden until they apply, so they are checked here rather than by the browser.
+  if($('#on_trt').value.trim()==='Yes — currently on TRT'){ var tp=$('#trt_protocol'), tv=tp.value.trim(); if(!tv){ err.textContent='Please describe your current TRT protocol.'; tp.scrollIntoView({behavior:'smooth',block:'center'}); return; } payload['trt_protocol']=tv; payload.qa.push({q:labelFor('trt_protocol'),a:tv}); }
+  if($('#ever_used_steroids').value.trim()==='Yes'){ var cd=$('#cycle_describe'), cv=cd.value.trim(); if(!cv){ err.textContent='Please describe your steroid usage.'; cd.scrollIntoView({behavior:'smooth',block:'center'}); return; } payload['cycle_describe']=cv; payload.qa.push({q:labelFor('cycle_describe'),a:cv}); }
   err.textContent=''; var b=$('#appBtn'); b.disabled=true; b.textContent='Submitting…';
   try{
     var r=await fetch(WORKER+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -188,8 +178,12 @@ $('#appForm').addEventListener('submit', async function(e){
     location.href='/waitlist/thanks/';
   }catch(x){ err.textContent='Something went wrong — please try again.'; b.disabled=false; b.textContent='Submit my application →'; }
 });
-// Reveal the "describe your cycle" question only when they say they're on a cycle.
-$('#on_cycle_now').addEventListener('change',function(){ document.getElementById('cycle_wrap').style.display=this.value==='Yes'?'':'none'; });
+// Show a follow-up only when the answer above calls for it.
+(function(){ function tog(id,wrapId,val){ var sel=document.getElementById(id), w=document.getElementById(wrapId);
+    if(!sel||!w) return;
+    function upd(){ w.style.display = sel.value.trim()===val ? '' : 'none'; }
+    sel.addEventListener('change',upd); upd(); }
+  tog('on_trt','trt_wrap','Yes — currently on TRT'); tog('ever_used_steroids','steroid_wrap','Yes'); })();
 
 // Mobile keyboard fix: add bottom scroll room while any field is focused so the
 // Submit button can be scrolled clear of the on-screen keyboard.

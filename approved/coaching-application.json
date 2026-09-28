@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "0d3ff431c2ffed7a390cce31902b8cfe09a15c49b178682113d80210f7152d7a",
- "approved_at": "2026-09-28T07:44:06",
- "approved_for": "Julian asked to take out the financial qualifier — the note saying coaching runs $400-600/month",
+ "sha256": "76cb17a7fd5339904c4142a601bb81200e72b20370f7b22b062936ac2181c46f",
+ "approved_at": "2026-09-28T08:00:09",
+ "approved_for": "Julian asked: drop 'are you currently on a cycle', make the steroid describe box appear on Yes ('current or past usage'), make the TRT protocol box appear only for 'Yes - on TRT', drop 'biggest challenge' and 'what would success look like'",
  "questions": [
   [
    "instagram",
@@ -33,15 +33,7 @@
    ""
   ],
   [
-   "trt_protocol",
-   ""
-  ],
-  [
    "ever_used_steroids",
-   ""
-  ],
-  [
-   "on_cycle_now",
    ""
   ],
   [
@@ -58,14 +50,6 @@
   ],
   [
    "why_now_vs_wait",
-   ""
-  ],
-  [
-   "biggest_struggle",
-   ""
-  ],
-  [
-   "success_definition",
    ""
   ],
   [

@@ -1,8 +1,8 @@
 {
  "page": "waitlist/index.html",
- "sha256": "7b7d42294cf46ac0a1c099e8edcced4d8c988d775442773589b16fc45673b584",
- "approved_at": "2026-09-28T07:44:06",
- "approved_for": "Julian asked to take out the financial qualifier — the note saying coaching runs $400-600/month",
+ "sha256": "27c30b268e13cdb6d6167a7baee986d2fd6af85a7c3bb86e18001f13798ac7c5",
+ "approved_at": "2026-09-28T08:00:09",
+ "approved_for": "Julian asked: drop 'are you currently on a cycle', make the steroid describe box appear on Yes ('current or past usage'), make the TRT protocol box appear only for 'Yes - on TRT', drop 'biggest challenge' and 'what would success look like'",
  "questions": [
   [
    "instagram",
@@ -33,15 +33,7 @@
    ""
   ],
   [
-   "trt_protocol",
-   ""
-  ],
-  [
    "ever_used_steroids",
-   ""
-  ],
-  [
-   "on_cycle_now",
    ""
   ],
   [
@@ -58,14 +50,6 @@
   ],
   [
    "why_now_vs_wait",
-   ""
-  ],
-  [
-   "biggest_struggle",
-   ""
-  ],
-  [
-   "success_definition",
    ""
   ],
   [
