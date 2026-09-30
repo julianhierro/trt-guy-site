@@ -1,8 +1,8 @@
 {
  "page": "waitlist/index.html",
- "sha256": "27c30b268e13cdb6d6167a7baee986d2fd6af85a7c3bb86e18001f13798ac7c5",
- "approved_at": "2026-09-28T08:00:09",
- "approved_for": "Julian asked: drop 'are you currently on a cycle', make the steroid describe box appear on Yes ('current or past usage'), make the TRT protocol box appear only for 'Yes - on TRT', drop 'biggest challenge' and 'what would success look like'",
+ "sha256": "dd4551c08b15ffa12cf8cffeb3750ec3ddaae89a536c14d6276449bb30aff5e4",
+ "approved_at": "2026-09-30T14:51:30",
+ "approved_for": "Julian asked: after submitting the application, redirect to his booking page calendar.app.google/J7qtLxAKeyLi2nZG8 instead of /waitlist/thanks/",
  "questions": [
   [
    "instagram",

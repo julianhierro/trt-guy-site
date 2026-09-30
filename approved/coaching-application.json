@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "76cb17a7fd5339904c4142a601bb81200e72b20370f7b22b062936ac2181c46f",
- "approved_at": "2026-09-28T08:00:09",
- "approved_for": "Julian asked: drop 'are you currently on a cycle', make the steroid describe box appear on Yes ('current or past usage'), make the TRT protocol box appear only for 'Yes - on TRT', drop 'biggest challenge' and 'what would success look like'",
+ "sha256": "c597aaa151717af709e4e80a2561d944e20824f8e5bd7047dc07b6b07657ba80",
+ "approved_at": "2026-09-30T14:51:30",
+ "approved_for": "Julian asked: after submitting the application, redirect to his booking page calendar.app.google/J7qtLxAKeyLi2nZG8 instead of /waitlist/thanks/",
  "questions": [
   [
    "instagram",
