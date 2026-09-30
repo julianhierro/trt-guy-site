@@ -49,6 +49,16 @@
   .cta:hover{background:var(--acc-d);transform:translateY(-1px)}
   .foot{color:var(--mut);font-size:12px;margin-top:34px;text-align:center}
 
+
+  /* The photos from the coaching tab — pictures only, no captions. */
+  .gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:30px}
+  .gal figure{margin:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--card);line-height:0}
+  .gal img{width:100%;height:auto;display:block;cursor:zoom-in}
+  @media(min-width:520px){.gal{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .lb{position:fixed;inset:0;background:rgba(8,10,14,.92);display:none;align-items:center;justify-content:center;padding:18px;z-index:70}
+  .lb.on{display:flex}
+  .lb img{max-width:100%;max-height:92vh;border-radius:10px}
+  .lb button{position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:34px;line-height:1;cursor:pointer}
   .draft{background:#fff5d6;border:1px solid #e5c766;border-radius:12px;padding:13px 16px;font-size:13.5px;color:#6b5312;text-align:left;margin:22px 0 4px}
   .draft b{color:#4a3908}
 </style>
@@ -66,7 +76,7 @@
   </div>
 
   <div class="kicker">Coaching</div>
-  <h1>The Four Pillars</h1>
+  <h1>What's included with my coaching?</h1>
   <p class="lead">The way that I look at coaching is with four pillars.</p>
 
   <div class="pillar">
@@ -122,10 +132,37 @@
     </div>
   </div>
 
+  <div class="gal" data-noedit>
+    <figure><img loading="lazy" alt="Brian, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/67884ee5c273446a2b7386c4.png"></figure>
+    <figure><img loading="lazy" alt="Chris, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/6a807261cf50f900f2289107.png"></figure>
+    <figure><img loading="lazy" alt="John, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/6a807261cf50f900f2289118.png"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-01.png"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-02.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-03.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-04.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-05.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-06.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-07.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-08.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-09.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-10.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-11.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-12.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-13.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-14.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-15.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-16.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-17.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-18.webp"></figure>
+    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-19.webp"></figure>
+  </div>
+
   <a class="cta" href="/coaching-application/">Apply to work with me</a>
 
   <div class="foot">© TRT Guy</div>
 </div>
+
+<div class="lb" id="lb" data-noedit><button type="button" aria-label="Close">&times;</button><img alt=""></div>
 
 <script>
 var TRACK='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtguy-coaching';
@@ -133,6 +170,14 @@ function tgv(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random
 function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+encodeURIComponent(tgv());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){}}
 if(!/[?&]edit=1/.test(location.search)) track('view');
 document.querySelector('.cta').addEventListener('click',function(){ track('click'); });
+// Tap a photo to see it full size.
+(function(){ var lb=document.getElementById('lb'), im=lb.querySelector('img');
+  document.querySelectorAll('.gal img').forEach(function(t){
+    t.addEventListener('click',function(){ im.src=t.currentSrc||t.src; lb.classList.add('on'); }); });
+  function close(){ lb.classList.remove('on'); im.removeAttribute('src'); }
+  lb.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
 </script>
 
 <script>window.JV_EDITOR={ site:"td-coaching-pillars", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
