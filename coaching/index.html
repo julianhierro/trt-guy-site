@@ -14,7 +14,6 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Coaching | TRT Guy">
 <meta name="twitter:image" content="https://trt-guy.com/og-image.png">
-<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,7 +22,7 @@
 <style>html.jv-pending body{visibility:hidden}</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 <style>
-  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);
+  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--line-2:rgba(11,13,16,.16);--bg-2:#f4f5f7;--acc-soft:rgba(26,92,255,.08);--r:16px;
     --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;padding:0 18px 70px}
@@ -38,11 +37,14 @@
   .pillar h2{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.1;text-transform:uppercase;margin-bottom:8px}
   .pillar p{color:var(--mut);font-size:15.5px}
 
+  .note{color:var(--mut);font-size:15px;max-width:520px;margin:20px auto 0;text-align:center}
+  .inc{list-style:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;
+       box-shadow:0 2px 10px rgba(11,13,16,.05);text-align:left;display:grid;gap:9px}
+  .inc li{position:relative;padding-left:26px;font-size:15.5px}
+  .inc li:before{content:"";position:absolute;left:4px;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--acc)}
+  @media(min-width:560px){.inc{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:22px}}
   .sep{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:34px 0 14px}
 
-  /* Anything still in brackets is waiting on Julian's words — never ship it filled in with mine. */
-  .todo{display:block;border:1px dashed var(--acc);border-radius:11px;background:rgba(26,92,255,.05);color:var(--acc);
-        font-size:14.5px;font-weight:500;padding:12px 14px;margin-top:4px}
 
   .cta{display:block;background:var(--acc);color:#fff;border-radius:12px;padding:17px;font-family:var(--display);font-weight:700;font-size:21px;
        text-transform:uppercase;letter-spacing:.03em;text-decoration:none;margin-top:26px;transition:background .15s,transform .1s}
@@ -50,17 +52,41 @@
   .foot{color:var(--mut);font-size:12px;margin-top:34px;text-align:center}
 
 
-  /* The photos from the coaching tab — pictures only, no captions. */
-  .gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:30px}
-  .gal figure{margin:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--card);line-height:0}
-  .gal img{width:100%;height:auto;display:block;cursor:zoom-in}
-  @media(min-width:520px){.gal{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  /* Results: the same design as the coaching tab on the main site. The section breaks
+     out of the 620px column so three cards sit side by side on a desktop. */
+  .ba-wrap,.gal-wrap{width:min(1140px,calc(100vw - 36px));margin-left:50%;transform:translateX(-50%)}
+  .ba-wrap{margin-top:clamp(44px,5vw,70px)}
+  .ba-head,.gal-head{text-align:center;margin-bottom:clamp(20px,3vw,30px)}
+  .ba-head h2{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,40px);line-height:1;text-transform:uppercase}
+  .kicker .kdash{flex:none;width:26px;height:2px;background:var(--acc);border-radius:2px;display:inline-block}
+  .ba-head .kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px}
+  .ba{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;text-align:left}
+  .ba-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+  .ba-card:hover{transform:translateY(-3px);border-color:var(--line-2);box-shadow:0 14px 34px rgba(11,13,16,.09)}
+  .ba-shot{position:relative;aspect-ratio:1.24;background:var(--bg-2);border-bottom:1px solid var(--line)}
+  .ba-shot img{width:100%;height:100%;object-fit:cover;object-position:top center}
+  .ba-tag{position:absolute;bottom:12px;z-index:2;font:700 10.5px/1 Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:7px 11px;border-radius:6px;color:var(--txt);background:rgba(255,255,255,.92);border:1px solid var(--line);box-shadow:0 2px 10px rgba(11,13,16,.12)}
+  .ba-tag.b{left:12px}
+  .ba-tag.a{right:12px;color:#fff;background:var(--acc);border-color:transparent}
+  .ba-body{padding:18px 20px 20px}
+  .ba-body h3{font-size:20px;line-height:1.16;margin:0 0 11px}
+  .ba-meta{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .ba-chip{flex:none;white-space:nowrap;font:700 12px/1 Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-d);border:1px solid rgba(26,92,255,.28);background:var(--acc-soft);border-radius:999px;padding:8px 13px}
+  .ba-meta span.t{font-size:14px;color:var(--mut)}
+  .gal-wrap{margin-top:clamp(40px,4.4vw,60px)}
+  .gal-head h3{font-size:clamp(21px,2.4vw,27px);line-height:1.15;margin:0 0 8px}
+  .gal-head p{color:var(--mut);font-size:15.5px;max-width:560px;margin:0 auto}
+  .gal{columns:3;column-gap:14px}
+  .gal figure{break-inside:avoid;margin:0 0 14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg-2);cursor:zoom-in;line-height:0;transition:border-color .18s,box-shadow .18s,transform .18s}
+  .gal figure:hover{border-color:var(--line-2);box-shadow:0 12px 30px rgba(11,13,16,.10);transform:translateY(-2px)}
+  .gal img{display:block;width:100%;height:auto}
+  @media(max-width:900px){.gal{columns:2}}
+  @media(max-width:560px){.gal{columns:1}}
+  body.jv-editing .gal figure{cursor:default}
   .lb{position:fixed;inset:0;background:rgba(8,10,14,.92);display:none;align-items:center;justify-content:center;padding:18px;z-index:70}
   .lb.on{display:flex}
   .lb img{max-width:100%;max-height:92vh;border-radius:10px}
   .lb button{position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:34px;line-height:1;cursor:pointer}
-  .draft{background:#fff5d6;border:1px solid #e5c766;border-radius:12px;padding:13px 16px;font-size:13.5px;color:#6b5312;text-align:left;margin:22px 0 4px}
-  .draft b{color:#4a3908}
 </style>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icon-180.png">
@@ -69,94 +95,131 @@
 <div class="wrap">
   <div class="wordmark">TRT-GUY</div>
 
-  <div class="draft" data-noedit>
-    <b>Draft — not linked anywhere yet, and set to noindex.</b> Every blue dashed box below is waiting on
-    your words. Send them to me, or hit Edit and type them straight in. I'll take this banner and the
-    noindex off once they're filled.
-  </div>
 
   <div class="kicker">Coaching</div>
   <h1>What's included with my coaching?</h1>
-  <p class="lead">The way that I look at coaching is with four pillars.</p>
+  <p class="lead">If your goal is to develop a strong, healthy, aesthetic and athletic physique, then these
+  are the four pillars you need to include in planning. Each of these pillars is a dial. And depending on
+  what you want to accomplish, you can turn up or turn down each of them.</p>
 
   <div class="pillar">
     <div class="num">01</div>
     <div>
-      <h2>Nutrition</h2>
-      <p>The dials can be turned up or turned down depending on your goals, but they're present in
-      everyone's plan. Nutrition will be turned up or turned down according to your goals and what you need.</p>
+      <h2>Strength</h2>
+      <p>Strength training should be one of the foundations of your program. You do not need dozens of complicated exercises. You need to get very good at the basics, execute them well, and progressively improve over time.</p>
     </div>
   </div>
 
   <div class="pillar">
     <div class="num">02</div>
     <div>
-      <h2>Training</h2>
-      <p>We'll make sure that you're doing sufficient volume to make progress and that everything that
-      you do adjusts and aligns with your schedule and with your specific goals.</p>
+      <h2>Cardiovascular capacity</h2>
+      <p>You can be as strong as a bull, but if you get winded going up a flight of stairs, it&rsquo;s pretty useless. That&rsquo;s why you also need to be fit.</p>
     </div>
   </div>
 
   <div class="pillar">
     <div class="num">03</div>
     <div>
-      <h2>Activity and cardio</h2>
-      <span class="todo">[Your words for activity and cardio — what it looks like in the plan and why it's a pillar.]</span>
+      <h2>Favorable body composition</h2>
+      <p>How much muscle are you carrying, and how much body fat are you carrying? Your ideal body composition depends on your current condition and your goals. Nutrition moves this dial.</p>
     </div>
   </div>
 
   <div class="pillar">
     <div class="num">04</div>
     <div>
-      <h2>Accountability</h2>
-      <p>You have me 24/7, and I'll be actively checking in with you every single week to make sure that
-      you're executing the plan.</p>
+      <h2>Hormones, peptides &amp; performance support</h2>
+      <p>The internal environment that can support your training, recovery, health, and performance. We make all decisions together based on your blood work, your current health status, and the level of risk you want to take. We can be super conservative, or if you want to push things, I can help you do that too while we preserve your health as much as possible.</p>
     </div>
   </div>
 
-  <div class="sep">Also part of the plan</div>
+  <p class="note">All plans include the pillars, but we dial each one up or down depending on what you need.</p>
 
-  <div class="pillar">
-    <div class="num">＋</div>
-    <div>
-      <h2>TRT oversight</h2>
-      <span class="todo">[Your words on TRT oversight / implementation — what you do, and where the line is between you and their doctor.]</span>
+  <div class="sep">Your coaching can include</div>
+  <ul class="inc">
+    <li>Individualized strength training</li>
+    <li>Cardiovascular programming</li>
+    <li>Body-composition management</li>
+    <li>Nutrition planning</li>
+    <li>Fat-loss strategies</li>
+    <li>Muscle-gain strategies</li>
+    <li>Recovery management</li>
+    <li>Lifestyle adjustments</li>
+    <li>Supplementation guidance</li>
+    <li>Hormonal-health oversight</li>
+    <li>PED cycle design</li>
+    <li>Blood-work and health-marker overview</li>
+  </ul>
+
+  <div class="ba-wrap">
+    <div class="ba-head">
+      <p class="kicker"><i class="kdash"></i>Does this work?</p>
+      <h2>Real Results &darr;</h2>
+    </div>
+    <div class="ba">
+      <article class="ba-card">
+        <div class="ba-shot">
+          <span class="ba-tag b">Before</span><span class="ba-tag a">After</span>
+          <img loading="lazy" alt="Brian, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/67884ee5c273446a2b7386c4.png">
+        </div>
+        <div class="ba-body">
+          <h3>Meet Brian, Marketing Executive For Fortune 500.</h3>
+          <div class="ba-meta"><span class="ba-chip">5 Months</span><span class="t">of coaching.</span></div>
+        </div>
+      </article>
+      <article class="ba-card">
+        <div class="ba-shot">
+          <span class="ba-tag b">Before</span><span class="ba-tag a">After</span>
+          <img loading="lazy" alt="Chris, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/6a807261cf50f900f2289107.png">
+        </div>
+        <div class="ba-body">
+          <h3>Meet Chris, Software Engineer.</h3>
+          <div class="ba-meta"><span class="ba-chip">9 Months</span><span class="t">of coaching.</span></div>
+        </div>
+      </article>
+      <article class="ba-card">
+        <div class="ba-shot">
+          <span class="ba-tag b">Before</span><span class="ba-tag a">After</span>
+          <img loading="lazy" alt="John, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/6a807261cf50f900f2289118.png">
+        </div>
+        <div class="ba-body">
+          <h3>Meet John, Entrepreneur.</h3>
+          <div class="ba-meta"><span class="ba-chip">7 Months</span><span class="t">of coaching.</span></div>
+        </div>
+      </article>
+    </div>
+
+    <div class="gal-wrap">
+      <div class="gal-head">
+        <h3>More men, same system</h3>
+        <p>Every one of these is a real client photo. No filters, no lighting tricks, no posing coaching.</p>
+      </div>
+      <div class="gal">
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-01.png"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-02.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-03.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-04.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-05.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-06.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-07.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-08.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-09.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-10.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-11.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-12.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-13.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-14.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-15.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-16.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-17.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-18.webp"></figure>
+        <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-19.webp"></figure>
+      </div>
     </div>
   </div>
 
-  <div class="pillar">
-    <div class="num">＋</div>
-    <div>
-      <h2>PED cycle design</h2>
-      <span class="todo">[Your words on PED cycle design — who it's for, what you design, what you won't do.]</span>
-    </div>
-  </div>
-
-  <div class="gal" data-noedit>
-    <figure><img loading="lazy" alt="Brian, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/67884ee5c273446a2b7386c4.png"></figure>
-    <figure><img loading="lazy" alt="Chris, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/6a807261cf50f900f2289107.png"></figure>
-    <figure><img loading="lazy" alt="John, before and after" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_900/u_https://assets.cdn.filesafe.space/WmcafLXT7njeQOu3fqlP/media/6a807261cf50f900f2289118.png"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-01.png"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-02.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-03.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-04.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-05.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-06.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-07.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-08.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-09.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-10.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-11.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-12.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-13.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-14.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-15.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-16.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-17.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-18.webp"></figure>
-    <figure><img loading="lazy" alt="Client transformation, before and after" src="/img/tr-19.webp"></figure>
-  </div>
-
+  <p class="note">Tell me where you're currently at, what you're trying to accomplish, and what you need help with.</p>
   <a class="cta" href="/coaching-application/">Apply to work with me</a>
 
   <div class="foot">© TRT Guy</div>
