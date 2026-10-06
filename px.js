@@ -80,6 +80,7 @@
     if (mail) match.em = mail;
     if (person.phone) match.ph = person.phone;
     if (person.firstName) match.fn = person.firstName;
+    if (person.country) match.country = person.country;
 
     try {
       fbq(STANDARD.indexOf(name) === -1 ? 'trackCustom' : 'track', name, params || {}, match);
@@ -99,6 +100,7 @@
           email: mail || undefined,
           phone: person.phone || undefined,
           first_name: person.firstName || undefined,
+          country: person.country || undefined,
           external_id: externalId(),
           fbp: cookie('_fbp') || undefined,
           fbc: cookie('_fbc') || undefined,

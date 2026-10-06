@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "0e992b942fe75b7d7e222e512f94db5108f6e06f662735b47759a9b92605e69c",
- "approved_at": "2026-10-06T09:28:37",
- "approved_for": "Julian asked for Meta pixel tracking across the funnel: adds px.js and a SubmitApplication event on successful submit. No question changed.",
+ "sha256": "7bd473b4fc7daac251fb70a2c795094cf4b75d466aac81750345af26edb281a5",
+ "approved_at": "2026-10-06T09:34:33",
+ "approved_for": "Julian asked whether country was worth sending to Meta: the application's 'Where are you based?' answer now rides along with the SubmitApplication event. No question changed.",
  "questions": [
   [
    "instagram",

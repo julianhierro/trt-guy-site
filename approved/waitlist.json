@@ -1,8 +1,8 @@
 {
  "page": "waitlist/index.html",
- "sha256": "26ff6395a00b5d6b82dfdd42bddd00ba0ebb6ebd9c956fbe24092848ad34b535",
- "approved_at": "2026-10-06T09:28:37",
- "approved_for": "Julian asked for Meta pixel tracking across the funnel: adds px.js and a SubmitApplication event on successful submit. No question changed.",
+ "sha256": "c9e7ef6515d587736e1f2f7b34eaba48904b58d6a17851632b76ccbf8fc97f69",
+ "approved_at": "2026-10-06T09:34:33",
+ "approved_for": "Julian asked whether country was worth sending to Meta: the application's 'Where are you based?' answer now rides along with the SubmitApplication event. No question changed.",
  "questions": [
   [
    "instagram",
