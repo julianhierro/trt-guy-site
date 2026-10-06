@@ -146,10 +146,10 @@ footer{
 <script src="/px.js?v=1"></script>
 </head>
 <body>
-<div class="deco" data-eid="e1">
-<div class="wrap" data-eid="e2">
-<div class="brand" data-eid="e3">TRT Guy</div>
-<div class="head" data-eid="e4" id="head">
+<div class="deco">
+<div class="wrap">
+<div class="brand">TRT Guy</div>
+<div class="head" id="head">
 <h1>La Guía<br><em>TRT 101</em></h1>
 <div class="rule"></div>
 <p class="sub">Cómo sacarle el máximo provecho a tu tratamiento de TRT</p>
@@ -162,23 +162,23 @@ footer{
 <li>3 hábitos que puedes empezar hoy mismo y que hacen que la misma dosis de testosterona trabaje notablemente mejor.</li>
 </ul>
 </div>
-<form data-eid="e10" id="form" novalidate="">
-<input autocomplete="given-name" class="field" data-eid="e11" id="fname" name="firstName" placeholder="Nombre" required="" type="text"/>
-<input autocomplete="email" class="field" data-eid="e12" id="email" inputmode="email" name="email" placeholder="Correo electrónico" required="" type="email"/>
-<button class="btn" data-eid="e13" id="go" type="submit">Envíame la guía <span class="arr">→</span></button>
-<p class="err" data-eid="e15" id="err" role="alert"></p>
+<form id="form" novalidate="">
+<input autocomplete="given-name" class="field" id="fname" name="firstName" placeholder="Nombre" required="" type="text"/>
+<input autocomplete="email" class="field" id="email" inputmode="email" name="email" placeholder="Correo electrónico" required="" type="email"/>
+<button class="btn" id="go" type="submit">Envíame la guía <span class="arr">→</span></button>
+<p class="err" id="err" role="alert"></p>
 <p class="fine">Te la envío por correo de inmediato. Puedes darte de baja cuando quieras.</p>
 </form>
-<div class="done" data-eid="e17" id="done">
-<div class="tick" data-eid="e18">
-<svg data-eid="e19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5" data-eid="e20"></path></svg>
+<div class="done" id="done">
+<div class="tick">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewbox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>
 </div>
 <h2>Revisa tu correo</h2>
 <p>Listo. Te aviso en cuanto la guía esté disponible — revisa tu correo, incluyendo promociones o spam.</p>
 </div>
 </div>
 </div>
-<footer data-eid="e23">© <span data-eid="e24" id="yr"></span> TRT Guy · Solo con fines educativos, no es consejo médico.</footer>
+<footer>© <span id="yr"></span> TRT Guy · Solo con fines educativos, no es consejo médico.</footer>
 <script>
 /* Leads go through the TRT Guy site's own serverless proxy, which talks to
    GoHighLevel. The token stays on the server. Tags are applied server-side
@@ -255,7 +255,7 @@ form.addEventListener('submit', async function (e) {
   }
 });
 </script>
-<script>window.JV_EDITOR={ site:"td-101-gate", page:1, noAuth:true, pwKey:"trtdad", api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script>window.JV_EDITOR={ site:"td-101-gate-es", page:1, noAuth:true, pwKey:"trtdad", api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <script>
 (function () {
   if (!document.body) return;
