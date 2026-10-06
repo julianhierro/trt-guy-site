@@ -49,6 +49,7 @@
 </style>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icon-180.png">
+<script src="/px.js?v=1"></script>
 </head>
 <body>
 <div class="wrap">
@@ -175,6 +176,8 @@ $('#appForm').addEventListener('submit', async function(e){
   try{
     var r=await fetch(WORKER+'/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!r.ok) throw 0;
+    if(window.tgPx) tgPx.track('SubmitApplication', { content_name: 'Coaching Application' },
+                               { email: email, phone: phone, firstName: name });
     location.href='https://calendar.app.google/J7qtLxAKeyLi2nZG8';   // straight to booking (the application is saved first)
   }catch(x){ err.textContent='Something went wrong — please try again.'; b.disabled=false; b.textContent='Submit my application →'; }
 });

@@ -33,6 +33,7 @@
   .rule{height:1px;background:var(--line);margin:24px 0}
   .fine{font-size:14.5px}
 </style>
+<script src="/px.js?v=1"></script>
 </head>
 <body>
   <div class="card">
@@ -63,5 +64,10 @@
 })();
 </script>
 <script src="/editor.js?v=1"></script>
+<script>
+/* Meta: a booked call is the conversion worth optimising for. This only fires if
+   the booking flow actually lands here — Google Calendar does not redirect today. */
+if (window.tgPx) tgPx.track('Schedule', { content_name: 'Coaching Consultation' });
+</script>
 </body>
 </html>

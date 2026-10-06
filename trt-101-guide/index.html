@@ -235,6 +235,7 @@ a.cta .s{font:600 9.5pt/1.4 Inter,sans-serif;opacity:.88;margin-top:4pt}
 </script>
 
 <style>.cover .mark{display:inline-block!important;height:34px!important;width:auto!important;aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat!important;font-size:0!important;color:transparent!important;overflow:hidden;letter-spacing:0!important}</style>
+<script src="/px.js?v=1"></script>
 </head>
 <body>
 <div class="sheet" data-eid="e1">
@@ -870,5 +871,16 @@ a.cta .s{font:600 9.5pt/1.4 Inter,sans-serif;opacity:.88;margin-top:4pt}
 </script>
 
 
+<script>
+/* Meta: reading the guide is interest, downloading it is intent — track both. */
+(function () {
+  if (!window.tgPx) return;
+  tgPx.track('ViewContent', { content_name: 'TRT 101 Guide', content_type: 'product' });
+  var pdf = document.getElementById('jvPdf');
+  if (pdf) pdf.addEventListener('click', function () {
+    tgPx.track('DownloadGuide', { content_name: 'TRT 101 Guide' });
+  });
+})();
+</script>
 </body>
 </html>

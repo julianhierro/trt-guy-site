@@ -141,6 +141,7 @@ footer{
 <style>.brand{display:inline-block!important;height:30px!important;width:auto!important;aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat!important;font-size:0!important;color:transparent!important;overflow:hidden;letter-spacing:0!important}</style>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icon-180.png">
+<script src="/px.js?v=1"></script>
 </head>
 <body>
 <div class="deco" data-eid="e1">
@@ -233,6 +234,8 @@ form.addEventListener('submit', async function (e) {
     if (!res.ok) throw new Error('bad status ' + res.status);
 
     track('optin');
+    // Meta: the email is the conversion. Fires once, with the address attached.
+    if (window.tgPx) tgPx.track('Lead', { content_name: 'TRT 101 Guide' }, { email: mail, firstName: first });
     location.href = '../thanks/';
   } catch (e2) {
     go.disabled = false;

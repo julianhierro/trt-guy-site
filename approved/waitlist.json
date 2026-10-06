@@ -1,8 +1,8 @@
 {
  "page": "waitlist/index.html",
- "sha256": "dd4551c08b15ffa12cf8cffeb3750ec3ddaae89a536c14d6276449bb30aff5e4",
- "approved_at": "2026-09-30T14:51:30",
- "approved_for": "Julian asked: after submitting the application, redirect to his booking page calendar.app.google/J7qtLxAKeyLi2nZG8 instead of /waitlist/thanks/",
+ "sha256": "26ff6395a00b5d6b82dfdd42bddd00ba0ebb6ebd9c956fbe24092848ad34b535",
+ "approved_at": "2026-10-06T09:28:37",
+ "approved_for": "Julian asked for Meta pixel tracking across the funnel: adds px.js and a SubmitApplication event on successful submit. No question changed.",
  "questions": [
   [
    "instagram",
