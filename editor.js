@@ -1806,6 +1806,7 @@
       '</span>' +
 
       // ── Text formatting (popover) ──
+      '<button class="jv-grp-btn jv-img" type="button" title="Click a picture on the page, then click here to swap it">🖼 Image</button>' +
       '<div class="jv-grp">' +
         '<button class="jv-grp-btn" type="button" data-pop="text">🅰 Text</button>' +
         '<div class="jv-pop" data-pop="text">' +
@@ -1969,6 +1970,31 @@
     bar.querySelectorAll(".jv-step").forEach(function (b) { b.addEventListener("click", function () { var cur = parseInt(ui.size.value, 10) || 16; ui.size.value = Math.max(8, Math.min(200, cur + parseInt(b.dataset.d, 10))); applyStyle("font-size", ui.size.value + "px"); }); });
     ui.color.addEventListener("input", function () { applyStyle("color", ui.color.value); });
     bar.querySelectorAll(".jv-sw").forEach(function (s) { s.addEventListener("click", function () { ui.color.value = s.dataset.c; applyStyle("color", s.dataset.c); }); });
+    // ── Replace a picture ───────────────────────────────────────────────
+    // Click the picture, then the Image button. The swap is stored as a src
+    // attribute edit, which the content store already supports.
+    var pickedImg = null;
+    document.addEventListener("click", function (e) {
+      var img = e.target && e.target.tagName === "IMG" ? e.target : null;
+      if (!img || img.closest(".jv-toolbar, .jv-launcher, .jv-addmenu, .jv-outline, #lb")) return;
+      if (pickedImg) pickedImg.style.outline = "";
+      pickedImg = img;
+      img.style.outline = "3px solid #1a5cff";
+    }, true);
+    bar.querySelector(".jv-img").addEventListener("click", function () {
+      var img = pickedImg || (activeEl && (activeEl.tagName === "IMG" ? activeEl : activeEl.querySelector && activeEl.querySelector("img")));
+      if (!img) { flash("Click the picture you want to change first"); return; }
+      if (!img.getAttribute("data-eid")) { flash("That picture cannot be swapped here"); return; }
+      chooseImage(function (url) {
+        if (!url) return;
+        pushUndo();
+        img.setAttribute("src", url);
+        img.removeAttribute("srcset");
+        markAttr(img);
+        scheduleDraft();
+        flash("Picture swapped — hit Publish to make it live");
+      });
+    });
     ui.link.addEventListener("click", function () { linkSelection(); });
     ui.unlink.addEventListener("click", function () {
       if (!restoreSel()) { flash("Select the linked text first"); return; }
