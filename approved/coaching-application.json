@@ -1,8 +1,8 @@
 {
  "page": "coaching-application/index.html",
- "sha256": "7bd473b4fc7daac251fb70a2c795094cf4b75d466aac81750345af26edb281a5",
- "approved_at": "2026-10-06T09:34:33",
- "approved_for": "Julian asked whether country was worth sending to Meta: the application's 'Where are you based?' answer now rides along with the SubmitApplication event. No question changed.",
+ "sha256": "8f82411db4af5e77cf86c42aa4a7fac76aca6622030001364b5460af6a94452f",
+ "approved_at": "2026-10-07T10:10:58",
+ "approved_for": "Julian asked (2026-10-07): move 'Why are you looking to make a change now?' higher (now right after long-term goals), and add 'What challenges/struggles are you facing right now?' under 'Can you describe your current or past steroid usage?' (shown only when they answer Yes to steroids, required then).",
  "questions": [
   [
    "instagram",
@@ -29,6 +29,10 @@
    ""
   ],
   [
+   "why_now_vs_wait",
+   ""
+  ],
+  [
    "on_trt",
    ""
   ],
@@ -46,10 +50,6 @@
   ],
   [
    "decision_maker",
-   ""
-  ],
-  [
-   "why_now_vs_wait",
    ""
   ],
   [
