@@ -792,14 +792,13 @@
     var inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
     inp.onchange = function () {
       var f = inp.files && inp.files[0]; if (!f) { cb(null); return; }
-      var pw = localStorage.getItem(PW_KEY) || prompt("Enter your dashboard password to upload:"); if (!pw) { cb(null); return; }
       var fr = new FileReader();
       fr.onload = function () {
         flash("Uploading image…", true);
         fetch(UPLOAD, { method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pw, filename: f.name, contentType: f.type, dataBase64: fr.result }) })
+          body: JSON.stringify({ filename: f.name, contentType: f.type, dataBase64: fr.result }) })
           .then(function (r) { return r.json(); })
-          .then(function (d) { if (d && d.url) { localStorage.setItem(PW_KEY, pw); cb(d.url); } else { alert("Upload failed: " + ((d && d.error) || "unknown")); cb(null); } })
+          .then(function (d) { if (d && d.url) { cb(d.url); } else { alert("Upload failed: " + ((d && d.error) || "unknown")); cb(null); } })
           .catch(function () { alert("Upload network error."); cb(null); });
       };
       fr.readAsDataURL(f);
