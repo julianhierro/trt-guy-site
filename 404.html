@@ -174,6 +174,55 @@
     font-size:14.5px;font-weight:500;color:var(--mut)}
   .resbox .res-soon:last-child{border-bottom:0}
 
+  /* check-in tracker */
+  .wk{margin-bottom:16px}
+  .wk .sub{font-size:13.5px;color:var(--mut);margin-top:2px}
+  .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0 4px}
+  .days button{border:1px solid var(--line-2);background:#fff;border-radius:11px;padding:8px 0 7px;cursor:pointer;
+    font:600 11.5px Inter,sans-serif;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:5px}
+  .days button i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line-2);display:block}
+  .days button.on i{background:var(--acc);border-color:var(--acc)}
+  .days button.today{border-color:var(--acc);color:var(--txt)}
+  .days button:disabled{opacity:.4;cursor:default}
+  .stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 2px}
+  .stats4 .s b{display:block;font-size:19px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+  .stats4 .s span{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;font-size:10.5px;color:var(--mut)}
+  .stats4 .s em{display:block;font-style:normal;font-size:11.5px;color:var(--mut)}
+  @media(max-width:420px){ .stats4{grid-template-columns:repeat(2,1fr);gap:12px} }
+  .wk .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .wk .btns .btn{margin-top:14px;padding:13px 12px;font-size:14.5px}
+  .spark{margin-top:14px;display:block;width:100%;height:56px}
+  .linkbtn{background:none;border:0;padding:12px 0 0;color:var(--mut);font:600 13.5px Inter,sans-serif;cursor:pointer;text-decoration:underline}
+  .dnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 16px}
+  .dnav b{font-size:15.5px}
+  .dnav button{border:1px solid var(--line-2);background:#fff;border-radius:10px;width:42px;height:38px;font-size:18px;cursor:pointer;color:var(--txt)}
+  .dnav button:disabled{opacity:.3;cursor:default}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fgrid.three{grid-template-columns:1fr 1fr 1fr}
+  .f label{display:block;font-size:13px;font-weight:600;margin:0 0 5px}
+  .f label small{font-weight:500;color:var(--mut)}
+  .f input,.f textarea,.q textarea{width:100%;border:1px solid var(--line-2);border-radius:11px;padding:12px;
+    font:500 16px Inter,sans-serif;color:var(--txt);background:#fff;outline:0}
+  .f input:focus,.f textarea:focus,.q textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+  .f textarea,.q textarea{min-height:84px;resize:vertical;line-height:1.5}
+  .grp{margin:22px 0 10px}
+  .q{margin:0 0 20px}
+  .q .qt{font-size:14.5px;font-weight:600;margin:0 0 4px;white-space:pre-wrap}
+  .q .qh{font-size:12.5px;color:var(--mut);margin:0 0 8px;white-space:pre-wrap}
+  .opts{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .opts button{border:1px solid var(--line-2);background:#fff;border-radius:10px;padding:10px 13px;
+    font:500 14px Inter,sans-serif;color:var(--txt);cursor:pointer;text-align:left}
+  .opts.col{flex-direction:column}
+  .opts button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+  .saved{font-size:13px;color:var(--mut);text-align:center;margin-top:10px;min-height:18px}
+  .hist{width:100%;border-collapse:collapse;font-size:13px}
+  .hist th{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    font-size:11px;color:var(--mut);text-align:right;padding:0 6px 8px;white-space:nowrap}
+  .hist th:first-child,.hist td:first-child{text-align:left}
+  .hist td{border-top:1px solid var(--line);padding:10px 6px;text-align:right;white-space:nowrap}
+  .histwrap{overflow-x:auto;margin:0 -4px}
+
   .a2hs{display:flex;gap:12px;align-items:flex-start;background:var(--acc-soft);border:1px solid rgba(11,13,16,.16);
     border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:var(--txt)}
   .a2hs button{background:none;border:0;color:var(--txt);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
@@ -231,6 +280,7 @@
       <section class="card phase" id="aPhase"></section>
       <section class="card note" id="aNote" hidden></section>
       <section class="card macros" id="aMacros" hidden></section>
+      <section class="card wk" id="aWeek" hidden></section>
       <div class="tiles" id="aTiles"></div>
       <div id="aRes"></div>
       <div class="a2hs" id="a2hs" hidden>
@@ -247,7 +297,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-09-06T19:35Z';
+const BUILD = '2026-10-12T16:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -310,6 +360,21 @@ const DEFAULT_COPY = {
   nf_title: 'Page not found',
   nf_body: "That link doesn't lead anywhere. Check the spelling, or head back to the site.",
   nf_btn: 'Go to trt-guy.com',
+  trk_label: 'This week',
+  trk_week: 'Week {n} of coaching',
+  trk_log_btn: 'Log today',
+  trk_log_edit: "Edit today's log",
+  trk_weekly_btn: 'Weekly check-in',
+  trk_weekly_done: 'Weekly check-in ✓',
+  trk_history: 'See past weeks',
+  trk_daily_title: 'Daily Check In',
+  trk_weekly_title: 'Weekly Check In',
+  trk_history_title: 'Past weeks',
+  trk_measure_label: 'Measurements',
+  trk_save: 'Save',
+  trk_submit: 'Submit check-in',
+  trk_saved: 'Saved ✓',
+  trk_target: 'target {n}',
 };
 let C = Object.assign({}, DEFAULT_COPY);
 // t('week_txt', {n:2, total:8}) — {placeholders} are filled from the second argument.
@@ -340,6 +405,7 @@ const ORDER = ['training','daily_checkin','peds','weekly_checkin'];
 
 let CLIENT = null;
 let RESOURCES = [];
+let PIN = '';
 
 function fmt(d){
   if(!d) return '';
@@ -383,6 +449,7 @@ async function tryPin(pin){
   });
   const j = await res.json().catch(() => ({}));
   if(!res.ok) throw new Error(j.error || 'Something went wrong.');
+  PIN = pin;
   RESOURCES = Array.isArray(j.resources) ? j.resources : [];
   return j.client;
 }
@@ -492,8 +559,11 @@ function openApp(){
   const progs = (secs.programs || []).filter(p => (p.name || '').trim() || (p.link || '').trim());
   const curProg = progs.find(p => p.current);
 
+  // With the in-app tracker on, the check-in tiles (old sheet links) step aside.
+  const trackerOn = !!(secs.tracker && secs.tracker.on);
   const tiles = ORDER.filter(k => {
     if(!secs[k] || !secs[k].on) return false;
+    if(trackerOn && (k === 'daily_checkin' || k === 'weekly_checkin')) return false;
     return (secs[k].link || '').trim() || (secs[k].text || '').trim() ||
            (k === 'training' && curProg && (curProg.link || '').trim());
   }).map(k => {
@@ -523,6 +593,9 @@ function openApp(){
         ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`
         : `<span class="res-soon">${esc(r.label)}</span>`).join('')}
     </details>` : '';
+
+  $('#aWeek').hidden = !trackerOn;
+  if(trackerOn) loadLogs();
 
   a2hs();
   show('vApp');
@@ -580,7 +653,7 @@ function closeSection(){
   $('#aHome').hidden = false;
   window.scrollTo(0, 0);
 }
-window.addEventListener('popstate', () => { if(!$('#aSection').hidden) closeSection(); });
+window.addEventListener('popstate', () => { if(!$('#aSection').hidden){ closeSection(); if(!$('#aWeek').hidden) renderWeek(); } });
 
 // Home-screen prompt: iOS has no install API, so it gets the Share-sheet wording.
 function a2hs(){
@@ -615,6 +688,289 @@ function installManifest(c){
     link.rel = 'manifest'; link.href = url;
     document.head.appendChild(link);
   } catch(e){}
+}
+
+/* ── check-in tracker ─────────────────────────────────────────────────────
+   The Google Sheet's Daily Check In, Weekly Check In, Measurements and Timeline
+   tabs, as part of his page. Weeks run Monday → Sunday like the sheet. Targets
+   are set by Julian per week in the manager and carry forward until changed. */
+const DAILY_FIELDS = [
+  ['weight','Bodyweight'], ['protein','Protein'], ['carbs','Carbs'], ['fat','Fats'],
+  ['fiber','Fiber'], ['kcal','Kcals'], ['steps','Steps'], ['cardio','Cardio', 'min'],
+  ['sys','Systolic'], ['dia','Diastolic'], ['pulse','Pulse'],
+];
+const MEASURES = [
+  ['m_waist','Waist'], ['m_rbicep','Right Bicep'], ['m_lbicep','Left Bicep'], ['m_rquad','Right Quad'],
+  ['m_lquad','Left Quad'], ['m_chest','Chest'], ['m_shoulders','Shoulders'], ['m_neck','Neck'],
+];
+const ONE_TO_FIVE = ['1','2','3','4','5'];
+const FEEL = ['Great','Good','Okay / Decent','Subpar','Poor'];
+// Questions and answers are the sheet's own wording.
+const WEEKLY_Q = [
+  { k:'score', q:'What score do you give yourself this week? And why?', h:'(1-5| 1 is poor, 5 is excellent)', opts:ONE_TO_FIVE },
+  { k:'why', q:'Why did you pick that number?' },
+  { k:'training_ok', q:'Is your training plan this week up to date?', opts:['Yes','No'] },
+  { k:'daily_ok', q:'Is your daily check in sheet up to date?', opts:['Yes','No'] },
+  { k:'adherence', q:'How is your diet adherence?', col:true, opts:[
+    'Great — tracked everything and close to targets (less than 5% deviation)',
+    'Mostly good — tracked everything and pretty close to targets (5 -10% deviation)',
+    'Okay — missed 1-2 days of tracking and/or moderate deviations from targets (10-15%)',
+    'Subpar — missed 3 or more days of tracking and/or substantial deviation from targets (more than 15%)'] },
+  { k:'appetite', q:'How is your appetite/hunger?', col:true, opts:[
+    'Overly full — having trouble eating enough food',
+    'Very full — getting enough food in, but a bit uncomfortable to do so',
+    'Satiated — getting my food in and feeling good overall',
+    'A bit hungry — mostly fine but small bouts of hunger throughout the day',
+    'Hungry — constantly feeling small to moderate levels of hunger',
+    'Very hungry — constantly hungry'] },
+  { k:'sleep', q:'Average hours of sleep per night?', opts:['7+ hours','6-7 hours','Less than 6 hours'] },
+  { k:'rested', q:'How rested do you feel after sleep?', col:true, opts:['Very rested','Decently rested','Okay, but could be better','A bit tired, but manageable','Very tired'] },
+  { k:'energy', q:'Rate your energy', opts:FEEL },
+  { k:'stress', q:'Rate your stress', h:'1 is low/none and 5 is extreme', opts:ONE_TO_FIVE },
+  { k:'mood', q:'Rate your mood', opts:FEEL },
+  { k:'motivation', q:'Rate your motivation', opts:['Very high','High','Okay / Decent','A bit low','Very low'] },
+  { k:'win', q:'List at least one win for the week.', h:'It can be related to training, diet, sleep, clothes fitting better, finding a dollar on the ground, whatever! No matter how big or small, but you HAVE to list at least one.' },
+  { k:'action', q:'What is the number one action you will take to move toward your goals?', h:'Example: Sleep earlier, increase training intensity, make better food choices, meet my step targets, etc.' },
+  { k:'diet_issues', q:"Describe any diet issues you'd like to address", h:"Example: Hungry at specific times, food recommendations because you're too full or hungry, etc." },
+  { k:'training_issues', q:"Describe any training issues you'd like to address", h:"Example: Any exercises that you aren't connecting with, any nagging spots or injuries, etc." },
+  { k:'other_issues', q:"Describe any other issues you'd like to address" },
+  { k:'help', q:'Anything I can help you with?' },
+  { k:'feedback', q:'Are you feeling pretty satisfied with our work together or is there a bit more to be desired?', h:"Please don't feel shy — any and all feedback is vital in our progress together, and for me to best serve you as a coach!\n\nIf you have no critiques and are happy with the coaching so far, please let me know. It also helps me better ever improve my services! :)" },
+  { k:'questions', q:'Feel free to ask any additional questions' },
+];
+
+let LOGS = [];
+const pad = n => String(n).padStart(2, '0');
+const isoOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dOf = s => new Date(s + 'T12:00:00');
+const addDays = (s, n) => { const d = dOf(s); d.setDate(d.getDate() + n); return isoOf(d); };
+const todayIso = () => isoOf(new Date());
+const mondayOf = s => { const d = dOf(s); return addDays(s, -((d.getDay() + 6) % 7)); };
+const num = v => (v === '' || v == null || isNaN(Number(v))) ? null : Number(v);
+const avg = arr => { const v = arr.filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+const nf = (v, dp = 0) => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: dp, minimumFractionDigits: dp });
+
+const logOf = (kind, day) => (LOGS.find(l => l.kind === kind && l.day === day) || {}).data || null;
+// The target in force for a week: the latest one set on or before its Monday.
+function targetFor(mon){
+  const t = LOGS.filter(l => l.kind === 'target' && l.day <= mon).sort((a, b) => a.day < b.day ? 1 : -1)[0];
+  const d = t ? Object.assign({}, t.data) : {};
+  const mac = (CLIENT.sections || {}).macros || {};
+  ['protein','carbs','fat'].forEach(k => { if(d[k] == null && mac.on && mac[k] != null) d[k] = mac[k]; });
+  if(d.kcal == null && d.protein != null && d.carbs != null && d.fat != null) d.kcal = (d.protein + d.carbs) * 4 + d.fat * 9;
+  if(d.kcal == null && mac.on && mac.calories != null) d.kcal = mac.calories;
+  return d;
+}
+const kcalOf = d => d.kcal != null ? num(d.kcal)
+  : (d.protein != null && d.carbs != null && d.fat != null) ? (num(d.protein) + num(d.carbs)) * 4 + num(d.fat) * 9 : null;
+function weekStats(mon){
+  const days = [...Array(7)].map((_, i) => logOf('daily', addDays(mon, i))).filter(Boolean);
+  const a = k => avg(days.map(d => num(d[k])));
+  return { n: days.length, weight: a('weight'), kcal: avg(days.map(kcalOf)), protein: a('protein'),
+    carbs: a('carbs'), fat: a('fat'), fiber: a('fiber'), steps: a('steps'), sys: a('sys'), dia: a('dia'), pulse: a('pulse'),
+    cardio: days.reduce((s, d) => s + (num(d.cardio) || 0), 0) };
+}
+function coachWeek(mon){
+  const start = CLIENT.start_date || (CLIENT.phase || {}).start;
+  if(!start) return null;
+  const w = Math.round((dOf(mon) - dOf(mondayOf(start))) / (7 * 86400000)) + 1;
+  return w >= 1 ? w : null;
+}
+
+async function logApi(body){
+  const res = await fetch(WORKER + '/client-log', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(Object.assign({ slug: SLUG, pin: PIN }, body)) });
+  const j = await res.json().catch(() => ({}));
+  if(!res.ok) throw new Error(j.error || 'Could not reach the server.');
+  return j;
+}
+async function loadLogs(){
+  renderWeek();
+  try {
+    const j = await logApi({ from: addDays(mondayOf(todayIso()), -7 * 26) });
+    LOGS = j.logs || [];
+  } catch(e){}
+  renderWeek();
+}
+
+function renderWeek(){
+  const today = todayIso(), mon = mondayOf(today);
+  const st = weekStats(mon), last = weekStats(addDays(mon, -7)), tg = targetFor(mon);
+  const cw = coachWeek(mon);
+  const letters = ['M','T','W','T','F','S','S'];
+  const strip = letters.map((l, i) => {
+    const d = addDays(mon, i);
+    return `<button data-day="${d}" class="${logOf('daily', d) ? 'on' : ''} ${d === today ? 'today' : ''}" ${d > today ? 'disabled' : ''}>${l}<i></i></button>`;
+  }).join('');
+  const delta = st.weight != null && last.weight != null ? st.weight - last.weight : null;
+  const stat = (v, label, sub, dp) => `<div class="s"><b>${nf(v, dp)}</b><span>${label}</span>${sub ? `<em>${sub}</em>` : ''}</div>`;
+  const tgt = v => v != null ? esc(t('trk_target', { n: nf(v) })) : '';
+  // Weekly average bodyweight for the sparkline — only weeks with a weigh-in.
+  const pts = [];
+  for(let i = 11; i >= 0; i--){ const w = weekStats(addDays(mon, -7 * i)).weight; if(w != null) pts.push(w); }
+  let spark = '';
+  if(pts.length >= 2){
+    const lo = Math.min(...pts), hi = Math.max(...pts), span = (hi - lo) || 1;
+    const xy = pts.map((p, i) => `${(i / (pts.length - 1) * 296 + 2).toFixed(1)},${(50 - (p - lo) / span * 44).toFixed(1)}`);
+    spark = `<svg class="spark" viewBox="0 0 300 56" preserveAspectRatio="none" aria-label="Bodyweight trend">
+      <polyline points="${xy.join(' ')}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+      <circle cx="${xy[xy.length - 1].split(',')[0]}" cy="${xy[xy.length - 1].split(',')[1]}" r="3.5" fill="currentColor"/></svg>`;
+  }
+  // A weekly target from the manager overrides the Plan tab's macros on the card above.
+  if(LOGS.some(l => l.kind === 'target' && l.day <= mon) && $('#aMacros').querySelectorAll('.m b').length === 4){
+    const bs = $('#aMacros').querySelectorAll('.m b');
+    [[tg.kcal, ''], [tg.protein, 'g'], [tg.carbs, 'g'], [tg.fat, 'g']].forEach(([v, u], i) => {
+      bs[i].textContent = v == null ? '—' : Math.round(v).toLocaleString('en-US') + u;
+    });
+  }
+  const doneWeekly = !!logOf('weekly', mon);
+  $('#aWeek').innerHTML = `
+    <div class="lbl" data-copy="trk_label">${esc(t('trk_label'))}</div>
+    <div class="sub">${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}${tg.goal ? ' · ' + esc(tg.goal) : ''}</div>
+    <div class="days">${strip}</div>
+    <div class="stats4">
+      ${stat(st.weight, 'Avg weight', delta != null ? (delta > 0 ? '+' : '') + nf(delta, 1) + ' vs last wk' : '', 1)}
+      ${stat(st.kcal, 'Avg kcals', tgt(tg.kcal))}
+      ${stat(st.protein, 'Avg protein', tgt(tg.protein))}
+      ${stat(st.steps, 'Avg steps', tgt(tg.steps))}
+    </div>
+    ${spark}
+    ${tg.note ? `<p class="sub" style="margin-top:12px;color:var(--txt)">${esc(tg.note)}</p>` : ''}
+    <div class="btns">
+      <button class="btn" id="wLog" data-copy="${logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'}">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
+      <button class="btn ghost" id="wWeekly" data-copy="${doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'}">${esc(t(doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
+    </div>
+    <button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button>`;
+  document.querySelectorAll('#aWeek .days button').forEach(b => b.onclick = () => openDaily(b.dataset.day));
+  $('#wLog').onclick = () => openDaily(today);
+  $('#wWeekly').onclick = () => openWeekly(mon);
+  $('#wHist').onclick = openHistory;
+}
+
+function showSection(html){
+  $('#aHome').hidden = true;
+  $('#aSection').hidden = false;
+  $('#aSection').innerHTML = `<button class="back" id="sBack" data-copy="back">${esc(t('back'))}</button>` + html;
+  $('#sBack').onclick = () => { closeSection(); renderWeek(); };
+  if(history.state == null || !history.state.sec) history.pushState({ sec:'tracker' }, '', location.pathname);
+  window.scrollTo(0, 0);
+}
+const dayLabel = s => dOf(s).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+
+function openDaily(day){
+  const d = logOf('daily', day) || {};
+  const tg = targetFor(mondayOf(day));
+  const tk = { protein:'protein', carbs:'carbs', fat:'fat', fiber:'fiber', kcal:'kcal', steps:'steps' };
+  const fld = ([k, label, unit]) => `<div class="f"><label for="d_${k}">${esc(label)}${unit ? ` <small>(${unit})</small>` : ''}${
+      tk[k] && tg[tk[k]] != null ? ` <small>· ${esc(t('trk_target', { n: nf(tg[tk[k]]) }))}</small>` : ''}</label>
+    <input id="d_${k}" type="number" inputmode="decimal" step="any" value="${d[k] == null ? '' : esc(d[k])}"></div>`;
+  const by = k => DAILY_FIELDS.find(f => f[0] === k);
+  showSection(`
+    <h1 data-copy="trk_daily_title">${esc(t('trk_daily_title'))}</h1>
+    <div class="dnav"><button id="dPrev" aria-label="Previous day">‹</button><b>${dayLabel(day)}</b>
+      <button id="dNext" aria-label="Next day" ${day >= todayIso() ? 'disabled' : ''}>›</button></div>
+    <div class="fgrid">${['weight','steps'].map(k => fld(by(k))).join('')}</div>
+    <div class="lbl grp">Nutrition</div>
+    <div class="fgrid">${['protein','carbs','fat','fiber'].map(k => fld(by(k))).join('')}</div>
+    <div class="fgrid" style="margin-top:12px">${fld(by('kcal'))}${fld(by('cardio'))}</div>
+    <div class="lbl grp">Blood pressure</div>
+    <div class="fgrid three">${['sys','dia','pulse'].map(k => fld(by(k))).join('')}</div>
+    <div class="f" style="margin-top:18px"><label for="d_notes">Notes</label><textarea id="d_notes">${esc(d.notes || '')}</textarea></div>
+    <button class="btn" id="dSave" data-copy="trk_save">${esc(t('trk_save'))}</button>
+    <p class="saved" id="dMsg"></p>`);
+  // Kcals fill themselves in from the macros unless he types his own.
+  const kc = $('#d_kcal');
+  const autoK = () => {
+    const p = num($('#d_protein').value), c = num($('#d_carbs').value), f = num($('#d_fat').value);
+    kc.placeholder = (p != null && c != null && f != null) ? String(Math.round((p + c) * 4 + f * 9)) : '';
+  };
+  ['#d_protein','#d_carbs','#d_fat'].forEach(id => $(id).addEventListener('input', autoK)); autoK();
+  $('#dPrev').onclick = () => openDaily(addDays(day, -1));
+  $('#dNext').onclick = () => openDaily(addDays(day, 1));
+  $('#dSave').onclick = async () => {
+    const data = {};
+    DAILY_FIELDS.forEach(([k]) => { const v = num($('#d_' + k).value); if(v != null) data[k] = v; });
+    if(data.kcal == null && kc.placeholder) data.kcal = Number(kc.placeholder);
+    const n = $('#d_notes').value.trim(); if(n) data.notes = n;
+    await saveLog('daily', day, data, $('#dSave'), $('#dMsg'));
+  };
+}
+
+function openWeekly(mon){
+  const draftKey = `tgc-wk:${SLUG}:${mon}`;
+  let draft = null; try { draft = JSON.parse(localStorage.getItem(draftKey) || 'null'); } catch(e){}
+  const d = Object.assign({}, logOf('weekly', mon) || draft || {});
+  const q = x => {
+    const v = d[x.k];
+    const inner = x.opts
+      ? `<div class="opts ${x.col ? 'col' : ''}" data-k="${x.k}">${x.opts.map(o => `<button type="button" class="${v === o ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`
+      : `<textarea data-k="${x.k}">${esc(v || '')}</textarea>`;
+    return `<div class="q"><p class="qt">${esc(x.q)}</p>${x.h ? `<p class="qh">${esc(x.h)}</p>` : ''}${inner}</div>`;
+  };
+  const cw = coachWeek(mon);
+  showSection(`
+    <h1 data-copy="trk_weekly_title">${esc(t('trk_weekly_title'))}</h1>
+    <div class="dnav"><button id="wPrev" aria-label="Previous week">‹</button>
+      <b>${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}</b>
+      <button id="wNext" aria-label="Next week" ${mon >= mondayOf(todayIso()) ? 'disabled' : ''}>›</button></div>
+    ${WEEKLY_Q.map(q).join('')}
+    <div class="lbl grp" data-copy="trk_measure_label">${esc(t('trk_measure_label'))}</div>
+    <div class="fgrid">${MEASURES.map(([k, l]) => `<div class="f"><label for="w_${k}">${esc(l)}</label>
+      <input id="w_${k}" data-k="${k}" type="number" inputmode="decimal" step="any" value="${d[k] == null ? '' : esc(d[k])}"></div>`).join('')}</div>
+    <button class="btn" id="wSave" data-copy="trk_submit" style="margin-top:22px">${esc(t('trk_submit'))}</button>
+    <p class="saved" id="wMsg"></p>`);
+  const keepDraft = () => { try { localStorage.setItem(draftKey, JSON.stringify(d)); } catch(e){} };
+  document.querySelectorAll('#aSection .opts').forEach(box => box.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const on = !b.classList.contains('on');
+    box.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+    if(on){ b.classList.add('on'); d[box.dataset.k] = b.dataset.v; } else delete d[box.dataset.k];
+    keepDraft();
+  }));
+  document.querySelectorAll('#aSection textarea[data-k], #aSection input[data-k]').forEach(el => el.addEventListener('input', () => {
+    d[el.dataset.k] = el.type === 'number' ? num(el.value) : el.value; keepDraft();
+  }));
+  $('#wPrev').onclick = () => openWeekly(addDays(mon, -7));
+  $('#wNext').onclick = () => openWeekly(addDays(mon, 7));
+  $('#wSave').onclick = async () => {
+    const data = {};
+    Object.keys(d).forEach(k => { const v = d[k]; if(v != null && String(v).trim() !== '') data[k] = typeof v === 'string' ? v.trim() : v; });
+    if(await saveLog('weekly', mon, data, $('#wSave'), $('#wMsg'))) { try { localStorage.removeItem(draftKey); } catch(e){} }
+  };
+}
+
+async function saveLog(kind, day, data, btn, msg){
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const j = await logApi({ action:'save', kind, day, data });
+    LOGS = LOGS.filter(l => !(l.kind === kind && l.day === day)).concat([j.log]);
+    msg.textContent = t('trk_saved');
+    setTimeout(() => { closeSection(); renderWeek(); }, 650);
+    return true;
+  } catch(e){
+    msg.textContent = e.message;
+    return false;
+  } finally {
+    btn.disabled = false; btn.textContent = t(kind === 'weekly' ? 'trk_submit' : 'trk_save');
+  }
+}
+
+function openHistory(){
+  const mon = mondayOf(todayIso());
+  const rows = [];
+  for(let i = 0; i < 26; i++){
+    const m = addDays(mon, -7 * i), s = weekStats(m), tg = targetFor(m), cw = coachWeek(m);
+    if(!s.n && !logOf('weekly', m)) continue;
+    const wk = logOf('weekly', m) || {};
+    rows.push(`<tr><td><b>${cw ? 'W' + cw : ''}</b> ${fmt(m)}</td><td>${nf(s.weight, 1)}</td><td>${nf(s.kcal)}${tg.kcal ? `<br><small style="color:var(--mut)">${nf(tg.kcal)}</small>` : ''}</td>
+      <td>${nf(s.protein)}</td><td>${nf(s.carbs)}</td><td>${nf(s.fat)}</td><td>${nf(s.steps)}</td>
+      <td>${s.sys != null ? nf(s.sys) + '/' + nf(s.dia) : '—'}</td><td>${nf(s.cardio)}</td><td>${wk.m_waist != null ? nf(wk.m_waist, 1) : '—'}</td><td>${wk.score || '—'}</td></tr>`);
+  }
+  showSection(`
+    <h1 data-copy="trk_history_title">${esc(t('trk_history_title'))}</h1>
+    ${rows.length ? `<div class="card" style="padding:14px 12px"><div class="histwrap"><table class="hist">
+      <thead><tr><th>Week</th><th>Weight</th><th>Kcals</th><th>P</th><th>C</th><th>F</th><th>Steps</th><th>BP</th><th>Cardio</th><th>Waist</th><th>Score</th></tr></thead>
+      <tbody>${rows.join('')}</tbody></table></div></div>` : '<div class="card" style="color:var(--mut)">Nothing logged yet.</div>'}
+    <p class="updated">Weekly averages of your daily logs. Cardio is the week's total minutes.</p>`);
 }
 
 /* ── edit mode: trt-guy.com/<anyone>?edit=1 ───────────────────────────────

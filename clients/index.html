@@ -141,6 +141,19 @@
   .draghandle:active{cursor:grabbing}
   .resrow.drop-hi{outline:2px dashed var(--accent);outline-offset:3px;border-radius:10px}
   a.openlink{flex:0 0 auto;text-decoration:none;padding:8px 11px}
+  table.trk{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.trk th{font-size:9px;padding:0 7px 8px;text-align:right}
+  table.trk th:first-child,table.trk td:first-child{text-align:left}
+  table.trk tbody tr{border-top:1px solid var(--line)}
+  table.trk tbody td{padding:9px 7px;text-align:right;white-space:nowrap;font-size:12.5px;vertical-align:top}
+  table.trk tbody tr[data-wk]:hover{background:var(--panel-2)}
+  table.trk.inner{background:var(--panel-2);border-radius:10px;margin:4px 0}
+  table.trk.inner tbody tr{cursor:default}
+  @media(max-width:760px){ table.trk thead{display:table-header-group} table.trk tbody tr{display:table-row;border:0;border-top:1px solid var(--line);margin:0;padding:0}
+    table.trk tbody td{display:table-cell;padding:9px 7px} table.trk tbody td:before{display:none} }
+  .trkqa{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:12px;white-space:normal;text-align:left}
+  .trkqa .fl{margin:0}
+  .trkqa p{margin:0 0 6px;font-size:13px;color:var(--fg);white-space:pre-wrap}
   .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;
     padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:600;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.2)}
   @media(max-width:760px){
@@ -210,7 +223,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-09-03T22:06Z';
+const BUILD = '2026-10-12T16:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -810,6 +823,7 @@ function drawPanel(){
       ${tpl ? '<button class="ptab on" data-t="plan">Plan template</button>' : `
       <button class="ptab ${TAB==='details'?'on':''}" data-t="details">Details</button>
       <button class="ptab ${TAB==='plan'?'on':''}" data-t="plan">Plan</button>
+      <button class="ptab ${TAB==='tracking'?'on':''}" data-t="tracking">Tracking</button>
       <button class="ptab ${TAB==='intake'?'on':''}" data-t="intake">Intake</button>`}
     </div>
     <div class="pbody" id="pBody"></div>
@@ -1079,6 +1093,8 @@ function drawBody(){
       TYPE_SECTIONS[c.client_type].forEach(k => { const el = $('#s_' + k + '_on'); if(el) el.checked = true; });
     }
 
+  } else if(TAB === 'tracking'){
+    drawTracking(c, b);
   } else {
     const intake = c.intake || null;
     const body = intake && (intake.transcript || (intake.qa || []).map(x => `${x.q}\n  ${x.a}`).join('\n\n'));
@@ -1107,6 +1123,162 @@ function drawBody(){
       } catch(e){ btn.disabled = false; btn.textContent = 'Pull from GHL'; alert('Failed: ' + e.message); }
     };
   }
+}
+
+/* ── Tracking tab: the Google Sheet's Timeline + Daily/Weekly Check In ─────
+   Logs come from his page (trt-guy.com/<slug>); targets are set here per week
+   and carry forward until a newer one is set. Weeks run Monday → Sunday. */
+const T_PAD = n => String(n).padStart(2, '0');
+const tIso = d => `${d.getFullYear()}-${T_PAD(d.getMonth() + 1)}-${T_PAD(d.getDate())}`;
+const tD = s => new Date(s + 'T12:00:00');
+const tAdd = (s, n) => { const d = tD(s); d.setDate(d.getDate() + n); return tIso(d); };
+const tMon = s => tAdd(s, -((tD(s).getDay() + 6) % 7));
+const tNum = v => (v === '' || v == null || isNaN(Number(v))) ? null : Number(v);
+const tAvg = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; };
+const tNf = (v, dp = 0) => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: dp, minimumFractionDigits: dp });
+const T_GOALS = ['Fat Loss', 'Maintenance', 'Muscle Gain', 'Recomp', 'Diet Break', 'Peak Week'];
+const T_WEEKLY = [
+  ['score','Score (1-5)'], ['why','Why that number'], ['training_ok','Training plan up to date'], ['daily_ok','Daily check-in up to date'],
+  ['adherence','Diet adherence'], ['appetite','Appetite / hunger'], ['sleep','Sleep'], ['rested','Rested after sleep'],
+  ['energy','Energy'], ['stress','Stress (1-5)'], ['mood','Mood'], ['motivation','Motivation'], ['win','Win of the week'],
+  ['action','Number one action'], ['diet_issues','Diet issues'], ['training_issues','Training issues'],
+  ['other_issues','Other issues'], ['help','Anything I can help with'], ['feedback','Feedback on coaching'], ['questions','Questions'],
+];
+const T_MEAS = [['m_waist','Waist'],['m_rbicep','R Bicep'],['m_lbicep','L Bicep'],['m_rquad','R Quad'],['m_lquad','L Quad'],
+  ['m_chest','Chest'],['m_shoulders','Shoulders'],['m_neck','Neck']];
+
+async function drawTracking(c, b){
+  const on = !!(((c.sections || {}).tracker) || {}).on;
+  b.innerHTML = `
+    <div class="sect">
+      <div class="shead"><h3>Check-in tracker on his page</h3>
+        <label class="sw"><input type="checkbox" id="trk_on" ${on ? 'checked' : ''}><span class="track"></span>Show</label></div>
+      <p class="hint">He logs bodyweight, macros, steps, BP and cardio daily, and does the weekly check-in + measurements on his page. Turning this on hides the Daily / Weekly Check In sheet tiles. Hit Save after switching.</p>
+    </div>
+    <div id="trkBody"><p class="hint">Loading logs…</p></div>`;
+  try {
+    const j = await api('/clients?action=logs&id=' + encodeURIComponent(c.id) + '&from=' + tAdd(tMon(tIso(new Date())), -7 * 51));
+    c._logs = j.logs || [];
+  } catch(e){ $('#trkBody').innerHTML = `<p class="hint">Could not load logs: ${esc(e.message)}</p>`; return; }
+  if(OPEN !== c || TAB !== 'tracking') return;
+  drawTrackingBody(c);
+}
+
+function drawTrackingBody(c){
+  const L = c._logs || [];
+  const logOf = (k, d) => (L.find(l => l.kind === k && l.day === d) || {}).data || null;
+  const targets = L.filter(l => l.kind === 'target').sort((a, b) => a.day < b.day ? 1 : -1);
+  const targetFor = m => { const t = targets.find(x => x.day <= m); return t ? t.data : {}; };
+  const kcalOf = d => d.kcal != null ? tNum(d.kcal)
+    : (d.protein != null && d.carbs != null && d.fat != null) ? (tNum(d.protein) + tNum(d.carbs)) * 4 + tNum(d.fat) * 9 : null;
+  const start = c.start_date || (c.phase || {}).start;
+  const cw = m => start ? Math.round((tD(m) - tD(tMon(start))) / 6048e5) + 1 : null;
+  const thisMon = tMon(tIso(new Date()));
+
+  const weeks = [];
+  for(let i = 0; i < 52; i++){
+    const m = tAdd(thisMon, -7 * i);
+    const days = [...Array(7)].map((_, j) => ({ day: tAdd(m, j), d: logOf('daily', tAdd(m, j)) }));
+    const got = days.filter(x => x.d).map(x => x.d);
+    const wk = logOf('weekly', m);
+    if(!got.length && !wk && i > 3) continue;
+    const a = k => tAvg(got.map(d => tNum(d[k])));
+    weeks.push({ m, days, wk, n: got.length, tg: targetFor(m), weight: a('weight'), kcal: tAvg(got.map(kcalOf)),
+      protein: a('protein'), carbs: a('carbs'), fat: a('fat'), fiber: a('fiber'), steps: a('steps'),
+      sys: a('sys'), dia: a('dia'), pulse: a('pulse'), cardio: got.reduce((s, d) => s + (tNum(d.cardio) || 0), 0) });
+  }
+  const vs = (v, t, dp) => `${tNf(v, dp)}${t != null && t !== '' ? `<span class="csub"> / ${tNf(t)}</span>` : ''}`;
+
+  $('#trkBody').innerHTML = `
+    <div class="sect">
+      <div class="shead"><h3>Weekly targets</h3><button class="btn sm" id="tgNew">+ Set targets</button></div>
+      <p class="hint" style="margin-bottom:10px">Like the Timeline tab. A target holds from its week until you set a newer one. Kcals work themselves out from the macros.</p>
+      <div id="tgForm"></div>
+      <div class="rowlist">${targets.length ? targets.map(t => `<div class="r" style="font-size:13.5px">
+        <span style="flex:1"><b>From ${fmtDate(t.day)}</b>${cw(t.day) ? ` <span class="csub">(wk ${cw(t.day)})</span>` : ''} —
+          ${esc(t.data.goal || '')} ${t.data.kcal != null ? tNf(t.data.kcal) + ' kcal · ' : ''}P ${tNf(t.data.protein)} · C ${tNf(t.data.carbs)} · F ${tNf(t.data.fat)}${t.data.steps != null ? ' · ' + tNf(t.data.steps) + ' steps' : ''}${t.data.cardio != null ? ' · ' + tNf(t.data.cardio) + ' min Z2/wk' : ''}
+          ${t.data.note ? `<br><span class="csub">${esc(t.data.note)}</span>` : ''}</span>
+        <button class="btn sm" data-tge="${t.day}">Edit</button><button class="btn sm danger" data-tgx="${t.day}">✕</button></div>`).join('')
+        : '<p class="hint">No targets yet — until you set some, his page uses the macros from the Plan tab.</p>'}</div>
+    </div>
+    <div class="sect" style="overflow-x:auto">
+      <div class="shead"><h3>Week by week</h3><span class="hint">Click a week for the daily log + check-in answers</span></div>
+      <table class="trk"><thead><tr><th>Week</th><th>Days</th><th>Weight</th><th>Kcals</th><th>P</th><th>C</th><th>F</th><th>Fiber</th><th>Steps</th><th>BP</th><th>HR</th><th>Cardio</th><th>Check-in</th></tr></thead>
+      <tbody>${weeks.map((w, i) => {
+        const prev = weeks[i + 1] && weeks[i + 1].weight;
+        const dW = w.weight != null && prev != null ? w.weight - prev : null;
+        return `<tr data-wk="${w.m}"><td><b>${cw(w.m) ? 'W' + cw(w.m) : ''}</b> ${fmtDate(w.m)}${w.tg.goal ? `<br><span class="csub">${esc(w.tg.goal)}</span>` : ''}</td>
+        <td>${w.n}/7</td><td>${tNf(w.weight, 1)}${dW != null ? `<br><span class="csub">${dW > 0 ? '+' : ''}${tNf(dW, 1)}</span>` : ''}</td>
+        <td>${vs(w.kcal, w.tg.kcal)}</td><td>${vs(w.protein, w.tg.protein)}</td><td>${vs(w.carbs, w.tg.carbs)}</td><td>${vs(w.fat, w.tg.fat)}</td>
+        <td>${vs(w.fiber, w.tg.fiber)}</td><td>${vs(w.steps, w.tg.steps)}</td><td>${w.sys != null ? tNf(w.sys) + '/' + tNf(w.dia) : '—'}</td>
+        <td>${tNf(w.pulse)}</td><td>${vs(w.n ? w.cardio : null, w.tg.cardio)}</td><td>${w.wk ? '✓ ' + esc(w.wk.score || '') : '—'}</td></tr>
+        <tr class="trkx" data-x="${w.m}" hidden><td colspan="13"></td></tr>`;
+      }).join('')}</tbody></table>
+    </div>`;
+
+  // a week opens to the sheet's daily rows and his weekly answers
+  $$('#trkBody tr[data-wk]').forEach(tr => tr.onclick = () => {
+    const w = weeks.find(x => x.m === tr.dataset.wk), x = $(`#trkBody tr[data-x="${w.m}"]`);
+    if(!x.hidden){ x.hidden = true; return; }
+    const dn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    x.firstElementChild.innerHTML = `
+      <table class="trk inner"><thead><tr><th>Day</th><th>Weight</th><th>P</th><th>C</th><th>F</th><th>Fiber</th><th>Kcals</th><th>Steps</th><th>BP</th><th>Pulse</th><th>Cardio</th><th>Notes</th></tr></thead>
+      <tbody>${w.days.map((r, i) => { const d = r.d || {}; return `<tr><td>${dn[i]} ${fmtDate(r.day)}</td><td>${tNf(d.weight, 1)}</td>
+        <td>${tNf(d.protein)}</td><td>${tNf(d.carbs)}</td><td>${tNf(d.fat)}</td><td>${tNf(d.fiber)}</td><td>${tNf(r.d ? kcalOf(d) : null)}</td>
+        <td>${tNf(d.steps)}</td><td>${d.sys != null ? tNf(d.sys) + '/' + tNf(d.dia) : '—'}</td><td>${tNf(d.pulse)}</td><td>${tNf(d.cardio)}</td>
+        <td style="white-space:normal;min-width:180px">${esc(d.notes || '')}</td></tr>`; }).join('')}</tbody></table>
+      ${w.wk ? `<div class="trkqa">${T_WEEKLY.filter(([k]) => w.wk[k] != null && w.wk[k] !== '').map(([k, l]) =>
+          `<div><span class="fl">${l}</span><p>${esc(w.wk[k])}</p></div>`).join('')}
+        ${T_MEAS.some(([k]) => w.wk[k] != null) ? `<div><span class="fl">Measurements</span><p>${T_MEAS.filter(([k]) => w.wk[k] != null).map(([k, l]) => `${l} <b>${esc(w.wk[k])}</b>`).join(' · ')}</p></div>` : ''}</div>`
+        : '<p class="hint" style="margin:10px 0 0">No weekly check-in for this week.</p>'}`;
+    x.hidden = false;
+  });
+
+  const form = (t) => {
+    const d = (t && t.data) || targets[0] && Object.assign({}, targets[0].data) || {};
+    const day = t ? t.day : thisMon;
+    $('#tgForm').innerHTML = `<div class="prog" style="margin-bottom:12px">
+      <div class="grid2">
+        <div class="fld"><label class="fl">From week of (Monday)</label><input type="date" id="tg_day" value="${day}"></div>
+        <div class="fld"><label class="fl">Goal</label><input id="tg_goal" list="tgGoals" value="${esc(d.goal || '')}" placeholder="Maintenance">
+          <datalist id="tgGoals">${T_GOALS.map(g => `<option value="${g}">`).join('')}</datalist></div>
+        <div class="fld"><label class="fl">Protein (g)</label><input type="number" id="tg_protein" value="${d.protein ?? ''}"></div>
+        <div class="fld"><label class="fl">Carbs (g)</label><input type="number" id="tg_carbs" value="${d.carbs ?? ''}"></div>
+        <div class="fld"><label class="fl">Fat (g)</label><input type="number" id="tg_fat" value="${d.fat ?? ''}"></div>
+        <div class="fld"><label class="fl">Kcals</label><input type="number" id="tg_kcal" readonly placeholder="from macros"></div>
+        <div class="fld"><label class="fl">Fiber (g)</label><input type="number" id="tg_fiber" value="${d.fiber ?? ''}"></div>
+        <div class="fld"><label class="fl">Daily step goal</label><input type="number" id="tg_steps" value="${d.steps ?? ''}"></div>
+        <div class="fld"><label class="fl">Zone 2 cardio min / week</label><input type="number" id="tg_cardio" value="${d.cardio ?? ''}"></div>
+      </div>
+      <div class="fld"><label class="fl">Note he sees on his week card</label><input id="tg_note" value="${esc(d.note || '')}"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn sm" id="tgCancel">Cancel</button><button class="btn sm primary" id="tgSave">Save targets</button></div>
+    </div>`;
+    const kc = () => { const p = tNum($('#tg_protein').value), cb = tNum($('#tg_carbs').value), f = tNum($('#tg_fat').value);
+      $('#tg_kcal').value = (p != null && cb != null && f != null) ? (p + cb) * 4 + f * 9 : ''; };
+    ['#tg_protein','#tg_carbs','#tg_fat'].forEach(id => $(id).oninput = kc); kc();
+    $('#tgCancel').onclick = () => { $('#tgForm').innerHTML = ''; };
+    $('#tgSave').onclick = async () => {
+      const day = tMon($('#tg_day').value || thisMon);
+      const data = { goal: $('#tg_goal').value.trim(), note: $('#tg_note').value.trim() };
+      ['protein','carbs','fat','kcal','fiber','steps','cardio'].forEach(k => { const v = tNum($('#tg_' + k).value); if(v != null) data[k] = v; });
+      try {
+        if(t && t.day !== day) await api('/clients', { method:'POST', body: JSON.stringify({ action:'log_remove', id:c.id, kind:'target', day:t.day }) });
+        const j = await api('/clients', { method:'POST', body: JSON.stringify({ action:'log_save', id:c.id, kind:'target', day, data }) });
+        c._logs = L.filter(l => !(l.kind === 'target' && (l.day === day || (t && l.day === t.day)))).concat([j.log]);
+        drawTrackingBody(c); toast('Targets saved');
+      } catch(e){ alert('Could not save: ' + e.message); }
+    };
+  };
+  $('#tgNew').onclick = () => form(null);
+  $$('#trkBody [data-tge]').forEach(btn => btn.onclick = () => form(targets.find(t => t.day === btn.dataset.tge)));
+  $$('#trkBody [data-tgx]').forEach(btn => btn.onclick = async () => {
+    if(!confirm('Remove the targets set from ' + fmtDate(btn.dataset.tgx) + '?')) return;
+    try {
+      await api('/clients', { method:'POST', body: JSON.stringify({ action:'log_remove', id:c.id, kind:'target', day:btn.dataset.tgx }) });
+      c._logs = L.filter(l => !(l.kind === 'target' && l.day === btn.dataset.tgx));
+      drawTrackingBody(c); toast('Removed');
+    } catch(e){ alert('Could not remove: ' + e.message); }
+  });
 }
 
 // Read whatever tab is open back into OPEN, so switching tabs never loses work.
@@ -1149,7 +1321,11 @@ function collect(){
       };
     });
     sec.extras = (c._extras || []).filter(x => (x.label || '').trim() || (x.link || '').trim());
+    if((c.sections || {}).tracker) sec.tracker = c.sections.tracker;   // set on the Tracking tab
     c.sections = sec;
+  }
+  if(TAB === 'tracking' && $('#trk_on')){
+    c.sections = Object.assign({}, c.sections || {}, { tracker: { on: $('#trk_on').checked } });
   }
 }
 function upsertLocal(cl){
