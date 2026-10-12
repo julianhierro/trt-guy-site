@@ -154,6 +154,43 @@
   .trkqa{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:12px;white-space:normal;text-align:left}
   .trkqa .fl{margin:0}
   .trkqa p{margin:0 0 6px;font-size:13px;color:var(--fg);white-space:pre-wrap}
+  .panel.wide{width:min(1240px,100%)}
+  .thumbs{display:flex;gap:8px;margin-top:12px}
+  .thumbs a{position:relative;display:block;width:110px;height:146px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .thumbs img{width:100%;height:100%;object-fit:cover}
+  .thumbs span{position:absolute;left:5px;bottom:5px;background:#fff;font-size:10.5px;border-radius:5px;padding:1px 6px}
+  .tlwrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);max-height:68vh}
+  table.tl{border-collapse:separate;border-spacing:0;font-size:12.5px}
+  table.tl th{position:sticky;left:0;z-index:2;background:var(--panel);text-align:left;font-weight:600;padding:5px 10px;white-space:nowrap;
+    border-right:1px solid var(--line);border-top:1px solid var(--line);min-width:230px}
+  table.tl td{border-top:1px solid var(--line);padding:3px;min-width:96px;text-align:center;white-space:nowrap}
+  table.tl td input{padding:6px 7px;font-size:12.5px;border-radius:6px;background:transparent;border-color:transparent;text-align:center}
+  table.tl td input:hover{border-color:var(--line-bright)}
+  table.tl td input:focus{background:#fff;border-color:var(--accent)}
+  table.tl td input::placeholder{color:var(--muted-2)}
+  table.tl td.auto{color:var(--muted);background:rgba(11,13,16,.025)}
+  table.tl td.now{background:var(--accent-soft)}
+  table.tl tr.tlh td,table.tl tr.tlh th{position:sticky;top:0;z-index:3;background:var(--panel);font-weight:700;font-size:12px;padding:7px}
+  table.tl tr.tlh th{z-index:4}
+  table.tl tr.tlh td.now{background:#ececee}
+  table.tl tr.tlg th{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);background:var(--panel-2)}
+  table.tl tr.tlg td{background:var(--panel-2)}
+  .tlx,.tladd{background:none;border:0;color:var(--muted-2);cursor:pointer;font-size:11px;padding:2px 4px}
+  .tlx:hover,.tladd:hover{color:var(--fg)}
+  .tladd{font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;font-size:9px}
+  .tlname{display:inline-block;max-width:160px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+  .tpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+  .tpday{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--panel-2)}
+  .tpday .r{display:flex;gap:4px;align-items:center}
+  .tpday input{padding:7px 8px;font-size:13px}
+  .tpday input.reps{font-size:12px;padding:5px 8px;margin-top:-3px;color:var(--muted)}
+  .wtabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+  .wtabs button{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:7px 10px;border-radius:7px;border:1px solid var(--line-bright);background:transparent;color:var(--muted);cursor:pointer}
+  .wtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .dow{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px}
+  .dow label{display:flex;gap:4px;align-items:center;cursor:pointer}
+  .dow input{width:auto;accent-color:var(--accent)}
+  table.ptable td input{padding:6px 7px;font-size:12.5px;min-width:90px}
   .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;
     padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:600;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.2)}
   @media(max-width:760px){
@@ -223,7 +260,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-12T16:00Z';
+const BUILD = '2026-10-12T19:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -804,7 +841,8 @@ function drawPanel(){
   closePanel();
   const c = OPEN;
   const scrim = document.createElement('div'); scrim.className = 'scrim'; scrim.id = 'scrim';
-  const p = document.createElement('div'); p.className = 'panel'; p.id = 'panel';
+  const p = document.createElement('div'); p.id = 'panel';
+  p.className = 'panel' + (['tracking','timeline','training','protocols'].includes(TAB) ? ' wide' : '');
   const tpl = !!c.isTemplate;
   p.innerHTML = `
     <div class="phead">
@@ -824,6 +862,9 @@ function drawPanel(){
       <button class="ptab ${TAB==='details'?'on':''}" data-t="details">Details</button>
       <button class="ptab ${TAB==='plan'?'on':''}" data-t="plan">Plan</button>
       <button class="ptab ${TAB==='tracking'?'on':''}" data-t="tracking">Tracking</button>
+      <button class="ptab ${TAB==='timeline'?'on':''}" data-t="timeline">Timeline</button>
+      <button class="ptab ${TAB==='training'?'on':''}" data-t="training">Training</button>
+      <button class="ptab ${TAB==='protocols'?'on':''}" data-t="protocols">Protocols</button>
       <button class="ptab ${TAB==='intake'?'on':''}" data-t="intake">Intake</button>`}
     </div>
     <div class="pbody" id="pBody"></div>
@@ -1095,6 +1136,12 @@ function drawBody(){
 
   } else if(TAB === 'tracking'){
     drawTracking(c, b);
+  } else if(TAB === 'timeline'){
+    drawTimeline(c, b);
+  } else if(TAB === 'training'){
+    drawTraining(c, b);
+  } else if(TAB === 'protocols'){
+    drawProtocols(c, b);
   } else {
     const intake = c.intake || null;
     const body = intake && (intake.transcript || (intake.qa || []).map(x => `${x.q}\n  ${x.a}`).join('\n\n'));
@@ -1125,18 +1172,24 @@ function drawBody(){
   }
 }
 
-/* ── Tracking tab: the Google Sheet's Timeline + Daily/Weekly Check In ─────
-   Logs come from his page (trt-guy.com/<slug>); targets are set here per week
-   and carry forward until a newer one is set. Weeks run Monday → Sunday. */
+/* ── Tracker tabs: the client Google Sheet, rebuilt ─────────────────────────
+   Tracking  — his daily logs + weekly check-ins, week by week (Daily / Weekly Check In tabs)
+   Timeline  — the Timeline tab: one column per week, typed here, carried forward
+   Training  — the Training tab: split, exercises + sets per week, volume plan
+   Protocols — Fertility Protocol / Show Day / written protocols
+   Logs live in tg_logs; the plan pieces live in his `sections`. Weeks run Mon → Sun. */
 const T_PAD = n => String(n).padStart(2, '0');
 const tIso = d => `${d.getFullYear()}-${T_PAD(d.getMonth() + 1)}-${T_PAD(d.getDate())}`;
 const tD = s => new Date(s + 'T12:00:00');
 const tAdd = (s, n) => { const d = tD(s); d.setDate(d.getDate() + n); return tIso(d); };
 const tMon = s => tAdd(s, -((tD(s).getDay() + 6) % 7));
+const tWeeks = (a, b) => Math.round((tD(b) - tD(a)) / 6048e5);
 const tNum = v => (v === '' || v == null || isNaN(Number(v))) ? null : Number(v);
 const tAvg = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; };
 const tNf = (v, dp = 0) => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: dp, minimumFractionDigits: dp });
-const T_GOALS = ['Fat Loss', 'Maintenance', 'Muscle Gain', 'Recomp', 'Diet Break', 'Peak Week'];
+const tRid = () => Math.random().toString(36).slice(2, 8);
+const tIsoWeek = s => { const d = tD(s); d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+  const w1 = new Date(d.getFullYear(), 0, 4); return 1 + Math.round(((d - w1) / 864e5 - 3 + (w1.getDay() + 6) % 7) / 7); };
 const T_WEEKLY = [
   ['score','Score (1-5)'], ['why','Why that number'], ['training_ok','Training plan up to date'], ['daily_ok','Daily check-in up to date'],
   ['adherence','Diet adherence'], ['appetite','Appetite / hunger'], ['sleep','Sleep'], ['rested','Rested after sleep'],
@@ -1145,74 +1198,150 @@ const T_WEEKLY = [
   ['other_issues','Other issues'], ['help','Anything I can help with'], ['feedback','Feedback on coaching'], ['questions','Questions'],
 ];
 const T_MEAS = [['m_waist','Waist'],['m_rbicep','R Bicep'],['m_lbicep','L Bicep'],['m_rquad','R Quad'],['m_lquad','L Quad'],
-  ['m_chest','Chest'],['m_shoulders','Shoulders'],['m_neck','Neck']];
+  ['m_chest','Chest'],['m_shoulders','Shoulders'],['m_neck','Neck'],['m_hips','Hips'],['m_rforearm','R Forearm'],['m_lforearm','L Forearm'],
+  ['m_rcalf','R Calf'],['m_lcalf','L Calf']];
+const T_SKIN = [['sf_pec','Pectoral'],['sf_subscap','Sub-Scapular'],['sf_bicep','Biceps'],['sf_tricep','Triceps'],['sf_kidney','Kidney'],
+  ['sf_suprailiac','Suprailiac'],['sf_abdominal','Abdominals'],['sf_quad','Quadriceps'],['sf_calf','Medial Calf']];
+const T_PICS = [['pic_front','Front'],['pic_side','Side'],['pic_back','Back']];
+const T_DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const tSkin = w => { if(!w) return null; const v = T_SKIN.map(([k]) => tNum(w[k])).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
 
+// Same row list as his page (404.html) — keep the two in step.
+const TL_GROUPS = [['week','Week'], ['cardio','Cardio/Movement'], ['health','Health/Composition'], ['nutrition','Nutrition'],
+  ['aas','Testosterone & AAS'], ['peptides','Peptides'], ['pharm','Non AAS Pharm'], ['supps','Supplements']];
+const TL_AUTO = [
+  {k:'_date',l:'Week / Date',g:'week'}, {k:'_woy',l:'Week Of The Year',g:'week'}, {k:'_woc',l:'Week Of Coaching',g:'week'},
+  {k:'_bw',l:'Avg. Body Weight',g:'health'}, {k:'_sf',l:'Total Skinfold mm',g:'health'}, {k:'_bp',l:'Average BP',g:'health'},
+  {k:'_hr',l:'Average Resting HR',g:'health'}, {k:'_kcal',l:'Target Kcal',g:'nutrition'}, {k:'_mg',l:"Total Weekly mg's",g:'aas'},
+];
+const TL_DEFAULT = ['_date','_woy','_woc', {k:'cycle',l:'Week Of Cycle',g:'week'}, {k:'goal',l:'Goal',g:'week'}, {k:'event',l:'Event / Contest',g:'week'},
+  {k:'cardio',l:'Zone 2 Cardio Min/Week',g:'cardio'}, {k:'steps',l:'Daily Step Goal',g:'cardio'},
+  {k:'pics',l:'Progress Pics',g:'health'}, '_bw', {k:'target_bw',l:'Target Body Weight',g:'health'}, '_sf', '_bp', '_hr',
+  {k:'labs',l:'Labs',g:'health'}, {k:'note',l:'Notes',g:'health'},
+  '_kcal', {k:'protein',l:'Target Protein',g:'nutrition'}, {k:'carbs',l:'Target Carbs',g:'nutrition'}, {k:'fat',l:'Target Fat',g:'nutrition'}, {k:'fiber',l:'Target Fiber',g:'nutrition'},
+  {k:'x_teste',l:'Test E',g:'aas'}, '_mg',
+  {k:'x_gh',l:'GH',g:'peptides'}, {k:'x_pinealon',l:'Pinealon (AM)',g:'peptides'}, {k:'x_vilon',l:'VilON (AM)',g:'peptides'}, {k:'x_epitalon',l:'EpitalON (PM)',g:'peptides'},
+  {k:'x_metformin',l:'Metformin',g:'pharm'},
+  {k:'x_multimax',l:'Multi Max AM',g:'supps'}, {k:'x_omega3',l:'Omega 3 AM',g:'supps'}, {k:'x_supportmax',l:'SupportMax AM',g:'supps'},
+  {k:'x_zmax',l:'ZMAX PM',g:'supps'}, {k:'x_neuromax',l:'NeuroMax PM',g:'supps'}, {k:'x_lipidmax',l:'LipidMax (Any Time)',g:'supps'}, {k:'x_creatine',l:'Creatine',g:'supps'},
+].map(r => typeof r === 'string' ? TL_AUTO.find(a => a.k === r) : r);
+const TL_NO_CARRY = new Set(['note','labs','pics','event']);
+const T_GOALS = ['Fat Loss', 'Maintenance', 'Muscle Gain', 'Recomp', 'Diet Break', 'Peak Week'];
+
+async function ensureLogs(c){
+  if(c._logs) return c._logs;
+  const j = await api('/clients?action=logs&id=' + encodeURIComponent(c.id) + '&from=' + tAdd(tMon(tIso(new Date())), -7 * 52));
+  c._logs = j.logs || [];
+  return c._logs;
+}
+async function putLog(c, kind, day, data){
+  const empty = !Object.keys(data).length;
+  const j = await api('/clients', { method:'POST', body: JSON.stringify(empty
+    ? { action:'log_remove', id:c.id, kind, day } : { action:'log_save', id:c.id, kind, day, data }) });
+  c._logs = (c._logs || []).filter(l => !(l.kind === kind && l.day === day));
+  if(!empty) c._logs.push(j.log);
+}
+const tLog = (c, kind, day) => ((c._logs || []).find(l => l.kind === kind && l.day === day) || {}).data || null;
+const tStart = c => c.start_date || (c.phase || {}).start || '';
+const tCoachWeek = (c, m) => { const s = tStart(c); if(!s) return null; const w = tWeeks(tMon(s), m) + 1; return w >= 1 ? w : null; };
+const tKcalOf = d => d.kcal != null ? tNum(d.kcal)
+  : (d.protein != null && d.carbs != null && d.fat != null) ? (tNum(d.protein) + tNum(d.carbs)) * 4 + tNum(d.fat) * 9 : null;
+function tWeekStats(c, m){
+  const days = [...Array(7)].map((_, j) => ({ day: tAdd(m, j), d: tLog(c, 'daily', tAdd(m, j)) }));
+  const got = days.filter(x => x.d && (['weight','protein','carbs','fat','steps','sys','pulse','cardio'].some(k => x.d[k] != null) || x.d.notes)).map(x => x.d);
+  const a = k => tAvg(got.map(d => tNum(d[k])));
+  return { days, n: got.length, weight: a('weight'), kcal: tAvg(got.map(tKcalOf)), protein: a('protein'), carbs: a('carbs'),
+    fat: a('fat'), fiber: a('fiber'), steps: a('steps'), sys: a('sys'), dia: a('dia'), pulse: a('pulse'),
+    cardio: got.reduce((s, d) => s + (tNum(d.cardio) || 0), 0) };
+}
+const tlRowsOf = c => {
+  const r = (c.sections || {}).timeline_rows;
+  return Array.isArray(r) && r.length ? r.map(x => x.k && x.k[0] === '_' ? (TL_AUTO.find(a => a.k === x.k) || x) : x) : TL_DEFAULT.slice();
+};
+function tlCell(c, m, k){
+  const own = tLog(c, 'target', m);
+  if(own && own[k] != null && own[k] !== '') return { v: own[k], carried: false };
+  if(TL_NO_CARRY.has(k)) return { v: null };
+  const prev = (c._logs || []).filter(l => l.kind === 'target' && l.day < m && l.data[k] != null && l.data[k] !== '')
+    .sort((a, b) => a.day < b.day ? 1 : -1)[0];
+  if(!prev) return { v: null };
+  if(k === 'cycle' && tNum(prev.data.cycle) != null) return { v: tNum(prev.data.cycle) + tWeeks(prev.day, m), carried: true };
+  return { v: prev.data[k], carried: true };
+}
+const tlNum = (c, m, k) => tNum(tlCell(c, m, k).v);
+function tTargetFor(c, m){
+  const d = {};
+  ['goal'].forEach(k => { const v = tlCell(c, m, k).v; if(v != null) d[k] = v; });
+  ['protein','carbs','fat','fiber','steps','cardio'].forEach(k => { const v = tlNum(c, m, k); if(v != null) d[k] = v; });
+  if(d.protein != null && d.carbs != null && d.fat != null) d.kcal = (d.protein + d.carbs) * 4 + d.fat * 9;
+  return d;
+}
+function tlAuto(c, m, k){
+  const st = () => tWeekStats(c, m);
+  switch(k){
+    case '_date': return fmtDate(m);
+    case '_woy': return tIsoWeek(m);
+    case '_woc': return tCoachWeek(c, m) || '';
+    case '_bw': { const s = st(); return s.weight == null ? '' : tNf(s.weight, 1); }
+    case '_bp': { const s = st(); return s.sys == null ? '' : tNf(s.sys) + '/' + tNf(s.dia); }
+    case '_hr': { const s = st(); return s.pulse == null ? '' : tNf(s.pulse); }
+    case '_sf': { const v = tSkin(tLog(c, 'weekly', m)); return v == null ? '' : tNf(v, 1); }
+    case '_kcal': { const p = tlNum(c, m, 'protein'), cb = tlNum(c, m, 'carbs'), f = tlNum(c, m, 'fat');
+      return (p != null && cb != null && f != null) ? tNf((p + cb) * 4 + f * 9) : ''; }
+    case '_mg': { const v = tlRowsOf(c).filter(r => r.g === 'aas' && r.k[0] !== '_').map(r => parseFloat(tlCell(c, m, r.k).v)).filter(x => !isNaN(x));
+      return v.length ? tNf(v.reduce((a, b) => a + b, 0)) : ''; }
+  }
+  return '';
+}
+const saveSections = async c => {
+  const j = await api('/clients', { method:'POST', body: JSON.stringify({ id:c.id, sections:c.sections }) });
+  const logs = c._logs; Object.assign(c, j.client); c._logs = logs; upsertLocal(c);
+};
+
+/* ── Tracking: what he logged ──────────────────────────────────────────── */
 async function drawTracking(c, b){
-  const on = !!(((c.sections || {}).tracker) || {}).on;
+  const tr = ((c.sections || {}).tracker) || {};
   b.innerHTML = `
     <div class="sect">
       <div class="shead"><h3>Check-in tracker on his page</h3>
-        <label class="sw"><input type="checkbox" id="trk_on" ${on ? 'checked' : ''}><span class="track"></span>Show</label></div>
-      <p class="hint">He logs bodyweight, macros, steps, BP and cardio daily, and does the weekly check-in + measurements on his page. Turning this on hides the Daily / Weekly Check In sheet tiles. Hit Save after switching.</p>
+        <label class="sw"><input type="checkbox" id="trk_on" ${tr.on ? 'checked' : ''}><span class="track"></span>Show</label></div>
+      <p class="hint">Turns on his week card, daily log, weekly check-in (with measurements + progress pics), the Timeline, and the Training / Protocol tiles. The old Daily / Weekly Check In sheet tiles step aside. Hit Save after switching.</p>
+      <div class="shead" style="margin-top:12px"><h3 style="font-size:13.5px">Skin folds in his weekly check-in</h3>
+        <label class="sw"><input type="checkbox" id="trk_sf" ${tr.skinfolds ? 'checked' : ''}><span class="track"></span>Ask</label></div>
+      <p class="hint">The nine sites from the sheet, with its measuring instructions. Only worth it if someone with calipers measures him.</p>
     </div>
     <div id="trkBody"><p class="hint">Loading logs…</p></div>`;
-  try {
-    const j = await api('/clients?action=logs&id=' + encodeURIComponent(c.id) + '&from=' + tAdd(tMon(tIso(new Date())), -7 * 51));
-    c._logs = j.logs || [];
-  } catch(e){ $('#trkBody').innerHTML = `<p class="hint">Could not load logs: ${esc(e.message)}</p>`; return; }
+  try { await ensureLogs(c); }
+  catch(e){ $('#trkBody').innerHTML = `<p class="hint">Could not load logs: ${esc(e.message)}</p>`; return; }
   if(OPEN !== c || TAB !== 'tracking') return;
   drawTrackingBody(c);
 }
 
 function drawTrackingBody(c){
-  const L = c._logs || [];
-  const logOf = (k, d) => (L.find(l => l.kind === k && l.day === d) || {}).data || null;
-  const targets = L.filter(l => l.kind === 'target').sort((a, b) => a.day < b.day ? 1 : -1);
-  const targetFor = m => { const t = targets.find(x => x.day <= m); return t ? t.data : {}; };
-  const kcalOf = d => d.kcal != null ? tNum(d.kcal)
-    : (d.protein != null && d.carbs != null && d.fat != null) ? (tNum(d.protein) + tNum(d.carbs)) * 4 + tNum(d.fat) * 9 : null;
-  const start = c.start_date || (c.phase || {}).start;
-  const cw = m => start ? Math.round((tD(m) - tD(tMon(start))) / 6048e5) + 1 : null;
   const thisMon = tMon(tIso(new Date()));
-
   const weeks = [];
   for(let i = 0; i < 52; i++){
-    const m = tAdd(thisMon, -7 * i);
-    const days = [...Array(7)].map((_, j) => ({ day: tAdd(m, j), d: logOf('daily', tAdd(m, j)) }));
-    const got = days.filter(x => x.d).map(x => x.d);
-    const wk = logOf('weekly', m);
-    if(!got.length && !wk && i > 3) continue;
-    const a = k => tAvg(got.map(d => tNum(d[k])));
-    weeks.push({ m, days, wk, n: got.length, tg: targetFor(m), weight: a('weight'), kcal: tAvg(got.map(kcalOf)),
-      protein: a('protein'), carbs: a('carbs'), fat: a('fat'), fiber: a('fiber'), steps: a('steps'),
-      sys: a('sys'), dia: a('dia'), pulse: a('pulse'), cardio: got.reduce((s, d) => s + (tNum(d.cardio) || 0), 0) });
+    const m = tAdd(thisMon, -7 * i), s = tWeekStats(c, m), wk = tLog(c, 'weekly', m);
+    const tr = (c._logs || []).filter(l => l.kind === 'training' && l.day >= m && l.day <= tAdd(m, 6));
+    if(!s.n && !wk && !tr.length && i > 3) continue;
+    weeks.push(Object.assign(s, { m, wk, tr, tg: tTargetFor(c, m) }));
   }
   const vs = (v, t, dp) => `${tNf(v, dp)}${t != null && t !== '' ? `<span class="csub"> / ${tNf(t)}</span>` : ''}`;
-
   $('#trkBody').innerHTML = `
-    <div class="sect">
-      <div class="shead"><h3>Weekly targets</h3><button class="btn sm" id="tgNew">+ Set targets</button></div>
-      <p class="hint" style="margin-bottom:10px">Like the Timeline tab. A target holds from its week until you set a newer one. Kcals work themselves out from the macros.</p>
-      <div id="tgForm"></div>
-      <div class="rowlist">${targets.length ? targets.map(t => `<div class="r" style="font-size:13.5px">
-        <span style="flex:1"><b>From ${fmtDate(t.day)}</b>${cw(t.day) ? ` <span class="csub">(wk ${cw(t.day)})</span>` : ''} —
-          ${esc(t.data.goal || '')} ${t.data.kcal != null ? tNf(t.data.kcal) + ' kcal · ' : ''}P ${tNf(t.data.protein)} · C ${tNf(t.data.carbs)} · F ${tNf(t.data.fat)}${t.data.steps != null ? ' · ' + tNf(t.data.steps) + ' steps' : ''}${t.data.cardio != null ? ' · ' + tNf(t.data.cardio) + ' min Z2/wk' : ''}
-          ${t.data.note ? `<br><span class="csub">${esc(t.data.note)}</span>` : ''}</span>
-        <button class="btn sm" data-tge="${t.day}">Edit</button><button class="btn sm danger" data-tgx="${t.day}">✕</button></div>`).join('')
-        : '<p class="hint">No targets yet — until you set some, his page uses the macros from the Plan tab.</p>'}</div>
-    </div>
     <div class="sect" style="overflow-x:auto">
-      <div class="shead"><h3>Week by week</h3><span class="hint">Click a week for the daily log + check-in answers</span></div>
-      <table class="trk"><thead><tr><th>Week</th><th>Days</th><th>Weight</th><th>Kcals</th><th>P</th><th>C</th><th>F</th><th>Fiber</th><th>Steps</th><th>BP</th><th>HR</th><th>Cardio</th><th>Check-in</th></tr></thead>
+      <div class="shead"><h3>Week by week</h3><span class="hint">Click a week for the daily log, check-in, pics and sessions. Targets come from the Timeline tab.</span></div>
+      <table class="trk"><thead><tr><th>Week</th><th>Days</th><th>Weight</th><th>Kcals</th><th>P</th><th>C</th><th>F</th><th>Fiber</th><th>Steps</th><th>BP</th><th>HR</th><th>Cardio</th><th>Sessions</th><th>Check-in</th></tr></thead>
       <tbody>${weeks.map((w, i) => {
         const prev = weeks[i + 1] && weeks[i + 1].weight;
         const dW = w.weight != null && prev != null ? w.weight - prev : null;
-        return `<tr data-wk="${w.m}"><td><b>${cw(w.m) ? 'W' + cw(w.m) : ''}</b> ${fmtDate(w.m)}${w.tg.goal ? `<br><span class="csub">${esc(w.tg.goal)}</span>` : ''}</td>
+        const cw = tCoachWeek(c, w.m);
+        return `<tr data-wk="${w.m}"><td><b>${cw ? 'W' + cw : ''}</b> ${fmtDate(w.m)}${w.tg.goal ? `<br><span class="csub">${esc(w.tg.goal)}</span>` : ''}</td>
         <td>${w.n}/7</td><td>${tNf(w.weight, 1)}${dW != null ? `<br><span class="csub">${dW > 0 ? '+' : ''}${tNf(dW, 1)}</span>` : ''}</td>
         <td>${vs(w.kcal, w.tg.kcal)}</td><td>${vs(w.protein, w.tg.protein)}</td><td>${vs(w.carbs, w.tg.carbs)}</td><td>${vs(w.fat, w.tg.fat)}</td>
         <td>${vs(w.fiber, w.tg.fiber)}</td><td>${vs(w.steps, w.tg.steps)}</td><td>${w.sys != null ? tNf(w.sys) + '/' + tNf(w.dia) : '—'}</td>
-        <td>${tNf(w.pulse)}</td><td>${vs(w.n ? w.cardio : null, w.tg.cardio)}</td><td>${w.wk ? '✓ ' + esc(w.wk.score || '') : '—'}</td></tr>
-        <tr class="trkx" data-x="${w.m}" hidden><td colspan="13"></td></tr>`;
+        <td>${tNf(w.pulse)}</td><td>${vs(w.n ? w.cardio : null, w.tg.cardio)}</td><td>${w.tr.length || '—'}</td>
+        <td>${w.wk ? '✓ ' + esc(w.wk.score || '') + (T_PICS.some(([k]) => w.wk[k]) ? ' 📷' : '') : '—'}</td></tr>
+        <tr class="trkx" data-x="${w.m}" hidden><td colspan="14"></td></tr>`;
       }).join('')}</tbody></table>
     </div>`;
 
@@ -1220,65 +1349,288 @@ function drawTrackingBody(c){
   $$('#trkBody tr[data-wk]').forEach(tr => tr.onclick = () => {
     const w = weeks.find(x => x.m === tr.dataset.wk), x = $(`#trkBody tr[data-x="${w.m}"]`);
     if(!x.hidden){ x.hidden = true; return; }
-    const dn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const doseTicks = d => Object.keys(d || {}).filter(k => k.startsWith('p_') && d[k]).length;
+    const wk = w.wk || {};
     x.firstElementChild.innerHTML = `
-      <table class="trk inner"><thead><tr><th>Day</th><th>Weight</th><th>P</th><th>C</th><th>F</th><th>Fiber</th><th>Kcals</th><th>Steps</th><th>BP</th><th>Pulse</th><th>Cardio</th><th>Notes</th></tr></thead>
-      <tbody>${w.days.map((r, i) => { const d = r.d || {}; return `<tr><td>${dn[i]} ${fmtDate(r.day)}</td><td>${tNf(d.weight, 1)}</td>
-        <td>${tNf(d.protein)}</td><td>${tNf(d.carbs)}</td><td>${tNf(d.fat)}</td><td>${tNf(d.fiber)}</td><td>${tNf(r.d ? kcalOf(d) : null)}</td>
+      <table class="trk inner"><thead><tr><th>Day</th><th>Weight</th><th>P</th><th>C</th><th>F</th><th>Fiber</th><th>Kcals</th><th>Steps</th><th>BP</th><th>Pulse</th><th>Cardio</th><th>Doses</th><th>Notes</th></tr></thead>
+      <tbody>${w.days.map((r, i) => { const d = r.d || {}; return `<tr><td>${T_DAYS[i]} ${fmtDate(r.day)}</td><td>${tNf(d.weight, 1)}</td>
+        <td>${tNf(d.protein)}</td><td>${tNf(d.carbs)}</td><td>${tNf(d.fat)}</td><td>${tNf(d.fiber)}</td><td>${tNf(r.d ? tKcalOf(d) : null)}</td>
         <td>${tNf(d.steps)}</td><td>${d.sys != null ? tNf(d.sys) + '/' + tNf(d.dia) : '—'}</td><td>${tNf(d.pulse)}</td><td>${tNf(d.cardio)}</td>
-        <td style="white-space:normal;min-width:180px">${esc(d.notes || '')}</td></tr>`; }).join('')}</tbody></table>
-      ${w.wk ? `<div class="trkqa">${T_WEEKLY.filter(([k]) => w.wk[k] != null && w.wk[k] !== '').map(([k, l]) =>
-          `<div><span class="fl">${l}</span><p>${esc(w.wk[k])}</p></div>`).join('')}
-        ${T_MEAS.some(([k]) => w.wk[k] != null) ? `<div><span class="fl">Measurements</span><p>${T_MEAS.filter(([k]) => w.wk[k] != null).map(([k, l]) => `${l} <b>${esc(w.wk[k])}</b>`).join(' · ')}</p></div>` : ''}</div>`
-        : '<p class="hint" style="margin:10px 0 0">No weekly check-in for this week.</p>'}`;
+        <td>${doseTicks(d) ? '✓ ' + doseTicks(d) : '—'}</td><td style="white-space:normal;min-width:180px">${esc(d.notes || '')}</td></tr>`; }).join('')}</tbody></table>
+      ${T_PICS.some(([k]) => wk[k]) ? `<div class="thumbs">${T_PICS.filter(([k]) => wk[k]).map(([k, l]) =>
+        `<a href="${esc(wk[k])}" target="_blank" rel="noopener"><img src="${esc(wk[k])}" alt="${l}"><span>${l}</span></a>`).join('')}</div>` : ''}
+      ${w.wk ? `<div class="trkqa">${T_WEEKLY.filter(([k]) => wk[k] != null && wk[k] !== '').map(([k, l]) =>
+          `<div><span class="fl">${l}</span><p>${esc(wk[k])}</p></div>`).join('')}
+        ${T_MEAS.some(([k]) => wk[k] != null) ? `<div><span class="fl">Measurements</span><p>${T_MEAS.filter(([k]) => wk[k] != null).map(([k, l]) => `${l} <b>${esc(wk[k])}</b>`).join(' · ')}</p></div>` : ''}
+        ${tSkin(wk) != null ? `<div><span class="fl">Skin folds (mm) · total ${tNf(tSkin(wk), 1)}</span><p>${T_SKIN.filter(([k]) => wk[k] != null).map(([k, l]) => `${l} <b>${esc(wk[k])}</b>`).join(' · ')}</p></div>` : ''}</div>`
+        : '<p class="hint" style="margin:10px 0 0">No weekly check-in for this week.</p>'}
+      ${w.tr.sort((a, b) => a.day < b.day ? -1 : 1).map(l => {
+        const d = l.data, ex = [];
+        for(let i = 0; i < 40; i++) if(d['e' + i + 'n'] && (d['e' + i + 'w'] || d['e' + i + 'r'])) ex.push(`${esc(d['e' + i + 'n'])} <b>${esc([d['e' + i + 'w'], d['e' + i + 'r']].filter(Boolean).join(' × '))}</b>`);
+        return `<div class="trkqa" style="grid-template-columns:1fr"><div><span class="fl">Session · ${fmtDate(l.day)} · ${esc(d.day || '')}</span><p>${ex.join('<br>') || '—'}${d.notes ? `<br><i>${esc(d.notes)}</i>` : ''}</p></div></div>`;
+      }).join('')}`;
     x.hidden = false;
   });
+}
 
-  const form = (t) => {
-    const d = (t && t.data) || targets[0] && Object.assign({}, targets[0].data) || {};
-    const day = t ? t.day : thisMon;
-    $('#tgForm').innerHTML = `<div class="prog" style="margin-bottom:12px">
-      <div class="grid2">
-        <div class="fld"><label class="fl">From week of (Monday)</label><input type="date" id="tg_day" value="${day}"></div>
-        <div class="fld"><label class="fl">Goal</label><input id="tg_goal" list="tgGoals" value="${esc(d.goal || '')}" placeholder="Maintenance">
-          <datalist id="tgGoals">${T_GOALS.map(g => `<option value="${g}">`).join('')}</datalist></div>
-        <div class="fld"><label class="fl">Protein (g)</label><input type="number" id="tg_protein" value="${d.protein ?? ''}"></div>
-        <div class="fld"><label class="fl">Carbs (g)</label><input type="number" id="tg_carbs" value="${d.carbs ?? ''}"></div>
-        <div class="fld"><label class="fl">Fat (g)</label><input type="number" id="tg_fat" value="${d.fat ?? ''}"></div>
-        <div class="fld"><label class="fl">Kcals</label><input type="number" id="tg_kcal" readonly placeholder="from macros"></div>
-        <div class="fld"><label class="fl">Fiber (g)</label><input type="number" id="tg_fiber" value="${d.fiber ?? ''}"></div>
-        <div class="fld"><label class="fl">Daily step goal</label><input type="number" id="tg_steps" value="${d.steps ?? ''}"></div>
-        <div class="fld"><label class="fl">Zone 2 cardio min / week</label><input type="number" id="tg_cardio" value="${d.cardio ?? ''}"></div>
-      </div>
-      <div class="fld"><label class="fl">Note he sees on his week card</label><input id="tg_note" value="${esc(d.note || '')}"></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn sm" id="tgCancel">Cancel</button><button class="btn sm primary" id="tgSave">Save targets</button></div>
-    </div>`;
-    const kc = () => { const p = tNum($('#tg_protein').value), cb = tNum($('#tg_carbs').value), f = tNum($('#tg_fat').value);
-      $('#tg_kcal').value = (p != null && cb != null && f != null) ? (p + cb) * 4 + f * 9 : ''; };
-    ['#tg_protein','#tg_carbs','#tg_fat'].forEach(id => $(id).oninput = kc); kc();
-    $('#tgCancel').onclick = () => { $('#tgForm').innerHTML = ''; };
-    $('#tgSave').onclick = async () => {
-      const day = tMon($('#tg_day').value || thisMon);
-      const data = { goal: $('#tg_goal').value.trim(), note: $('#tg_note').value.trim() };
-      ['protein','carbs','fat','kcal','fiber','steps','cardio'].forEach(k => { const v = tNum($('#tg_' + k).value); if(v != null) data[k] = v; });
-      try {
-        if(t && t.day !== day) await api('/clients', { method:'POST', body: JSON.stringify({ action:'log_remove', id:c.id, kind:'target', day:t.day }) });
-        const j = await api('/clients', { method:'POST', body: JSON.stringify({ action:'log_save', id:c.id, kind:'target', day, data }) });
-        c._logs = L.filter(l => !(l.kind === 'target' && (l.day === day || (t && l.day === t.day)))).concat([j.log]);
-        drawTrackingBody(c); toast('Targets saved');
-      } catch(e){ alert('Could not save: ' + e.message); }
-    };
-  };
-  $('#tgNew').onclick = () => form(null);
-  $$('#trkBody [data-tge]').forEach(btn => btn.onclick = () => form(targets.find(t => t.day === btn.dataset.tge)));
-  $$('#trkBody [data-tgx]').forEach(btn => btn.onclick = async () => {
-    if(!confirm('Remove the targets set from ' + fmtDate(btn.dataset.tgx) + '?')) return;
-    try {
-      await api('/clients', { method:'POST', body: JSON.stringify({ action:'log_remove', id:c.id, kind:'target', day:btn.dataset.tgx }) });
-      c._logs = L.filter(l => !(l.kind === 'target' && l.day === btn.dataset.tgx));
-      drawTrackingBody(c); toast('Removed');
-    } catch(e){ alert('Could not remove: ' + e.message); }
+/* ── Timeline: the sheet's Timeline tab ────────────────────────────────── */
+async function drawTimeline(c, b){
+  b.innerHTML = '<p class="hint">Loading…</p>';
+  try { await ensureLogs(c); } catch(e){ b.innerHTML = `<p class="hint">Could not load: ${esc(e.message)}</p>`; return; }
+  if(OPEN !== c || TAB !== 'timeline') return;
+  const now = tMon(tIso(new Date())), targets = (c._logs || []).filter(l => l.kind === 'target').map(l => l.day).sort();
+  let from = tStart(c) ? tMon(tStart(c)) : now;
+  if(targets[0] && targets[0] < from) from = targets[0];
+  if(tWeeks(from, now) > 40) from = tAdd(now, -7 * 40);
+  if(tWeeks(from, now) < 2) from = tAdd(now, -14);
+  let to = tAdd(now, 7 * 12);
+  if(targets.length && targets[targets.length - 1] > to) to = tAdd(targets[targets.length - 1], 7 * 2);
+  const weeks = []; for(let m = from; m <= to && weeks.length < 70; m = tAdd(m, 7)) weeks.push(m);
+  const rows = tlRowsOf(c);
+  const head = `<tr class="tlh"><th>Week</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}">${tCoachWeek(c, m) ? 'W' + tCoachWeek(c, m) : ''}<br><span class="csub">${fmtDate(m)}</span></td>`).join('')}</tr>`;
+  const body = TL_GROUPS.map(([g, gl]) => {
+    const rs = rows.filter(r => r.g === g);
+    return `<tr class="tlg"><th>${esc(gl)} <button class="tladd" data-addrow="${g}" title="Add a row">+ row</button></th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}"></td>`).join('')}</tr>` +
+      rs.map(r => {
+        const auto = r.k[0] === '_';
+        return `<tr><th><span class="tlname">${esc(r.l)}</span>${auto ? '<span class="csub"> auto</span>' : ` <button class="tlx" data-ren="${esc(r.k)}" title="Rename">✎</button><button class="tlx" data-del="${esc(r.k)}" title="Remove row">✕</button>`}</th>
+          ${weeks.map(m => {
+            if(auto) return `<td class="auto ${m === now ? 'now' : ''}">${esc(tlAuto(c, m, r.k))}</td>`;
+            const cell = tlCell(c, m, r.k);
+            const pic = r.k === 'pics' && T_PICS.some(([k]) => (tLog(c, 'weekly', m) || {})[k]);
+            return `<td class="${m === now ? 'now' : ''}"><input data-m="${m}" data-k="${esc(r.k)}" value="${cell.carried || cell.v == null ? '' : esc(cell.v)}"
+              placeholder="${pic ? '✓ pics' : cell.carried ? esc(cell.v) : ''}" ${r.k === 'goal' ? 'list="tlGoals"' : ''}></td>`;
+          }).join('')}</tr>`;
+      }).join('');
+  }).join('');
+  b.innerHTML = `
+    <p class="hint" style="margin:0 0 10px">Type straight into a week. A value carries into the following weeks (shown grey) until you type a new one — type <b>0</b> or <b>off</b> to stop a compound. Notes, Labs, Pics and Event don't carry. Rows marked auto fill themselves from his logs. Every cell saves as you leave it, and he sees this on his page under Timeline.</p>
+    <datalist id="tlGoals">${T_GOALS.map(g => `<option value="${g}">`).join('')}</datalist>
+    <div class="tlwrap" id="tlWrap"><table class="tl"><tbody>${head}${body}</tbody></table></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" id="tlReset">Reset rows to the sheet's list</button></div>`;
+  const nowCell = $('#tlWrap td.now'); if(nowCell) $('#tlWrap').scrollLeft = Math.max(0, nowCell.offsetLeft - 260);
+
+  $$('#tlWrap input[data-m]').forEach(inp => inp.onchange = async () => {
+    const m = inp.dataset.m, k = inp.dataset.k, v = inp.value.trim();
+    const data = Object.assign({}, tLog(c, 'target', m) || {});
+    if(v === '') delete data[k]; else data[k] = (tNum(v) != null && !['goal','note','labs','event','pics'].includes(k)) ? Number(v) : v;
+    inp.disabled = true;
+    try { await putLog(c, 'target', m, data); const sl = $('#tlWrap').scrollLeft, st = $('#pBody').scrollTop; await drawTimeline(c, b); $('#tlWrap').scrollLeft = sl; $('#pBody').scrollTop = st; }
+    catch(e){ alert('Could not save: ' + e.message); inp.disabled = false; }
   });
+  const setRows = async rs => { c.sections = Object.assign({}, c.sections || {}, { timeline_rows: rs }); await saveSections(c); drawTimeline(c, b); };
+  $$('#tlWrap [data-addrow]').forEach(btn => btn.onclick = async () => {
+    const l = prompt('Name of the new row (e.g. Anavar, BPC 157, Vitamin D3):'); if(!l || !l.trim()) return;
+    const rs = tlRowsOf(c), idx = rs.map(r => r.g).lastIndexOf(btn.dataset.addrow);
+    rs.splice(idx < 0 ? rs.length : idx + 1, 0, { k: 'x_' + tRid(), l: l.trim(), g: btn.dataset.addrow });
+    try { await setRows(rs); } catch(e){ alert(e.message); }
+  });
+  $$('#tlWrap [data-ren]').forEach(btn => btn.onclick = async () => {
+    const rs = tlRowsOf(c), r = rs.find(x => x.k === btn.dataset.ren); const l = prompt('Rename row:', r.l); if(!l || !l.trim()) return;
+    r.l = l.trim(); try { await setRows(rs); } catch(e){ alert(e.message); }
+  });
+  $$('#tlWrap [data-del]').forEach(btn => btn.onclick = async () => {
+    const rs = tlRowsOf(c), r = rs.find(x => x.k === btn.dataset.del);
+    if(!confirm(`Remove the “${r.l}” row? Values already typed stay stored, they just stop showing.`)) return;
+    try { await setRows(rs.filter(x => x.k !== r.k)); } catch(e){ alert(e.message); }
+  });
+  $('#tlReset').onclick = async () => {
+    if(!confirm("Put the rows back to the sheet's Timeline list? Rows you added disappear from view (their values stay stored).")) return;
+    try { await setRows(TL_DEFAULT.slice()); } catch(e){ alert(e.message); }
+  };
+}
+
+/* ── Training: the sheet's Training tab ────────────────────────────────── */
+const TRAIN_SEED = {"days":[{"name":"Upper","when":"Monday"},{"name":"Lower","when":"Tuesday"},{"name":"Upper","when":"Thursday"},{"name":"Lower","when":"Friday"},{"name":"Arms","when":"Saturday"}],"budget":16,"volume":[[{"m":"Shoulders","s":5},{"m":"Chest","s":4},{"m":"Triceps","s":3},{"m":"Low Back","s":2},{"m":"Abs","s":2}],[{"m":"Lats/Erectors","s":5},{"m":"Hips","s":4},{"m":"Calves","s":3},{"m":"Quads","s":2},{"m":"Hams","s":2}],[{"m":"Chest","s":5},{"m":"Triceps","s":4},{"m":"Shoulders","s":3},{"m":"Low Back","s":2},{"m":"Abs","s":2}],[{"m":"Lats/Erectors","s":5},{"m":"Hips","s":4},{"m":"Calves","s":3},{"m":"Quads","s":2},{"m":"Hams","s":2}],[{"m":"Shoulders","s":4},{"m":"Biceps","s":4},{"m":"Triceps","s":4},{"m":"Forearms","s":4}]],"weeks":[{"label":"W1","ex":[[{"n":"Lateral Raises","s":3},{"n":"Cable Facepulls","s":3},{"n":"Horizontal Press","s":2},{"n":"Machine Chest Fly","s":3},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":2}],[{"n":"SLDL","s":2},{"n":"Lat Pulldowns","s":3},{"n":"Hip Thrusts","s":2},{"n":"Kickbakcs","s":2},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Cable Flye","s":2},{"n":"Decline Press","s":2},{"n":"Dips","s":3},{"n":"DB Upright Row","s":3},{"n":"Tricep Isolation","s":2},{"n":"Abs","s":4}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":2},{"n":"Straight Arm Pulldown","s":2},{"n":"Calves","s":3},{"n":"Hack Squats","s":2},{"n":"Lunges","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Machine Lateral Raise","s":2},{"n":"Front Raises","s":2},{"n":"Bicep Isolation","s":2},{"n":"Bicep Isolation","s":2},{"n":"Tricep Isolation","s":2},{"n":"Tricep Isolation","s":2},{"n":"Forearms","s":4}]]},{"label":"W2","ex":[[{"n":"Lateral Raises","s":3},{"n":"Cable Facepulls","s":3},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":3},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":2}],[{"n":"SLDL","s":3},{"n":"Lat Pulldowns","s":3},{"n":"Hip Thrusts","s":2},{"n":"Kickbakcs","s":2},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Cable Flye","s":3},{"n":"Decline Press","s":2},{"n":"Dips","s":3},{"n":"DB Upright Row","s":3},{"n":"Tricep Isolation","s":2},{"n":"Abs","s":4}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":3},{"n":"Straight Arm Pulldown","s":2},{"n":"Calves","s":3},{"n":"Hack Squats","s":2},{"n":"Lunges","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Machine Lateral Raise","s":3},{"n":"Front Raises","s":2},{"n":"Bicep Isolation","s":2},{"n":"Bicep Isolation","s":2},{"n":"Tricep Isolation","s":2},{"n":"Tricep Isolation","s":2},{"n":"Forearms","s":4}]]},{"label":"W3","ex":[[{"n":"Lateral Raises","s":3},{"n":"Cable Facepulls","s":3},{"n":"Bicep Isolation","s":2},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":3},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":2}],[{"n":"SLDL","s":3},{"n":"Lat Pulldowns","s":3},{"n":"Hip Thrusts","s":2},{"n":"Kickbakcs","s":2},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Cable Flye","s":3},{"n":"Decline Press","s":3},{"n":"Dips","s":3},{"n":"Tricep Isolation","s":2},{"n":"DB Upright Row","s":3},{"n":"Tricep Isolation","s":2}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":3},{"n":"Straight Arm Pulldown","s":3},{"n":"Calves","s":3},{"n":"Hack Squats","s":2},{"n":"Lunges","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Machine Lateral Raise","s":3},{"n":"Front Raises","s":3},{"n":"Bicep Isolation","s":3},{"n":"Tricep Isolation","s":3},{"n":"Forearms","s":4},{"n":"Abs","s":4}]]},{"label":"W4","ex":[[{"n":"Lateral Raises","s":4},{"n":"Cable Facepulls","s":3},{"n":"Bicep Isolation","s":2},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":3},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":2}],[{"n":"SLDL","s":3},{"n":"Lat Pulldowns","s":4},{"n":"Hip Thrusts","s":2},{"n":"Kickbakcs","s":2},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Cable Flye","s":3},{"n":"Decline Press","s":3},{"n":"Dips","s":3},{"n":"Tricep Isolation","s":3},{"n":"DB Upright Row","s":3},{"n":"Tricep Isolation","s":2}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":3},{"n":"Straight Arm Pulldown","s":3},{"n":"Calves","s":3},{"n":"Hack Squats","s":2},{"n":"Lunges","s":3},{"n":"Hamstring Curls","s":2}],[{"n":"Machine Lateral Raise","s":4},{"n":"Front Raises","s":3},{"n":"Bicep Isolation","s":3},{"n":"Tricep Isolation","s":3},{"n":"Forearms","s":4},{"n":"Abs","s":4}]]},{"label":"W5","ex":[[{"n":"Lateral Raises","s":4},{"n":"Cable Facepulls","s":3},{"n":"Bicep Isolation","s":3},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":3},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":2}],[{"n":"SLDL","s":3},{"n":"Lat Pulldowns","s":4},{"n":"Hip Thrusts","s":3},{"n":"Kickbakcs","s":2},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":2}],[{"n":"Cable Flye","s":3},{"n":"Decline Press","s":3},{"n":"Dips","s":4},{"n":"Tricep Isolation","s":3},{"n":"DB Upright Row","s":4},{"n":"Tricep Isolation","s":2}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":4},{"n":"Straight Arm Pulldown","s":3},{"n":"Calves","s":3},{"n":"Hack Squats","s":2},{"n":"Lunges","s":3},{"n":"Hamstring Curls","s":2}],[{"n":"Machine Lateral Raise","s":4},{"n":"Front Raises","s":3},{"n":"Bicep Isolation","s":3},{"n":"Tricep Isolation","s":3},{"n":"Forearms","s":4},{"n":"Abs","s":4}]]},{"label":"W6","ex":[[{"n":"Lateral Raises","s":4},{"n":"Cable Facepulls","s":4},{"n":"Bicep Isolation","s":3},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":3},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":2}],[{"n":"SLDL","s":3},{"n":"Lat Pulldowns","s":4},{"n":"Hip Thrusts","s":3},{"n":"Kickbakcs","s":3},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":3}],[{"n":"Cable Flye","s":4},{"n":"Decline Press","s":3},{"n":"Dips","s":4},{"n":"Tricep Isolation","s":3},{"n":"DB Upright Row","s":4},{"n":"Tricep Isolation","s":2}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":4},{"n":"Straight Arm Pulldown","s":3},{"n":"Calves","s":3},{"n":"Hack Squats","s":2},{"n":"Lunges","s":3},{"n":"Hamstring Curls","s":2}],[{"n":"Machine Lateral Raise","s":4},{"n":"Front Raises","s":4},{"n":"Bicep Isolation","s":3},{"n":"Tricep Isolation","s":3},{"n":"Forearms","s":4},{"n":"Abs","s":4}]]},{"label":"W7","ex":[[{"n":"Lateral Raises","s":4},{"n":"Cable Facepulls","s":4},{"n":"Bicep Isolation","s":3},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":3},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":2}],[{"n":"SLDL","s":3},{"n":"Lat Pulldowns","s":4},{"n":"Hip Thrusts","s":3},{"n":"Kickbakcs","s":3},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":3}],[{"n":"Cable Flye","s":4},{"n":"Decline Press","s":4},{"n":"Dips","s":4},{"n":"Tricep Isolation","s":3},{"n":"DB Upright Row","s":4},{"n":"Tricep Isolation","s":3}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":4},{"n":"Straight Arm Pulldown","s":4},{"n":"Calves","s":3},{"n":"Hack Squats","s":2},{"n":"Lunges","s":3},{"n":"Hamstring Curls","s":2}],[{"n":"Machine Lateral Raise","s":4},{"n":"Front Raises","s":4},{"n":"Bicep Isolation","s":4},{"n":"Tricep Isolation","s":4},{"n":"Forearms","s":4},{"n":"Abs","s":4}]]},{"label":"W8","ex":[[{"n":"Lateral Raises","s":4},{"n":"Cable Facepulls","s":4},{"n":"Bicep Isolation","s":3},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":4},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":3}],[{"n":"SLDL","s":3},{"n":"Lat Pulldowns","s":4},{"n":"Hip Thrusts","s":3},{"n":"Kickbakcs","s":3},{"n":"Calf Raises","s":3},{"n":"Leg Extensions","s":2},{"n":"Hamstring Curls","s":3}],[{"n":"Cable Flye","s":4},{"n":"Decline Press","s":4},{"n":"Dips","s":4},{"n":"Tricep Isolation","s":4},{"n":"DB Upright Row","s":4},{"n":"Tricep Isolation","s":3}],[{"n":"Horizontal Row","s":3},{"n":"Lat Pulldown","s":4},{"n":"Straight Arm Pulldown","s":4},{"n":"Calves","s":3},{"n":"Hack Squats","s":3},{"n":"Lunges","s":3},{"n":"Hamstring Curls","s":3}],[{"n":"Machine Lateral Raise","s":4},{"n":"Front Raises","s":4},{"n":"Bicep Isolation","s":4},{"n":"Tricep Isolation","s":4},{"n":"Forearms","s":4},{"n":"Abs","s":4}]]},{"label":"W9","ex":[[{"n":"Lateral Raises","s":4},{"n":"Cable Facepulls","s":4},{"n":"Bicep Isolation","s":3},{"n":"Horizontal Press","s":3},{"n":"Machine Chest Fly","s":4},{"n":"Tricep Extensions","s":3},{"n":"Abs of choice","s":3}],[{"n":"SLDL","s":4},{"n":"Lat Pulldowns","s":4},{"n":"Hip Thrusts","s":3},{"n":"Kickbakcs","s":3},{"n":"Calf Raises","s":4},{"n":"Leg Extensions","s":3},{"n":"Hamstring Curls","s":3}],[{"n":"Cable Flye","s":4},{"n":"Decline Press","s":4},{"n":"Dips","s":4},{"n":"Tricep Isolation","s":4},{"n":"DB Upright Row","s":4},{"n":"Tricep Isolation","s":3}],[{"n":"Horizontal Row","s":4},{"n":"Lat Pulldown","s":4},{"n":"Straight Arm Pulldown","s":4},{"n":"Calves","s":4},{"n":"Hack Squats","s":3},{"n":"Lunges","s":3},{"n":"Hamstring Curls","s":3}],[{"n":"Machine Lateral Raise","s":4},{"n":"Front Raises","s":4},{"n":"Bicep Isolation","s":4},{"n":"Tricep Isolation","s":4},{"n":"Forearms","s":4},{"n":"Abs","s":4}]]}]};
+let TW = 0;   // week open in the Training editor
+function drawTraining(c, b){
+  c.sections = c.sections || {};
+  const tp = c.sections.training_plan;
+  if(!tp){
+    b.innerHTML = `<div class="sect"><h3>No training program yet</h3>
+      <p class="hint" style="margin:6px 0 14px">Build it here and he sees it on his page — each week's days, exercises and sets — and logs weights and reps per session. Old program links in the Plan tab keep working.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" id="tpSeed">Start from the sheet's program</button>
+      <button class="btn sm" id="tpBlank">Start blank</button></div>
+      <p class="hint" style="margin-top:8px">The sheet's program is Upper / Lower / Upper / Lower / Arms, 9 weekly blocks, with its volume plan.</p></div>`;
+    $('#tpSeed').onclick = () => { c.sections.training_plan = Object.assign(JSON.parse(JSON.stringify(TRAIN_SEED)), { start: tMon(tIso(new Date())) }); TW = 0; drawTraining(c, b); };
+    $('#tpBlank').onclick = () => { c.sections.training_plan = { start: tMon(tIso(new Date())), budget: 16, days:[{name:'Day 1',when:''}], volume:[[]], weeks:[{label:'W1', ex:[[]]}] }; TW = 0; drawTraining(c, b); };
+    return;
+  }
+  tp.days = tp.days || []; tp.weeks = tp.weeks || []; tp.volume = tp.volume || [];
+  if(TW >= tp.weeks.length) TW = Math.max(0, tp.weeks.length - 1);
+  const wk = tp.weeks[TW] || { ex: [] };
+  wk.ex = wk.ex || [];
+  const nowIdx = tp.start ? Math.floor((tD(tIso(new Date())) - tD(tMon(tp.start))) / 6048e5) : null;
+  const sum = arr => (arr || []).reduce((a, e) => a + (tNum(e.s) || 0), 0);
+  const weekTotal = wk.ex.reduce((a, d) => a + sum(d), 0);
+  b.innerHTML = `
+    <div class="sect">
+      <div class="grid2">
+        <div class="fld"><label class="fl">Week 1 starts</label><input type="date" id="tp_start" value="${esc(tp.start || '')}">
+          <p class="hint">${nowIdx != null ? (nowIdx < 0 ? 'Not started yet.' : nowIdx >= tp.weeks.length ? 'Past the last week — he stays on the last one.' : 'He is on ' + esc(tp.weeks[nowIdx].label || 'W' + (nowIdx + 1)) + ' this week.') : ''}</p></div>
+        <div class="fld"><label class="fl">Sets per day (volume budget)</label><input type="number" id="tp_budget" value="${tp.budget ?? ''}"></div>
+      </div>
+      <label class="fl">Training days</label>
+      <div class="rowlist">${tp.days.map((d, i) => `<div class="r"><input data-dn="${i}" value="${esc(d.name || '')}" placeholder="Upper" style="flex:0 0 40%">
+        <input data-dw="${i}" value="${esc(d.when || '')}" placeholder="Monday"><button class="btn sm danger" data-drm="${i}">✕</button></div>`).join('')}</div>
+      <button class="btn sm" id="tpAddDay" style="margin-top:8px">+ Add day</button>
+    </div>
+
+    <div class="sect">
+      <div class="shead"><h3>Volume plan</h3><span class="hint">Sets per muscle each day, like the top of the sheet</span></div>
+      <div class="tpgrid">${tp.days.map((d, i) => { const v = tp.volume[i] = tp.volume[i] || []; const left = (tNum(tp.budget) || 0) - sum(v);
+        return `<div class="tpday"><b>${esc(d.name || 'Day ' + (i + 1))}</b>
+          ${v.map((m, j) => `<div class="r"><input data-vm="${i}.${j}" value="${esc(m.m || '')}" placeholder="Muscle"><input data-vs="${i}.${j}" type="number" value="${m.s ?? ''}" style="flex:0 0 58px"><button class="tlx" data-vrm="${i}.${j}">✕</button></div>`).join('')}
+          <button class="tladd" data-vadd="${i}">+ muscle</button>
+          <p class="hint">${sum(v)} sets${tp.budget ? ` · ${left} left of ${tp.budget}` : ''}</p></div>`; }).join('')}</div>
+    </div>
+
+    <div class="sect">
+      <div class="wtabs">${tp.weeks.map((w, i) => `<button data-tw="${i}" class="${i === TW ? 'on' : ''}">${esc(w.label || 'W' + (i + 1))}${i === nowIdx ? ' •' : ''}</button>`).join('')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <input id="tp_label" value="${esc(wk.label || '')}" style="max-width:110px">
+        <button class="btn sm" id="tpCopy">+ Copy this week</button>
+        <button class="btn sm danger" id="tpDelWk">Delete week</button>
+        <span class="hint">${weekTotal} total sets this week</span>
+      </div>
+      <div class="tpgrid">${tp.days.map((d, i) => { const ex = wk.ex[i] = wk.ex[i] || [];
+        return `<div class="tpday"><b>${esc(d.name || 'Day ' + (i + 1))}</b> <span class="csub">${esc(d.when || '')}</span>
+          ${ex.map((e, j) => `<div class="r"><input data-en="${i}.${j}" value="${esc(e.n || '')}" placeholder="Exercise"><input data-es="${i}.${j}" type="number" value="${e.s ?? ''}" placeholder="sets" style="flex:0 0 58px"><button class="tlx" data-erm="${i}.${j}">✕</button></div>
+            <input class="reps" data-er="${i}.${j}" value="${esc(e.r || '')}" placeholder="reps / notes (optional)">`).join('')}
+          <button class="tladd" data-eadd="${i}">+ exercise</button>
+          <p class="hint">${sum(ex)} sets</p></div>`; }).join('')}</div>
+    </div>
+    <div class="sect"><label class="fl">Notes he sees under the program</label><textarea id="tp_notes" placeholder="Rest times, how to progress, form cues…">${esc(tp.notes || '')}</textarea></div>
+    <div style="display:flex;justify-content:space-between"><span class="hint">Edits are kept as you type — hit Save to publish them to his page.</span>
+      <button class="btn sm danger" id="tpRemove">Remove program</button></div>`;
+
+  const redraw = () => { const st = $('#pBody').scrollTop; drawTraining(c, b); $('#pBody').scrollTop = st; };
+  const ij = s => s.split('.').map(Number);
+  $('#tp_start').onchange = e => { tp.start = e.target.value; redraw(); };
+  $('#tp_budget').oninput = e => { tp.budget = tNum(e.target.value); };
+  $('#tp_budget').onchange = redraw;
+  $('#tp_notes').oninput = e => { tp.notes = e.target.value; };
+  $('#tp_label').oninput = e => { wk.label = e.target.value; };
+  $$('#pBody [data-dn]').forEach(i => i.oninput = () => { tp.days[+i.dataset.dn].name = i.value; });
+  $$('#pBody [data-dw]').forEach(i => i.oninput = () => { tp.days[+i.dataset.dw].when = i.value; });
+  $$('#pBody [data-drm]').forEach(btn => btn.onclick = () => {
+    const i = +btn.dataset.drm; if(!confirm(`Remove ${tp.days[i].name || 'this day'} from every week?`)) return;
+    tp.days.splice(i, 1); tp.volume.splice(i, 1); tp.weeks.forEach(w => (w.ex || []).splice(i, 1)); redraw();
+  });
+  $('#tpAddDay').onclick = () => { tp.days.push({ name:'', when:'' }); tp.volume.push([]); tp.weeks.forEach(w => (w.ex = w.ex || []).push([])); redraw(); };
+  $$('#pBody [data-vm]').forEach(i => i.oninput = () => { const [a, z] = ij(i.dataset.vm); tp.volume[a][z].m = i.value; });
+  $$('#pBody [data-vs]').forEach(i => { i.oninput = () => { const [a, z] = ij(i.dataset.vs); tp.volume[a][z].s = tNum(i.value); }; i.onchange = redraw; });
+  $$('#pBody [data-vrm]').forEach(btn => btn.onclick = () => { const [a, z] = ij(btn.dataset.vrm); tp.volume[a].splice(z, 1); redraw(); });
+  $$('#pBody [data-vadd]').forEach(btn => btn.onclick = () => { tp.volume[+btn.dataset.vadd].push({ m:'', s:null }); redraw(); });
+  $$('#pBody [data-en]').forEach(i => i.oninput = () => { const [a, z] = ij(i.dataset.en); wk.ex[a][z].n = i.value; });
+  $$('#pBody [data-er]').forEach(i => i.oninput = () => { const [a, z] = ij(i.dataset.er); wk.ex[a][z].r = i.value; });
+  $$('#pBody [data-es]').forEach(i => { i.oninput = () => { const [a, z] = ij(i.dataset.es); wk.ex[a][z].s = tNum(i.value); }; i.onchange = redraw; });
+  $$('#pBody [data-erm]').forEach(btn => btn.onclick = () => { const [a, z] = ij(btn.dataset.erm); wk.ex[a].splice(z, 1); redraw(); });
+  $$('#pBody [data-eadd]').forEach(btn => btn.onclick = () => { wk.ex[+btn.dataset.eadd].push({ n:'', s:3 }); redraw(); });
+  $$('#pBody [data-tw]').forEach(btn => btn.onclick = () => { TW = +btn.dataset.tw; redraw(); });
+  $('#tpCopy').onclick = () => {
+    const cp = JSON.parse(JSON.stringify(wk)); cp.label = 'W' + (tp.weeks.length + 1);
+    tp.weeks.splice(TW + 1, 0, cp); TW = TW + 1; redraw();
+  };
+  $('#tpDelWk').onclick = () => {
+    if(tp.weeks.length < 2) return alert('A program needs at least one week.');
+    if(!confirm(`Delete ${wk.label || 'this week'}?`)) return;
+    tp.weeks.splice(TW, 1); redraw();
+  };
+  $('#tpRemove').onclick = () => { if(!confirm('Remove the whole program? (Takes effect when you Save.)')) return; delete c.sections.training_plan; redraw(); };
+}
+
+/* ── Protocols: Fertility Protocol / Show Day / written ────────────────── */
+const PROTO_SEEDS = {
+  fertility: () => ({ name:'Fertility Protocol', type:'schedule', start: tMon(tIso(new Date())), weeks: 7, text:'', items:[
+    { id:tRid(), name:'HMG', dose:'75', unit:'IU', days:[true,false,true,false,true,false,false], note:'' },
+    { id:tRid(), name:'HCG', dose:'1000,1000,1000,1000,1500,1500,2000', unit:'IU', days:[false,true,false,true,false,true,false], note:'' },
+    { id:tRid(), name:'Carnitine', dose:'500', unit:'mgs', days:[true,true,true,true,true,true,true], note:'' },
+  ]}),
+  showday: () => ({ name:'Show Day', type:'table', cols:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'], rows:[
+    { label:'Carbs', cells:['0','0','0','500 grams','350 grams','Be Done. Light breakfast.'] },
+    { label:'Sodium', cells:['12','12','12','8','4','Day of show: 30-60 min before stage 1 Liter of water, half bodyweight in carbs 50 grams gatorade, 5 grams of sodium, and crushed 1 viagra 10-25 mg. 1 gram taurine. Shake up drink it ice cold.'] },
+    { label:'Water', cells:['9','9','9','6','3',''] },
+  ], text:'Equate Calories\n\n### Session 1\n- Leg curl\n- Leg extension\n- Leg press calf raise\n- High pull machine\n- Pec dec / mid cable fly\n- Machine/DB lateral raise\n- Reverse pec deck/cable fly\n- Behind the back cable curl\n- One arm cable overhead triceps extension\n- Abs\n\n3 sets of 12-15 reps (as high as 20) to absolute FAILURE\n\n### Session 2\n- Leg curl\n- Leg extension\n- Straight knee calf raise\n- Row machine (chest support)\n- Cable fly (low to high)\n- Cable lateral raise\n- Cable rear delt fly\n- Dual cable biceps curl\n- Machine triceps extension\n- Abs\n\n3 sets of 12-15 reps (as high as 20) to absolute FAILURE' }),
+  pathway: () => ({ name:'Fertility Pathway - Male', type:'text', text:
+    '- **HCG:** 3,000IUs subq Monday, Wednesday, and Friday before bed (drive intra- testicular actions)\n' +
+    '- **HMG:** 75IUs subq Tuesday, Thursday, and Saturday before bed (hyper accelerate spermatogenesis)\n' +
+    '- **BPC-157/TB-500 Blend (5mg/5mg):** 200mcgs ED subq ED before bed (work in conjunction to fix any fragmentation or morphological/motility based spermatic dysfunctions) —> use a 31 guage 5/16th inch insulin syringe\n' +
+    '- **Metformin:** 1 gram upon waking / 1 gram before bed (improve all aspects of fertility from spermatic production to motility and morphology improvements) - begin with 250mgs before bed and give it a week to ensure your stomach doesnt get upset from then, then increase another 250mgs but add it upon waking, repeat this process until your taking in 1 gram AM and PM as long as there are no gut issues\n' +
+    '- **Glutathione in Taurine BAC Water:** 50mcgs microdosed ED subq before bed (manage systemic inflammation and global oxidation via GSSG:GSH ratios within every cell of the body while taurine will act as a sulfide donor to break GSSG bonds to free up more usable GSH)\n' +
+    '- **Injectable L-Carnitine/Choline (300/200mgs):** 1mL IM preworkout right before walking into the gym OR 15-20 minutes subq preworkout before leaving for the gym - either application will match kinetics of training (push fatty acid oxidation rates, preserve glycogen stores, enhance growth factors and binding proteins, drive androgen receptor translocation) - Use a slin pin and do a subq injection to avoid PIP and discomfort based issues\n' +
+    '- **Tadalafil:** 5mgs first thing upon waking (improve hemodynamics to gentiles to improve overall sexual performance and keep libido higher)' }),
+  schedule: () => ({ name:'', type:'schedule', start: tMon(tIso(new Date())), weeks: null, text:'', items:[{ id:tRid(), name:'', dose:'', unit:'', days:[false,false,false,false,false,false,false], note:'' }] }),
+  table: () => ({ name:'', type:'table', cols:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], rows:[{ label:'', cells:[] }], text:'' }),
+  text: () => ({ name:'', type:'text', text:'' }),
+};
+const PROTO_TYPES = { schedule:'Dosing schedule — he ticks off each dose', table:'Day-by-day table (peak week)', text:'Written protocol' };
+function drawProtocols(c, b){
+  c.sections = c.sections || {};
+  const ps = c.sections.protocols = Array.isArray(c.sections.protocols) ? c.sections.protocols : [];
+  b.innerHTML = `
+    <div class="sect">
+      <div class="shead"><h3>Add a protocol</h3></div>
+      <p class="hint" style="margin-bottom:10px">Each one becomes its own tile on his page. Schedules also put today's doses on his week card to tick off.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn sm" data-new="schedule">+ Dosing schedule</button><button class="btn sm" data-new="table">+ Day-by-day table</button><button class="btn sm" data-new="text">+ Written</button>
+      </div>
+      <p class="hint" style="margin:12px 0 6px">From the sheet:</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn sm" data-new="fertility">Fertility Protocol</button><button class="btn sm" data-new="showday">Show Day</button><button class="btn sm" data-new="pathway">Fertility Pathway (written)</button>
+      </div>
+    </div>
+    ${ps.map((p, pi) => `<div class="sect">
+      <div class="shead"><h3 style="flex:1"><input data-pn="${pi}" value="${esc(p.name || '')}" placeholder="Protocol name" style="font-weight:700"></h3>
+        <label class="sw"><input type="checkbox" data-pon="${pi}" ${p.on !== false ? 'checked' : ''}><span class="track"></span>Show</label>
+        <button class="btn sm danger" data-prm="${pi}">✕</button></div>
+      <p class="hint" style="margin-bottom:10px">${PROTO_TYPES[p.type] || ''}</p>
+      ${p.type === 'schedule' ? `
+        <div class="grid2"><div class="fld"><label class="fl">Week 1 starts</label><input type="date" data-ps="${pi}" value="${esc(p.start || '')}"></div>
+          <div class="fld"><label class="fl">Length (weeks, blank = ongoing)</label><input type="number" data-pw="${pi}" value="${p.weeks ?? ''}"></div></div>
+        <label class="fl">Doses</label>
+        <p class="hint" style="margin:0 0 8px">Dose can change by week: <span class="mono">1000,1000,1000,1000,1500,1500,2000</span> — the last one holds after that.</p>
+        ${(p.items || []).map((it, ii) => `<div class="prog" style="margin-bottom:8px">
+          <div class="r"><input data-in="${pi}.${ii}" value="${esc(it.name || '')}" placeholder="Compound" style="flex:0 0 32%">
+            <input data-id="${pi}.${ii}" value="${esc(it.dose || '')}" placeholder="Dose"><input data-iu="${pi}.${ii}" value="${esc(it.unit || '')}" placeholder="IU / mg" style="flex:0 0 74px">
+            <button class="btn sm danger" data-irm="${pi}.${ii}">✕</button></div>
+          <div class="r dow">${T_DAYS.map((d, di) => `<label><input type="checkbox" data-iday="${pi}.${ii}.${di}" ${(it.days || [])[di] ? 'checked' : ''}>${d}</label>`).join('')}</div>
+          <input data-inote="${pi}.${ii}" value="${esc(it.note || '')}" placeholder="Note (e.g. subq before bed)"></div>`).join('')}
+        <button class="btn sm" data-iadd="${pi}">+ Add dose</button>` : ''}
+      ${p.type === 'table' ? `
+        <div class="fld"><label class="fl">Columns (comma separated)</label><input data-pc="${pi}" value="${esc((p.cols || []).join(', '))}"></div>
+        <div style="overflow-x:auto"><table class="trk ptable"><thead><tr><th></th>${(p.cols || []).map(cn => `<th>${esc(cn)}</th>`).join('')}<th></th></tr></thead>
+          <tbody>${(p.rows || []).map((r, ri) => `<tr><td><input data-rl="${pi}.${ri}" value="${esc(r.label || '')}" placeholder="Row"></td>
+            ${(p.cols || []).map((_, ci) => `<td><input data-rc="${pi}.${ri}.${ci}" value="${esc((r.cells || [])[ci] || '')}"></td>`).join('')}
+            <td><button class="tlx" data-rrm="${pi}.${ri}">✕</button></td></tr>`).join('')}</tbody></table></div>
+        <button class="btn sm" data-radd="${pi}" style="margin-top:8px">+ Add row</button>` : ''}
+      <div class="fld" style="margin-top:12px"><label class="fl">${p.type === 'text' ? 'The protocol' : 'Notes under it'}</label>
+        <textarea data-pt="${pi}" style="min-height:${p.type === 'text' ? 220 : 90}px" placeholder="Plain text. **bold**, - bullets, ### headings and links work.">${esc(p.text || '')}</textarea></div>
+    </div>`).join('')}
+    ${ps.length ? '<p class="hint">Hit Save to publish protocol changes to his page.</p>' : ''}`;
+
+  const redraw = () => { const st = $('#pBody').scrollTop; drawProtocols(c, b); $('#pBody').scrollTop = st; };
+  const ix = s => s.split('.').map(Number);
+  $$('#pBody [data-new]').forEach(btn => btn.onclick = () => { ps.push(Object.assign({ id: tRid(), on: true }, PROTO_SEEDS[btn.dataset.new]())); redraw(); });
+  $$('#pBody [data-pn]').forEach(i => i.oninput = () => { ps[+i.dataset.pn].name = i.value; });
+  $$('#pBody [data-pon]').forEach(i => i.onchange = () => { ps[+i.dataset.pon].on = i.checked; });
+  $$('#pBody [data-prm]').forEach(btn => btn.onclick = () => { if(!confirm('Remove this protocol? (Takes effect when you Save.)')) return; ps.splice(+btn.dataset.prm, 1); redraw(); });
+  $$('#pBody [data-ps]').forEach(i => i.onchange = () => { ps[+i.dataset.ps].start = i.value; });
+  $$('#pBody [data-pw]').forEach(i => i.oninput = () => { ps[+i.dataset.pw].weeks = tNum(i.value); });
+  $$('#pBody [data-pt]').forEach(i => i.oninput = () => { ps[+i.dataset.pt].text = i.value; });
+  const item = s => { const [a, z] = ix(s); return ps[a].items[z]; };
+  $$('#pBody [data-in]').forEach(i => i.oninput = () => { item(i.dataset.in).name = i.value; });
+  $$('#pBody [data-id]').forEach(i => i.oninput = () => { item(i.dataset.id).dose = i.value; });
+  $$('#pBody [data-iu]').forEach(i => i.oninput = () => { item(i.dataset.iu).unit = i.value; });
+  $$('#pBody [data-inote]').forEach(i => i.oninput = () => { item(i.dataset.inote).note = i.value; });
+  $$('#pBody [data-iday]').forEach(i => i.onchange = () => { const [a, z, d] = ix(i.dataset.iday); const it = ps[a].items[z]; it.days = it.days || []; it.days[d] = i.checked; });
+  $$('#pBody [data-irm]').forEach(btn => btn.onclick = () => { const [a, z] = ix(btn.dataset.irm); ps[a].items.splice(z, 1); redraw(); });
+  $$('#pBody [data-iadd]').forEach(btn => btn.onclick = () => { const p = ps[+btn.dataset.iadd]; (p.items = p.items || []).push({ id: tRid(), name:'', dose:'', unit:'', days:[false,false,false,false,false,false,false], note:'' }); redraw(); });
+  $$('#pBody [data-pc]').forEach(i => i.onchange = () => { ps[+i.dataset.pc].cols = i.value.split(',').map(s => s.trim()).filter(Boolean); redraw(); });
+  $$('#pBody [data-rl]').forEach(i => i.oninput = () => { const [a, r] = ix(i.dataset.rl); ps[a].rows[r].label = i.value; });
+  $$('#pBody [data-rc]').forEach(i => i.oninput = () => { const [a, r, cc] = ix(i.dataset.rc); const row = ps[a].rows[r]; row.cells = row.cells || []; row.cells[cc] = i.value; });
+  $$('#pBody [data-rrm]').forEach(btn => btn.onclick = () => { const [a, r] = ix(btn.dataset.rrm); ps[a].rows.splice(r, 1); redraw(); });
+  $$('#pBody [data-radd]').forEach(btn => btn.onclick = () => { const p = ps[+btn.dataset.radd]; (p.rows = p.rows || []).push({ label:'', cells:[] }); redraw(); });
 }
 
 // Read whatever tab is open back into OPEN, so switching tabs never loses work.
@@ -1302,7 +1654,8 @@ function collect(){
       past: (c._past || []),
     };
     const num = id => { const v = $(id).value; return v === '' ? null : Number(v); };
-    const sec = {
+    // Start from what's there so the tracker pieces (Timeline rows, Training, Protocols) survive.
+    const sec = Object.assign({}, c.sections || {}, {
       note: { on: $('#note_on').checked, text: $('#note_text').value, at: new Date().toISOString().slice(0,10) },
       macros: {
         on: $('#mac_on').checked,
@@ -1311,7 +1664,7 @@ function collect(){
         note: $('#mac_note').value.trim(),
       },
       programs: (c._progs || []).filter(p => (p.name || '').trim() || (p.link || '').trim()),
-    };
+    });
     SECTIONS.forEach(s => {
       sec[s.key] = {
         on: $('#s_' + s.key + '_on').checked,
@@ -1321,11 +1674,10 @@ function collect(){
       };
     });
     sec.extras = (c._extras || []).filter(x => (x.label || '').trim() || (x.link || '').trim());
-    if((c.sections || {}).tracker) sec.tracker = c.sections.tracker;   // set on the Tracking tab
     c.sections = sec;
   }
   if(TAB === 'tracking' && $('#trk_on')){
-    c.sections = Object.assign({}, c.sections || {}, { tracker: { on: $('#trk_on').checked } });
+    c.sections = Object.assign({}, c.sections || {}, { tracker: { on: $('#trk_on').checked, skinfolds: $('#trk_sf').checked } });
   }
 }
 function upsertLocal(cl){

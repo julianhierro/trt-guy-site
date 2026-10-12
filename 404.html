@@ -223,6 +223,52 @@
   .hist td{border-top:1px solid var(--line);padding:10px 6px;text-align:right;white-space:nowrap}
   .histwrap{overflow-x:auto;margin:0 -4px}
 
+  .btn.sm{width:auto;padding:10px 14px;font-size:13.5px;margin-top:12px}
+  .doses{display:grid;gap:7px}
+  .dose{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line-2);border-radius:11px;padding:11px 13px;
+    font-size:14.5px;cursor:pointer;background:#fff}
+  .dose input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--acc);flex:0 0 auto}
+  .dose small{color:var(--mut)}
+  .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .pic{position:relative;aspect-ratio:3/4;border:1.5px dashed var(--line-2);border-radius:12px;overflow:hidden;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;background:#fff;text-decoration:none;color:var(--mut)}
+  .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .pic .plus{font-size:26px}
+  .pic .pl{position:absolute;left:6px;bottom:6px;background:rgba(255,255,255,.9);color:var(--txt);font-size:11.5px;
+    font-weight:600;border-radius:6px;padding:2px 7px}
+  .pic.busy{opacity:.5}
+  .picrow{margin-bottom:14px}
+  .picrow .sub{margin-bottom:6px}
+  .howto{margin:0 0 12px;font-size:13.5px;color:var(--mut)}
+  .howto summary{cursor:pointer;font-weight:600;color:var(--txt);margin-bottom:6px}
+  .howto p{margin:0 0 8px}
+  .tlwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:#fff;max-height:75vh}
+  table.tl{border-collapse:separate;border-spacing:0;font-size:12.5px}
+  table.tl th{position:sticky;left:0;background:#fff;text-align:left;font-weight:600;padding:7px 12px;white-space:nowrap;
+    border-right:1px solid var(--line);z-index:1;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+  table.tl td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap;min-width:78px;text-align:center}
+  table.tl tr th{border-top:1px solid var(--line)}
+  table.tl th{box-shadow:-4px 0 0 #fff}
+  @media(max-width:520px){ table.tl th{max-width:124px;padding:7px 8px;font-size:12px} table.tl td{min-width:64px;padding:7px 6px} }
+  table.tl td.now{background:var(--acc-soft);font-weight:700}
+  table.tl tr.tlg th{font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;font-size:11px;
+    color:var(--mut);background:var(--bg-2)}
+  table.tl tr.tlg td{background:var(--bg-2)}
+  .carried{color:var(--mut);font-weight:400}
+  .wtabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding-bottom:4px}
+  .wtabs button{border:1px solid var(--line-2);background:#fff;border-radius:9px;padding:8px 12px;font:600 13px Inter,sans-serif;cursor:pointer;color:var(--txt)}
+  .wtabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+  .tday{margin-bottom:10px;padding:16px 18px}
+  .tdh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .exl{margin:10px 0 0;padding-left:20px;font-size:14.5px}
+  .exl li{margin:0 0 6px}
+  .exl li span.sub{margin-left:6px;font-size:12.5px;color:var(--mut)}
+  .pday{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:#fff}
+  .pday.now{border-color:var(--acc)}
+  .pdh{font-weight:700;font-size:14px;margin-bottom:8px}
+  .pday .dose{margin-top:6px}
+  table.ptab td{white-space:normal;min-width:80px}
+
   .a2hs{display:flex;gap:12px;align-items:flex-start;background:var(--acc-soft);border:1px solid rgba(11,13,16,.16);
     border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:var(--txt)}
   .a2hs button{background:none;border:0;color:var(--txt);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
@@ -297,7 +343,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-12T16:00Z';
+const BUILD = '2026-10-12T19:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -375,6 +421,11 @@ const DEFAULT_COPY = {
   trk_submit: 'Submit check-in',
   trk_saved: 'Saved ✓',
   trk_target: 'target {n}',
+  tile_timeline: 'Timeline',              tile_timeline_sub: 'Your plan week by week',
+  trk_today_label: 'Today',
+  trk_pics_label: 'Progress pics',
+  trk_skin_label: 'Skin folds (mm)',
+  trk_train_log: 'Log this session',
 };
 let C = Object.assign({}, DEFAULT_COPY);
 // t('week_txt', {n:2, total:8}) — {placeholders} are filled from the second argument.
@@ -564,6 +615,7 @@ function openApp(){
   const tiles = ORDER.filter(k => {
     if(!secs[k] || !secs[k].on) return false;
     if(trackerOn && (k === 'daily_checkin' || k === 'weekly_checkin')) return false;
+    if(trackerOn && k === 'training' && hasTrainingPlan()) return false;
     return (secs[k].link || '').trim() || (secs[k].text || '').trim() ||
            (k === 'training' && curProg && (curProg.link || '').trim());
   }).map(k => {
@@ -577,6 +629,14 @@ function openApp(){
         ? `<a class="tile" href="${esc(link)}" target="_blank" rel="noopener">${inner}<span class="go">↗</span></a>`
         : `<button class="tile" data-k="${k}">${inner}<span class="go">›</span></button>`;
     });
+  // In-app tracker tiles: Timeline, the training program, each protocol.
+  if(trackerOn){
+    const tk = [];
+    tk.push(`<button class="tile" data-tk="timeline"><span class="t"><b data-copy="tile_timeline">${esc(t('tile_timeline'))}</b><span data-copy="tile_timeline_sub">${esc(t('tile_timeline_sub'))}</span></span><span class="go">›</span></button>`);
+    if(hasTrainingPlan()) tk.push(`<button class="tile" data-tk="training"><span class="t"><b data-copy="tile_training">${esc(t('tile_training'))}</b><span data-copy="tile_training_sub">${esc(t('tile_training_sub'))}</span></span><span class="go">›</span></button>`);
+    activeProtocols().forEach(p => tk.push(`<button class="tile" data-tk="protocol" data-pid="${esc(p.id)}"><span class="t"><b>${esc(p.name || 'Protocol')}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span><span class="go">›</span></button>`));
+    tiles.unshift(...tk);
+  }
   (secs.extras || []).filter(x => (x.link || '').trim()).forEach(x => {
     tiles.push(`<a class="tile" href="${esc(x.link)}" target="_blank" rel="noopener">
       <span class="t"><b>${esc(x.label || 'Open')}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span><span class="go">↗</span></a>`);
@@ -584,6 +644,11 @@ function openApp(){
   $('#aTiles').innerHTML = tiles.join('') ||
     `<div class="card" style="color:var(--mut)" data-copy="empty_plan">${esc(t('empty_plan'))}</div>`;
   document.querySelectorAll('#aTiles .tile[data-k]').forEach(b => b.onclick = () => openSection(b.dataset.k));
+  document.querySelectorAll('#aTiles .tile[data-tk]').forEach(b => b.onclick = () => {
+    if(b.dataset.tk === 'timeline') openTimeline();
+    else if(b.dataset.tk === 'training') openTraining();
+    else openProtocol(b.dataset.pid);
+  });
 
   // Additional Resources — one shared library, the worker sends what this client may see.
   const res = RESOURCES || [];
@@ -691,9 +756,10 @@ function installManifest(c){
 }
 
 /* ── check-in tracker ─────────────────────────────────────────────────────
-   The Google Sheet's Daily Check In, Weekly Check In, Measurements and Timeline
-   tabs, as part of his page. Weeks run Monday → Sunday like the sheet. Targets
-   are set by Julian per week in the manager and carry forward until changed. */
+   Everything from the client Google Sheet, as part of his page: Daily Check In,
+   Weekly Check In + Measurements + skin folds + progress pics, the Timeline,
+   the training program (with a session log) and protocols. Weeks run Monday →
+   Sunday like the sheet. The Timeline is written by Julian in the manager. */
 const DAILY_FIELDS = [
   ['weight','Bodyweight'], ['protein','Protein'], ['carbs','Carbs'], ['fat','Fats'],
   ['fiber','Fiber'], ['kcal','Kcals'], ['steps','Steps'], ['cardio','Cardio', 'min'],
@@ -702,7 +768,22 @@ const DAILY_FIELDS = [
 const MEASURES = [
   ['m_waist','Waist'], ['m_rbicep','Right Bicep'], ['m_lbicep','Left Bicep'], ['m_rquad','Right Quad'],
   ['m_lquad','Left Quad'], ['m_chest','Chest'], ['m_shoulders','Shoulders'], ['m_neck','Neck'],
+  ['m_hips','Hips'], ['m_rforearm','Right Forearm'], ['m_lforearm','Left Forearm'], ['m_rcalf','Right Calf'], ['m_lcalf','Left Calf'],
 ];
+// The sheet's nine sites and its own measuring instructions.
+const SKINFOLDS = [
+  ['sf_pec','Pectoral','Measure about one inch below the collar bone and three to four inches out from the inside edge of the pectoral muscle. If you are measuring a female, be sure to stay on the pectoral and avoid the breast tissue. Pull the skin fold in a horizontal (—) direction.'],
+  ['sf_subscap','Sub-Scapular','Locate the middle of the scapula (shoulder blade) and measure about one inch in towards the spine. Pull the skin fold in a vertical (I) direction. Remember to measure the area with the most body fat in close proximity to the described location.'],
+  ['sf_bicep','Biceps','Measure in the middle of the bicep muscle. Pull the skin fold in a vertical (I) direction.'],
+  ['sf_tricep','Triceps','Measure at the bottom of the inside triceps head. Pull the skin fold in a vertical (I) direction.'],
+  ['sf_kidney','Kidney','Locate the dimple or indentation above the gluteus. Go up about two inches and out about two inches. Pull the skin fold in a horizontal (—) direction.'],
+  ['sf_suprailiac','Suprailiac','Measure about halfway between the navel and the top of the hip bone. This should be at or near the area where the oblique’s and abdominals meet. Pull the skin fold in a horizontal (—) direction.'],
+  ['sf_abdominal','Abdominals','Measure about one inch to the left of the navel or one inch to the right and one inch down. Go for the area of the highest body fat. Pull the skin fold in a vertical (I) direction.'],
+  ['sf_quad','Quadriceps','Measure in the middle of the quadriceps. If that area is too tight, you may need to go up one or two inches to get a reading. Pull the skin fold in a vertical (I) direction.'],
+  ['sf_calf','Medial Calf','Measure the middle of the inside head. If that area is too tight, you may need to go up one or two inches to get a reading. Pull the skin fold in a vertical (I) direction'],
+];
+const SKIN_INTRO = 'Consistency is the key component of body fat charting. Two important techniques will assure the most reliable readings are, have the same person measure you each time and be sure that they take detailed notes on how and where the caliper readings were done!';
+const PICS = [['pic_front','Front'], ['pic_side','Side'], ['pic_back','Back']];
 const ONE_TO_FIVE = ['1','2','3','4','5'];
 const FEEL = ['Great','Good','Okay / Decent','Subpar','Poor'];
 // Questions and answers are the sheet's own wording.
@@ -739,6 +820,28 @@ const WEEKLY_Q = [
   { k:'questions', q:'Feel free to ask any additional questions' },
 ];
 
+// The Timeline tab's rows. Keys starting with _ are worked out, never typed.
+// Clients can carry their own row list (sections.timeline_rows) — the manager edits it.
+const TL_GROUPS = [['week',''], ['cardio','Cardio/Movement'], ['health','Health/Composition'], ['nutrition','Nutrition'],
+  ['aas','Testosterone & AAS'], ['peptides','Peptides'], ['pharm','Non AAS Pharm'], ['supps','Supplements']];
+const TL_AUTO = [
+  {k:'_date',l:'Week / Date',g:'week'}, {k:'_woy',l:'Week Of The Year',g:'week'}, {k:'_woc',l:'Week Of Coaching',g:'week'},
+  {k:'_bw',l:'Avg. Body Weight',g:'health'}, {k:'_sf',l:'Total Skinfold mm',g:'health'}, {k:'_bp',l:'Average BP',g:'health'},
+  {k:'_hr',l:'Average Resting HR',g:'health'}, {k:'_kcal',l:'Target Kcal',g:'nutrition'}, {k:'_mg',l:"Total Weekly mg's",g:'aas'},
+];
+const TL_DEFAULT = ['_date','_woy','_woc', {k:'cycle',l:'Week Of Cycle',g:'week'}, {k:'goal',l:'Goal',g:'week'}, {k:'event',l:'Event / Contest',g:'week'},
+  {k:'cardio',l:'Zone 2 Cardio Min/Week',g:'cardio'}, {k:'steps',l:'Daily Step Goal',g:'cardio'},
+  {k:'pics',l:'Progress Pics',g:'health'}, '_bw', {k:'target_bw',l:'Target Body Weight',g:'health'}, '_sf', '_bp', '_hr',
+  {k:'labs',l:'Labs',g:'health'}, {k:'note',l:'Notes',g:'health'},
+  '_kcal', {k:'protein',l:'Target Protein',g:'nutrition'}, {k:'carbs',l:'Target Carbs',g:'nutrition'}, {k:'fat',l:'Target Fat',g:'nutrition'}, {k:'fiber',l:'Target Fiber',g:'nutrition'},
+  {k:'x_teste',l:'Test E',g:'aas'}, '_mg',
+  {k:'x_gh',l:'GH',g:'peptides'}, {k:'x_pinealon',l:'Pinealon (AM)',g:'peptides'}, {k:'x_vilon',l:'VilON (AM)',g:'peptides'}, {k:'x_epitalon',l:'EpitalON (PM)',g:'peptides'},
+  {k:'x_metformin',l:'Metformin',g:'pharm'},
+  {k:'x_multimax',l:'Multi Max AM',g:'supps'}, {k:'x_omega3',l:'Omega 3 AM',g:'supps'}, {k:'x_supportmax',l:'SupportMax AM',g:'supps'},
+  {k:'x_zmax',l:'ZMAX PM',g:'supps'}, {k:'x_neuromax',l:'NeuroMax PM',g:'supps'}, {k:'x_lipidmax',l:'LipidMax (Any Time)',g:'supps'}, {k:'x_creatine',l:'Creatine',g:'supps'},
+].map(r => typeof r === 'string' ? TL_AUTO.find(a => a.k === r) : r);
+const TL_NO_CARRY = new Set(['note','labs','pics','event']);
+
 let LOGS = [];
 const pad = n => String(n).padStart(2, '0');
 const isoOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -746,34 +849,57 @@ const dOf = s => new Date(s + 'T12:00:00');
 const addDays = (s, n) => { const d = dOf(s); d.setDate(d.getDate() + n); return isoOf(d); };
 const todayIso = () => isoOf(new Date());
 const mondayOf = s => { const d = dOf(s); return addDays(s, -((d.getDay() + 6) % 7)); };
+const weeksBetween = (a, b) => Math.round((dOf(b) - dOf(a)) / 6048e5);
 const num = v => (v === '' || v == null || isNaN(Number(v))) ? null : Number(v);
 const avg = arr => { const v = arr.filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
 const nf = (v, dp = 0) => v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: dp, minimumFractionDigits: dp });
+const isoWeek = s => { const d = dOf(s); d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+  const w1 = new Date(d.getFullYear(), 0, 4); return 1 + Math.round(((d - w1) / 864e5 - 3 + (w1.getDay() + 6) % 7) / 7); };
 
 const logOf = (kind, day) => (LOGS.find(l => l.kind === kind && l.day === day) || {}).data || null;
-// The target in force for a week: the latest one set on or before its Monday.
+const secs = () => (CLIENT && CLIENT.sections) || {};
+const tlRows = () => {
+  const r = secs().timeline_rows;
+  return Array.isArray(r) && r.length ? r.map(x => x.k && x.k[0] === '_' ? (TL_AUTO.find(a => a.k === x.k) || x) : x) : TL_DEFAULT;
+};
+// A Timeline cell: typed for that week, or carried from the last week that had it.
+function tlCell(mon, k){
+  const own = logOf('target', mon);
+  if(own && own[k] != null && own[k] !== '') return { v: own[k], carried: false };
+  if(TL_NO_CARRY.has(k)) return { v: null };
+  const prev = LOGS.filter(l => l.kind === 'target' && l.day < mon && l.data[k] != null && l.data[k] !== '')
+    .sort((a, b) => a.day < b.day ? 1 : -1)[0];
+  if(!prev) return { v: null };
+  if(k === 'cycle' && num(prev.data.cycle) != null) return { v: num(prev.data.cycle) + weeksBetween(prev.day, mon), carried: true };
+  return { v: prev.data[k], carried: true };
+}
+const tlNum = (mon, k) => num(tlCell(mon, k).v);
+// What his page measures him against this week.
 function targetFor(mon){
-  const t = LOGS.filter(l => l.kind === 'target' && l.day <= mon).sort((a, b) => a.day < b.day ? 1 : -1)[0];
-  const d = t ? Object.assign({}, t.data) : {};
-  const mac = (CLIENT.sections || {}).macros || {};
+  const d = {};
+  ['goal','note','event'].forEach(k => { const v = tlCell(mon, k).v; if(v != null) d[k] = v; });
+  ['protein','carbs','fat','fiber','steps','cardio','kcal','target_bw'].forEach(k => { const v = tlNum(mon, k); if(v != null) d[k] = v; });
+  const mac = secs().macros || {};
   ['protein','carbs','fat'].forEach(k => { if(d[k] == null && mac.on && mac[k] != null) d[k] = mac[k]; });
-  if(d.kcal == null && d.protein != null && d.carbs != null && d.fat != null) d.kcal = (d.protein + d.carbs) * 4 + d.fat * 9;
+  if(d.protein != null && d.carbs != null && d.fat != null) d.kcal = (d.protein + d.carbs) * 4 + d.fat * 9;
   if(d.kcal == null && mac.on && mac.calories != null) d.kcal = mac.calories;
   return d;
 }
 const kcalOf = d => d.kcal != null ? num(d.kcal)
   : (d.protein != null && d.carbs != null && d.fat != null) ? (num(d.protein) + num(d.carbs)) * 4 + num(d.fat) * 9 : null;
 function weekStats(mon){
-  const days = [...Array(7)].map((_, i) => logOf('daily', addDays(mon, i))).filter(Boolean);
+  const days = [...Array(7)].map((_, i) => logOf('daily', addDays(mon, i))).filter(Boolean)
+    .filter(d => DAILY_FIELDS.some(([k]) => d[k] != null) || d.notes);
   const a = k => avg(days.map(d => num(d[k])));
   return { n: days.length, weight: a('weight'), kcal: avg(days.map(kcalOf)), protein: a('protein'),
     carbs: a('carbs'), fat: a('fat'), fiber: a('fiber'), steps: a('steps'), sys: a('sys'), dia: a('dia'), pulse: a('pulse'),
     cardio: days.reduce((s, d) => s + (num(d.cardio) || 0), 0) };
 }
+const skinTotal = w => { if(!w) return null; const v = SKINFOLDS.map(([k]) => num(w[k])).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
 function coachWeek(mon){
   const start = CLIENT.start_date || (CLIENT.phase || {}).start;
   if(!start) return null;
-  const w = Math.round((dOf(mon) - dOf(mondayOf(start))) / (7 * 86400000)) + 1;
+  const w = weeksBetween(mondayOf(start), mon) + 1;
   return w >= 1 ? w : null;
 }
 
@@ -787,10 +913,47 @@ async function logApi(body){
 async function loadLogs(){
   renderWeek();
   try {
-    const j = await logApi({ from: addDays(mondayOf(todayIso()), -7 * 26) });
+    const j = await logApi({ from: addDays(mondayOf(todayIso()), -7 * 52) });
     LOGS = j.logs || [];
   } catch(e){}
   renderWeek();
+}
+async function putLog(kind, day, data){
+  const j = await logApi({ action:'save', kind, day, data });
+  LOGS = LOGS.filter(l => !(l.kind === kind && l.day === day)).concat([j.log]);
+  return j.log;
+}
+
+/* protocols: doses due on a day, and whether he ticked them off */
+const activeProtocols = () => (secs().protocols || []).filter(p => p && p.on !== false && (p.name || '').trim());
+const hasTrainingPlan = () => { const tp = secs().training_plan; return !!(tp && Array.isArray(tp.weeks) && tp.weeks.length && (tp.days || []).length); };
+function protoWeek(p, day){
+  if(!p.start) return 1;
+  return Math.floor((dOf(day) - dOf(p.start)) / 6048e5) + 1;
+}
+// "1000" or one value per week "1000,1000,1500" (the last one holds after that).
+function doseFor(it, wk){
+  const parts = String(it.dose || '').split(',').map(s => s.trim()).filter(Boolean);
+  if(!parts.length) return '';
+  return parts[Math.max(0, Math.min(parts.length, wk) - 1)];
+}
+function dosesOn(day){
+  const out = [];
+  activeProtocols().filter(p => p.type === 'schedule').forEach(p => {
+    const wk = protoWeek(p, day);
+    if(wk < 1 || (p.weeks && wk > p.weeks)) return;
+    const dow = (dOf(day).getDay() + 6) % 7;
+    (p.items || []).forEach(it => {
+      if(!(it.days || [])[dow] || !(it.name || '').trim()) return;
+      out.push({ p, it, key: `p_${p.id}_${it.id}`, dose: doseFor(it, wk) });
+    });
+  });
+  return out;
+}
+async function tickDose(day, key, on){
+  const cur = Object.assign({}, logOf('daily', day) || {});
+  if(on) cur[key] = true; else delete cur[key];
+  await putLog('daily', day, cur);
 }
 
 function renderWeek(){
@@ -799,8 +962,9 @@ function renderWeek(){
   const cw = coachWeek(mon);
   const letters = ['M','T','W','T','F','S','S'];
   const strip = letters.map((l, i) => {
-    const d = addDays(mon, i);
-    return `<button data-day="${d}" class="${logOf('daily', d) ? 'on' : ''} ${d === today ? 'today' : ''}" ${d > today ? 'disabled' : ''}>${l}<i></i></button>`;
+    const d = addDays(mon, i), dl = logOf('daily', d);
+    const logged = dl && (DAILY_FIELDS.some(([k]) => dl[k] != null) || dl.notes);
+    return `<button data-day="${d}" class="${logged ? 'on' : ''} ${d === today ? 'today' : ''}" ${d > today ? 'disabled' : ''}>${l}<i></i></button>`;
   }).join('');
   const delta = st.weight != null && last.weight != null ? st.weight - last.weight : null;
   const stat = (v, label, sub, dp) => `<div class="s"><b>${nf(v, dp)}</b><span>${label}</span>${sub ? `<em>${sub}</em>` : ''}</div>`;
@@ -816,32 +980,44 @@ function renderWeek(){
       <polyline points="${xy.join(' ')}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
       <circle cx="${xy[xy.length - 1].split(',')[0]}" cy="${xy[xy.length - 1].split(',')[1]}" r="3.5" fill="currentColor"/></svg>`;
   }
-  // A weekly target from the manager overrides the Plan tab's macros on the card above.
-  if(LOGS.some(l => l.kind === 'target' && l.day <= mon) && $('#aMacros').querySelectorAll('.m b').length === 4){
+  // A Timeline target overrides the Plan tab's macros on the card above.
+  if(LOGS.some(l => l.kind === 'target' && l.day <= mon && ['protein','carbs','fat'].some(k => l.data[k] != null))
+     && $('#aMacros').querySelectorAll('.m b').length === 4){
     const bs = $('#aMacros').querySelectorAll('.m b');
     [[tg.kcal, ''], [tg.protein, 'g'], [tg.carbs, 'g'], [tg.fat, 'g']].forEach(([v, u], i) => {
       bs[i].textContent = v == null ? '—' : Math.round(v).toLocaleString('en-US') + u;
     });
   }
+  // Today's doses from any schedule protocol, ticked off right here.
+  const doses = dosesOn(today), dl = logOf('daily', today) || {};
+  const doseHtml = doses.length ? `<div class="lbl grp" style="margin-top:18px" data-copy="trk_today_label">${esc(t('trk_today_label'))}</div>
+    <div class="doses">${doses.map(x => `<label class="dose"><input type="checkbox" data-dk="${x.key}" ${dl[x.key] ? 'checked' : ''}>
+      <span><b>${esc(x.it.name)}</b> ${esc([x.dose, x.it.unit].filter(Boolean).join(' '))}${x.it.note ? ` <small>· ${esc(x.it.note)}</small>` : ''}</span></label>`).join('')}</div>` : '';
   const doneWeekly = !!logOf('weekly', mon);
   $('#aWeek').innerHTML = `
     <div class="lbl" data-copy="trk_label">${esc(t('trk_label'))}</div>
     <div class="sub">${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}${tg.goal ? ' · ' + esc(tg.goal) : ''}</div>
     <div class="days">${strip}</div>
     <div class="stats4">
-      ${stat(st.weight, 'Avg weight', delta != null ? (delta > 0 ? '+' : '') + nf(delta, 1) + ' vs last wk' : '', 1)}
+      ${stat(st.weight, 'Avg weight', delta != null ? (delta > 0 ? '+' : '') + nf(delta, 1) + ' vs last wk' : (tg.target_bw ? esc(t('trk_target', { n: nf(tg.target_bw, 1) })) : ''), 1)}
       ${stat(st.kcal, 'Avg kcals', tgt(tg.kcal))}
       ${stat(st.protein, 'Avg protein', tgt(tg.protein))}
       ${stat(st.steps, 'Avg steps', tgt(tg.steps))}
     </div>
     ${spark}
-    ${tg.note ? `<p class="sub" style="margin-top:12px;color:var(--txt)">${esc(tg.note)}</p>` : ''}
+    ${tg.note ? `<p class="sub" style="margin-top:12px;color:var(--txt);white-space:pre-wrap">${esc(tg.note)}</p>` : ''}
+    ${doseHtml}
     <div class="btns">
       <button class="btn" id="wLog" data-copy="${logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'}">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
       <button class="btn ghost" id="wWeekly" data-copy="${doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'}">${esc(t(doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
     </div>
     <button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button>`;
   document.querySelectorAll('#aWeek .days button').forEach(b => b.onclick = () => openDaily(b.dataset.day));
+  document.querySelectorAll('#aWeek [data-dk]').forEach(cb => cb.onchange = async () => {
+    cb.disabled = true;
+    try { await tickDose(today, cb.dataset.dk, cb.checked); } catch(e){ cb.checked = !cb.checked; alert(e.message); }
+    cb.disabled = false;
+  });
   $('#wLog').onclick = () => openDaily(today);
   $('#wWeekly').onclick = () => openWeekly(mon);
   $('#wHist').onclick = openHistory;
@@ -865,6 +1041,7 @@ function openDaily(day){
       tk[k] && tg[tk[k]] != null ? ` <small>· ${esc(t('trk_target', { n: nf(tg[tk[k]]) }))}</small>` : ''}</label>
     <input id="d_${k}" type="number" inputmode="decimal" step="any" value="${d[k] == null ? '' : esc(d[k])}"></div>`;
   const by = k => DAILY_FIELDS.find(f => f[0] === k);
+  const doses = dosesOn(day);
   showSection(`
     <h1 data-copy="trk_daily_title">${esc(t('trk_daily_title'))}</h1>
     <div class="dnav"><button id="dPrev" aria-label="Previous day">‹</button><b>${dayLabel(day)}</b>
@@ -875,6 +1052,8 @@ function openDaily(day){
     <div class="fgrid" style="margin-top:12px">${fld(by('kcal'))}${fld(by('cardio'))}</div>
     <div class="lbl grp">Blood pressure</div>
     <div class="fgrid three">${['sys','dia','pulse'].map(k => fld(by(k))).join('')}</div>
+    ${doses.length ? `<div class="lbl grp">Protocol</div><div class="doses">${doses.map(x => `<label class="dose">
+      <input type="checkbox" data-dk="${x.key}" ${d[x.key] ? 'checked' : ''}><span><b>${esc(x.it.name)}</b> ${esc([x.dose, x.it.unit].filter(Boolean).join(' '))}</span></label>`).join('')}</div>` : ''}
     <div class="f" style="margin-top:18px"><label for="d_notes">Notes</label><textarea id="d_notes">${esc(d.notes || '')}</textarea></div>
     <button class="btn" id="dSave" data-copy="trk_save">${esc(t('trk_save'))}</button>
     <p class="saved" id="dMsg"></p>`);
@@ -892,14 +1071,43 @@ function openDaily(day){
     DAILY_FIELDS.forEach(([k]) => { const v = num($('#d_' + k).value); if(v != null) data[k] = v; });
     if(data.kcal == null && kc.placeholder) data.kcal = Number(kc.placeholder);
     const n = $('#d_notes').value.trim(); if(n) data.notes = n;
+    // keep ticks for doses that aren't on screen (e.g. a protocol that ended)
+    Object.keys(d).filter(k => k.startsWith('p_')).forEach(k => { data[k] = d[k]; });
+    document.querySelectorAll('#aSection [data-dk]').forEach(cb => { if(cb.checked) data[cb.dataset.dk] = true; else delete data[cb.dataset.dk]; });
     await saveLog('daily', day, data, $('#dSave'), $('#dMsg'));
   };
+}
+
+// Phone photos are huge; shrink to 1600px JPEG before upload.
+function shrink(file){
+  return new Promise(resolve => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      cv.toBlob(b => resolve(b ? new File([b], 'photo.jpg', { type:'image/jpeg' }) : file), 'image/jpeg', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+async function uploadPhoto(file){
+  const fd = new FormData();
+  fd.append('slug', SLUG); fd.append('pin', PIN); fd.append('file', await shrink(file));
+  const res = await fetch(WORKER + '/client-log', { method:'POST', body: fd });
+  const j = await res.json().catch(() => ({}));
+  if(!res.ok || !j.url) throw new Error(j.error || 'Upload failed.');
+  return j.url;
 }
 
 function openWeekly(mon){
   const draftKey = `tgc-wk:${SLUG}:${mon}`;
   let draft = null; try { draft = JSON.parse(localStorage.getItem(draftKey) || 'null'); } catch(e){}
   const d = Object.assign({}, logOf('weekly', mon) || draft || {});
+  const skinOn = !!((secs().tracker || {}).skinfolds);
   const q = x => {
     const v = d[x.k];
     const inner = x.opts
@@ -907,6 +1115,8 @@ function openWeekly(mon){
       : `<textarea data-k="${x.k}">${esc(v || '')}</textarea>`;
     return `<div class="q"><p class="qt">${esc(x.q)}</p>${x.h ? `<p class="qh">${esc(x.h)}</p>` : ''}${inner}</div>`;
   };
+  const numIn = (k, l) => `<div class="f"><label for="w_${k}">${esc(l)}</label>
+      <input id="w_${k}" data-k="${k}" type="number" inputmode="decimal" step="any" value="${d[k] == null ? '' : esc(d[k])}"></div>`;
   const cw = coachWeek(mon);
   showSection(`
     <h1 data-copy="trk_weekly_title">${esc(t('trk_weekly_title'))}</h1>
@@ -914,12 +1124,22 @@ function openWeekly(mon){
       <b>${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}</b>
       <button id="wNext" aria-label="Next week" ${mon >= mondayOf(todayIso()) ? 'disabled' : ''}>›</button></div>
     ${WEEKLY_Q.map(q).join('')}
+    <div class="lbl grp" data-copy="trk_pics_label">${esc(t('trk_pics_label'))}</div>
+    <div class="pics">${PICS.map(([k, l]) => `<label class="pic" data-pk="${k}">
+      ${d[k] ? `<img src="${esc(d[k])}" alt="${esc(l)}">` : '<span class="plus">+</span>'}<span class="pl">${esc(l)}</span>
+      <input type="file" accept="image/*" hidden></label>`).join('')}</div>
     <div class="lbl grp" data-copy="trk_measure_label">${esc(t('trk_measure_label'))}</div>
-    <div class="fgrid">${MEASURES.map(([k, l]) => `<div class="f"><label for="w_${k}">${esc(l)}</label>
-      <input id="w_${k}" data-k="${k}" type="number" inputmode="decimal" step="any" value="${d[k] == null ? '' : esc(d[k])}"></div>`).join('')}</div>
+    <div class="fgrid">${MEASURES.map(([k, l]) => numIn(k, l)).join('')}</div>
+    ${skinOn ? `<div class="lbl grp" data-copy="trk_skin_label">${esc(t('trk_skin_label'))}</div>
+      <details class="howto"><summary>How to measure</summary><p>${esc(SKIN_INTRO)}</p>
+        ${SKINFOLDS.map(([, l, h]) => `<p><b>${esc(l)}:</b> ${esc(h)}</p>`).join('')}</details>
+      <div class="fgrid">${SKINFOLDS.map(([k, l]) => numIn(k, l)).join('')}</div>
+      <p class="sub" id="sfTotal" style="margin-top:10px"></p>` : ''}
     <button class="btn" id="wSave" data-copy="trk_submit" style="margin-top:22px">${esc(t('trk_submit'))}</button>
     <p class="saved" id="wMsg"></p>`);
   const keepDraft = () => { try { localStorage.setItem(draftKey, JSON.stringify(d)); } catch(e){} };
+  const sfT = () => { const el = $('#sfTotal'); if(el){ const v = skinTotal(d); el.textContent = v == null ? '' : 'Total: ' + nf(v, 1) + ' mm'; } };
+  sfT();
   document.querySelectorAll('#aSection .opts').forEach(box => box.querySelectorAll('button').forEach(b => b.onclick = () => {
     const on = !b.classList.contains('on');
     box.querySelectorAll('button').forEach(x => x.classList.remove('on'));
@@ -927,8 +1147,22 @@ function openWeekly(mon){
     keepDraft();
   }));
   document.querySelectorAll('#aSection textarea[data-k], #aSection input[data-k]').forEach(el => el.addEventListener('input', () => {
-    d[el.dataset.k] = el.type === 'number' ? num(el.value) : el.value; keepDraft();
+    d[el.dataset.k] = el.type === 'number' ? num(el.value) : el.value; keepDraft(); sfT();
   }));
+  document.querySelectorAll('#aSection .pic').forEach(box => {
+    const inp = box.querySelector('input');
+    inp.onchange = async () => {
+      const f = inp.files && inp.files[0]; if(!f) return;
+      box.classList.add('busy');
+      try {
+        const u = await uploadPhoto(f);
+        d[box.dataset.pk] = u; keepDraft();
+        box.querySelectorAll('img,.plus').forEach(x => x.remove());
+        box.insertAdjacentHTML('afterbegin', `<img src="${esc(u)}" alt="">`);
+      } catch(e){ alert(e.message); }
+      box.classList.remove('busy');
+    };
+  });
   $('#wPrev').onclick = () => openWeekly(addDays(mon, -7));
   $('#wNext').onclick = () => openWeekly(addDays(mon, 7));
   $('#wSave').onclick = async () => {
@@ -938,39 +1172,206 @@ function openWeekly(mon){
   };
 }
 
-async function saveLog(kind, day, data, btn, msg){
+async function saveLog(kind, day, data, btn, msg, stay){
   btn.disabled = true; btn.textContent = '…';
   try {
-    const j = await logApi({ action:'save', kind, day, data });
-    LOGS = LOGS.filter(l => !(l.kind === kind && l.day === day)).concat([j.log]);
+    await putLog(kind, day, data);
     msg.textContent = t('trk_saved');
-    setTimeout(() => { closeSection(); renderWeek(); }, 650);
+    if(!stay) setTimeout(() => { closeSection(); renderWeek(); }, 650);
     return true;
   } catch(e){
     msg.textContent = e.message;
     return false;
   } finally {
-    btn.disabled = false; btn.textContent = t(kind === 'weekly' ? 'trk_submit' : 'trk_save');
+    btn.disabled = false;
+    btn.textContent = t(kind === 'weekly' ? 'trk_submit' : kind === 'training' ? 'trk_train_log' : 'trk_save');
   }
 }
 
 function openHistory(){
   const mon = mondayOf(todayIso());
   const rows = [];
-  for(let i = 0; i < 26; i++){
+  for(let i = 0; i < 52; i++){
     const m = addDays(mon, -7 * i), s = weekStats(m), tg = targetFor(m), cw = coachWeek(m);
     if(!s.n && !logOf('weekly', m)) continue;
     const wk = logOf('weekly', m) || {};
     rows.push(`<tr><td><b>${cw ? 'W' + cw : ''}</b> ${fmt(m)}</td><td>${nf(s.weight, 1)}</td><td>${nf(s.kcal)}${tg.kcal ? `<br><small style="color:var(--mut)">${nf(tg.kcal)}</small>` : ''}</td>
       <td>${nf(s.protein)}</td><td>${nf(s.carbs)}</td><td>${nf(s.fat)}</td><td>${nf(s.steps)}</td>
-      <td>${s.sys != null ? nf(s.sys) + '/' + nf(s.dia) : '—'}</td><td>${nf(s.cardio)}</td><td>${wk.m_waist != null ? nf(wk.m_waist, 1) : '—'}</td><td>${wk.score || '—'}</td></tr>`);
+      <td>${s.sys != null ? nf(s.sys) + '/' + nf(s.dia) : '—'}</td><td>${nf(s.cardio)}</td><td>${wk.m_waist != null ? nf(wk.m_waist, 1) : '—'}</td>
+      <td>${skinTotal(wk) != null ? nf(skinTotal(wk), 1) : '—'}</td><td>${wk.score || '—'}</td></tr>`);
   }
+  // Progress pics side by side, newest first.
+  const picWeeks = LOGS.filter(l => l.kind === 'weekly' && PICS.some(([k]) => l.data[k])).sort((a, b) => a.day < b.day ? 1 : -1);
   showSection(`
     <h1 data-copy="trk_history_title">${esc(t('trk_history_title'))}</h1>
     ${rows.length ? `<div class="card" style="padding:14px 12px"><div class="histwrap"><table class="hist">
-      <thead><tr><th>Week</th><th>Weight</th><th>Kcals</th><th>P</th><th>C</th><th>F</th><th>Steps</th><th>BP</th><th>Cardio</th><th>Waist</th><th>Score</th></tr></thead>
+      <thead><tr><th>Week</th><th>Weight</th><th>Kcals</th><th>P</th><th>C</th><th>F</th><th>Steps</th><th>BP</th><th>Cardio</th><th>Waist</th><th>Skin</th><th>Score</th></tr></thead>
       <tbody>${rows.join('')}</tbody></table></div></div>` : '<div class="card" style="color:var(--mut)">Nothing logged yet.</div>'}
-    <p class="updated">Weekly averages of your daily logs. Cardio is the week's total minutes.</p>`);
+    <p class="updated">Weekly averages of your daily logs. Cardio is the week's total minutes.</p>
+    ${picWeeks.length ? `<div class="lbl grp" data-copy="trk_pics_label">${esc(t('trk_pics_label'))}</div>
+      ${picWeeks.map(l => `<div class="picrow"><div class="sub">${fmt(l.day)}</div><div class="pics">${PICS.map(([k, lb]) => l.data[k]
+        ? `<a class="pic" href="${esc(l.data[k])}" target="_blank" rel="noopener"><img src="${esc(l.data[k])}" alt="${esc(lb)}"><span class="pl">${esc(lb)}</span></a>`
+        : `<span class="pic"><span class="plus">—</span><span class="pl">${esc(lb)}</span></span>`).join('')}</div></div>`).join('')}` : ''}`);
+}
+
+/* ── Timeline: the sheet's Timeline tab, read-only for him ─────────────── */
+function tlValue(mon, row){
+  const wk = logOf('weekly', mon);
+  switch(row.k){
+    case '_date': return fmt(mon);
+    case '_woy': return isoWeek(mon);
+    case '_woc': return coachWeek(mon) || '';
+    case '_bw': { const s = weekStats(mon); return s.weight == null ? '' : nf(s.weight, 1); }
+    case '_bp': { const s = weekStats(mon); return s.sys == null ? '' : nf(s.sys) + '/' + nf(s.dia); }
+    case '_hr': { const s = weekStats(mon); return s.pulse == null ? '' : nf(s.pulse); }
+    case '_sf': { const v = skinTotal(wk); return v == null ? '' : nf(v, 1); }
+    case '_kcal': { const p = tlNum(mon, 'protein'), c = tlNum(mon, 'carbs'), f = tlNum(mon, 'fat');
+      return (p != null && c != null && f != null) ? nf((p + c) * 4 + f * 9) : ''; }
+    case '_mg': { const v = tlRows().filter(r => r.g === 'aas' && r.k[0] !== '_').map(r => parseFloat(tlCell(mon, r.k).v)).filter(x => !isNaN(x));
+      return v.length ? nf(v.reduce((a, b) => a + b, 0)) : ''; }
+  }
+  if(row.k === 'pics' && wk && PICS.some(([k]) => wk[k])) return '✓';
+  return tlCell(mon, row.k);
+}
+function timelineWeeks(){
+  const now = mondayOf(todayIso());
+  const start = CLIENT.start_date || (CLIENT.phase || {}).start;
+  const firstT = LOGS.filter(l => l.kind === 'target').map(l => l.day).sort()[0];
+  let from = start ? mondayOf(start) : (firstT || now);
+  if(firstT && firstT < from) from = firstT;
+  if(weeksBetween(from, now) > 40) from = addDays(now, -7 * 40);
+  const lastT = LOGS.filter(l => l.kind === 'target').map(l => l.day).sort().pop();
+  let to = addDays(now, 7 * 4);
+  if(lastT && lastT > to) to = lastT;
+  const out = []; for(let m = from; m <= to && out.length < 60; m = addDays(m, 7)) out.push(m);
+  return out;
+}
+function openTimeline(){
+  const weeks = timelineWeeks(), now = mondayOf(todayIso()), rows = tlRows();
+  // A row with nothing in any week stays out of his view.
+  const shown = rows.filter(r => r.k[0] === '_' || weeks.some(m => { const v = tlValue(m, r); return (v && typeof v === 'object' ? v.v : v) != null && (v && typeof v === 'object' ? v.v : v) !== ''; }));
+  const cell = (m, r) => {
+    const v = tlValue(m, r);
+    if(v && typeof v === 'object') return v.v == null ? '' : `<span class="${v.carried ? 'carried' : ''}">${esc(v.v)}</span>`;
+    return esc(v);
+  };
+  const body = TL_GROUPS.map(([g, gl]) => {
+    const rs = shown.filter(r => r.g === g);
+    if(!rs.length) return '';
+    return (gl ? `<tr class="tlg"><th>${esc(gl)}</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}"></td>`).join('')}</tr>` : '') +
+      rs.map(r => `<tr><th>${esc(r.l)}</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}">${cell(m, r)}</td>`).join('')}</tr>`).join('');
+  }).join('');
+  showSection(`
+    <h1 data-copy="tile_timeline">${esc(t('tile_timeline'))}</h1>
+    <div class="tlwrap" id="tlWrap"><table class="tl"><tbody>${body}</tbody></table></div>
+    <p class="updated">This week is highlighted. Grey values carry on from an earlier week.</p>`);
+  const nowCell = document.querySelector('#tlWrap td.now');
+  if(nowCell) $('#tlWrap').scrollLeft = Math.max(0, nowCell.offsetLeft - 160);
+}
+
+/* ── Training: the program week by week, and a log of each session ─────── */
+function trainingWeekIndex(tp){
+  if(!tp.start) return 0;
+  const i = Math.floor((dOf(todayIso()) - dOf(mondayOf(tp.start))) / 6048e5);
+  return Math.max(0, Math.min(tp.weeks.length - 1, i));
+}
+function openTraining(wi){
+  const tp = secs().training_plan;
+  if(wi == null) wi = trainingWeekIndex(tp);
+  const wk = tp.weeks[wi] || { ex: [] };
+  const total = (wk.ex || []).reduce((s, d) => s + (d || []).reduce((a, e) => a + (num(e.s) || 0), 0), 0);
+  showSection(`
+    <h1 data-copy="tile_training">${esc(t('tile_training'))}</h1>
+    <div class="wtabs">${tp.weeks.map((w, i) => `<button data-wi="${i}" class="${i === wi ? 'on' : ''}">${esc(w.label || 'W' + (i + 1))}</button>`).join('')}</div>
+    <p class="sub" style="margin:0 0 14px">${nf(total)} total sets this week</p>
+    ${tp.days.map((day, di) => {
+      const ex = (wk.ex || [])[di] || [];
+      const sets = ex.reduce((a, e) => a + (num(e.s) || 0), 0);
+      return `<div class="card tday">
+        <div class="tdh"><div><b>${esc(day.name || 'Day ' + (di + 1))}</b>${day.when ? ` <span class="sub">· ${esc(day.when)}</span>` : ''}</div><span class="sub">${nf(sets)} sets</span></div>
+        <ol class="exl">${ex.map(e => `<li><span>${esc(e.n)}</span><span class="sub">${e.s != null ? esc(e.s) + ' sets' : ''}${e.r ? ' · ' + esc(e.r) : ''}</span></li>`).join('')}</ol>
+        ${ex.length ? `<button class="btn ghost sm" data-log="${di}" data-copy="trk_train_log">${esc(t('trk_train_log'))}</button>` : ''}
+      </div>`;
+    }).join('')}
+    ${tp.notes ? `<div class="body" style="margin-top:8px">${render(tp.notes)}</div>` : ''}`);
+  document.querySelectorAll('#aSection .wtabs button').forEach(b => b.onclick = () => openTraining(+b.dataset.wi));
+  document.querySelectorAll('#aSection [data-log]').forEach(b => b.onclick = () => openSession(wi, +b.dataset.log, todayIso()));
+}
+// The last time he logged an exercise with this name — what to beat.
+function lastFor(name, before){
+  const ls = LOGS.filter(l => l.kind === 'training' && l.day < before).sort((a, b) => a.day < b.day ? 1 : -1);
+  for(const l of ls){
+    for(let i = 0; i < 40; i++){
+      if(l.data['e' + i + 'n'] === name && (l.data['e' + i + 'w'] || l.data['e' + i + 'r'])) return { day: l.day, w: l.data['e' + i + 'w'], r: l.data['e' + i + 'r'] };
+    }
+  }
+  return null;
+}
+function openSession(wi, di, day){
+  const tp = secs().training_plan, day0 = tp.days[di] || {};
+  const ex = ((tp.weeks[wi] || {}).ex || [])[di] || [];
+  const saved = logOf('training', day);
+  const same = saved && saved.d === di && saved.wk === wi;
+  showSection(`
+    <h1>${esc(day0.name || 'Session')}</h1>
+    <div class="dnav"><button id="sPrev" aria-label="Previous day">‹</button><b>${dayLabel(day)}</b>
+      <button id="sNext" aria-label="Next day" ${day >= todayIso() ? 'disabled' : ''}>›</button></div>
+    ${ex.map((e, i) => {
+      const last = lastFor(e.n, day);
+      const w = same ? saved['e' + i + 'w'] : '', r = same ? saved['e' + i + 'r'] : '';
+      return `<div class="q exlog"><p class="qt">${esc(e.n)} <span class="sub">${e.s != null ? '· ' + esc(e.s) + ' sets' : ''}${e.r ? ' · ' + esc(e.r) : ''}</span></p>
+        ${last ? `<p class="qh">Last time (${fmt(last.day)}): ${esc([last.w, last.r].filter(Boolean).join(' × '))}</p>` : ''}
+        <div class="fgrid"><div class="f"><label>Weight</label><input data-i="${i}" data-f="w" value="${esc(w || '')}" placeholder="e.g. 140"></div>
+        <div class="f"><label>Reps per set</label><input data-i="${i}" data-f="r" value="${esc(r || '')}" placeholder="e.g. 20,14,15,13"></div></div></div>`;
+    }).join('')}
+    <div class="f"><label for="s_notes">Notes</label><textarea id="s_notes">${esc(same ? saved.notes || '' : '')}</textarea></div>
+    <button class="btn" id="sSave" data-copy="trk_train_log">${esc(t('trk_train_log'))}</button>
+    <p class="saved" id="sMsg"></p>`);
+  $('#sBack').onclick = () => openTraining(wi);
+  $('#sPrev').onclick = () => openSession(wi, di, addDays(day, -1));
+  $('#sNext').onclick = () => openSession(wi, di, addDays(day, 1));
+  $('#sSave').onclick = async () => {
+    const data = { d: di, wk: wi, day: day0.name || '' };
+    ex.forEach((e, i) => { data['e' + i + 'n'] = e.n; });
+    document.querySelectorAll('#aSection [data-f]').forEach(inp => { const v = inp.value.trim(); if(v) data['e' + inp.dataset.i + inp.dataset.f] = v; });
+    const n = $('#s_notes').value.trim(); if(n) data.notes = n;
+    if(await saveLog('training', day, data, $('#sSave'), $('#sMsg'), true)) setTimeout(() => openTraining(wi), 650);
+  };
+}
+
+/* ── Protocols: dosing schedules, tables (peak week), written protocols ── */
+function openProtocol(pid, mon){
+  const p = activeProtocols().find(x => x.id === pid);
+  if(!p) return;
+  let body = '';
+  if(p.type === 'schedule'){
+    mon = mon || mondayOf(todayIso());
+    const wk = protoWeek(p, mon), dn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], today = todayIso();
+    const live = wk >= 1 && !(p.weeks && wk > p.weeks);
+    body = `<div class="dnav"><button id="pPrev">‹</button><b>${live ? 'Week ' + wk + (p.weeks ? ' of ' + p.weeks : '') + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}</b><button id="pNext">›</button></div>
+      ${live ? [...Array(7)].map((_, i) => {
+        const day = addDays(mon, i), due = dosesOn(day).filter(x => x.p.id === p.id), dl = logOf('daily', day) || {};
+        return `<div class="pday ${day === today ? 'now' : ''}"><div class="pdh">${dn[i]} <span class="sub">${fmt(day)}</span></div>
+          ${due.length ? due.map(x => `<label class="dose"><input type="checkbox" data-day="${day}" data-dk="${x.key}" ${dl[x.key] ? 'checked' : ''} ${day > today ? 'disabled' : ''}>
+            <span><b>${esc(x.it.name)}</b> ${esc([x.dose, x.it.unit].filter(Boolean).join(' '))}${x.it.note ? ` <small>· ${esc(x.it.note)}</small>` : ''}</span></label>`).join('')
+            : '<p class="sub" style="margin:2px 0 0">Nothing today</p>'}</div>`;
+      }).join('') : `<div class="card" style="color:var(--mut)">${wk < 1 ? 'Starts ' + fmt(p.start) + '.' : 'This protocol has finished.'}</div>`}`;
+  } else if(p.type === 'table'){
+    const cols = p.cols || [];
+    body = `<div class="card" style="padding:14px 12px"><div class="histwrap"><table class="hist ptab">
+      <thead><tr><th></th>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead>
+      <tbody>${(p.rows || []).map(r => `<tr><td><b>${esc(r.label)}</b></td>${cols.map((_, i) => `<td>${esc((r.cells || [])[i] || '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+  }
+  showSection(`<h1>${esc(p.name)}</h1>${body}${(p.text || '').trim() ? `<div class="body" style="margin-top:16px">${render(p.text)}</div>` : ''}`);
+  if(p.type === 'schedule'){
+    $('#pPrev').onclick = () => openProtocol(pid, addDays(mon, -7));
+    $('#pNext').onclick = () => openProtocol(pid, addDays(mon, 7));
+    document.querySelectorAll('#aSection [data-dk]').forEach(cb => cb.onchange = async () => {
+      cb.disabled = true;
+      try { await tickDose(cb.dataset.day, cb.dataset.dk, cb.checked); } catch(e){ cb.checked = !cb.checked; alert(e.message); }
+      cb.disabled = false;
+    });
+  }
 }
 
 /* ── edit mode: trt-guy.com/<anyone>?edit=1 ───────────────────────────────
