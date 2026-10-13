@@ -231,6 +231,23 @@
   .hist.wv tr.avg td{border-top:2px solid var(--line-2);font-weight:700}
   .hist.wv tr.tg td{color:var(--mut)}
   .links{display:flex;gap:18px}
+  .mprog{font-size:12.5px;font-weight:600;letter-spacing:.02em;background:var(--acc-soft);border-radius:10px;padding:9px 12px;margin:-4px 0 12px}
+  .tday.rest{padding:13px 18px;color:var(--mut)}
+  .cnote{font-size:13.5px;background:var(--bg-2);border-radius:10px;padding:9px 12px;margin:10px 0 0;white-space:pre-wrap}
+  .mex{margin-top:8px}
+  .mrow{padding:9px 0;border-top:1px solid var(--line)}
+  .mrow:first-child{border-top:0}
+  .mn{font-size:15px;font-weight:600}
+  .mn a,.mlog .qt a{color:var(--txt);text-decoration:none}
+  .mp{font-size:12.5px;color:var(--mut);margin-top:2px}
+  .mlog{margin-bottom:12px;padding:16px 16px}
+  .mlog .qt{font-size:16px;font-weight:700;margin:0 0 3px}
+  .mlog .qh{font-size:13px;color:var(--mut);margin:0 0 4px}
+  .mlog .last{color:var(--txt);font-weight:600;background:var(--bg-2);border-radius:8px;padding:6px 10px;margin-top:6px}
+  .ml{font-size:13px;font-weight:600;margin:12px 0 0}
+  .ml small{font-weight:500;color:var(--mut)}
+  .mlog .opts{margin-top:6px}
+  .mlog .opts button{padding:8px 11px;font-size:13.5px}
   .btn.locked,.btn:disabled.locked{background:var(--bg-2);color:#9aa3ae;border:1px dashed var(--line-2);cursor:not-allowed}
   .btn.locked:hover{background:var(--bg-2)}
   .nclamp{white-space:pre-wrap;text-align:left;font-size:12px;line-height:1.4;width:170px;display:-webkit-box;-webkit-line-clamp:3;
@@ -297,6 +314,7 @@
   .wtabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding-bottom:4px}
   .wtabs button{border:1px solid var(--line-2);background:#fff;border-radius:9px;padding:8px 12px;font:600 13px Inter,sans-serif;cursor:pointer;color:var(--txt)}
   .wtabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+  .wtabs button{white-space:nowrap;flex:0 0 auto}
   .tday{margin-bottom:10px;padding:16px 18px}
   .tdh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
   .exl{margin:10px 0 0;padding-left:20px;font-size:14.5px}
@@ -382,7 +400,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-13T22:00Z';
+const BUILD = '2026-10-14T00:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1510,7 +1528,81 @@ function trainingWeekIndex(tp){
   const i = Math.floor((dOf(todayIso()) - dOf(mondayOf(tp.start))) / 6048e5);
   return Math.max(0, Math.min(tp.weeks.length - 1, i));
 }
+/* ── Mesocycle program (the training sheet): weeks of RIR + sets per exercise,
+   videos, Julian's Coach's Notes, and his log per exercise per week. ── */
+const FATIGUE = ['None, feel very fresh','Very little fatigue','Moderate fatigue','Very noticeable fatigue','Overwhelming fatigue'];
+const PUMP = ['Amazing pumps','Noticeable to okay pump','Very little pump','No pump'];
+// A session is filed under its slot: week w, day d → Monday of that week + d.
+const mesoDay = (tp, w, d) => addDays(mondayOf(tp.start || todayIso()), w * 7 + d);
+const mesoLog = (tp, w, d) => { const l = logOf('training', mesoDay(tp, w, d)); return l && l.m && l.w === w && l.d === d ? l : null; };
+function openMeso(wi){
+  const tp = secs().training_plan;
+  if(wi == null) wi = trainingWeekIndex(tp);
+  const wk = tp.weeks[wi] || {};
+  const vol = tp.days.reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (num(((e.wk || [])[wi] || {}).sets) || 0), 0), 0);
+  showSection(`
+    <h1>${esc(tp.name || t('tile_training'))}</h1>
+    ${tp.progression ? `<p class="mprog">${esc(tp.progression)}</p>` : ''}
+    <div class="wtabs">${tp.weeks.map((w, i) => `<button data-wi="${i}" class="${i === wi ? 'on' : ''}">${esc(w.label || 'Week ' + (i + 1))}</button>`).join('')}</div>
+    <p class="sub" style="margin:0 0 14px">${nf(vol)} total sets this week${wk.deload && tp.deload_note ? ' · deload: ' + esc(tp.deload_note) : ''}</p>
+    ${tp.days.map((day, di) => {
+      if(day.rest) return `<div class="card tday rest"><b>${esc(day.name)}</b></div>`;
+      const log = mesoLog(tp, wi, di), note = (day.notes || [])[wi];
+      return `<div class="card tday">
+        <div class="tdh"><b>${esc(day.name)}</b>${log ? '<span class="sub">✓ logged</span>' : ''}</div>
+        ${note ? `<p class="cnote"><b>Coach's Notes:</b> ${esc(note)}</p>` : ''}
+        <div class="mex">${(day.ex || []).map(e => { const w = (e.wk || [])[wi] || {};
+          return `<div class="mrow"><div class="mn">${e.v ? `<a href="${esc(e.v)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ↗</a>` : esc(e.n || e.cat)}</div>
+            <div class="mp">${[e.reps && e.reps + ' reps', e.tempo && 'tempo ' + e.tempo, w.rir !== '' && w.rir != null && 'RIR ' + w.rir, w.sets && w.sets + ' sets'].filter(Boolean).map(esc).join(' · ')}</div></div>`; }).join('')}</div>
+        <button class="btn ghost sm" data-log="${di}">${log ? 'Edit log' : esc(t('trk_train_log'))}</button>
+      </div>`;
+    }).join('')}`);
+  document.querySelectorAll('#aSection .wtabs button').forEach(b => b.onclick = () => openMeso(+b.dataset.wi));
+  document.querySelectorAll('#aSection [data-log]').forEach(b => b.onclick = () => openMesoLog(wi, +b.dataset.log));
+}
+function openMesoLog(wi, di){
+  const tp = secs().training_plan, day = tp.days[di], wk = tp.weeks[wi] || {};
+  const saved = mesoLog(tp, wi, di) || {}, prev = wi > 0 ? mesoLog(tp, wi - 1, di) : null;
+  const note = (day.notes || [])[wi];
+  const chips = (key, opts, val) => `<div class="opts col" data-k="${key}">${opts.map(o => `<button type="button" class="${val === o ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+  showSection(`
+    <h1>${esc(day.name)}</h1>
+    <p class="sub" style="margin:-8px 0 14px">${esc(wk.label || '')}${tp.start ? ' · ' + fmt(mesoDay(tp, wi, di)) : ''}</p>
+    ${note ? `<p class="cnote"><b>Coach's Notes:</b> ${esc(note)}</p>` : ''}
+    ${(day.ex || []).map((e, i) => { const w = (e.wk || [])[wi] || {};
+      const p = prev && prev['e' + i + 'n'] === (e.n || e.cat) ? prev : null;
+      return `<div class="card mlog">
+        <p class="qt">${e.v ? `<a href="${esc(e.v)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ↗</a>` : esc(e.n || e.cat)}</p>
+        <p class="qh">${[e.reps && e.reps + ' reps', e.tempo && 'tempo ' + e.tempo, w.rir !== '' && w.rir != null && 'RIR ' + w.rir, w.sets && w.sets + ' sets'].filter(Boolean).map(esc).join(' · ')}</p>
+        ${p ? `<p class="qh last">Last week: ${esc([p['e' + i + 'w'], p['e' + i + 'r']].filter(Boolean).join(' × ') || '—')}${p['e' + i + 'p'] ? ' · ' + esc(p['e' + i + 'p']) : ''}</p>` : ''}
+        <p class="ml">Fatigue <small>(before you start)</small></p>${chips('e' + i + 'f', FATIGUE, saved['e' + i + 'f'])}
+        <div class="fgrid" style="margin-top:12px"><div class="f"><label>Weight</label><input data-k="e${i}w" value="${esc(saved['e' + i + 'w'] || '')}" placeholder="e.g. 140"></div>
+          <div class="f"><label>Rep Results</label><input data-k="e${i}r" value="${esc(saved['e' + i + 'r'] || '')}" placeholder="12,10,8"></div></div>
+        <p class="ml">Pump</p>${chips('e' + i + 'p', PUMP, saved['e' + i + 'p'])}
+        <input class="exnote" data-k="e${i}x" value="${esc(saved['e' + i + 'x'] || '')}" placeholder="Notes">
+      </div>`; }).join('')}
+    <div class="f"><label for="s_notes">Notes on this session</label><textarea id="s_notes">${esc(saved.notes || '')}</textarea></div>
+    <button class="btn" id="sSave">${esc(t('trk_train_log'))}</button>
+    <p class="saved" id="sMsg"></p>`);
+  const d = {};
+  Object.keys(saved).forEach(k => { d[k] = saved[k]; });
+  document.querySelectorAll('#aSection .opts').forEach(box => box.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const on = !b.classList.contains('on');
+    box.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+    if(on){ b.classList.add('on'); d[box.dataset.k] = b.dataset.v; } else delete d[box.dataset.k];
+  }));
+  $('#sBack').onclick = () => openMeso(wi);
+  $('#sSave').onclick = async () => {
+    document.querySelectorAll('#aSection input[data-k]').forEach(inp => { const v = inp.value.trim(); if(v) d[inp.dataset.k] = v; else delete d[inp.dataset.k]; });
+    const n = $('#s_notes').value.trim(); if(n) d.notes = n; else delete d.notes;
+    Object.assign(d, { m: 1, w: wi, d: di, day: day.name || '' });
+    (day.ex || []).forEach((e, i) => { d['e' + i + 'n'] = e.n || e.cat; });
+    if(await saveLog('training', mesoDay(tp, wi, di), d, $('#sSave'), $('#sMsg'), true)) setTimeout(() => openMeso(wi), 650);
+  };
+}
+
 function openTraining(wi){
+  if((secs().training_plan || {}).type === 'meso') return openMeso(wi);
   const tp = secs().training_plan;
   if(wi == null) wi = trainingWeekIndex(tp);
   const wk = tp.weeks[wi] || { ex: [] };
