@@ -155,6 +155,10 @@
   .trkqa .fl{margin:0}
   .trkqa p{margin:0 0 6px;font-size:13px;color:var(--fg);white-space:pre-wrap}
   .panel.wide{width:min(1240px,100%)}
+  table.tl td.nt{vertical-align:top;padding:6px}
+  .nclamp{white-space:pre-wrap;text-align:left;font-size:11.5px;line-height:1.4;width:180px;display:-webkit-box;-webkit-line-clamp:4;
+    -webkit-box-orient:vertical;overflow:hidden;cursor:pointer;color:var(--fg)}
+  .nclamp.open{display:block;-webkit-line-clamp:unset}
   .rx .rxrow{display:grid;grid-template-columns:2fr 1.4fr 1fr 1.2fr 1.2fr auto;gap:10px;margin:8px 0}
   @media(max-width:900px){ .rx .rxrow{grid-template-columns:1fr 1fr} }
   .fcell{display:flex;gap:3px;align-items:center;justify-content:center;flex-wrap:wrap;min-height:28px}
@@ -268,7 +272,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-13T17:00Z';
+const BUILD = '2026-10-13T21:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1304,6 +1308,7 @@ function tlAuto(c, m, k){
     case '_avgsteps': { const s = st(); return s.steps == null ? '' : tNf(s.steps); }
     case '_cardiodone': { const s = st(); return s.n ? tNf(s.cardio) : ''; }
     case '_q': { const w = tLog(c, 'weekly', m) || {}; return [w.questions, w.help].filter(Boolean).join(' · '); }
+    case '_dnotes': case '_tnotes': case '_cnotes': return tWeekNotes(c, m, k);
     case '_mg': { const v = tlRowsOf(c).filter(r => r.g === 'aas' && r.k[0] !== '_').map(r => parseFloat(tlCell(c, m, r.k).v)).filter(x => !isNaN(x));
       return v.length ? tNf(v.reduce((a, b) => a + b, 0)) : ''; }
   }
@@ -1419,6 +1424,23 @@ const tFiles = (c, m) => { const d = tLog(c, 'files', m) || {}, out = [];
   return out; };
 const tFilesData = list => { const d = {}; list.forEach((f, i) => { d['f' + i + 'u'] = f.u; d['f' + i + 'n'] = f.n; d['f' + i + 't'] = f.t; }); return d; };
 
+
+// Every note from the week, gathered for the Timeline's Notes block.
+const T_DN = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+function tWeekNotes(c, m, kind){
+  if(kind === '_dnotes') return T_DN.map((n, i) => { const d = tLog(c, 'daily', tAdd(m, i)); return d && (d.notes || '').trim() ? `${n}: ${d.notes.trim()}` : ''; }).filter(Boolean).join('\n');
+  if(kind === '_tnotes') return (c._logs || []).filter(l => l.kind === 'training' && l.day >= m && l.day <= tAdd(m, 6)).sort((a, b) => a.day < b.day ? -1 : 1).map(l => {
+      const d = l.data, bits = [];
+      if((d.notes || '').trim()) bits.push(d.notes.trim());
+      for(let i = 0; i < 40; i++) if((d['e' + i + 'x'] || '').trim()) bits.push(`${d['e' + i + 'n'] || 'Exercise'} — ${d['e' + i + 'x'].trim()}`);
+      return bits.length ? `${T_DN[(tD(l.day).getDay() + 6) % 7]}${d.day ? ' ' + d.day : ''}: ${bits.join(' · ')}` : '';
+    }).filter(Boolean).join('\n');
+  if(kind === '_cnotes'){ const w = tLog(c, 'weekly', m) || {};
+    return [['why','Score ' + (w.score || '')], ['diet_issues','Diet'], ['training_issues','Training'], ['other_issues','Other'], ['questions','Questions'], ['help','Help']]
+      .filter(([k]) => (w[k] || '').trim()).map(([k, l]) => `${l}: ${w[k].trim()}`).join('\n'); }
+  return '';
+}
+const T_NOTE_ROWS = [{ k:'_dnotes', l:'Daily notes' }, { k:'_tnotes', l:'Training notes' }, { k:'_cnotes', l:'Check-in notes' }];
 async function drawTimeline(c, b, mode){
   mode = mode || 'timeline';
   const myTab = mode === 'pharma' ? 'pharma' : 'timeline';
@@ -1448,6 +1470,8 @@ async function drawTimeline(c, b, mode){
         return `<td ${td(m)}><div class="fcell">${theirs}${files.map(f => `<span class="fchip"><a href="${esc(f.u)}" target="_blank" rel="noopener" title="${esc(f.n)}">${t === 'photo' ? '🖼' : '📄'}</a><button class="tlx" data-fdel="${m}|${esc(f.u)}" title="Remove">×</button></span>`).join('')}
           <label class="fup" title="Upload ${t === 'photo' ? 'photos' : 'labs'}">+<input type="file" hidden multiple accept="${t === 'photo' ? 'image/*' : 'image/*,application/pdf'}" data-up="${t}" data-m="${m}"></label></div></td>`;
       }
+      if(['_dnotes','_tnotes','_cnotes'].includes(r.k)){ const v = tlAuto(c, m, r.k);
+        return `<td class="auto nt ${m === now ? 'now' : ''}">${v ? `<div class="nclamp" title="Click to expand">${esc(v)}</div>` : ''}</td>`; }
       if(auto) return `<td class="auto ${m === now ? 'now' : ''}">${esc(tlAuto(c, m, r.k))}</td>`;
       const cell = tlCell(c, m, r.k);
       const pic = r.k === 'pics' && T_PICS.some(([k]) => (tLog(c, 'weekly', m) || {})[k]);
@@ -1463,11 +1487,12 @@ async function drawTimeline(c, b, mode){
     body += rows.filter(r => r.g === 'week' && ['_date','_woy','_woc','cycle','event'].includes(r.k)).map(r => rowHtml(r)).join('');
     body += groupHead('Composition / Diagnostics') + PH_TOP.map(r => rowHtml(r, { fixed:true })).join('');
     PH_GROUPS.forEach(g => { body += groupHead(PH_GROUP_LABEL[g], g) + rows.filter(r => r.g === g).map(r => rowHtml(r)).join(''); });
-    body += groupHead('Notes / Questions') + rowHtml({ k:'note', l:'Notes' }, { fixed:true }) + rowHtml({ k:'_q', l:'Questions (his check-in)' });
+    body += groupHead('All notes') + rowHtml({ k:'note', l:'Notes (yours)' }, { fixed:true }) + T_NOTE_ROWS.map(r => rowHtml(r)).join('');
   } else {
     TL_GROUPS.filter(([g]) => TL_VIEW_GROUPS.includes(g)).forEach(([g, gl]) => {
-      body += groupHead(gl, g) + rows.filter(r => r.g === g).map(r => rowHtml(r)).join('');
+      body += groupHead(gl, g) + rows.filter(r => r.g === g && r.k !== 'note').map(r => rowHtml(r)).join('');
     });
+    body += groupHead('All notes') + rowHtml({ k:'note', l:'Notes (yours)' }, { fixed:true }) + T_NOTE_ROWS.map(r => rowHtml(r)).join('');
   }
 
   const known = PH_KNOWN.map(([n]) => n).concat(rows.filter(r => PH_GROUPS.includes(r.g)).map(r => r.l));
@@ -1492,6 +1517,7 @@ async function drawTimeline(c, b, mode){
     <div class="tlwrap" id="tlWrap"><table class="tl"><tbody>${head}${body}</tbody></table></div>
     <div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" id="tlReset">Reset rows to the sheet's list</button></div>`;
   const nowCell = $('#tlWrap td.now'); if(nowCell) $('#tlWrap').scrollLeft = Math.max(0, nowCell.offsetLeft - 260);
+  $$('#tlWrap .nclamp').forEach(n => n.onclick = () => n.classList.toggle('open'));
 
   const redraw = async () => { const sl = $('#tlWrap').scrollLeft, st = $('#pBody').scrollTop; await drawTimeline(c, b, mode); if($('#tlWrap')) $('#tlWrap').scrollLeft = sl; $('#pBody').scrollTop = st; };
   const setCell = async (m, k, v, numeric) => {

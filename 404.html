@@ -231,6 +231,11 @@
   .hist.wv tr.avg td{border-top:2px solid var(--line-2);font-weight:700}
   .hist.wv tr.tg td{color:var(--mut)}
   .links{display:flex;gap:18px}
+  .nclamp{white-space:pre-wrap;text-align:left;font-size:12px;line-height:1.4;width:170px;display:-webkit-box;-webkit-line-clamp:3;
+    -webkit-box-orient:vertical;overflow:hidden;cursor:pointer;font-weight:400}
+  .nclamp.open{display:block;-webkit-line-clamp:unset}
+  table.tl td:has(.nclamp){vertical-align:top}
+  .exnote{width:100%;margin-top:8px;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px;font:500 14px Inter,sans-serif;color:var(--txt);background:#fff;outline:0}
   .wsum{margin-bottom:14px;padding:16px 18px}
   .stats4.wk8{margin-top:10px}
   .rxg{margin-top:12px}
@@ -375,7 +380,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-13T19:00Z';
+const BUILD = '2026-10-13T21:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1387,6 +1392,7 @@ function tlValue(mon, row){
     case '_avgsteps': { const s = weekStats(mon); return s.steps == null ? '' : nf(s.steps); }
     case '_cardiodone': { const s = weekStats(mon); return s.n ? nf(s.cardio) : ''; }
     case '_q': { const w = wk || {}; return [w.questions, w.help].filter(Boolean).join(' · '); }
+    case '_dnotes': case '_tnotes': case '_cnotes': return weekNotes(mon, row.k);
   }
   if(row.k === 'pics' && wk && PICS.some(([k]) => wk[k])) return '✓';
   return tlCell(mon, row.k);
@@ -1416,6 +1422,23 @@ const PH_TOP = [
 const filesOf = mon => { const d = logOf('files', mon) || {}, out = [];
   for(let i = 0; i < 50; i++) if(d['f' + i + 'u']) out.push({ u: d['f' + i + 'u'], n: d['f' + i + 'n'] || 'file', t: d['f' + i + 't'] || 'lab' });
   return out; };
+
+// Every note from the week, gathered for the Timeline's Notes block.
+const DN = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+function weekNotes(mon, kind){
+  if(kind === '_dnotes') return DN.map((n, i) => { const d = logOf('daily', addDays(mon, i)); return d && (d.notes || '').trim() ? `${n}: ${d.notes.trim()}` : ''; }).filter(Boolean).join('\n');
+  if(kind === '_tnotes') return LOGS.filter(l => l.kind === 'training' && l.day >= mon && l.day <= addDays(mon, 6)).sort((a, b) => a.day < b.day ? -1 : 1).map(l => {
+      const d = l.data, bits = [];
+      if((d.notes || '').trim()) bits.push(d.notes.trim());
+      for(let i = 0; i < 40; i++) if((d['e' + i + 'x'] || '').trim()) bits.push(`${d['e' + i + 'n'] || 'Exercise'} — ${d['e' + i + 'x'].trim()}`);
+      return bits.length ? `${DN[(dOf(l.day).getDay() + 6) % 7]}${d.day ? ' ' + d.day : ''}: ${bits.join(' · ')}` : '';
+    }).filter(Boolean).join('\n');
+  if(kind === '_cnotes'){ const w = logOf('weekly', mon) || {};
+    return [['why','Score ' + (w.score || '')], ['diet_issues','Diet'], ['training_issues','Training'], ['other_issues','Other'], ['questions','Questions'], ['help','Help']]
+      .filter(([k]) => (w[k] || '').trim()).map(([k, l]) => `${l}: ${w[k].trim()}`).join('\n'); }
+  return '';
+}
+const NOTE_ROWS = [{ k:'note', l:'Notes' }, { k:'_dnotes', l:'Daily notes' }, { k:'_tnotes', l:'Training notes' }, { k:'_cnotes', l:'Check-in notes' }];
 function openTimeline(mode){
   const pharma = mode === 'pharma';
   const weeks = timelineWeeks(), now = mondayOf(todayIso()), rows = tlRows();
@@ -1431,6 +1454,7 @@ function openTimeline(mode){
       if(v.v == null || /^(off|stop|stopped)$/i.test(String(v.v).trim())) return '';
       return `<span class="${v.carried ? 'carried' : ''}">${esc(v.v)}</span>`;
     }
+    if(['_dnotes','_tnotes','_cnotes'].includes(r.k)) return v ? `<div class="nclamp">${esc(v)}</div>` : '';
     return esc(v);
   };
   // A row with nothing in any week stays out of his view.
@@ -1442,13 +1466,15 @@ function openTimeline(mode){
     body += rows.filter(r => r.g === 'week' && ['_date','_woc','cycle','event'].includes(r.k)).filter(hasAny).map(tr).join('');
     body += gh('Composition / Diagnostics') + PH_TOP.filter(hasAny).map(tr).join('');
     PH_GROUPS.forEach(g => { const rs = rows.filter(r => r.g === g).filter(hasAny); if(rs.length) body += gh(PH_GROUP_LABEL[g]) + rs.map(tr).join(''); });
-    const notes = [{ k:'note', l:'Notes' }, { k:'_q', l:'Your questions' }].filter(hasAny);
-    if(notes.length) body += gh('Notes / Questions') + notes.map(tr).join('');
+    const notes = NOTE_ROWS.filter(hasAny);
+    if(notes.length) body += gh('All notes') + notes.map(tr).join('');
   } else {
     TL_GROUPS.filter(([g]) => !PH_GROUPS.includes(g)).forEach(([g, gl]) => {
-      const rs = rows.filter(r => r.g === g).filter(hasAny);
+      const rs = rows.filter(r => r.g === g && r.k !== 'note').filter(hasAny);
       if(rs.length) body += (gl ? gh(gl) : '') + rs.map(tr).join('');
     });
+    const notes = NOTE_ROWS.filter(hasAny);
+    if(notes.length) body += gh('All notes') + notes.map(tr).join('');
   }
   showSection(`
     <h1 data-copy="${pharma ? 'tile_pharma' : 'tile_timeline'}">${esc(t(pharma ? 'tile_pharma' : 'tile_timeline'))}</h1>
@@ -1456,6 +1482,7 @@ function openTimeline(mode){
     <p class="updated">This week is highlighted. Grey values carry on from an earlier week.${pharma ? ' Tap 📄 or 🖼 to open a lab or photo.' : ''}</p>`);
   const nowCell = document.querySelector('#tlWrap td.now');
   if(nowCell) $('#tlWrap').scrollLeft = Math.max(0, nowCell.offsetLeft - 160);
+  document.querySelectorAll('#tlWrap .nclamp').forEach(n => n.onclick = () => n.classList.toggle('open'));
 }
 
 /* ── Training: the program week by week, and a log of each session ─────── */
@@ -1511,9 +1538,10 @@ function openSession(wi, di, day){
       return `<div class="q exlog"><p class="qt">${esc(e.n)} <span class="sub">${e.s != null ? '· ' + esc(e.s) + ' sets' : ''}${e.r ? ' · ' + esc(e.r) : ''}</span></p>
         ${last ? `<p class="qh">Last time (${fmt(last.day)}): ${esc([last.w, last.r].filter(Boolean).join(' × '))}</p>` : ''}
         <div class="fgrid"><div class="f"><label>Weight</label><input data-i="${i}" data-f="w" value="${esc(w || '')}" placeholder="e.g. 140"></div>
-        <div class="f"><label>Reps per set</label><input data-i="${i}" data-f="r" value="${esc(r || '')}" placeholder="e.g. 20,14,15,13"></div></div></div>`;
+        <div class="f"><label>Reps per set</label><input data-i="${i}" data-f="r" value="${esc(r || '')}" placeholder="e.g. 20,14,15,13"></div></div>
+        <input class="exnote" data-i="${i}" data-f="x" value="${esc(same ? saved['e' + i + 'x'] || '' : '')}" placeholder="Note"></div>`;
     }).join('')}
-    <div class="f"><label for="s_notes">Notes</label><textarea id="s_notes">${esc(same ? saved.notes || '' : '')}</textarea></div>
+    <div class="f"><label for="s_notes">Notes on this session</label><textarea id="s_notes">${esc(same ? saved.notes || '' : '')}</textarea></div>
     <button class="btn" id="sSave" data-copy="trk_train_log">${esc(t('trk_train_log'))}</button>
     <p class="saved" id="sMsg"></p>`);
   $('#sBack').onclick = () => openTraining(wi);
