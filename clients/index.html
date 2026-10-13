@@ -175,6 +175,34 @@
     table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{min-width:128px;max-width:140px}
     table.mg th,table.mg td{padding:5px 6px}
   }
+  /* one line per row — long text is cut with … (hover for the full text) */
+  table.mg th,table.mg td{white-space:nowrap;line-height:1.3;padding:6px 8px}
+  table.mg .cl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  table.mg tbody tr:not(.mgrest) td:first-child,table.mg .mgtitle{min-width:200px;max-width:200px;width:200px}
+  table.mg tbody tr:not(.mgrest) td:first-child .cl{max-width:184px}
+  table.mg td.mgres .cl{width:150px}
+  table.mg td.mgnote .cl{width:110px;color:#444}
+  table.mg td.mgsess .cl,table.mg tr.mgcn td .cl{max-width:330px}
+  table.mg tr.mgcn td{white-space:nowrap}
+  table.mg tr.mgrest td{padding:5px 10px}
+  table.mg tr.mgcols td{padding:4px 8px}
+  .mgprogline{font-size:11.5px;font-weight:700;letter-spacing:.04em;color:#555;margin:8px 2px 0}
+  .mvwrap{overflow-x:auto;margin-top:14px}
+  table.mv{border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}
+  table.mv th,table.mv td{padding:6px 12px;white-space:nowrap;border-bottom:1px solid #eee;text-align:center}
+  table.mv th:first-child,table.mv td:first-child{text-align:left;font-weight:700;background:#cccccc}
+  table.mv th:first-child{background:#000;color:#fff}
+  table.mv small{font-size:11px}
+  table.mv small.ok{color:#2e7d32}
+  table.mv small.low{color:#b26a00}
+  table.mv tr.tot td{font-weight:800;background:#f3f3f3}
+  @media(max-width:520px){
+    table.mg tbody tr:not(.mgrest) td:first-child,table.mg .mgtitle{min-width:140px;max-width:140px;width:140px}
+    table.mg tbody tr:not(.mgrest) td:first-child .cl{max-width:126px}
+    table.mg td.mgres .cl{width:120px}
+    table.mg td.mgnote .cl{width:80px}
+  }
+
   table.mg tr.mgday td.mgsp{background:#f3f3f3}
   table.mg tr.mgcols td{background:#d9d9d9;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
   table.mg tr.mgcols td.mgsp{background:#f3f3f3}
@@ -202,7 +230,14 @@
   table.mweek{width:100%;border-collapse:collapse;font-size:12.5px}
   table.mweek th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);text-align:left;padding:4px 8px 6px;white-space:nowrap}
   table.mweek td{border-top:1px solid var(--line);padding:8px;vertical-align:top}
-  table.mweek td:first-child{font-weight:600;min-width:170px}
+  table.mweek td:first-child{font-weight:600;min-width:200px;max-width:220px}
+  table.mweek td,table.mweek th{white-space:nowrap}
+  table.mweek .c{text-align:center}
+  table.mweek .cl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  table.mweek td:first-child .cl{max-width:210px}
+  table.mweek td.res .cl{max-width:190px;font-weight:600}
+  table.mweek td.csub .cl{max-width:180px}
+  table.mweek td.nt .cl{max-width:160px}
   table.mweek td a{color:var(--fg);text-decoration:none}
   table.mweek td.sets{min-width:200px}
   table.mweek .sc{display:inline-block;border:1px solid var(--line-bright);border-radius:6px;padding:2px 6px;margin:0 4px 4px 0;white-space:nowrap;background:#fff}
@@ -343,7 +378,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-14T04:30Z';
+const BUILD = '2026-10-14T07:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -945,10 +980,11 @@ function drawPanel(){
       <button class="ptab ${TAB==='details'?'on':''}" data-t="details">Details</button>
       <button class="ptab ${TAB==='plan'?'on':''}" data-t="plan">Plan</button>
       <button class="ptab ${TAB==='tracking'?'on':''}" data-t="tracking">Tracking</button>
+      ${(((c.sections || {}).tracker) || {}).on ? `
       <button class="ptab ${TAB==='timeline'?'on':''}" data-t="timeline">Timeline</button>
       <button class="ptab ${TAB==='pharma'?'on':''}" data-t="pharma">Pharmacology</button>
       <button class="ptab ${TAB==='training'?'on':''}" data-t="training">Training</button>
-      <button class="ptab ${TAB==='protocols'?'on':''}" data-t="protocols">Protocols</button>
+      <button class="ptab ${TAB==='protocols'?'on':''}" data-t="protocols">Protocols</button>` : ''}
       <button class="ptab ${TAB==='intake'?'on':''}" data-t="intake">Intake</button>`}
     </div>
     <div class="pbody" id="pBody"></div>
@@ -1689,6 +1725,26 @@ let TW = 0;   // week open in the Training editor
 const EX_LIB = {"Horizontal Press": [["Barbell Bench Press Normal Grip", "https://www.youtube.com/watch?v=gMgvBspQ9lk"], ["Barbell Bench Press Wide Grip", "https://www.youtube.com/watch?v=EeE3f4VWFDo"], ["Barbell Bench Press Narrow Grip", "https://www.youtube.com/watch?v=FiQUzPtS90E"], ["Dumbbell Horizontal Press", "https://www.youtube.com/watch?v=YQ2s_Y7g5Qk"], ["Seated Machine Bench Press", "https://www.youtube.com/watch?v=NwzUje3z0qY"], ["Horizontal Machine Chest Press", "https://youtu.be/z4YEEwGD2Q0?t=16"], ["Cable Flys", "https://www.youtube.com/watch?v=4mfLHnFL0Uw"], ["Dips", "https://www.youtube.com/watch?v=4LA1kF7yCGo"], ["Dip machine", "https://www.youtube.com/shorts/UVdP0sB7dDc"], ["Dips - Assisted", "https://www.youtube.com/watch?v=yZ83t4mrPrI"], ["Machine Fly", "https://www.youtube.com/watch?v=FDay9wFe5uE"], ["Smith Machine Bench", "https://www.youtube.com/watch?v=O5viuEPDXKY"], ["Push Up", "https://www.youtube.com/watch?v=mm6_WcoCVTA"], ["Deficit Push Ups", "https://www.youtube.com/watch?v=gmNlqsE3Onc"], ["Dumbbell Fly", "https://www.youtube.com/watch?v=JFm8KbhjibM"], ["Push up from knees", "https://www.youtube.com/watch?v=WcHtt6zT3Go"]], "Incline Press": [["High Incline Dumbbell Press", "https://youtu.be/GFYrRBoov3w"], ["Incline Barbell Press Medium Grip", "https://youtu.be/lJ2o89kcnxY"], ["Incline Barbell Press Narrow Grip", "https://youtu.be/Zfi0KcIJi6c"], ["Incline Barbell Press Wide Grip", "https://youtu.be/FxQ0XEoFYQk"], ["Incline Dumbbell Flye", "https://youtu.be/8oR5hBwbIBc"], ["Incline Dumbbell Press", "https://youtu.be/5CECBjd7HLQ"], ["Incline Machine Chest Press", "https://youtu.be/TrTSvn5-MTk"], ["Low Incline Dumbbell Press", "https://youtu.be/B09ZkYsnKko"], ["Smith Machine High Incline Press", "https://youtu.be/GFYrRBoov3w"], ["Smith Machine Low Incline Press", "https://youtu.be/B09ZkYsnKko"], ["Smith Machine Incline Press", "https://youtu.be/8urE8Z8AMQ4"]], "Horizontal Pull": [["Barbell Bent Over Row", "https://www.youtube.com/watch?v=6FZHJGzMFEc"], ["2-Arm Dumbbell Row", "https://www.youtube.com/watch?v=5PoEksoJNaw"], ["Cable Row", "https://www.youtube.com/watch?v=NYok5zjbDcw"], ["Cable One Arm Row", "https://www.youtube.com/watch?v=PFGa5_PvgVQ"], ["Dumbbell One Arm Row", "https://www.youtube.com/watch?v=DMo3HJoawrU"], ["Dumbbell Chest Supported Row", "https://www.youtube.com/watch?v=tZUYS7X50so"], ["Underhand EZ Bent Over Row", "https://www.youtube.com/watch?v=H260SUUyJBM"], ["Chest Supported Machine Row", "https://www.youtube.com/watch?v=bmWA2yO9Aa0"], ["Hammer Strength Horizontal Row", "https://www.youtube.com/watch?v=0GU9_kT6tBY"], ["Hammer Strength High Row", "https://www.youtube.com/watch?v=gg5hwJuv6KI"], ["T Bar Row", "https://www.youtube.com/watch?v=0UBRfiO4zDs"], ["Hammer Low Row", "https://www.youtube.com/watch?v=opjbouBmUWg"], ["Smith Machine Row", "https://www.youtube.com/watch?v=3QcJggd_L24"], ["Cambered Bar Row", "https://youtu.be/jiowkUMomlw"], ["Inverted Row", "https://youtu.be/KOaCM1HMwU0"], ["Seal Row", "https://youtu.be/4H2ItXwUTp8"]], "Vertical Pull": [["Normal Grip Pullup", "https://www.youtube.com/watch?v=aAggnpPyR6E"], ["Assisted Normal Grip Pullup", "https://www.youtube.com/watch?v=8ygapPMYK1I"], ["Parallel Grip Pullup", "https://www.youtube.com/watch?v=XWt6FQAK5wM"], ["Assissted Parallel Pull Up", "https://www.youtube.com/watch?v=GdsRZAeeDUc"], ["Underhand Pullup", "https://www.youtube.com/watch?v=9JC1EwqezGY"], ["Wide Grip Pullup", "https://www.youtube.com/watch?v=GRgWPT9XSQQ"], ["Parallel Pulldown", "https://www.youtube.com/watch?v=--utaPT7XYQ"], ["Underhand Pulldown", "https://www.youtube.com/watch?v=VprlTxpB1rk"], ["Wide Grip Pulldown", "https://www.youtube.com/watch?v=YCKPD4BSD2E"], ["Normal Grip Pulldown", "https://www.youtube.com/watch?v=EUIri47Epcg"], ["Machine Pulldown", "https://youtu.be/vjrEYyQ6EW0"], ["One Arm Pulldown", "https://www.youtube.com/watch?v=J81mealJ9j4"], ["Hammer Strength High Row", "https://www.youtube.com/watch?v=gg5hwJuv6KI"], ["Straight Arm Pulldown", "https://www.youtube.com/watch?v=G9uNaXGTJ4w"]], "Hip Hinge": [["Dumbbell Straight Leg Deadlift", "https://www.youtube.com/watch?v=cYKYGwcg0U8"], ["Glute Ham Raises", "https://www.youtube.com/watch?v=SBGYSfoqyfU"], ["Smith Machine Good Mornings", ""], ["Stiff Legged Deadlift", "https://www.youtube.com/watch?v=CN_7cz3P-1U"], ["Deadlift", "https://www.youtube.com/watch?v=AweC3UaM14o"], ["Trap Bar Deadlift", "https://www.youtube.com/watch?v=VNgxEhOoOjo"], ["45-Degree Back Raise", "https://www.youtube.com/watch?v=5_ejbGfdAQE"], ["Hack Squat Good Mornings", "https://www.youtube.com/watch?v=xBjSyZagZL0"], ["Low Bar Good Morning", "https://www.youtube.com/watch?v=mnxn-7SO9Ks"], ["HIgh Bar Good Morning", "https://www.youtube.com/watch?v=dEJ0FTm-CEk"]], "Hamstrings": [["45 Degree Back Raise", "https://youtu.be/5_ejbGfdAQE"], ["Dumbbell Stiff Legged Deadlift", "https://youtu.be/cYKYGwcg0U8"], ["Glute Ham Raise", "https://youtu.be/SBGYSfoqyfU"], ["High Bar Good Morning", "https://youtu.be/dEJ0FTm-CEk"], ["Low Bar Good Morning", "https://youtu.be/mnxn-7SO9Ks"], ["Lying Leg Curl", "https://youtu.be/n5WDXD_mpVY"], ["Seated Leg Curl", "https://youtu.be/Orxowest56U"], ["Single Leg Curl", "https://youtu.be/N6FVnaasdq0"], ["Stiff Legged Deadlift", "https://youtu.be/CN_7cz3P-1U"]], "Quad": [["Barbell Bulgarian Lunge", "https://www.youtube.com/watch?v=giUKtDvwhrM"], ["Barbell Walking Lunge", "https://www.youtube.com/watch?v=XJyUHKWKnxc"], ["Dumbbell Bulgarian Lunge", "https://youtu.be/vLuhN_glFZ8"], ["Dumbbell Lunges", "https://www.youtube.com/watch?v=eFWCn5iEbTU"], ["Leg Extensions", "https://www.youtube.com/watch?v=m0FOpMEgero"], ["Leg Press", "https://www.youtube.com/watch?v=yZmx_Ac3880"], ["Smith Machine Squat", "https://www.youtube.com/watch?v=-eO_VydErV0"], ["High Bar Back Squat", "https://www.youtube.com/watch?v=i7J5h7BJ07g"], ["Goblet Squat", "https://www.youtube.com/watch?v=zBV3ceGyAxw"], ["Bodyweight Squat", "https://www.youtube.com/watch?v=0EpP3pYUYTk"], ["Hack Squat", "https://www.youtube.com/watch?v=rYgNArpwE7E"], ["Pendulum Squats", "https://youtu.be/OcgrPkHHuUs?t=7"], ["Smith Machine Wide Stance Squats", "https://www.youtube.com/watch?v=9O3lA9HsZU8"], ["Sumo Squat", "https://www.youtube.com/watch?v=4eDJa5MnAmY"], ["Belt Squat", "https://youtu.be/L__-j2v_LPM"], ["Narrow Stance Squat", "https://youtu.be/1IIPcUCKxcE"], ["Front Squat Cross Grip", "https://youtu.be/0DQvn2qsOG4"], ["Front Squat", "https://youtu.be/HHxNbhP16UE"]], "Side Delts": [["Barbell Upright Row", "https://youtu.be/um3VVzqunPU"], ["Cable Cross Body Lateral Raise", "https://youtu.be/2OMbdPF7mz4"], ["Cable Upright Row", "https://youtu.be/qr3ziolhjvQ"], ["Dumbbell Upright Row", "https://youtu.be/Ub6QruNKfbY"], ["Lateral Raise", "https://youtu.be/OuG1smZTsQQ"], ["Leaning Cable Lateral Raise", "https://youtu.be/lq7eLC30b9w"], ["Machine Lateral Raise", "https://youtu.be/0o07iGKUarI"], ["Smith Machine Upright Row", "https://youtu.be/QIpa-9dtkgA"], ["Thumbs Down Lateral Raise", "https://youtu.be/D1f7d1OcobY"], ["Top Hold Lateral Raise", "https://youtu.be/SKf8wHlIFX0"]], "Triceps": [["Cable Overhead Tricep Extension", "https://www.youtube.com/watch?v=1u18yJELsh0"], ["Rope Overhead Triceps Extension", "https://www.youtube.com/watch?v=kqidUIf1eJE"], ["Barbell Skull Crusher", "https://www.youtube.com/watch?v=l3rHYPtMUo8"], ["Tricep Extension Machine", "https://www.youtube.com/watch?v=_JoblP7fggo"], ["Tricep Push Down", "https://www.youtube.com/watch?v=6Fzep104f0s"], ["Dips", "https://www.youtube.com/watch?v=4LA1kF7yCGo"], ["Dip machine", "https://www.youtube.com/shorts/UVdP0sB7dDc"], ["Dumbbell Skullcrusher", "https://www.youtube.com/watch?v=jPjhQ2hsAds"], ["Cable Rope Pushdown", "https://www.youtube.com/watch?v=-xa-6cQaZKY"], ["Assisted Dips", "https://www.youtube.com/watch?v=yZ83t4mrPrI"]], "Biceps": [["EZ Bar Cable Curl", "https://www.youtube.com/watch?v=opFVuRi_3b8"], ["EZ Bar Curls", "https://www.youtube.com/watch?v=MCjBeB844rU&feature=youtu.be"], ["Dumbbell Alternating Curl", "https://www.youtube.com/watch?v=WYezBGuUsdw"], ["2-Arm Dumbbell Bicep Curl", "https://youtu.be/yYB76DOBPsM"], ["Dumbbell Hammer Curl", "https://youtu.be/xsOm9xn83-8"], ["Incline Dumbbell Curl", "https://youtu.be/2jsTYbOkx1U"], ["Machine Preacher Curl", "https://www.youtube.com/watch?v=Ja6ZlIDONac"], ["Spider Curls", "https://www.youtube.com/watch?v=ke2shAeQ0O8"], ["Incline Dumbbell Curl", "https://www.youtube.com/watch?v=aTYlqC_JacQ"]], "Rear Delts": [["Barbell Facepull", "https://youtu.be/hPWYuhJMUhU"], ["Bent Lateral Raise", "https://youtu.be/34gVHrkaiz0"], ["Cable Cross Body Bent Lateral Raise", "https://youtu.be/f0g5NkYiWUY"], ["Cable Rope Facepull", "https://youtu.be/-MODnZdnmAQ"], ["Cable Single Arm Rear Delt Raise", "https://youtu.be/qz1OLup4W_M"], ["Dumbbell Facepull", "https://youtu.be/nzTY7j9ocR8"], ["Incline Dumbbell Facepull", "https://youtu.be/90cE3rCLtmo"], ["Incline Dumbbell Lateral Raise", "https://youtu.be/z3PRz2aVA10"], ["Kneeling Cable Facepull", "https://youtu.be/8CGMuud1ANw"], ["Machine Reverse Flye", "https://youtu.be/5YK4bgzXDp0"]], "Abs": [["Ab machine (any)", ""], ["Captain Char Leg Raises", "https://www.youtube.com/watch?v=skmbJPuUn3Q"], ["Decline Sit Ups", "https://www.youtube.com/watch?v=N7hf1_vcX5w"]], "Glutes": [["Barbell Hip Thrust", "https://www.youtube.com/watch?v=2zcsFcTLMsI"], ["Barbell Walking Lunge", "https://www.youtube.com/watch?v=XJyUHKWKnxc"], ["Stiff Legged Deadlift", "https://www.youtube.com/watch?v=CN_7cz3P-1U"], ["Deadlift", "https://www.youtube.com/watch?v=AweC3UaM14o"], ["Dumbbell Deficit Reverse Lunge", "https://www.youtube.com/watch?v=S8UKm6oHGis"], ["Sumo Squat", "https://www.youtube.com/watch?v=4eDJa5MnAmY"], ["Dumbbell Straight Leg Deadlift", "https://www.youtube.com/watch?v=cYKYGwcg0U8"], ["Seated Abduction", "https://www.youtube.com/watch?v=G_8LItOiZ0Q"], ["Barbell Bulgarian Lunge", "https://www.youtube.com/watch?v=giUKtDvwhrM"], ["Barbell Walking Lunge", "https://www.youtube.com/watch?v=XJyUHKWKnxc"], ["Dumbbell Bulgarian Lunge", "https://youtu.be/vLuhN_glFZ8"], ["Dumbbell Lunges", "https://www.youtube.com/watch?v=eFWCn5iEbTU"]], "Calves": [["Machine Calf Raises", "https://www.youtube.com/watch?v=u8-wLlBxFE4"], ["Donkey Calf Raises", "https://www.youtube.com/watch?v=JL30z9tqMDA"], ["Smith Calf Raises", "https://www.youtube.com/shorts/wlqTemUXPXY"], ["Seated Calf Raises", "https://www.youtube.com/watch?v=paSkfNotQis"], ["Leg Press Calf Raises", "https://www.youtube.com/watch?v=dhRz1Ns60Zg"]], "Forearms": [["Barbell Standing Wrist Curls", "https://youtu.be/lfQR7oVS8eo"], ["Dumbbell Standing Wrist Curls", "https://youtu.be/iQ4JjOK73PE"], ["Dumbbell Bench Wrist Curls", "https://youtu.be/2wPpcJBe03oo"], ["Cable Wrist Curls", "https://youtu.be/WVAaKJvToe0"]]};
 const MESO_SEED = {"type":"meso","name":"Mesocycle 1","progression":"3-4 RIR → 3 RIR → 2 RIR → 1 RIR → 1-0 RIR → DELOAD","weeks":[{"label":"Week 1"},{"label":"Week 2"},{"label":"Week 3"},{"label":"Week 4"},{"label":"Week 5"},{"label":"Week 6: Deload","deload":true}],"days":[{"name":"Day 1 - Upper 1","rest":false,"ex":[{"cat":"Horizontal Press","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"4"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Incline Press","n":"","reps":"10-15","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Horizontal Press","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"4"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Triceps","n":"","reps":"15-20","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Vertical Pull","n":"","reps":"10-15","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Horizontal Pull","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"3"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Biceps","n":"","reps":"10-15","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]}]},{"name":"Day 2 - Lower 1","rest":false,"ex":[{"cat":"Quad","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"3"},{"rir":"1-0","sets":"3"},{"rir":"5","sets":"2"}]},{"cat":"Quad","n":"","reps":"15-20","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"3"},{"rir":"1-0","sets":"3"},{"rir":"5","sets":"2"}]},{"cat":"Hamstrings","n":"","reps":"15-20","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"3"},{"rir":"1-0","sets":"3"},{"rir":"5","sets":"2"}]},{"cat":"Side Delts","n":"","reps":"10-15","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"3"},{"rir":"2","sets":"4"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Side Delts","n":"","reps":"15-20","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"3"},{"rir":"2","sets":"4"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]}]},{"name":"Day 3 - Rest / Cardio","rest":true,"ex":[]},{"name":"Day 4 - Upper 2","rest":false,"ex":[{"cat":"Horizontal Pull","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"4"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Vertical Pull","n":"","reps":"15-20","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Biceps","n":"","reps":"10-15","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Incline Press","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Horizontal Press","n":"","reps":"10-15","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"3"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]},{"cat":"Triceps","n":"","reps":"15-20","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"3"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]}]},{"name":"Day 5 - Lower 2","rest":false,"ex":[{"cat":"Hip Hinge","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"2"},{"rir":"2","sets":"3"},{"rir":"1","sets":"3"},{"rir":"1-0","sets":"3"},{"rir":"5","sets":"2"}]},{"cat":"Glutes","n":"","reps":"10-15/leg","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"2"},{"rir":"2","sets":"3"},{"rir":"1","sets":"3"},{"rir":"1-0","sets":"3"},{"rir":"5","sets":"2"}]},{"cat":"Quad","n":"","reps":"8-12","tempo":"3100","wk":[{"rir":"3-4","sets":"2"},{"rir":"3","sets":"2"},{"rir":"2","sets":"2"},{"rir":"1","sets":"2"},{"rir":"1-0","sets":"2"},{"rir":"5","sets":"2"}]},{"cat":"Side Delts","n":"","reps":"15-20","tempo":"3100","wk":[{"rir":"3-4","sets":"3"},{"rir":"3","sets":"3"},{"rir":"2","sets":"4"},{"rir":"1","sets":"4"},{"rir":"1-0","sets":"4"},{"rir":"5","sets":"2"}]}]},{"name":"Rest / Cardio","rest":true,"ex":[]},{"name":"Full Rest","rest":true,"ex":[]}],"deload_note":"1/2 last week"};
 const EX_CATS = Object.keys(EX_LIB);
+// Exercises added with "Custom…" are saved to the library for every client (tg_settings 'ex_custom').
+let EX_CUSTOM = null;
+async function loadExCustom(){
+  if(EX_CUSTOM) return false;
+  try { EX_CUSTOM = (await api('/clients?action=exlib')).lib || {}; } catch(e){ EX_CUSTOM = {}; return false; }
+  Object.keys(EX_CUSTOM).forEach(cat => (EX_CUSTOM[cat] || []).forEach(([n, v]) => {
+    EX_LIB[cat] = EX_LIB[cat] || [];
+    if(!EX_LIB[cat].some(([x]) => x === n)) EX_LIB[cat].push([n, v || '', 'custom']);
+  }));
+  return true;
+}
+async function addToLibrary(cat, n, v){
+  await loadExCustom();
+  EX_CUSTOM[cat] = EX_CUSTOM[cat] || [];
+  if(!EX_CUSTOM[cat].some(([x]) => x === n)) EX_CUSTOM[cat].push([n, v || '']);
+  EX_LIB[cat] = EX_LIB[cat] || [];
+  if(!EX_LIB[cat].some(([x]) => x === n)) EX_LIB[cat].push([n, v || '', 'custom']);
+  try { await api('/clients', { method:'POST', body: JSON.stringify({ action:'exlib_save', lib: EX_CUSTOM }) }); toast(`“${n}” added to ${cat}`); }
+  catch(e){ alert('Saved on this program, but could not add it to the library: ' + e.message); }
+}
 /* The whole mesocycle as one sheet, coloured like the training spreadsheet:
    black day headers, grey exercise columns, each week in its own colour
    (light yellow → yellow → orange → dark red → red, deload green), green rest rows. */
@@ -1707,36 +1763,76 @@ function mesoSetsOf(d, i){
   return String(d['e' + i + 'r'] || '').split(',').map(x => x.trim()).filter(Boolean).map(r => ({ w: d['e' + i + 'w'] || '', r }));
 }
 // logFor(w, d) → that session's data or null; escFn escapes; nowWeek highlights the current week.
+// "205 × 10/8/6" when the weight holds; "190×8 · 175×9" when it changes.
+function compactSets(sets){
+  const s = (sets || []).filter(Boolean).filter(x => x.w || x.r);
+  if(!s.length) return '';
+  const ws = s.map(x => x.w || '');
+  if(ws.every(w => w && w === ws[0])) return `${ws[0]} × ${s.map(x => x.r || '—').join('/')}`;
+  return s.map(x => x.w && x.r ? `${x.w}×${x.r}` : (x.r || x.w)).join(' · ');
+}
+// Library categories → the muscle groups volume is counted by.
+const MUSCLE_OF = { 'Horizontal Press':'Chest', 'Incline Press':'Chest', 'Horizontal Pull':'Back', 'Vertical Pull':'Back',
+  'Side Delts':'Side Delts', 'Rear Delts':'Rear Delts', 'Triceps':'Triceps', 'Biceps':'Biceps', 'Quad':'Quads',
+  'Hamstrings':'Hamstrings', 'Hip Hinge':'Hamstrings', 'Glutes':'Glutes', 'Calves':'Calves', 'Abs':'Abs', 'Forearms':'Forearms' };
+const MUSCLE_ORDER = ['Chest','Back','Side Delts','Rear Delts','Triceps','Biceps','Quads','Hamstrings','Glutes','Calves','Abs','Forearms'];
+// Sets per muscle group per week: prescribed, and what he logged (sets with reps written down).
+function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
+  const W = (tp.weeks || []).length, pres = {}, done = {};
+  (tp.days || []).forEach((day, di) => {
+    if(day.rest) return;
+    (tp.weeks || []).forEach((_, wi) => {
+      const l = logFor(wi, di);
+      (day.ex || []).forEach((e, i) => {
+        const g = MUSCLE_OF[e.cat] || e.cat || 'Other';
+        pres[g] = pres[g] || Array(W).fill(0); done[g] = done[g] || Array(W).fill(null);
+        pres[g][wi] += Number(((e.wk || [])[wi] || {}).sets) || 0;
+        if(l){ const n = l['e' + i + 'n'] === (e.n || e.cat) ? mesoSetsOf(l, i).filter(x => x && x.r).length : 0;
+          done[g][wi] = (done[g][wi] || 0) + n; }
+      });
+    });
+  });
+  const groups = MUSCLE_ORDER.filter(g => pres[g]).concat(Object.keys(pres).filter(g => !MUSCLE_ORDER.includes(g)));
+  if(!groups.length) return '';
+  const tot = wi => groups.reduce((a, g) => a + pres[g][wi], 0);
+  return `<div class="mvwrap"><table class="mv">
+    <thead><tr><th>Sets per muscle group</th>${(tp.weeks || []).map((w, i) => { const c = mesoWeekColor(tp, i);
+      return `<th style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th>`; }).join('')}</tr></thead>
+    <tbody>${groups.map(g => `<tr><td>${escFn(g)}</td>${pres[g].map((p, wi) => { const d = done[g][wi];
+        return `<td>${p}${d != null ? `<small class="${d >= p ? 'ok' : 'low'}"> · ${d} done</small>` : ''}</td>`; }).join('')}</tr>`).join('')}
+      <tr class="tot"><td>Total</td>${(tp.weeks || []).map((_, wi) => `<td>${tot(wi)}</td>`).join('')}</tr></tbody></table></div>`;
+}
 function mesoGridHtml(tp, logFor, escFn, nowWeek){
   const W = (tp.weeks || []).length, cols = 4;   // per week: RIR · Sets · Results · Notes
+  const span = 3 + W * (cols + 1);
   const wkHead = (tp.weeks || []).map((w, i) => { const c = mesoWeekColor(tp, i);
-    return `<th colspan="${cols}" class="mgw${i === nowWeek ? ' now' : ''}" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
-  const colHead = (tp.weeks || []).map(() => `<th class="mgh">RIR</th><th class="mgh">Sets</th><th class="mgh mgres">Weight × Reps</th><th class="mgh">Notes</th><th class="mgsp"></th>`).join('');
+    return `<th colspan="${cols}" class="mgw" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
+  const colHead = (tp.weeks || []).map(() => `<td class="c">RIR</td><td class="c">Sets</td><td>Weight × Reps</td><td>Notes</td><td class="mgsp"></td>`).join('');
+  const cut = (txt, cls) => `<td class="${cls || ''}" title="${escFn(txt)}"><div class="cl">${escFn(txt)}</div></td>`;
   const body = (tp.days || []).map((day, di) => {
-    if(day.rest) return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="${3 + W * (cols + 1)}">${escFn(day.name)}</td></tr><tr class="mggap"><td colspan="${3 + W * (cols + 1)}"></td></tr>`;
+    if(day.rest) return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="${span}">${escFn(day.name)}</td></tr>`;
     const logs = (tp.weeks || []).map((_, wi) => logFor(wi, di));
-    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) => { const l = logs[wi];
-      const col = mesoWeekColor(tp, wi);
-      return `<td colspan="${cols}" class="mgsess" style="background:${col.bg};color:${col.fg}"><b>${escFn((tp.weeks[wi] || {}).label || '')}</b>${l ? ` <span>✓ ${[l.sf && 'Fatigue: ' + escFn(l.sf), l.sp && 'Pump: ' + escFn(l.sp)].filter(Boolean).join(' · ') || 'logged'}</span>` : ''}</td><td class="mgsp"></td>`; }).join('')}</tr>`;
+    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
+      const info = l ? '✓ ' + ([l.sf, l.sp].filter(Boolean).join(' · ') || 'logged') : '';
+      return `<td colspan="${cols}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((tp.weeks[wi] || {}).label || '')}</b> ${escFn(info)}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
     const notes = (tp.weeks || []).some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
-      `<td colspan="${cols}">${escFn((day.notes || [])[wi] || '')}</td><td class="mgsp"></td>`).join('')}</tr>` : '';
+      `<td colspan="${cols}" title="${escFn((day.notes || [])[wi] || '')}"><div class="cl">${escFn((day.notes || [])[wi] || '')}</div></td><td class="mgsp"></td>`).join('')}</tr>` : '';
     const rows = (day.ex || []).map((e, i) => { const name = e.n || e.cat;
-      return `<tr><td class="mgex">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</td>
-<td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
+      return `<tr><td class="mgex" title="${escFn(name)}"><div class="cl">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</div></td>
+        <td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
         ${(tp.weeks || []).map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
-          const sets = l && l['e' + i + 'n'] === name ? mesoSetsOf(l, i).filter(Boolean) : [];
+          const mine = l && l['e' + i + 'n'] === name;
           return `<td class="c">${escFn(w.rir ?? '')}</td><td class="c">${escFn(w.sets ?? '')}</td>
-            <td class="mgres">${sets.map(x => escFn(x.w && x.r ? x.w + '×' + x.r : (x.r || x.w))).join(' · ')}</td>
-            <td class="mgnote">${escFn(l && l['e' + i + 'n'] === name ? l['e' + i + 'x'] || '' : '')}</td><td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
+            ${cut(mine ? compactSets(mesoSetsOf(l, i)) : '', 'mgres')}${cut(mine ? l['e' + i + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
     const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
       `<td colspan="${cols}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
-    return head + notes + `<tr class="mgcols"><td>Exercise</td><td>Reps</td><td>Tempo</td>${colHead.replace(/<th/g, '<td').replace(/<\/th>/g, '</td>')}</tr>` + rows + vol + `<tr class="mggap"><td colspan="${3 + W * (cols + 1)}"></td></tr>`;
+    return head + notes + `<tr class="mgcols"><td>Exercise</td><td class="c">Reps</td><td class="c">Tempo</td>${colHead}</tr>` + rows + vol;
   }).join('');
   const total = (tp.weeks || []).map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
   return `<div class="mgwrap"><table class="mg">
-    <thead>${tp.progression ? `<tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th><th colspan="${W * (cols + 1)}" class="mgprog">PROGRESSION: ${escFn(tp.progression)}</th></tr>` : ''}
-      <tr><th class="mgtitle"></th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
-    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map(v => `<td colspan="${cols}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>`;
+    <thead><tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
+    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map(v => `<td colspan="${cols}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
+    ${tp.progression ? `<p class="mgprogline">PROGRESSION: ${escFn(tp.progression)}</p>` : ''}`;
 }
 
 
@@ -1751,6 +1847,7 @@ async function drawMesoFull(c, b){
   const logFor = (wi, di) => { const l = logs.find(x => x.day === tAdd(start, wi * 7 + di)); return l && l.data.w === wi && l.data.d === di ? l.data : null; };
   b.innerHTML = `<div class="mseg"><button id="msWeek">Week view</button><button class="on">Full plan</button><button id="msEdit">Edit plan</button></div>
     ${mesoGridHtml(tp, logFor, esc, nowIdx)}
+    ${mesoVolumeHtml(tp, logFor, esc, nowIdx)}
     <p class="hint" style="margin-top:8px">Every week side by side, coloured like the training sheet. His results fill in as he logs; ▶ opens the video.</p>`;
   $('#msWeek').onclick = () => { MESO_MODE = 'week'; drawTraining(c, b); };
   $('#msEdit').onclick = () => { MESO_MODE = 'edit'; drawTraining(c, b); };
@@ -1797,24 +1894,27 @@ async function drawMesoWeek(c, b){
           <span class="hint">${lg ? `✓ logged${lg.sf ? ' · Fatigue: <b>' + esc(lg.sf) + '</b>' : ''}${lg.sp ? ' · Pump: <b>' + esc(lg.sp) + '</b>' : ''}` : 'not logged yet'}</span></div>
         ${note ? `<p class="hint" style="margin:0 0 8px">Coach's Notes: <b style="color:var(--fg)">${esc(note)}</b></p>` : ''}
         <div style="overflow-x:auto"><table class="mweek">
-          <thead><tr><th>Exercise</th><th>Reps</th><th>Tempo</th><th>RIR</th><th>Sets</th><th>Weight × Reps (each set)</th><th>Last session</th><th>Notes</th></tr></thead>
+          <thead><tr><th>Exercise</th><th class="c">Reps</th><th class="c">Tempo</th><th class="c">RIR</th><th class="c">Sets</th><th>Weight × Reps</th><th>Last session</th><th>Notes</th></tr></thead>
           <tbody>${(day.ex || []).map((e, i) => { const w = (e.wk || [])[wi] || {}, name = e.n || e.cat;
             const mine = lg && lg['e' + i + 'n'] === name ? mSetsOf(lg, i) : [];
             const last = lastFor(name, slot(di));
-            return `<tr><td>${e.v ? `<a href="${esc(e.v)}" target="_blank" rel="noopener">${esc(name)} ↗</a>` : esc(name)}</td>
-              <td>${esc(e.reps || '')}</td><td>${esc(e.tempo || '')}</td><td>${esc(w.rir ?? '')}</td><td>${esc(w.sets ?? '')}</td>
-              <td class="sets">${mine.filter(Boolean).map((x, j) => `<span class="sc"><i>${j + 1}</i>${esc(x.w || '—')} × ${esc(x.r || '—')}</span>`).join('') || '<span class="csub">—</span>'}</td>
-              <td class="csub">${last ? `${esc(mPerf(last.sets))}<br>${fmtDate(last.day)}` : '—'}</td>
-              <td class="nt">${esc(lg && lg['e' + i + 'n'] === name ? lg['e' + i + 'x'] || '' : '')}</td></tr>`; }).join('')}</tbody></table></div>
+            const res = compactSets(mine), lastTxt = last ? compactSets(last.sets) : '', nt = lg && lg['e' + i + 'n'] === name ? lg['e' + i + 'x'] || '' : '';
+            return `<tr><td title="${esc(name)}"><div class="cl">${e.v ? `<a href="${esc(e.v)}" target="_blank" rel="noopener">${esc(name)} ↗</a>` : esc(name)}</div></td>
+              <td class="c">${esc(e.reps || '')}</td><td class="c">${esc(e.tempo || '')}</td><td class="c">${esc(w.rir ?? '')}</td><td class="c">${esc(w.sets ?? '')}</td>
+              <td class="res" title="${esc(res)}"><div class="cl">${res ? esc(res) : '<span class="csub">—</span>'}</div></td>
+              <td class="csub" title="${esc(lastTxt)}"><div class="cl">${last ? `${esc(lastTxt)} <span>· ${fmtDate(last.day)}</span>` : '—'}</div></td>
+              <td class="nt" title="${esc(nt)}"><div class="cl">${esc(nt)}</div></td></tr>`; }).join('')}</tbody></table></div>
         ${lg && lg.notes ? `<p class="hint" style="margin:8px 0 0">Session notes: <b style="color:var(--fg)">${esc(lg.notes)}</b></p>` : ''}
       </div>`;
-    }).join('')}`;
+    }).join('')}
+    ${mesoVolumeHtml(tp, (w, d) => { const l = logs.find(x => x.day === tAdd(start, w * 7 + d)); return l && l.data.w === w && l.data.d === d ? l.data : null; }, esc, nowIdx)}`;
   $$('#pBody [data-mw]').forEach(btn => btn.onclick = () => { MW = +btn.dataset.mw; drawMesoWeek(c, b); });
   $('#msEdit').onclick = () => { MESO_MODE = 'edit'; drawTraining(c, b); };
   $('#msFull').onclick = () => { MESO_MODE = 'full'; drawTraining(c, b); };
 }
 
 function drawMeso(c, b){
+  if(!EX_CUSTOM){ loadExCustom().then(() => { if(OPEN === c && TAB === 'training' && MESO_MODE === 'edit') drawMeso(c, b); }); }
   const tp = c.sections.training_plan;
   tp.weeks = tp.weeks || []; tp.days = tp.days || [];
   const nW = tp.weeks.length;
@@ -1824,8 +1924,8 @@ function drawMeso(c, b){
   const exOpts = e => {
     const list = EX_LIB[e.cat] || [];
     const known = list.some(([n]) => n === e.n);
-    return `<option value="">— pick ${esc(e.cat || 'exercise')} —</option>` + list.map(([n]) => `<option ${n === e.n ? 'selected' : ''}>${esc(n)}</option>`).join('') +
-      (e.n && !known ? `<option selected>${esc(e.n)}</option>` : '') + '<option value="__custom">Custom…</option>';
+    return `<option value="">— pick ${esc(e.cat || 'exercise')} —</option>` + list.map(([n, , tag]) => `<option value="${esc(n)}" ${n === e.n ? 'selected' : ''}>${esc(n)}${tag ? ' ★' : ''}</option>`).join('') +
+      (e.n && !known ? `<option selected>${esc(e.n)}</option>` : '') + '<option value="__custom">+ New exercise…</option>';
   };
   b.innerHTML = `
     <div class="mseg"><button id="msWeek">Week view</button><button id="msFull">Full plan</button><button class="on">Edit plan</button></div>
@@ -1866,6 +1966,7 @@ function drawMeso(c, b){
     <div class="sect">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn sm" id="msAddD">+ Day</button>
         <span class="hint">Volume (total sets): ${tp.weeks.map((w, wi) => `${esc(w.label)} <b>${vol(wi)}</b>`).join(' · ')}</span></div>
+      ${mesoVolumeHtml(tp, () => null, esc, nowIdx)}
     </div>
     <div style="display:flex;justify-content:space-between"><span class="hint">Edits are kept as you type. Hit Save to publish them to his page.</span>
       <button class="btn sm danger" id="tpRemove">Remove program</button></div>`;
@@ -1890,9 +1991,10 @@ function drawMeso(c, b){
   $$('#pBody [data-en]').forEach(i => i.onchange = () => {
     const e = ex(i.dataset.en);
     if(i.value === '__custom'){
-      const n = prompt('Exercise name:', e.n || ''); if(!n || !n.trim()){ redraw(); return; }
-      const v = prompt('Video link (optional):', e.v || '') || '';
+      const n = prompt(`New ${e.cat} exercise — name:`, ''); if(!n || !n.trim()){ redraw(); return; }
+      const v = prompt('Video link (optional, YouTube plays in the pop-up):', '') || '';
       e.n = n.trim(); e.v = v.trim();
+      addToLibrary(e.cat, e.n, e.v);
     } else { e.n = i.value; e.v = ((EX_LIB[e.cat] || []).find(([n]) => n === i.value) || [])[1] || ''; }
     redraw();
   });

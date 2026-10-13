@@ -264,6 +264,34 @@
     table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{min-width:128px;max-width:140px}
     table.mg th,table.mg td{padding:5px 6px}
   }
+  /* one line per row — long text is cut with … (hover for the full text) */
+  table.mg th,table.mg td{white-space:nowrap;line-height:1.3;padding:6px 8px}
+  table.mg .cl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  table.mg tbody tr:not(.mgrest) td:first-child,table.mg .mgtitle{min-width:200px;max-width:200px;width:200px}
+  table.mg tbody tr:not(.mgrest) td:first-child .cl{max-width:184px}
+  table.mg td.mgres .cl{width:150px}
+  table.mg td.mgnote .cl{width:110px;color:#444}
+  table.mg td.mgsess .cl,table.mg tr.mgcn td .cl{max-width:330px}
+  table.mg tr.mgcn td{white-space:nowrap}
+  table.mg tr.mgrest td{padding:5px 10px}
+  table.mg tr.mgcols td{padding:4px 8px}
+  .mgprogline{font-size:11.5px;font-weight:700;letter-spacing:.04em;color:#555;margin:8px 2px 0}
+  .mvwrap{overflow-x:auto;margin-top:14px}
+  table.mv{border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}
+  table.mv th,table.mv td{padding:6px 12px;white-space:nowrap;border-bottom:1px solid #eee;text-align:center}
+  table.mv th:first-child,table.mv td:first-child{text-align:left;font-weight:700;background:#cccccc}
+  table.mv th:first-child{background:#000;color:#fff}
+  table.mv small{font-size:11px}
+  table.mv small.ok{color:#2e7d32}
+  table.mv small.low{color:#b26a00}
+  table.mv tr.tot td{font-weight:800;background:#f3f3f3}
+  @media(max-width:520px){
+    table.mg tbody tr:not(.mgrest) td:first-child,table.mg .mgtitle{min-width:140px;max-width:140px;width:140px}
+    table.mg tbody tr:not(.mgrest) td:first-child .cl{max-width:126px}
+    table.mg td.mgres .cl{width:120px}
+    table.mg td.mgnote .cl{width:80px}
+  }
+
   table.mg tr.mgday td.mgsp{background:#f3f3f3}
   table.mg tr.mgcols td{background:#d9d9d9;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
   table.mg tr.mgcols td.mgsp{background:#f3f3f3}
@@ -463,7 +491,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-14T04:30Z';
+const BUILD = '2026-10-14T06:30Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1609,36 +1637,76 @@ function mesoSetsOf(d, i){
   return String(d['e' + i + 'r'] || '').split(',').map(x => x.trim()).filter(Boolean).map(r => ({ w: d['e' + i + 'w'] || '', r }));
 }
 // logFor(w, d) → that session's data or null; escFn escapes; nowWeek highlights the current week.
+// "205 × 10/8/6" when the weight holds; "190×8 · 175×9" when it changes.
+function compactSets(sets){
+  const s = (sets || []).filter(Boolean).filter(x => x.w || x.r);
+  if(!s.length) return '';
+  const ws = s.map(x => x.w || '');
+  if(ws.every(w => w && w === ws[0])) return `${ws[0]} × ${s.map(x => x.r || '—').join('/')}`;
+  return s.map(x => x.w && x.r ? `${x.w}×${x.r}` : (x.r || x.w)).join(' · ');
+}
+// Library categories → the muscle groups volume is counted by.
+const MUSCLE_OF = { 'Horizontal Press':'Chest', 'Incline Press':'Chest', 'Horizontal Pull':'Back', 'Vertical Pull':'Back',
+  'Side Delts':'Side Delts', 'Rear Delts':'Rear Delts', 'Triceps':'Triceps', 'Biceps':'Biceps', 'Quad':'Quads',
+  'Hamstrings':'Hamstrings', 'Hip Hinge':'Hamstrings', 'Glutes':'Glutes', 'Calves':'Calves', 'Abs':'Abs', 'Forearms':'Forearms' };
+const MUSCLE_ORDER = ['Chest','Back','Side Delts','Rear Delts','Triceps','Biceps','Quads','Hamstrings','Glutes','Calves','Abs','Forearms'];
+// Sets per muscle group per week: prescribed, and what he logged (sets with reps written down).
+function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
+  const W = (tp.weeks || []).length, pres = {}, done = {};
+  (tp.days || []).forEach((day, di) => {
+    if(day.rest) return;
+    (tp.weeks || []).forEach((_, wi) => {
+      const l = logFor(wi, di);
+      (day.ex || []).forEach((e, i) => {
+        const g = MUSCLE_OF[e.cat] || e.cat || 'Other';
+        pres[g] = pres[g] || Array(W).fill(0); done[g] = done[g] || Array(W).fill(null);
+        pres[g][wi] += Number(((e.wk || [])[wi] || {}).sets) || 0;
+        if(l){ const n = l['e' + i + 'n'] === (e.n || e.cat) ? mesoSetsOf(l, i).filter(x => x && x.r).length : 0;
+          done[g][wi] = (done[g][wi] || 0) + n; }
+      });
+    });
+  });
+  const groups = MUSCLE_ORDER.filter(g => pres[g]).concat(Object.keys(pres).filter(g => !MUSCLE_ORDER.includes(g)));
+  if(!groups.length) return '';
+  const tot = wi => groups.reduce((a, g) => a + pres[g][wi], 0);
+  return `<div class="mvwrap"><table class="mv">
+    <thead><tr><th>Sets per muscle group</th>${(tp.weeks || []).map((w, i) => { const c = mesoWeekColor(tp, i);
+      return `<th style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th>`; }).join('')}</tr></thead>
+    <tbody>${groups.map(g => `<tr><td>${escFn(g)}</td>${pres[g].map((p, wi) => { const d = done[g][wi];
+        return `<td>${p}${d != null ? `<small class="${d >= p ? 'ok' : 'low'}"> · ${d} done</small>` : ''}</td>`; }).join('')}</tr>`).join('')}
+      <tr class="tot"><td>Total</td>${(tp.weeks || []).map((_, wi) => `<td>${tot(wi)}</td>`).join('')}</tr></tbody></table></div>`;
+}
 function mesoGridHtml(tp, logFor, escFn, nowWeek){
   const W = (tp.weeks || []).length, cols = 4;   // per week: RIR · Sets · Results · Notes
+  const span = 3 + W * (cols + 1);
   const wkHead = (tp.weeks || []).map((w, i) => { const c = mesoWeekColor(tp, i);
-    return `<th colspan="${cols}" class="mgw${i === nowWeek ? ' now' : ''}" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
-  const colHead = (tp.weeks || []).map(() => `<th class="mgh">RIR</th><th class="mgh">Sets</th><th class="mgh mgres">Weight × Reps</th><th class="mgh">Notes</th><th class="mgsp"></th>`).join('');
+    return `<th colspan="${cols}" class="mgw" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
+  const colHead = (tp.weeks || []).map(() => `<td class="c">RIR</td><td class="c">Sets</td><td>Weight × Reps</td><td>Notes</td><td class="mgsp"></td>`).join('');
+  const cut = (txt, cls) => `<td class="${cls || ''}" title="${escFn(txt)}"><div class="cl">${escFn(txt)}</div></td>`;
   const body = (tp.days || []).map((day, di) => {
-    if(day.rest) return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="${3 + W * (cols + 1)}">${escFn(day.name)}</td></tr><tr class="mggap"><td colspan="${3 + W * (cols + 1)}"></td></tr>`;
+    if(day.rest) return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="${span}">${escFn(day.name)}</td></tr>`;
     const logs = (tp.weeks || []).map((_, wi) => logFor(wi, di));
-    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) => { const l = logs[wi];
-      const col = mesoWeekColor(tp, wi);
-      return `<td colspan="${cols}" class="mgsess" style="background:${col.bg};color:${col.fg}"><b>${escFn((tp.weeks[wi] || {}).label || '')}</b>${l ? ` <span>✓ ${[l.sf && 'Fatigue: ' + escFn(l.sf), l.sp && 'Pump: ' + escFn(l.sp)].filter(Boolean).join(' · ') || 'logged'}</span>` : ''}</td><td class="mgsp"></td>`; }).join('')}</tr>`;
+    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
+      const info = l ? '✓ ' + ([l.sf, l.sp].filter(Boolean).join(' · ') || 'logged') : '';
+      return `<td colspan="${cols}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((tp.weeks[wi] || {}).label || '')}</b> ${escFn(info)}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
     const notes = (tp.weeks || []).some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
-      `<td colspan="${cols}">${escFn((day.notes || [])[wi] || '')}</td><td class="mgsp"></td>`).join('')}</tr>` : '';
+      `<td colspan="${cols}" title="${escFn((day.notes || [])[wi] || '')}"><div class="cl">${escFn((day.notes || [])[wi] || '')}</div></td><td class="mgsp"></td>`).join('')}</tr>` : '';
     const rows = (day.ex || []).map((e, i) => { const name = e.n || e.cat;
-      return `<tr><td class="mgex">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</td>
-<td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
+      return `<tr><td class="mgex" title="${escFn(name)}"><div class="cl">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</div></td>
+        <td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
         ${(tp.weeks || []).map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
-          const sets = l && l['e' + i + 'n'] === name ? mesoSetsOf(l, i).filter(Boolean) : [];
+          const mine = l && l['e' + i + 'n'] === name;
           return `<td class="c">${escFn(w.rir ?? '')}</td><td class="c">${escFn(w.sets ?? '')}</td>
-            <td class="mgres">${sets.map(x => escFn(x.w && x.r ? x.w + '×' + x.r : (x.r || x.w))).join(' · ')}</td>
-            <td class="mgnote">${escFn(l && l['e' + i + 'n'] === name ? l['e' + i + 'x'] || '' : '')}</td><td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
+            ${cut(mine ? compactSets(mesoSetsOf(l, i)) : '', 'mgres')}${cut(mine ? l['e' + i + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
     const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
       `<td colspan="${cols}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
-    return head + notes + `<tr class="mgcols"><td>Exercise</td><td>Reps</td><td>Tempo</td>${colHead.replace(/<th/g, '<td').replace(/<\/th>/g, '</td>')}</tr>` + rows + vol + `<tr class="mggap"><td colspan="${3 + W * (cols + 1)}"></td></tr>`;
+    return head + notes + `<tr class="mgcols"><td>Exercise</td><td class="c">Reps</td><td class="c">Tempo</td>${colHead}</tr>` + rows + vol;
   }).join('');
   const total = (tp.weeks || []).map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
   return `<div class="mgwrap"><table class="mg">
-    <thead>${tp.progression ? `<tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th><th colspan="${W * (cols + 1)}" class="mgprog">PROGRESSION: ${escFn(tp.progression)}</th></tr>` : ''}
-      <tr><th class="mgtitle"></th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
-    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map(v => `<td colspan="${cols}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>`;
+    <thead><tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
+    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map(v => `<td colspan="${cols}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
+    ${tp.progression ? `<p class="mgprogline">PROGRESSION: ${escFn(tp.progression)}</p>` : ''}`;
 }
 
 
@@ -1647,6 +1715,7 @@ function openMesoFull(){
   showSection(`<div class="seg"><button id="segWk">This week</button><button class="on">Full plan</button></div>
     <h1>${esc(tp.name || t('tile_training'))}</h1>
     ${mesoGridHtml(tp, (w, d) => { const l = mesoLog(tp, w, d); return l ? l.data || l : null; }, esc, trainingWeekIndex(tp))}
+    ${mesoVolumeHtml(tp, (w, d) => { const l = mesoLog(tp, w, d); return l ? l.data || l : null; }, esc, trainingWeekIndex(tp))}
     <p class="updated">Swipe sideways to see every week. Tap ▶ for the video.</p>`);
   $('#segWk').onclick = () => openMeso();
 }
@@ -1706,7 +1775,7 @@ function lastPerf(name, before){
   return null;
 }
 const lastSession = before => LOGS.filter(l => l.kind === 'training' && l.data.m && l.day < before).sort((a, b) => a.day < b.day ? 1 : -1)[0] || null;
-const perfTxt = p => (p.sets || []).filter(Boolean).map(x => x.w && x.r ? `${x.w}×${x.r}` : (x.r || x.w)).join(' · ');
+const perfTxt = p => compactSets(p.sets);
 function openMeso(wi){
   const tp = secs().training_plan;
   if(wi == null) wi = trainingWeekIndex(tp);
