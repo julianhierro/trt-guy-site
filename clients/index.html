@@ -272,7 +272,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-13T21:00Z';
+const BUILD = '2026-10-13T22:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1330,6 +1330,10 @@ async function drawTracking(c, b){
       <div class="shead" style="margin-top:12px"><h3 style="font-size:13.5px">Skin folds in his weekly check-in</h3>
         <label class="sw"><input type="checkbox" id="trk_sf" ${tr.skinfolds ? 'checked' : ''}><span class="track"></span>Ask</label></div>
       <p class="hint">The nine sites from the sheet, with its measuring instructions. Only worth it if someone with calipers measures him.</p>
+      <div class="shead" style="margin-top:12px"><h3 style="font-size:13.5px">Check-in day</h3>
+        <select id="trk_cday" style="width:auto">${['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map((d, i) =>
+          `<option value="${i}" ${(tr.checkin_day ?? 6) === i ? 'selected' : ''}>${d}</option>`).join('')}</select></div>
+      <p class="hint">His Weekly check-in stays greyed out until this day each week. Earlier weeks stay open if he's late.</p>
     </div>
     <div id="trkBody"><p class="hint">Loading logs…</p></div>`;
   try { await ensureLogs(c); }
@@ -1840,7 +1844,7 @@ function collect(){
     c.sections = sec;
   }
   if(TAB === 'tracking' && $('#trk_on')){
-    c.sections = Object.assign({}, c.sections || {}, { tracker: { on: $('#trk_on').checked, skinfolds: $('#trk_sf').checked } });
+    c.sections = Object.assign({}, c.sections || {}, { tracker: { on: $('#trk_on').checked, skinfolds: $('#trk_sf').checked, checkin_day: Number($('#trk_cday').value) } });
   }
 }
 function upsertLocal(cl){

@@ -231,6 +231,8 @@
   .hist.wv tr.avg td{border-top:2px solid var(--line-2);font-weight:700}
   .hist.wv tr.tg td{color:var(--mut)}
   .links{display:flex;gap:18px}
+  .btn.locked,.btn:disabled.locked{background:var(--bg-2);color:#9aa3ae;border:1px dashed var(--line-2);cursor:not-allowed}
+  .btn.locked:hover{background:var(--bg-2)}
   .nclamp{white-space:pre-wrap;text-align:left;font-size:12px;line-height:1.4;width:170px;display:-webkit-box;-webkit-line-clamp:3;
     -webkit-box-orient:vertical;overflow:hidden;cursor:pointer;font-weight:400}
   .nclamp.open{display:block;-webkit-line-clamp:unset}
@@ -380,7 +382,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-13T21:00Z';
+const BUILD = '2026-10-13T22:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -449,6 +451,7 @@ const DEFAULT_COPY = {
   trk_log_edit: "Edit today's log",
   trk_weekly_btn: 'Weekly check-in',
   trk_weekly_done: 'Weekly check-in ✓',
+  trk_weekly_locked: 'Weekly check-in · opens {day}',
   trk_history: 'See past weeks',
   trk_daily_title: 'Daily Check In',
   trk_weekly_title: 'Weekly Check In',
@@ -999,6 +1002,21 @@ async function tickDose(day, key, on){
   await putLog('daily', day, cur);
 }
 
+// The weekly check-in opens on his check-in day (set in the manager; Sunday if not set).
+const CDAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const checkinDay = () => { const v = (secs().tracker || {}).checkin_day; return v == null || isNaN(Number(v)) ? 6 : Number(v); };
+function weeklyOpen(mon){
+  const thisMon = mondayOf(todayIso());
+  if(mon < thisMon) return true;
+  if(mon > thisMon) return false;
+  return (dOf(todayIso()).getDay() + 6) % 7 >= checkinDay();
+}
+function weeklyBtn(id, mon, extra){
+  const done = !!logOf('weekly', mon), open = done || weeklyOpen(mon);
+  const label = done ? t('trk_weekly_done') : open ? t('trk_weekly_btn') : t('trk_weekly_locked', { day: CDAYS[checkinDay()].slice(0, 3) });
+  return `<button class="btn ghost ${open ? '' : 'locked'}" id="${id}" ${open ? '' : 'disabled'} ${extra || ''}>${esc(label)}</button>`;
+}
+
 function renderWeek(){
   const today = todayIso(), mon = mondayOf(today);
   const st = weekStats(mon), last = weekStats(addDays(mon, -7)), tg = targetFor(mon);
@@ -1054,7 +1072,7 @@ function renderWeek(){
       <button class="btn" id="wLog" data-copy="trk_dailyview">${esc(t('trk_dailyview'))}</button>
       <button class="btn" id="wView" data-copy="trk_weekview">${esc(t('trk_weekview'))}</button>
     </div>
-    <button class="btn ghost" id="wWeekly" data-copy="${doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'}" style="margin-top:8px">${esc(t(doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
+    ${weeklyBtn('wWeekly', mon, 'style="margin-top:8px"')}
     <div class="links"><button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button></div>`;
   document.querySelectorAll('#aWeek .days button').forEach(b => b.onclick = () => openDaily(b.dataset.day));
   document.querySelectorAll('#aWeek [data-dk]').forEach(cb => cb.onchange = async () => {
@@ -1190,7 +1208,8 @@ function openWeekly(mon, ret){
         ${SKINFOLDS.map(([, l, h]) => `<p><b>${esc(l)}:</b> ${esc(h)}</p>`).join('')}</details>
       <div class="fgrid">${SKINFOLDS.map(([k, l]) => numIn(k, l)).join('')}</div>
       <p class="sub" id="sfTotal" style="margin-top:10px"></p>` : ''}
-    <button class="btn" id="wSave" data-copy="trk_submit" style="margin-top:22px">${esc(t('trk_submit'))}</button>
+    ${weeklyOpen(mon) || logOf('weekly', mon) ? `<button class="btn" id="wSave" data-copy="trk_submit" style="margin-top:22px">${esc(t('trk_submit'))}</button>`
+      : `<button class="btn locked" id="wSave" disabled style="margin-top:22px">${esc(t('trk_weekly_locked', { day: CDAYS[checkinDay()] }))}</button>`}
     <p class="saved" id="wMsg"></p>`);
   const keepDraft = () => { try { localStorage.setItem(draftKey, JSON.stringify(d)); } catch(e){} };
   const sfT = () => { const el = $('#sfTotal'); if(el){ const v = skinTotal(d); el.textContent = v == null ? '' : 'Total: ' + nf(v, 1) + ' mm'; } };
@@ -1333,7 +1352,7 @@ function openWeekView(mon){
       ${files.map(f => `<a href="${esc(f.u)}" target="_blank" rel="noopener">${f.t === 'photo' ? '🖼' : '📄'} ${esc(f.n)}</a>`).join('')}
       ${wk ? PICS.filter(([k]) => wk[k]).map(([k, l]) => `<a href="${esc(wk[k])}" target="_blank" rel="noopener">🖼 ${l}</a>`).join('') : ''}</div></div>` : ''}
     <div class="btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn ghost" id="vWeekly">${esc(t(wk ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
+      ${weeklyBtn('vWeekly', mon)}
       <button class="btn ghost" id="vLog">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
     </div>`);
   const back = () => openWeekView(mon);
