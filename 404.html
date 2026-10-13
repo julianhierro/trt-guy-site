@@ -231,6 +231,10 @@
   .hist.wv tr.avg td{border-top:2px solid var(--line-2);font-weight:700}
   .hist.wv tr.tg td{color:var(--mut)}
   .links{display:flex;gap:18px}
+  .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:11px;padding:3px;background:#fff;margin:0 0 14px}
+  .seg button{border:0;background:none;border-radius:8px;padding:8px 14px;font:600 13.5px Inter,sans-serif;color:var(--mut);cursor:pointer}
+  .seg button.on{background:var(--acc);color:#fff;cursor:default}
+  table.tl td a{text-decoration:none;font-size:15px}
   .wvq{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px 14px;margin-top:10px}
   .wvq span{display:block;font-size:11.5px;color:var(--mut)}
   .wvq b{font-size:14px;font-weight:600}
@@ -355,7 +359,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-13T15:00Z';
+const BUILD = '2026-10-13T17:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -438,7 +442,9 @@ const DEFAULT_COPY = {
   trk_pics_label: 'Progress pics',
   trk_skin_label: 'Skin folds (mm)',
   trk_train_log: 'Log this session',
-  trk_weekview: 'Week view',
+  trk_weekview: 'Weekly view',
+  trk_dailyview: 'Daily view',
+  tile_pharma: 'Pharmacology',            tile_pharma_sub: 'Your protocol, labs and photos week by week',
 };
 let C = Object.assign({}, DEFAULT_COPY);
 // t('week_txt', {n:2, total:8}) — {placeholders} are filled from the second argument.
@@ -646,6 +652,7 @@ function openApp(){
   if(trackerOn){
     const tk = [];
     tk.push(`<button class="tile" data-tk="timeline"><span class="t"><b data-copy="tile_timeline">${esc(t('tile_timeline'))}</b><span data-copy="tile_timeline_sub">${esc(t('tile_timeline_sub'))}</span></span><span class="go">›</span></button>`);
+    tk.push(`<button class="tile" data-tk="pharma"><span class="t"><b data-copy="tile_pharma">${esc(t('tile_pharma'))}</b><span data-copy="tile_pharma_sub">${esc(t('tile_pharma_sub'))}</span></span><span class="go">›</span></button>`);
     if(hasTrainingPlan()) tk.push(`<button class="tile" data-tk="training"><span class="t"><b data-copy="tile_training">${esc(t('tile_training'))}</b><span data-copy="tile_training_sub">${esc(t('tile_training_sub'))}</span></span><span class="go">›</span></button>`);
     activeProtocols().forEach(p => tk.push(`<button class="tile" data-tk="protocol" data-pid="${esc(p.id)}"><span class="t"><b>${esc(p.name || 'Protocol')}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span><span class="go">›</span></button>`));
     tiles.unshift(...tk);
@@ -659,6 +666,7 @@ function openApp(){
   document.querySelectorAll('#aTiles .tile[data-k]').forEach(b => b.onclick = () => openSection(b.dataset.k));
   document.querySelectorAll('#aTiles .tile[data-tk]').forEach(b => b.onclick = () => {
     if(b.dataset.tk === 'timeline') openTimeline();
+    else if(b.dataset.tk === 'pharma') openTimeline('pharma');
     else if(b.dataset.tk === 'training') openTraining();
     else openProtocol(b.dataset.pid);
   });
@@ -883,6 +891,7 @@ function tlCell(mon, k){
   const prev = LOGS.filter(l => l.kind === 'target' && l.day < mon && l.data[k] != null && l.data[k] !== '')
     .sort((a, b) => a.day < b.day ? 1 : -1)[0];
   if(!prev) return { v: null };
+  if(/^(off|stop|stopped)$/i.test(String(prev.data[k]).trim())) return { v: null, carried: true };
   if(k === 'cycle' && num(prev.data.cycle) != null) return { v: num(prev.data.cycle) + weeksBetween(prev.day, mon), carried: true };
   return { v: prev.data[k], carried: true };
 }
@@ -1021,11 +1030,11 @@ function renderWeek(){
     ${tg.note ? `<p class="sub" style="margin-top:12px;color:var(--txt);white-space:pre-wrap">${esc(tg.note)}</p>` : ''}
     ${doseHtml}
     <div class="btns">
-      <button class="btn" id="wLog" data-copy="${logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'}">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
-      <button class="btn ghost" id="wWeekly" data-copy="${doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'}">${esc(t(doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
+      <button class="btn" id="wLog" data-copy="trk_dailyview">${esc(t('trk_dailyview'))}</button>
+      <button class="btn" id="wView" data-copy="trk_weekview">${esc(t('trk_weekview'))}</button>
     </div>
-    <div class="links"><button class="linkbtn" id="wView" data-copy="trk_weekview">${esc(t('trk_weekview'))}</button>
-      <button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button></div>`;
+    <button class="btn ghost" id="wWeekly" data-copy="${doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'}" style="margin-top:8px">${esc(t(doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
+    <div class="links"><button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button></div>`;
   document.querySelectorAll('#aWeek .days button').forEach(b => b.onclick = () => openDaily(b.dataset.day));
   document.querySelectorAll('#aWeek [data-dk]').forEach(cb => cb.onchange = async () => {
     cb.disabled = true;
@@ -1065,6 +1074,7 @@ function openDaily(day, ret){
   const by = k => DAILY_FIELDS.find(f => f[0] === k);
   const doses = dosesOn(day);
   showSection(`
+    <div class="seg"><button class="on">${esc(t('trk_dailyview'))}</button><button id="segW">${esc(t('trk_weekview'))}</button></div>
     <h1 data-copy="trk_daily_title">${esc(t('trk_daily_title'))}</h1>
     <div class="dnav"><button id="dPrev" aria-label="Previous day">‹</button><b>${dayLabel(day)}</b>
       <button id="dNext" aria-label="Next day" ${day >= todayIso() ? 'disabled' : ''}>›</button></div>
@@ -1086,6 +1096,7 @@ function openDaily(day, ret){
     kc.placeholder = (p != null && c != null && f != null) ? String(Math.round((p + c) * 4 + f * 9)) : '';
   };
   ['#d_protein','#d_carbs','#d_fat'].forEach(id => $(id).addEventListener('input', autoK)); autoK();
+  $('#segW').onclick = () => openWeekView(mondayOf(day));
   $('#dPrev').onclick = () => openDaily(addDays(day, -1), ret);
   $('#dNext').onclick = () => openDaily(addDays(day, 1), ret);
   $('#dSave').onclick = async () => {
@@ -1231,6 +1242,7 @@ function openWeekView(mon){
   const wk = logOf('weekly', mon);
   const sessions = LOGS.filter(l => l.kind === 'training' && l.day >= mon && l.day <= addDays(mon, 6)).sort((a, b) => a.day < b.day ? -1 : 1);
   showSection(`
+    <div class="seg"><button id="segD">${esc(t('trk_dailyview'))}</button><button class="on">${esc(t('trk_weekview'))}</button></div>
     <h1 data-copy="trk_weekview">${esc(t('trk_weekview'))}</h1>
     <div class="dnav"><button id="vPrev" aria-label="Previous week">‹</button>
       <b>${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}</b>
@@ -1253,6 +1265,7 @@ function openWeekView(mon){
       ${sessions.map(l => `<p style="margin:8px 0 0;font-size:14px"><b>${dOf(l.day).toLocaleDateString('en-US', { weekday:'short' })}</b> · ${esc(l.data.day || 'Session')}</p>`).join('')}</div>` : ''}`);
   const back = () => openWeekView(mon);
   document.querySelectorAll('#aSection tr[data-day]').forEach(tr => tr.onclick = () => openDaily(tr.dataset.day, back));
+  $('#segD').onclick = () => openDaily(today < addDays(mon, 6) ? (today < mon ? mon : today) : addDays(mon, 6), back);
   $('#vPrev').onclick = () => openWeekView(addDays(mon, -7));
   $('#vNext').onclick = () => openWeekView(addDays(mon, 7));
   $('#vLog').onclick = () => openDaily(today, back);
@@ -1302,6 +1315,10 @@ function tlValue(mon, row){
       return (p != null && c != null && f != null) ? nf((p + c) * 4 + f * 9) : ''; }
     case '_mg': { const v = tlRows().filter(r => r.g === 'aas' && r.k[0] !== '_').map(r => parseFloat(tlCell(mon, r.k).v)).filter(x => !isNaN(x));
       return v.length ? nf(v.reduce((a, b) => a + b, 0)) : ''; }
+    case '_avgkcal': { const s = weekStats(mon); return s.kcal == null ? '' : nf(s.kcal); }
+    case '_avgsteps': { const s = weekStats(mon); return s.steps == null ? '' : nf(s.steps); }
+    case '_cardiodone': { const s = weekStats(mon); return s.n ? nf(s.cardio) : ''; }
+    case '_q': { const w = wk || {}; return [w.questions, w.help].filter(Boolean).join(' · '); }
   }
   if(row.k === 'pics' && wk && PICS.some(([k]) => wk[k])) return '✓';
   return tlCell(mon, row.k);
@@ -1319,25 +1336,56 @@ function timelineWeeks(){
   const out = []; for(let m = from; m <= to && out.length < 60; m = addDays(m, 7)) out.push(m);
   return out;
 }
-function openTimeline(){
+// The Pharmacology view follows the sheet's "Copy of Weekly" tab: that week's
+// averages, labs + photos, then every compound by week.
+const PH_GROUPS = ['aas', 'pharm', 'peptides', 'supps'];
+const PH_GROUP_LABEL = { aas:'Testosterone & AAS', pharm:'Non AAS Pharm', peptides:'Peptides', supps:'Nutraceuticals - OTC' };
+const PH_TOP = [
+  {k:'_bw',l:'Body Weight (avg)'}, {k:'target_bw',l:'Target Body Weight'}, {k:'_sf',l:'Total Skinfold mm'},
+  {k:'_bp',l:'Average BP'}, {k:'_hr',l:'Average Resting HR'}, {k:'_avgkcal',l:'Avg Kcals'}, {k:'_avgsteps',l:'Avg Steps'},
+  {k:'_cardiodone',l:'Cardio done (min)'}, {k:'@photo',l:'Progress Pics'}, {k:'@lab',l:'Labs / Dexa'},
+];
+const filesOf = mon => { const d = logOf('files', mon) || {}, out = [];
+  for(let i = 0; i < 50; i++) if(d['f' + i + 'u']) out.push({ u: d['f' + i + 'u'], n: d['f' + i + 'n'] || 'file', t: d['f' + i + 't'] || 'lab' });
+  return out; };
+function openTimeline(mode){
+  const pharma = mode === 'pharma';
   const weeks = timelineWeeks(), now = mondayOf(todayIso()), rows = tlRows();
-  // A row with nothing in any week stays out of his view.
-  const shown = rows.filter(r => r.k[0] === '_' || weeks.some(m => { const v = tlValue(m, r); return (v && typeof v === 'object' ? v.v : v) != null && (v && typeof v === 'object' ? v.v : v) !== ''; }));
-  const cell = (m, r) => {
+  const val = (m, r) => {
+    if(r.k === '@lab' || r.k === '@photo'){
+      const t = r.k.slice(1), wk = logOf('weekly', m) || {};
+      const links = filesOf(m).filter(f => f.t === t).map(f => `<a href="${esc(f.u)}" target="_blank" rel="noopener" title="${esc(f.n)}">${t === 'photo' ? '🖼' : '📄'}</a>`);
+      if(t === 'photo') PICS.forEach(([k, l]) => { if(wk[k]) links.push(`<a href="${esc(wk[k])}" target="_blank" rel="noopener" title="${l}">🖼</a>`); });
+      return links.join(' ');
+    }
     const v = tlValue(m, r);
-    if(v && typeof v === 'object') return v.v == null ? '' : `<span class="${v.carried ? 'carried' : ''}">${esc(v.v)}</span>`;
+    if(v && typeof v === 'object'){
+      if(v.v == null || /^(off|stop|stopped)$/i.test(String(v.v).trim())) return '';
+      return `<span class="${v.carried ? 'carried' : ''}">${esc(v.v)}</span>`;
+    }
     return esc(v);
   };
-  const body = TL_GROUPS.map(([g, gl]) => {
-    const rs = shown.filter(r => r.g === g);
-    if(!rs.length) return '';
-    return (gl ? `<tr class="tlg"><th>${esc(gl)}</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}"></td>`).join('')}</tr>` : '') +
-      rs.map(r => `<tr><th>${esc(r.l)}</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}">${cell(m, r)}</td>`).join('')}</tr>`).join('');
-  }).join('');
+  // A row with nothing in any week stays out of his view.
+  const hasAny = r => r.k[0] === '_' && !['_q'].includes(r.k) ? true : weeks.some(m => val(m, r) !== '');
+  const tr = r => `<tr><th>${esc(r.l)}</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}">${val(m, r)}</td>`).join('')}</tr>`;
+  const gh = gl => `<tr class="tlg"><th>${esc(gl)}</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}"></td>`).join('')}</tr>`;
+  let body = '';
+  if(pharma){
+    body += rows.filter(r => r.g === 'week' && ['_date','_woc','cycle','event'].includes(r.k)).filter(hasAny).map(tr).join('');
+    body += gh('Composition / Diagnostics') + PH_TOP.filter(hasAny).map(tr).join('');
+    PH_GROUPS.forEach(g => { const rs = rows.filter(r => r.g === g).filter(hasAny); if(rs.length) body += gh(PH_GROUP_LABEL[g]) + rs.map(tr).join(''); });
+    const notes = [{ k:'note', l:'Notes' }, { k:'_q', l:'Your questions' }].filter(hasAny);
+    if(notes.length) body += gh('Notes / Questions') + notes.map(tr).join('');
+  } else {
+    TL_GROUPS.filter(([g]) => !PH_GROUPS.includes(g)).forEach(([g, gl]) => {
+      const rs = rows.filter(r => r.g === g).filter(hasAny);
+      if(rs.length) body += (gl ? gh(gl) : '') + rs.map(tr).join('');
+    });
+  }
   showSection(`
-    <h1 data-copy="tile_timeline">${esc(t('tile_timeline'))}</h1>
+    <h1 data-copy="${pharma ? 'tile_pharma' : 'tile_timeline'}">${esc(t(pharma ? 'tile_pharma' : 'tile_timeline'))}</h1>
     <div class="tlwrap" id="tlWrap"><table class="tl"><tbody>${body}</tbody></table></div>
-    <p class="updated">This week is highlighted. Grey values carry on from an earlier week.</p>`);
+    <p class="updated">This week is highlighted. Grey values carry on from an earlier week.${pharma ? ' Tap 📄 or 🖼 to open a lab or photo.' : ''}</p>`);
   const nowCell = document.querySelector('#tlWrap td.now');
   if(nowCell) $('#tlWrap').scrollLeft = Math.max(0, nowCell.offsetLeft - 160);
 }

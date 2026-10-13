@@ -155,6 +155,14 @@
   .trkqa .fl{margin:0}
   .trkqa p{margin:0 0 6px;font-size:13px;color:var(--fg);white-space:pre-wrap}
   .panel.wide{width:min(1240px,100%)}
+  .rx .rxrow{display:grid;grid-template-columns:2fr 1.4fr 1fr 1.2fr 1.2fr auto;gap:10px;margin:8px 0}
+  @media(max-width:900px){ .rx .rxrow{grid-template-columns:1fr 1fr} }
+  .fcell{display:flex;gap:3px;align-items:center;justify-content:center;flex-wrap:wrap;min-height:28px}
+  .fchip{display:inline-flex;align-items:center;border:1px solid var(--line-bright);border-radius:6px;padding:1px 4px;font-size:12px;text-decoration:none;background:#fff}
+  .fchip a{text-decoration:none}
+  .fup{cursor:pointer;color:var(--muted-2);font-weight:700;padding:2px 7px;border:1px dashed var(--line-bright);border-radius:6px;font-size:12px}
+  .fup:hover{color:var(--fg);border-color:var(--fg)}
+  .fup.busy{opacity:.4;pointer-events:none}
   .thumbs{display:flex;gap:8px;margin-top:12px}
   .thumbs a{position:relative;display:block;width:110px;height:146px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
   .thumbs img{width:100%;height:100%;object-fit:cover}
@@ -260,7 +268,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-12T19:00Z';
+const BUILD = '2026-10-13T17:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -842,7 +850,7 @@ function drawPanel(){
   const c = OPEN;
   const scrim = document.createElement('div'); scrim.className = 'scrim'; scrim.id = 'scrim';
   const p = document.createElement('div'); p.id = 'panel';
-  p.className = 'panel' + (['tracking','timeline','training','protocols'].includes(TAB) ? ' wide' : '');
+  p.className = 'panel' + (['tracking','timeline','pharma','training','protocols'].includes(TAB) ? ' wide' : '');
   const tpl = !!c.isTemplate;
   p.innerHTML = `
     <div class="phead">
@@ -863,6 +871,7 @@ function drawPanel(){
       <button class="ptab ${TAB==='plan'?'on':''}" data-t="plan">Plan</button>
       <button class="ptab ${TAB==='tracking'?'on':''}" data-t="tracking">Tracking</button>
       <button class="ptab ${TAB==='timeline'?'on':''}" data-t="timeline">Timeline</button>
+      <button class="ptab ${TAB==='pharma'?'on':''}" data-t="pharma">Pharmacology</button>
       <button class="ptab ${TAB==='training'?'on':''}" data-t="training">Training</button>
       <button class="ptab ${TAB==='protocols'?'on':''}" data-t="protocols">Protocols</button>
       <button class="ptab ${TAB==='intake'?'on':''}" data-t="intake">Intake</button>`}
@@ -1137,7 +1146,9 @@ function drawBody(){
   } else if(TAB === 'tracking'){
     drawTracking(c, b);
   } else if(TAB === 'timeline'){
-    drawTimeline(c, b);
+    drawTimeline(c, b, 'timeline');
+  } else if(TAB === 'pharma'){
+    drawTimeline(c, b, 'pharma');
   } else if(TAB === 'training'){
     drawTraining(c, b);
   } else if(TAB === 'protocols'){
@@ -1266,6 +1277,7 @@ function tlCell(c, m, k){
     .sort((a, b) => a.day < b.day ? 1 : -1)[0];
   if(!prev) return { v: null };
   if(k === 'cycle' && tNum(prev.data.cycle) != null) return { v: tNum(prev.data.cycle) + tWeeks(prev.day, m), carried: true };
+  if(/^(off|stop|stopped)$/i.test(String(prev.data[k]).trim())) return { v: null, carried: true };   // stopped
   return { v: prev.data[k], carried: true };
 }
 const tlNum = (c, m, k) => tNum(tlCell(c, m, k).v);
@@ -1288,6 +1300,10 @@ function tlAuto(c, m, k){
     case '_sf': { const v = tSkin(tLog(c, 'weekly', m)); return v == null ? '' : tNf(v, 1); }
     case '_kcal': { const p = tlNum(c, m, 'protein'), cb = tlNum(c, m, 'carbs'), f = tlNum(c, m, 'fat');
       return (p != null && cb != null && f != null) ? tNf((p + cb) * 4 + f * 9) : ''; }
+    case '_avgkcal': { const s = st(); return s.kcal == null ? '' : tNf(s.kcal); }
+    case '_avgsteps': { const s = st(); return s.steps == null ? '' : tNf(s.steps); }
+    case '_cardiodone': { const s = st(); return s.n ? tNf(s.cardio) : ''; }
+    case '_q': { const w = tLog(c, 'weekly', m) || {}; return [w.questions, w.help].filter(Boolean).join(' · '); }
     case '_mg': { const v = tlRowsOf(c).filter(r => r.g === 'aas' && r.k[0] !== '_').map(r => parseFloat(tlCell(c, m, r.k).v)).filter(x => !isNaN(x));
       return v.length ? tNf(v.reduce((a, b) => a + b, 0)) : ''; }
   }
@@ -1373,11 +1389,42 @@ function drawTrackingBody(c){
   });
 }
 
-/* ── Timeline: the sheet's Timeline tab ────────────────────────────────── */
-async function drawTimeline(c, b){
+/* ── Timeline + Pharmacology: one week-per-column grid, two views ───────────
+   Timeline      — week, cardio, health, nutrition rows (the sheet's Timeline tab)
+   Pharmacology  — the "Copy of Weekly" layout: that week's averages up top, labs /
+                   photos uploads, then AAS (mg/week, totalled), Non AAS Pharm,
+                   Peptides, Nutraceuticals, notes and his check-in questions. */
+const PH_GROUPS = ['aas', 'pharm', 'peptides', 'supps'];
+const TL_VIEW_GROUPS = ['week', 'cardio', 'health', 'nutrition'];
+const PH_GROUP_LABEL = { aas:'Testosterone & AAS', pharm:'Non AAS Pharm', peptides:'Peptides', supps:'Nutraceuticals - OTC' };
+// What the sheet prescribes, so the Prescribe box can suggest and file them.
+const PH_KNOWN = [
+  ['Testosterone E.','aas'],['Test E','aas'],['Testosterone C.','aas'],['Primobolan','aas'],['Masteron E.','aas'],['Anavar','aas'],['Winstrol','aas'],
+  ['Metformin','pharm'],['Clenbuterol','pharm'],['Cialis','pharm'],['Modafinil','pharm'],['T4','pharm'],['T3','pharm'],['Naproxene','pharm'],['Telmisartan','pharm'],
+  ['HCG','pharm'],['HMG','pharm'],['Tadalafil','pharm'],
+  ['GH','peptides'],['Lantus','peptides'],['R Insulin','peptides'],['MT2','peptides'],['TB 500','peptides'],['BPC 157','peptides'],
+  ['Pinealon (AM)','peptides'],['VilON (AM)','peptides'],['EpitalON (PM)','peptides'],
+  ['Aspirin','supps'],['Slo Niacin','supps'],['Vitamin C','supps'],['Vitamin K','supps'],['Q10','supps'],['Potassium','supps'],['ZMA','supps'],
+  ['Chromium Picolinate','supps'],['Vitamin D3','supps'],['Omega 3 AM','supps'],['Creatine','supps'],['MCT','supps'],
+];
+// The averages block at the top of the Pharmacology view.
+const PH_TOP = [
+  {k:'_bw',l:'Body Weight (avg)'}, {k:'target_bw',l:'Target Body Weight'}, {k:'_sf',l:'Total Skinfold mm'},
+  {k:'_bp',l:'Average BP'}, {k:'_hr',l:'Average Resting HR'}, {k:'_avgkcal',l:'Avg Kcals'}, {k:'_avgsteps',l:'Avg Steps'},
+  {k:'_cardiodone',l:'Cardio done (min)'}, {k:'@photo',l:'Progress Pics'}, {k:'@lab',l:'Labs / Dexa'},
+];
+const tStopped = v => /^(off|stop|stopped)$/i.test(String(v == null ? '' : v).trim());
+const tFiles = (c, m) => { const d = tLog(c, 'files', m) || {}, out = [];
+  for(let i = 0; i < 50; i++) if(d['f' + i + 'u']) out.push({ u: d['f' + i + 'u'], n: d['f' + i + 'n'] || 'file', t: d['f' + i + 't'] || 'lab' });
+  return out; };
+const tFilesData = list => { const d = {}; list.forEach((f, i) => { d['f' + i + 'u'] = f.u; d['f' + i + 'n'] = f.n; d['f' + i + 't'] = f.t; }); return d; };
+
+async function drawTimeline(c, b, mode){
+  mode = mode || 'timeline';
+  const myTab = mode === 'pharma' ? 'pharma' : 'timeline';
   b.innerHTML = '<p class="hint">Loading…</p>';
   try { await ensureLogs(c); } catch(e){ b.innerHTML = `<p class="hint">Could not load: ${esc(e.message)}</p>`; return; }
-  if(OPEN !== c || TAB !== 'timeline') return;
+  if(OPEN !== c || TAB !== myTab) return;
   const now = tMon(tIso(new Date())), targets = (c._logs || []).filter(l => l.kind === 'target').map(l => l.day).sort();
   let from = tStart(c) ? tMon(tStart(c)) : now;
   if(targets[0] && targets[0] < from) from = targets[0];
@@ -1387,42 +1434,105 @@ async function drawTimeline(c, b){
   if(targets.length && targets[targets.length - 1] > to) to = tAdd(targets[targets.length - 1], 7 * 2);
   const weeks = []; for(let m = from; m <= to && weeks.length < 70; m = tAdd(m, 7)) weeks.push(m);
   const rows = tlRowsOf(c);
-  const head = `<tr class="tlh"><th>Week</th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}">${tCoachWeek(c, m) ? 'W' + tCoachWeek(c, m) : ''}<br><span class="csub">${fmtDate(m)}</span></td>`).join('')}</tr>`;
-  const body = TL_GROUPS.map(([g, gl]) => {
-    const rs = rows.filter(r => r.g === g);
-    return `<tr class="tlg"><th>${esc(gl)} <button class="tladd" data-addrow="${g}" title="Add a row">+ row</button></th>${weeks.map(m => `<td class="${m === now ? 'now' : ''}"></td>`).join('')}</tr>` +
-      rs.map(r => {
-        const auto = r.k[0] === '_';
-        return `<tr><th><span class="tlname">${esc(r.l)}</span>${auto ? '<span class="csub"> auto</span>' : ` <button class="tlx" data-ren="${esc(r.k)}" title="Rename">✎</button><button class="tlx" data-del="${esc(r.k)}" title="Remove row">✕</button>`}</th>
-          ${weeks.map(m => {
-            if(auto) return `<td class="auto ${m === now ? 'now' : ''}">${esc(tlAuto(c, m, r.k))}</td>`;
-            const cell = tlCell(c, m, r.k);
-            const pic = r.k === 'pics' && T_PICS.some(([k]) => (tLog(c, 'weekly', m) || {})[k]);
-            return `<td class="${m === now ? 'now' : ''}"><input data-m="${m}" data-k="${esc(r.k)}" value="${cell.carried || cell.v == null ? '' : esc(cell.v)}"
-              placeholder="${pic ? '✓ pics' : cell.carried ? esc(cell.v) : ''}" ${r.k === 'goal' ? 'list="tlGoals"' : ''}></td>`;
-          }).join('')}</tr>`;
-      }).join('');
-  }).join('');
+  const td = m => `class="${m === now ? 'now' : ''}"`;
+
+  const rowHtml = (r, opts = {}) => {
+    const auto = r.k[0] === '_';
+    const tools = auto || opts.fixed ? (auto ? '<span class="csub"> auto</span>' : '')
+      : ` <button class="tlx" data-ren="${esc(r.k)}" title="Rename">✎</button><button class="tlx" data-del="${esc(r.k)}" title="Remove row">✕</button>`;
+    return `<tr><th><span class="tlname">${esc(r.l)}</span>${tools}</th>${weeks.map(m => {
+      if(r.k === '@lab' || r.k === '@photo'){
+        const t = r.k.slice(1), files = tFiles(c, m).filter(f => f.t === t);
+        const wk = tLog(c, 'weekly', m) || {};
+        const theirs = t === 'photo' ? T_PICS.filter(([k]) => wk[k]).map(([k, l]) => `<a class="fchip" href="${esc(wk[k])}" target="_blank" rel="noopener" title="His ${l} photo">${l[0]}</a>`).join('') : '';
+        return `<td ${td(m)}><div class="fcell">${theirs}${files.map(f => `<span class="fchip"><a href="${esc(f.u)}" target="_blank" rel="noopener" title="${esc(f.n)}">${t === 'photo' ? '🖼' : '📄'}</a><button class="tlx" data-fdel="${m}|${esc(f.u)}" title="Remove">×</button></span>`).join('')}
+          <label class="fup" title="Upload ${t === 'photo' ? 'photos' : 'labs'}">+<input type="file" hidden multiple accept="${t === 'photo' ? 'image/*' : 'image/*,application/pdf'}" data-up="${t}" data-m="${m}"></label></div></td>`;
+      }
+      if(auto) return `<td class="auto ${m === now ? 'now' : ''}">${esc(tlAuto(c, m, r.k))}</td>`;
+      const cell = tlCell(c, m, r.k);
+      const pic = r.k === 'pics' && T_PICS.some(([k]) => (tLog(c, 'weekly', m) || {})[k]);
+      return `<td ${td(m)}><input data-m="${m}" data-k="${esc(r.k)}" value="${cell.carried || cell.v == null ? '' : esc(cell.v)}"
+        placeholder="${pic ? '✓ pics' : cell.carried && cell.v != null ? esc(cell.v) : ''}" ${r.k === 'goal' ? 'list="tlGoals"' : ''}></td>`;
+    }).join('')}</tr>`;
+  };
+  const groupHead = (label, g) => `<tr class="tlg"><th>${esc(label)}${g ? ` <button class="tladd" data-addrow="${g}" title="Add a row">+ row</button>` : ''}</th>${weeks.map(m => `<td ${td(m)}></td>`).join('')}</tr>`;
+  const head = `<tr class="tlh"><th>Week</th>${weeks.map(m => `<td ${td(m)}>${tCoachWeek(c, m) ? 'W' + tCoachWeek(c, m) : ''}<br><span class="csub">${fmtDate(m)}</span></td>`).join('')}</tr>`;
+
+  let body = '';
+  if(mode === 'pharma'){
+    body += rows.filter(r => r.g === 'week' && ['_date','_woy','_woc','cycle','event'].includes(r.k)).map(r => rowHtml(r)).join('');
+    body += groupHead('Composition / Diagnostics') + PH_TOP.map(r => rowHtml(r, { fixed:true })).join('');
+    PH_GROUPS.forEach(g => { body += groupHead(PH_GROUP_LABEL[g], g) + rows.filter(r => r.g === g).map(r => rowHtml(r)).join(''); });
+    body += groupHead('Notes / Questions') + rowHtml({ k:'note', l:'Notes' }, { fixed:true }) + rowHtml({ k:'_q', l:'Questions (his check-in)' });
+  } else {
+    TL_GROUPS.filter(([g]) => TL_VIEW_GROUPS.includes(g)).forEach(([g, gl]) => {
+      body += groupHead(gl, g) + rows.filter(r => r.g === g).map(r => rowHtml(r)).join('');
+    });
+  }
+
+  const known = PH_KNOWN.map(([n]) => n).concat(rows.filter(r => PH_GROUPS.includes(r.g)).map(r => r.l));
   b.innerHTML = `
-    <p class="hint" style="margin:0 0 10px">Type straight into a week. A value carries into the following weeks (shown grey) until you type a new one — type <b>0</b> or <b>off</b> to stop a compound. Notes, Labs, Pics and Event don't carry. Rows marked auto fill themselves from his logs. Every cell saves as you leave it, and he sees this on his page under Timeline.</p>
+    ${mode === 'pharma' ? `<div class="sect rx">
+      <div class="shead"><h3>Prescribe</h3><span class="hint">Fills his Pharmacology timeline from that week on</span></div>
+      <div class="rxrow">
+        <div><label class="fl">Compound</label><input id="rx_name" list="rxKnown" placeholder="Testosterone E."></div>
+        <div><label class="fl">Category</label><select id="rx_group">${PH_GROUPS.map(g => `<option value="${g}">${PH_GROUP_LABEL[g]}</option>`).join('')}</select></div>
+        <div><label class="fl">Dose</label><input id="rx_dose" placeholder="350"></div>
+        <div><label class="fl">From week of</label><input type="date" id="rx_from" value="${now}"></div>
+        <div><label class="fl">Until (optional)</label><input type="date" id="rx_to"></div>
+        <div style="align-self:end"><button class="btn primary" id="rxGo">Prescribe</button></div>
+      </div>
+      <p class="hint" id="rxHint">AAS: mg per week (e.g. 350) — they add up in Total Weekly mg's. Everything else as you'd write it: 500/D, 5mg/D, 10iu am, 100mcg 3X.</p>
+      <datalist id="rxKnown">${[...new Set(known)].map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    </div>` : ''}
+    <p class="hint" style="margin:0 0 10px">${mode === 'pharma'
+      ? 'Type straight into a week, or use Prescribe. A dose carries into the following weeks (grey) until you change it — type <b>off</b> to stop it. Top rows fill themselves from his logs. <b>+</b> uploads labs or photos to that week; he sees them on his page.'
+      : 'Type straight into a week. A value carries into the following weeks (shown grey) until you type a new one. Notes, Labs, Pics and Event don\'t carry. Rows marked auto fill themselves from his logs. Compounds now live in the Pharmacology tab.'}</p>
     <datalist id="tlGoals">${T_GOALS.map(g => `<option value="${g}">`).join('')}</datalist>
     <div class="tlwrap" id="tlWrap"><table class="tl"><tbody>${head}${body}</tbody></table></div>
     <div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" id="tlReset">Reset rows to the sheet's list</button></div>`;
   const nowCell = $('#tlWrap td.now'); if(nowCell) $('#tlWrap').scrollLeft = Math.max(0, nowCell.offsetLeft - 260);
 
-  $$('#tlWrap input[data-m]').forEach(inp => inp.onchange = async () => {
-    const m = inp.dataset.m, k = inp.dataset.k, v = inp.value.trim();
+  const redraw = async () => { const sl = $('#tlWrap').scrollLeft, st = $('#pBody').scrollTop; await drawTimeline(c, b, mode); if($('#tlWrap')) $('#tlWrap').scrollLeft = sl; $('#pBody').scrollTop = st; };
+  const setCell = async (m, k, v, numeric) => {
     const data = Object.assign({}, tLog(c, 'target', m) || {});
-    if(v === '') delete data[k]; else data[k] = (tNum(v) != null && !['goal','note','labs','event','pics'].includes(k)) ? Number(v) : v;
+    if(v === '' || v == null) delete data[k]; else data[k] = (numeric && tNum(v) != null) ? Number(v) : v;
+    await putLog(c, 'target', m, data);
+  };
+  const isNumKey = k => !['goal','note','labs','event','pics'].includes(k);
+  $$('#tlWrap input[data-m][data-k]').forEach(inp => inp.onchange = async () => {
     inp.disabled = true;
-    try { await putLog(c, 'target', m, data); const sl = $('#tlWrap').scrollLeft, st = $('#pBody').scrollTop; await drawTimeline(c, b); $('#tlWrap').scrollLeft = sl; $('#pBody').scrollTop = st; }
+    try { await setCell(inp.dataset.m, inp.dataset.k, inp.value.trim(), isNumKey(inp.dataset.k)); await redraw(); }
     catch(e){ alert('Could not save: ' + e.message); inp.disabled = false; }
   });
-  const setRows = async rs => { c.sections = Object.assign({}, c.sections || {}, { timeline_rows: rs }); await saveSections(c); drawTimeline(c, b); };
+  // uploads: labs (PDF / images) and photos, filed under that week
+  $$('#tlWrap input[data-up]').forEach(inp => inp.onchange = async () => {
+    const files = [...(inp.files || [])]; if(!files.length) return;
+    const m = inp.dataset.m, t = inp.dataset.up, lab = inp.closest('label'); lab.classList.add('busy');
+    try {
+      const list = tFiles(c, m);
+      for(const f of files){
+        const fd = new FormData(); fd.append('file', f); fd.append('kind', t); fd.append('slug', c.slug || '');
+        const res = await fetch(WORKER + '/clients', { method:'POST', headers:{ 'X-CC-Key': KEY }, body: fd });
+        const j = await res.json().catch(() => ({}));
+        if(!res.ok || !j.url) throw new Error(j.error || 'Upload failed (' + res.status + ')');
+        list.push({ u: j.url, n: f.name || t, t });
+      }
+      await putLog(c, 'files', m, tFilesData(list));
+      toast(files.length > 1 ? files.length + ' files uploaded' : 'Uploaded');
+      await redraw();
+    } catch(e){ alert(e.message); lab.classList.remove('busy'); }
+  });
+  $$('#tlWrap [data-fdel]').forEach(btn => btn.onclick = async () => {
+    const [m, u] = btn.dataset.fdel.split('|');
+    if(!confirm('Remove this file from the week?')) return;
+    try { await putLog(c, 'files', m, tFilesData(tFiles(c, m).filter(f => f.u !== u))); await redraw(); } catch(e){ alert(e.message); }
+  });
+  const setRows = async rs => { c.sections = Object.assign({}, c.sections || {}, { timeline_rows: rs }); await saveSections(c); await redraw(); };
+  const addRow = (rs, l, g) => { const idx = rs.map(r => r.g).lastIndexOf(g); const r = { k: 'x_' + tRid(), l, g }; rs.splice(idx < 0 ? rs.length : idx + 1, 0, r); return r; };
   $$('#tlWrap [data-addrow]').forEach(btn => btn.onclick = async () => {
     const l = prompt('Name of the new row (e.g. Anavar, BPC 157, Vitamin D3):'); if(!l || !l.trim()) return;
-    const rs = tlRowsOf(c), idx = rs.map(r => r.g).lastIndexOf(btn.dataset.addrow);
-    rs.splice(idx < 0 ? rs.length : idx + 1, 0, { k: 'x_' + tRid(), l: l.trim(), g: btn.dataset.addrow });
+    const rs = tlRowsOf(c); addRow(rs, l.trim(), btn.dataset.addrow);
     try { await setRows(rs); } catch(e){ alert(e.message); }
   });
   $$('#tlWrap [data-ren]').forEach(btn => btn.onclick = async () => {
@@ -1435,8 +1545,35 @@ async function drawTimeline(c, b){
     try { await setRows(rs.filter(x => x.k !== r.k)); } catch(e){ alert(e.message); }
   });
   $('#tlReset').onclick = async () => {
-    if(!confirm("Put the rows back to the sheet's Timeline list? Rows you added disappear from view (their values stay stored).")) return;
+    if(!confirm("Put the rows back to the sheet's list? Rows you added disappear from view (their values stay stored).")) return;
     try { await setRows(TL_DEFAULT.slice()); } catch(e){ alert(e.message); }
+  };
+
+  if(mode !== 'pharma') return;
+  // Prescribe: find or create the row, write the dose into the start week, "off" after the end.
+  $('#rx_name').oninput = () => {
+    const n = $('#rx_name').value.trim().toLowerCase();
+    const hit = rows.find(r => r.l.toLowerCase() === n && PH_GROUPS.includes(r.g)) || PH_KNOWN.find(([k]) => k.toLowerCase() === n);
+    if(hit) $('#rx_group').value = hit.g || hit[1];
+  };
+  $('#rxGo').onclick = async () => {
+    const name = $('#rx_name').value.trim(), dose = $('#rx_dose').value.trim(), g = $('#rx_group').value;
+    if(!name || !dose) return alert('Compound and dose, please.');
+    const start = tMon($('#rx_from').value || now), until = $('#rx_to').value ? tMon($('#rx_to').value) : '';
+    if(until && until < start) return alert('"Until" is before "From".');
+    const btn = $('#rxGo'); btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const rs = tlRowsOf(c);
+      let r = rs.find(x => x.l.toLowerCase() === name.toLowerCase() && PH_GROUPS.includes(x.g));
+      if(!r){ r = addRow(rs, name, g); c.sections = Object.assign({}, c.sections || {}, { timeline_rows: rs }); await saveSections(c); }
+      await setCell(start, r.k, dose, g === 'aas');
+      if(until){
+        const after = tAdd(until, 7), own = tLog(c, 'target', after) || {};
+        if(own[r.k] == null || own[r.k] === '') await setCell(after, r.k, 'off', false);
+      }
+      toast(`${name} ${dose} from ${fmtDate(start)}${until ? ' to ' + fmtDate(tAdd(until, 6)) : ''}`);
+      await redraw();
+    } catch(e){ alert('Could not save: ' + e.message); btn.disabled = false; btn.textContent = 'Prescribe'; }
   };
 }
 
