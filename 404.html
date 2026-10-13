@@ -239,7 +239,50 @@
   .vframe{position:relative;aspect-ratio:16/9}
   .vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .mprog{font-size:12.5px;font-weight:600;letter-spacing:.02em;background:var(--acc-soft);border-radius:10px;padding:9px 12px;margin:-4px 0 12px}
-  .tday.rest{padding:13px 18px;color:var(--mut)}
+  .tday.rest{padding:13px 18px;background:#b6d7a8;border-color:#b6d7a8;color:#000}
+  .tday.rest.full{background:#93c47d;border-color:#93c47d}
+  .tdh.mday{background:#000;color:#fff;margin:-16px -18px 0;padding:12px 18px;border-radius:var(--r) var(--r) 0 0}
+  .tdh.mday span{color:#b6d7a8;font-size:12.5px;font-weight:600}
+  .wtabs button.on[style]{outline:2px solid #000;outline-offset:2px;font-weight:800}
+  .mgwrap{overflow:auto;border:1px solid #d9d9d9;border-radius:12px;background:#fff;max-height:78vh}
+  table.mg{border-collapse:separate;border-spacing:0;font-size:12px;color:#000;font-family:Inter,system-ui,sans-serif}
+  table.mg th,table.mg td{padding:6px 8px;border-bottom:1px solid #e3e3e3;white-space:nowrap;vertical-align:top}
+  table.mg .c{text-align:center}
+  table.mg thead th{position:sticky;top:0;z-index:3}
+  table.mg thead tr:nth-child(2) th{top:31px}
+  table.mg .mgtitle{background:#f3f3f3;text-align:left;font-weight:800;position:sticky;left:0;z-index:4}
+  table.mg .mgprog{background:#f3f3f3;font-weight:800;letter-spacing:.04em;text-align:left}
+  table.mg .mgw{font-weight:800;text-align:center;font-size:12.5px;border-left:1px solid rgba(0,0,0,.08)}
+  table.mg .mgsp{background:#f3f3f3;min-width:6px;width:6px;padding:0;border-bottom-color:#f3f3f3}
+  table.mg tr.mgday td{background:#000;color:#fff;font-weight:800}
+  table.mg tr.mgday td.mgsess{font-weight:600;font-size:11px;white-space:nowrap}
+  table.mg tr.mgday td.mgsess b{font-size:12px;margin-right:6px}
+  table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{position:sticky;left:0;z-index:2;min-width:190px;max-width:230px;white-space:normal}
+  table.mg .mgtitle2{background:#f3f3f3}
+  @media(max-width:520px){
+    table.mg{font-size:11.5px}
+    table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{min-width:128px;max-width:140px}
+    table.mg th,table.mg td{padding:5px 6px}
+  }
+  table.mg tr.mgday td.mgsp{background:#f3f3f3}
+  table.mg tr.mgcols td{background:#d9d9d9;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+  table.mg tr.mgcols td.mgsp{background:#f3f3f3}
+  table.mg td.mgex{background:#cccccc;font-weight:700}
+  table.mg td.mgex:first-child{position:sticky;left:0;z-index:1;min-width:190px}
+  table.mg td.mgex.c{font-weight:500}
+  table.mg td.mgex a{color:#000;text-decoration:none}
+  table.mg td.mgres{min-width:150px;white-space:normal}
+  table.mg td.mgnote{min-width:120px;max-width:200px;white-space:normal;color:#333}
+  table.mg tr.mgcn td{background:#fff8e1;font-size:11.5px;white-space:normal;max-width:360px}
+  table.mg tr.mgcn td:first-child{font-weight:700;background:#f3f3f3}
+  table.mg tr.mgcn td.mgsp{background:#f3f3f3}
+  table.mg tr.mgvol td{background:#f3f3f3;color:#555;font-size:11px;text-align:center}
+  table.mg tr.mgvol td:first-child{text-align:left}
+  table.mg tr.mgvol.tot td{font-weight:800;color:#000}
+  table.mg tr.mgrest td{background:#b6d7a8;font-weight:800}
+  table.mg tr.mgrest.full td{background:#93c47d}
+  table.mg tr.mggap td{background:#f3f3f3;padding:3px;border:0}
+
   .cnote{font-size:13.5px;background:var(--bg-2);border-radius:10px;padding:9px 12px;margin:10px 0 0;white-space:pre-wrap}
   .mex{margin-top:8px}
   .mlast{font-size:12.5px;color:var(--mut);margin-top:3px}
@@ -420,7 +463,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-14T03:30Z';
+const BUILD = '2026-10-14T04:30Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1548,6 +1591,66 @@ function trainingWeekIndex(tp){
   const i = Math.floor((dOf(todayIso()) - dOf(mondayOf(tp.start))) / 6048e5);
   return Math.max(0, Math.min(tp.weeks.length - 1, i));
 }
+/* The whole mesocycle as one sheet, coloured like the training spreadsheet:
+   black day headers, grey exercise columns, each week in its own colour
+   (light yellow → yellow → orange → dark red → red, deload green), green rest rows. */
+const MESO_WEEK_COLORS = ['#FFF2CC', '#FFD966', '#F6B26B', '#CC0000', '#FF0000'];
+const MESO_DELOAD = '#34A853';
+function mesoWeekColor(tp, i){
+  const w = (tp.weeks || [])[i] || {};
+  const bg = w.deload ? MESO_DELOAD : MESO_WEEK_COLORS[Math.min(i, MESO_WEEK_COLORS.length - 1)];
+  const dark = ['#CC0000', '#FF0000', MESO_DELOAD].includes(bg);
+  return { bg, fg: dark ? '#fff' : '#000' };
+}
+function mesoSetsOf(d, i){
+  const out = [];
+  for(let j = 0; j < 12; j++){ const w = d['e' + i + 's' + j + 'w'], r = d['e' + i + 's' + j + 'r']; if(w || r) out[j] = { w: w || '', r: r || '' }; }
+  if(out.length) return out;
+  return String(d['e' + i + 'r'] || '').split(',').map(x => x.trim()).filter(Boolean).map(r => ({ w: d['e' + i + 'w'] || '', r }));
+}
+// logFor(w, d) → that session's data or null; escFn escapes; nowWeek highlights the current week.
+function mesoGridHtml(tp, logFor, escFn, nowWeek){
+  const W = (tp.weeks || []).length, cols = 4;   // per week: RIR · Sets · Results · Notes
+  const wkHead = (tp.weeks || []).map((w, i) => { const c = mesoWeekColor(tp, i);
+    return `<th colspan="${cols}" class="mgw${i === nowWeek ? ' now' : ''}" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
+  const colHead = (tp.weeks || []).map(() => `<th class="mgh">RIR</th><th class="mgh">Sets</th><th class="mgh mgres">Weight × Reps</th><th class="mgh">Notes</th><th class="mgsp"></th>`).join('');
+  const body = (tp.days || []).map((day, di) => {
+    if(day.rest) return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="${3 + W * (cols + 1)}">${escFn(day.name)}</td></tr><tr class="mggap"><td colspan="${3 + W * (cols + 1)}"></td></tr>`;
+    const logs = (tp.weeks || []).map((_, wi) => logFor(wi, di));
+    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) => { const l = logs[wi];
+      const col = mesoWeekColor(tp, wi);
+      return `<td colspan="${cols}" class="mgsess" style="background:${col.bg};color:${col.fg}"><b>${escFn((tp.weeks[wi] || {}).label || '')}</b>${l ? ` <span>✓ ${[l.sf && 'Fatigue: ' + escFn(l.sf), l.sp && 'Pump: ' + escFn(l.sp)].filter(Boolean).join(' · ') || 'logged'}</span>` : ''}</td><td class="mgsp"></td>`; }).join('')}</tr>`;
+    const notes = (tp.weeks || []).some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
+      `<td colspan="${cols}">${escFn((day.notes || [])[wi] || '')}</td><td class="mgsp"></td>`).join('')}</tr>` : '';
+    const rows = (day.ex || []).map((e, i) => { const name = e.n || e.cat;
+      return `<tr><td class="mgex">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</td>
+<td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
+        ${(tp.weeks || []).map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
+          const sets = l && l['e' + i + 'n'] === name ? mesoSetsOf(l, i).filter(Boolean) : [];
+          return `<td class="c">${escFn(w.rir ?? '')}</td><td class="c">${escFn(w.sets ?? '')}</td>
+            <td class="mgres">${sets.map(x => escFn(x.w && x.r ? x.w + '×' + x.r : (x.r || x.w))).join(' · ')}</td>
+            <td class="mgnote">${escFn(l && l['e' + i + 'n'] === name ? l['e' + i + 'x'] || '' : '')}</td><td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
+    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
+      `<td colspan="${cols}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
+    return head + notes + `<tr class="mgcols"><td>Exercise</td><td>Reps</td><td>Tempo</td>${colHead.replace(/<th/g, '<td').replace(/<\/th>/g, '</td>')}</tr>` + rows + vol + `<tr class="mggap"><td colspan="${3 + W * (cols + 1)}"></td></tr>`;
+  }).join('');
+  const total = (tp.weeks || []).map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
+  return `<div class="mgwrap"><table class="mg">
+    <thead>${tp.progression ? `<tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th><th colspan="${W * (cols + 1)}" class="mgprog">PROGRESSION: ${escFn(tp.progression)}</th></tr>` : ''}
+      <tr><th class="mgtitle"></th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
+    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map(v => `<td colspan="${cols}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>`;
+}
+
+
+function openMesoFull(){
+  const tp = secs().training_plan;
+  showSection(`<div class="seg"><button id="segWk">This week</button><button class="on">Full plan</button></div>
+    <h1>${esc(tp.name || t('tile_training'))}</h1>
+    ${mesoGridHtml(tp, (w, d) => { const l = mesoLog(tp, w, d); return l ? l.data || l : null; }, esc, trainingWeekIndex(tp))}
+    <p class="updated">Swipe sideways to see every week. Tap ▶ for the video.</p>`);
+  $('#segWk').onclick = () => openMeso();
+}
+
 /* ── Mesocycle program (the training sheet): weeks of RIR + sets per exercise,
    videos, Julian's Coach's Notes, and his log per exercise per week. ── */
 // Exercise videos play in a pop-up on the same screen instead of leaving the page.
@@ -1610,15 +1713,17 @@ function openMeso(wi){
   const wk = tp.weeks[wi] || {};
   const vol = tp.days.reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (num(((e.wk || [])[wi] || {}).sets) || 0), 0), 0);
   showSection(`
+    <div class="seg"><button class="on">This week</button><button id="segFull">Full plan</button></div>
     <h1>${esc(tp.name || t('tile_training'))}</h1>
     ${tp.progression ? `<p class="mprog">${esc(tp.progression)}</p>` : ''}
-    <div class="wtabs">${tp.weeks.map((w, i) => `<button data-wi="${i}" class="${i === wi ? 'on' : ''}">${esc(w.label || 'Week ' + (i + 1))}</button>`).join('')}</div>
+    <div class="wtabs">${tp.weeks.map((w, i) => { const col = mesoWeekColor(tp, i);
+      return `<button data-wi="${i}" class="${i === wi ? 'on' : ''}" style="background:${col.bg};color:${col.fg};border-color:${col.bg}">${esc(w.label || 'Week ' + (i + 1))}</button>`; }).join('')}</div>
     <p class="sub" style="margin:0 0 14px">${nf(vol)} total sets this week${wk.deload && tp.deload_note ? ' · deload: ' + esc(tp.deload_note) : ''}</p>
     ${tp.days.map((day, di) => {
-      if(day.rest) return `<div class="card tday rest"><b>${esc(day.name)}</b></div>`;
+      if(day.rest) return `<div class="card tday rest ${/^day/i.test(day.name || '') ? '' : 'full'}"><b>${esc(day.name)}</b></div>`;
       const log = mesoLog(tp, wi, di), note = (day.notes || [])[wi];
       return `<div class="card tday">
-        <div class="tdh"><b>${esc(day.name)}</b>${log ? '<span class="sub">✓ logged</span>' : ''}</div>
+        <div class="tdh mday"><b>${esc(day.name)}</b>${log ? '<span>✓ logged</span>' : ''}</div>
         ${note ? `<p class="cnote"><b>Coach's Notes:</b> ${esc(note)}</p>` : ''}
         <div class="mex">${(day.ex || []).map(e => { const w = (e.wk || [])[wi] || {};
           return `<div class="mrow"><div class="mn">${e.v ? `<a href="${esc(e.v)}" data-vid="${esc(e.v)}" data-vt="${esc(e.n || e.cat)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ▶</a>` : esc(e.n || e.cat)}</div>
@@ -1628,6 +1733,7 @@ function openMeso(wi){
       </div>`;
     }).join('')}`);
   document.querySelectorAll('#aSection .wtabs button').forEach(b => b.onclick = () => openMeso(+b.dataset.wi));
+  $('#segFull').onclick = openMesoFull;
   document.querySelectorAll('#aSection [data-log]').forEach(b => b.onclick = () => openMesoLog(wi, +b.dataset.log));
 }
 function openMesoLog(wi, di){
