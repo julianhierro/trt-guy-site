@@ -231,6 +231,22 @@
   .hist.wv tr.avg td{border-top:2px solid var(--line-2);font-weight:700}
   .hist.wv tr.tg td{color:var(--mut)}
   .links{display:flex;gap:18px}
+  .wsum{margin-bottom:14px;padding:16px 18px}
+  .stats4.wk8{margin-top:10px}
+  .rxg{margin-top:12px}
+  .rxh{font-size:12.5px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+  .rxh span{text-transform:none;letter-spacing:0;color:var(--txt)}
+  .rxi{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line);font-size:14.5px}
+  .rxi b{font-weight:600;text-align:right}
+  .wnote{padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+  .wnote:first-of-type{margin-top:8px}
+  .wnote b{font-size:13px}
+  .wnote p{margin:3px 0 0;font-size:14.5px;white-space:pre-wrap}
+  .wnote.coach{cursor:default}
+  .wfiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .wfiles a{border:1px solid var(--line-2);border-radius:9px;padding:7px 11px;font-size:13.5px;text-decoration:none;color:var(--txt)}
+  .dnotes{margin:0 0 16px}
+  .dnotes textarea{min-height:96px}
   .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:11px;padding:3px;background:#fff;margin:0 0 14px}
   .seg button{border:0;background:none;border-radius:8px;padding:8px 14px;font:600 13.5px Inter,sans-serif;color:var(--mut);cursor:pointer}
   .seg button.on{background:var(--acc);color:#fff;cursor:default}
@@ -359,7 +375,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-13T17:00Z';
+const BUILD = '2026-10-13T19:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1078,6 +1094,7 @@ function openDaily(day, ret){
     <h1 data-copy="trk_daily_title">${esc(t('trk_daily_title'))}</h1>
     <div class="dnav"><button id="dPrev" aria-label="Previous day">‹</button><b>${dayLabel(day)}</b>
       <button id="dNext" aria-label="Next day" ${day >= todayIso() ? 'disabled' : ''}>›</button></div>
+    <div class="f dnotes"><label for="d_notes">Notes</label><textarea id="d_notes">${esc(d.notes || '')}</textarea></div>
     <div class="fgrid">${['weight','steps'].map(k => fld(by(k))).join('')}</div>
     <div class="lbl grp">Nutrition</div>
     <div class="fgrid">${['protein','carbs','fat','fiber'].map(k => fld(by(k))).join('')}</div>
@@ -1086,7 +1103,6 @@ function openDaily(day, ret){
     <div class="fgrid three">${['sys','dia','pulse'].map(k => fld(by(k))).join('')}</div>
     ${doses.length ? `<div class="lbl grp">Protocol</div><div class="doses">${doses.map(x => `<label class="dose">
       <input type="checkbox" data-dk="${x.key}" ${d[x.key] ? 'checked' : ''}><span><b>${esc(x.it.name)}</b> ${esc([x.dose, x.it.unit].filter(Boolean).join(' '))}</span></label>`).join('')}</div>` : ''}
-    <div class="f" style="margin-top:18px"><label for="d_notes">Notes</label><textarea id="d_notes">${esc(d.notes || '')}</textarea></div>
     <button class="btn" id="dSave" data-copy="trk_save">${esc(t('trk_save'))}</button>
     <p class="saved" id="dMsg"></p>`);
   // Kcals fill themselves in from the macros unless he types his own.
@@ -1222,49 +1238,101 @@ async function saveLog(kind, day, data, btn, msg, stay){
   }
 }
 
-/* ── Week view: the sheet's Daily Check In block — Mon to Sun, averages, targets ── */
+/* ── Weekly view: a summary of the week — averages vs targets, what was
+   prescribed, every day's notes together, then the daily table. ── */
+function weekRx(mon){
+  const rows = tlRows(), out = [];
+  PH_GROUPS.forEach(g => {
+    const items = rows.filter(r => r.g === g && r.k[0] !== '_').map(r => ({ l: r.l, v: tlCell(mon, r.k).v }))
+      .filter(x => x.v != null && x.v !== '' && !/^(off|stop|stopped)$/i.test(String(x.v).trim()));
+    if(items.length) out.push({ g, label: PH_GROUP_LABEL[g], items });
+  });
+  return out;
+}
 function openWeekView(mon){
   RET = null;
-  const today = todayIso(), st = weekStats(mon), tg = targetFor(mon), cw = coachWeek(mon);
+  const today = todayIso(), st = weekStats(mon), last = weekStats(addDays(mon, -7)), tg = targetFor(mon), cw = coachWeek(mon);
   const dn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const cols = [['weight','Weight',1],['protein','P'],['carbs','C'],['fat','F'],['fiber','Fiber'],['kcal','Kcals'],['steps','Steps'],['bp','BP'],['pulse','Pulse'],['cardio','Cardio']];
   const cellOf = (d, k, dp) => k === 'bp' ? (d.sys != null ? nf(d.sys) + '/' + nf(d.dia ?? null) : '—') : k === 'kcal' ? nf(kcalOf(d)) : nf(num(d[k]), dp || 0);
-  const rows = dn.map((n, i) => {
-    const day = addDays(mon, i), d = logOf('daily', day) || {}, fut = day > today;
-    return `<tr class="${fut ? 'fut' : 'tap'} ${day === today ? 'now' : ''}" ${fut ? '' : `data-day="${day}"`}><td><b>${n}</b> <small>${fmt(day)}</small></td>
-      ${cols.map(([k, , dp]) => `<td>${cellOf(d, k, dp)}</td>`).join('')}</tr>
-      ${d.notes ? `<tr class="nrow"><td colspan="${cols.length + 1}">${esc(d.notes)}</td></tr>` : ''}`;
+  const days = dn.map((n, i) => ({ n, day: addDays(mon, i), d: logOf('daily', addDays(mon, i)) || {} }));
+
+  // averages vs targets
+  const delta = st.weight != null && last.weight != null ? st.weight - last.weight : null;
+  const tile = (v, label, sub, dp) => `<div class="s"><b>${v == null ? '—' : v}</b><span>${label}</span>${sub ? `<em>${sub}</em>` : ''}</div>`;
+  const vsT = (v, tv, dp) => tv != null ? `target ${nf(tv, dp || 0)}` + (v != null ? ` · ${v - tv > 0 ? '+' : ''}${nf(v - tv, dp || 0)}` : '') : '';
+  const avgHtml = `<div class="stats4 wk8">
+    ${tile(st.weight != null ? nf(st.weight, 1) : null, 'Avg weight', delta != null ? `${delta > 0 ? '+' : ''}${nf(delta, 1)} vs last wk` : (tg.target_bw != null ? 'target ' + nf(tg.target_bw, 1) : ''))}
+    ${tile(st.kcal != null ? nf(st.kcal) : null, 'Avg kcals', vsT(st.kcal, tg.kcal))}
+    ${tile(st.protein != null ? nf(st.protein) : null, 'Avg protein', vsT(st.protein, tg.protein))}
+    ${tile(st.carbs != null ? nf(st.carbs) + ' / ' + nf(st.fat) : null, 'Avg carbs / fat', tg.carbs != null ? `target ${nf(tg.carbs)} / ${nf(tg.fat ?? null)}` : '')}
+    ${tile(st.steps != null ? nf(st.steps) : null, 'Avg steps', vsT(st.steps, tg.steps))}
+    ${tile(st.n ? nf(st.cardio) : null, 'Cardio min', tg.cardio != null ? 'target ' + nf(tg.cardio) : '')}
+    ${tile(st.sys != null ? nf(st.sys) + '/' + nf(st.dia) : null, 'Avg BP', '')}
+    ${tile(st.pulse != null ? nf(st.pulse) : null, 'Resting HR', `${st.n}/7 days logged`)}
+  </div>`;
+
+  // prescriptions: the Pharmacology timeline for this week + protocol doses ticked off
+  const rx = weekRx(mon);
+  const mg = tlValue(mon, { k:'_mg' });
+  let due = 0, done = 0; const protoNames = new Set();
+  days.forEach(({ day, d }) => dosesOn(day).forEach(x => { protoNames.add(x.p.name); if(day <= today){ due++; if(d[x.key]) done++; } }));
+  const rxHtml = (rx.length || protoNames.size) ? `<div class="card wsum"><div class="lbl">Prescriptions</div>
+    ${rx.map(gr => `<div class="rxg"><div class="rxh">${esc(gr.label)}${gr.g === 'aas' && mg ? ` <span>· ${mg} mg / week</span>` : ''}</div>
+      ${gr.items.map(x => `<div class="rxi"><span>${esc(x.l)}</span><b>${esc(x.v)}${gr.g === 'aas' && num(x.v) != null ? ' mg' : ''}</b></div>`).join('')}</div>`).join('')}
+    ${protoNames.size ? `<div class="rxg"><div class="rxh">${esc([...protoNames].join(' · '))}</div>
+      <div class="rxi"><span>Doses ticked off</span><b>${done} of ${due}</b></div></div>` : ''}</div>` : '';
+
+  // every day's notes, together
+  const noted = days.filter(x => (x.d.notes || '').trim());
+  const notesHtml = `<div class="card wsum"><div class="lbl">Notes this week</div>
+    ${noted.length ? noted.map(x => `<div class="wnote" data-day="${x.day}"><b>${x.n} ${fmt(x.day)}</b><p>${esc(x.d.notes)}</p></div>`).join('')
+      : '<p class="sub" style="margin:8px 0 0">No notes yet. Add them in the Daily view.</p>'}
+    ${tg.note ? `<div class="wnote coach"><b>Timeline note</b><p>${esc(tg.note)}</p></div>` : ''}</div>`;
+
+  const rows = days.map(({ n, day, d }) => {
+    const fut = day > today;
+    return `<tr class="${fut ? 'fut' : 'tap'} ${day === today ? 'now' : ''}" ${fut ? '' : `data-day="${day}"`}><td><b>${n}</b> <small>${fmt(day)}</small>${(d.notes || '').trim() ? ' ✎' : ''}</td>
+      ${cols.map(([k, , dp]) => `<td>${cellOf(d, k, dp)}</td>`).join('')}</tr>`;
   }).join('');
   const avgRow = `<tr class="avg"><td><b>Averages</b></td><td>${nf(st.weight, 1)}</td><td>${nf(st.protein)}</td><td>${nf(st.carbs)}</td><td>${nf(st.fat)}</td>
     <td>${nf(st.fiber)}</td><td>${nf(st.kcal)}</td><td>${nf(st.steps)}</td><td>${st.sys != null ? nf(st.sys) + '/' + nf(st.dia) : '—'}</td><td>${nf(st.pulse)}</td><td>${st.n ? nf(st.cardio) : '—'}</td></tr>`;
   const tgRow = `<tr class="tg"><td><b>Target</b></td><td>${tg.target_bw != null ? nf(tg.target_bw, 1) : '—'}</td><td>${nf(tg.protein ?? null)}</td><td>${nf(tg.carbs ?? null)}</td><td>${nf(tg.fat ?? null)}</td>
     <td>${nf(tg.fiber ?? null)}</td><td>${nf(tg.kcal ?? null)}</td><td>${nf(tg.steps ?? null)}</td><td>—</td><td>—</td><td>${nf(tg.cardio ?? null)}</td></tr>`;
+
   const wk = logOf('weekly', mon);
   const sessions = LOGS.filter(l => l.kind === 'training' && l.day >= mon && l.day <= addDays(mon, 6)).sort((a, b) => a.day < b.day ? -1 : 1);
+  const files = filesOf(mon);
   showSection(`
     <div class="seg"><button id="segD">${esc(t('trk_dailyview'))}</button><button class="on">${esc(t('trk_weekview'))}</button></div>
     <h1 data-copy="trk_weekview">${esc(t('trk_weekview'))}</h1>
     <div class="dnav"><button id="vPrev" aria-label="Previous week">‹</button>
       <b>${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}</b>
       <button id="vNext" aria-label="Next week" ${mon >= mondayOf(today) ? 'disabled' : ''}>›</button></div>
-    ${tg.goal ? `<p class="sub" style="margin:-6px 0 12px">${esc(tg.goal)}</p>` : ''}
-    <div class="card" style="padding:12px 10px"><div class="histwrap"><table class="hist wv">
+    ${tg.goal || tg.event ? `<p class="sub" style="margin:-6px 0 12px">${esc([tg.goal, tg.event].filter(Boolean).join(' · '))}</p>` : ''}
+    <div class="card wsum"><div class="lbl">Averages</div>${avgHtml}</div>
+    ${rxHtml}
+    ${notesHtml}
+    <div class="card" style="padding:12px 10px;margin-bottom:14px"><div class="lbl" style="padding:4px 6px 8px">Day by day</div><div class="histwrap"><table class="hist wv">
       <thead><tr><th>Day</th>${cols.map(([, l]) => `<th>${l}</th>`).join('')}</tr></thead>
-      <tbody>${rows}${avgRow}${tgRow}</tbody></table></div></div>
-    <p class="updated" style="margin-top:10px">Tap a day to fill it in or fix it. Cardio is the week's total minutes.</p>
-    <div class="btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button class="btn ghost" id="vWeekly">${esc(t(wk ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
-      <button class="btn ghost" id="vLog">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
-    </div>
-    ${wk ? `<div class="card" style="margin-top:14px;padding:16px 18px"><div class="lbl">${esc(t('trk_weekly_title'))}</div>
-      <div class="wvq">${[['score','Score'],['energy','Energy'],['stress','Stress'],['mood','Mood'],['motivation','Motivation'],['sleep','Sleep'],['win','Win']].filter(([k]) => wk[k])
+      <tbody>${rows}${avgRow}${tgRow}</tbody></table></div>
+      <p class="updated" style="margin:8px 6px 4px">Tap a day to fill it in or fix it. ✎ = has a note.</p></div>
+    ${wk ? `<div class="card wsum"><div class="lbl">${esc(t('trk_weekly_title'))}</div>
+      <div class="wvq">${[['score','Score'],['energy','Energy'],['stress','Stress'],['mood','Mood'],['motivation','Motivation'],['sleep','Sleep'],['adherence','Diet adherence'],['win','Win'],['action','Number one action']].filter(([k]) => wk[k])
         .map(([k, l]) => `<div><span>${l}</span><b>${esc(wk[k])}</b></div>`).join('')}
       ${wk.m_waist != null ? `<div><span>Waist</span><b>${nf(wk.m_waist, 1)}</b></div>` : ''}
       ${skinTotal(wk) != null ? `<div><span>Skin folds</span><b>${nf(skinTotal(wk), 1)} mm</b></div>` : ''}</div></div>` : ''}
-    ${sessions.length ? `<div class="card" style="margin-top:14px;padding:16px 18px"><div class="lbl">Sessions</div>
-      ${sessions.map(l => `<p style="margin:8px 0 0;font-size:14px"><b>${dOf(l.day).toLocaleDateString('en-US', { weekday:'short' })}</b> · ${esc(l.data.day || 'Session')}</p>`).join('')}</div>` : ''}`);
+    ${sessions.length ? `<div class="card wsum"><div class="lbl">Sessions</div>
+      ${sessions.map(l => `<p style="margin:8px 0 0;font-size:14px"><b>${dOf(l.day).toLocaleDateString('en-US', { weekday:'short' })}</b> · ${esc(l.data.day || 'Session')}${l.data.notes ? ` <span class="sub">— ${esc(l.data.notes)}</span>` : ''}</p>`).join('')}</div>` : ''}
+    ${files.length || (wk && PICS.some(([k]) => wk[k])) ? `<div class="card wsum"><div class="lbl">Labs &amp; photos</div><div class="wfiles">
+      ${files.map(f => `<a href="${esc(f.u)}" target="_blank" rel="noopener">${f.t === 'photo' ? '🖼' : '📄'} ${esc(f.n)}</a>`).join('')}
+      ${wk ? PICS.filter(([k]) => wk[k]).map(([k, l]) => `<a href="${esc(wk[k])}" target="_blank" rel="noopener">🖼 ${l}</a>`).join('') : ''}</div></div>` : ''}
+    <div class="btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn ghost" id="vWeekly">${esc(t(wk ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
+      <button class="btn ghost" id="vLog">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
+    </div>`);
   const back = () => openWeekView(mon);
-  document.querySelectorAll('#aSection tr[data-day]').forEach(tr => tr.onclick = () => openDaily(tr.dataset.day, back));
+  document.querySelectorAll('#aSection tr[data-day], #aSection .wnote[data-day]').forEach(el => el.onclick = () => openDaily(el.dataset.day, back));
   $('#segD').onclick = () => openDaily(today < addDays(mon, 6) ? (today < mon ? mon : today) : addDays(mon, 6), back);
   $('#vPrev').onclick = () => openWeekView(addDays(mon, -7));
   $('#vNext').onclick = () => openWeekView(addDays(mon, 7));
