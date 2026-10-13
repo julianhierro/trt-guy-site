@@ -289,7 +289,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-14T00:00Z';
+const BUILD = '2026-10-14T01:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1409,7 +1409,7 @@ function drawTrackingBody(c){
       ${w.tr.sort((a, b) => a.day < b.day ? -1 : 1).map(l => {
         const d = l.data, ex = [];
         for(let i = 0; i < 40; i++) if(d['e' + i + 'n'] && (d['e' + i + 'w'] || d['e' + i + 'r'])) ex.push(`${esc(d['e' + i + 'n'])} <b>${esc([d['e' + i + 'w'], d['e' + i + 'r']].filter(Boolean).join(' × '))}</b>`);
-        return `<div class="trkqa" style="grid-template-columns:1fr"><div><span class="fl">Session · ${fmtDate(l.day)} · ${esc(d.day || '')}</span><p>${ex.join('<br>') || '—'}${d.notes ? `<br><i>${esc(d.notes)}</i>` : ''}</p></div></div>`;
+        return `<div class="trkqa" style="grid-template-columns:1fr"><div><span class="fl">Session · ${fmtDate(l.day)} · ${esc(d.day || '')}${d.sf ? ' · Fatigue: ' + esc(d.sf) : ''}${d.sp ? ' · Pump: ' + esc(d.sp) : ''}</span><p>${ex.join('<br>') || '—'}${d.notes ? `<br><i>${esc(d.notes)}</i>` : ''}</p></div></div>`;
       }).join('')}`;
     x.hidden = false;
   });
