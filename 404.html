@@ -259,6 +259,13 @@
   table.mg tr.mgday td.mgsess b{font-size:12px;margin-right:6px}
   table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{position:sticky;left:0;z-index:2;min-width:190px;max-width:230px;white-space:normal}
   table.mg .mgtitle2{background:#f3f3f3}
+  /* per-set weight / reps cells */
+  table.mg td.cw{background:#f7f7f7;min-width:38px;font-variant-numeric:tabular-nums;border-left:1px solid #e6e6e6}
+  table.mg td.cr{min-width:30px;font-weight:700;font-variant-numeric:tabular-nums}
+  table.mg tr.mgcols td.cw,table.mg tr.mgcols td.cr{font-size:9.5px;background:#d9d9d9}
+  .sx{display:inline-flex;align-items:baseline;gap:3px;border:1px solid #d9d9d9;border-radius:6px;padding:1px 6px;margin:0 4px 3px 0;background:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .sx i{font-style:normal;font-size:10px;color:#888}
+
   @media(max-width:520px){
     table.mg{font-size:11.5px}
     table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{min-width:128px;max-width:140px}
@@ -314,6 +321,11 @@
   .cnote{font-size:13.5px;background:var(--bg-2);border-radius:10px;padding:9px 12px;margin:10px 0 0;white-space:pre-wrap}
   .mex{margin-top:8px}
   .mlast{font-size:12.5px;color:var(--mut);margin-top:3px}
+  .mchips{display:flex;flex-wrap:wrap;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--txt)}
+  .mlog .last .mchips{margin-top:5px}
+  .mlog .last small{display:block;margin-top:2px}
+  .rrow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .rrow .cbtn{margin:0;background:rgba(255,255,255,.65);border-color:rgba(0,0,0,.15);color:#000;padding:8px 12px;font-size:13px}
   .sets{margin-top:10px}
   .sets .sh,.sets .set{display:grid;grid-template-columns:34px 1fr 1fr;gap:8px;align-items:center}
   .sets .sh{font-size:11.5px;font-weight:600;color:var(--mut);margin-bottom:4px}
@@ -491,7 +503,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-14T06:30Z';
+const BUILD = '2026-10-14T11:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1048,7 +1060,8 @@ function weekStats(mon){
   const a = k => avg(days.map(d => num(d[k])));
   return { n: days.length, weight: a('weight'), kcal: avg(days.map(kcalOf)), protein: a('protein'),
     carbs: a('carbs'), fat: a('fat'), fiber: a('fiber'), steps: a('steps'), sys: a('sys'), dia: a('dia'), pulse: a('pulse'),
-    cardio: days.reduce((s, d) => s + (num(d.cardio) || 0), 0) };
+    cardio: days.reduce((s, d) => s + (num(d.cardio) || 0), 0)
+      + LOGS.filter(l => l.kind === 'training' && l.day >= mon && l.day <= addDays(mon, 6)).reduce((s, l) => s + (num(l.data.c_min) || 0), 0) };
 }
 const skinTotal = w => { if(!w) return null; const v = SKINFOLDS.map(([k]) => num(w[k])).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
 function coachWeek(mon){
@@ -1630,6 +1643,13 @@ function mesoWeekColor(tp, i){
   const dark = ['#CC0000', '#FF0000', MESO_DELOAD].includes(bg);
   return { bg, fg: dark ? '#fff' : '#000' };
 }
+// Where an exercise sits in a logged session — matched by name, so moving exercises keeps their results.
+function mExAt(l, name, i){
+  if(!l) return -1;
+  if(l['e' + i + 'n'] === name) return i;
+  for(let j = 0; j < 40; j++) if(l['e' + j + 'n'] === name) return j;
+  return -1;
+}
 function mesoSetsOf(d, i){
   const out = [];
   for(let j = 0; j < 12; j++){ const w = d['e' + i + 's' + j + 'w'], r = d['e' + i + 's' + j + 'r']; if(w || r) out[j] = { w: w || '', r: r || '' }; }
@@ -1661,7 +1681,7 @@ function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
         const g = MUSCLE_OF[e.cat] || e.cat || 'Other';
         pres[g] = pres[g] || Array(W).fill(0); done[g] = done[g] || Array(W).fill(null);
         pres[g][wi] += Number(((e.wk || [])[wi] || {}).sets) || 0;
-        if(l){ const n = l['e' + i + 'n'] === (e.n || e.cat) ? mesoSetsOf(l, i).filter(x => x && x.r).length : 0;
+        if(l){ const k = mExAt(l, e.n || e.cat, i), n = k >= 0 ? mesoSetsOf(l, k).filter(x => x && x.r).length : 0;
           done[g][wi] = (done[g][wi] || 0) + n; }
       });
     });
@@ -1676,36 +1696,64 @@ function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
         return `<td>${p}${d != null ? `<small class="${d >= p ? 'ok' : 'low'}"> · ${d} done</small>` : ''}</td>`; }).join('')}</tr>`).join('')}
       <tr class="tot"><td>Total</td>${(tp.weeks || []).map((_, wi) => `<td>${tot(wi)}</td>`).join('')}</tr></tbody></table></div>`;
 }
+// Per-set chips: "1 205×10 · 2 205×8 · 3 200×6" — every set keeps its own weight.
+function setChipsHtml(sets, escFn){
+  return (sets || []).map((x, j) => x && (x.w || x.r) ? `<span class="sx"><i>${j + 1}</i>${escFn(x.w || '—')}×${escFn(x.r || '—')}</span>` : '').join('');
+}
+const cardioTxt = l => l && (l.c_min || l.c_type) ? [l.c_type, l.c_min && l.c_min + ' min', l.c_hr && l.c_hr + ' bpm'].filter(Boolean).join(' · ') : '';
+// How many set columns a week needs: the most sets prescribed or logged in that week.
+function mesoSetCols(tp, logFor, wi){
+  let n = 1;
+  (tp.days || []).forEach((day, di) => {
+    if(day.rest) return;
+    const l = logFor(wi, di);
+    (day.ex || []).forEach((e, i) => {
+      n = Math.max(n, Number(((e.wk || [])[wi] || {}).sets) || 0);
+      const k = mExAt(l, e.n || e.cat, i);
+      if(k >= 0) n = Math.max(n, mesoSetsOf(l, k).length);
+    });
+  });
+  return Math.min(n, 8);
+}
 function mesoGridHtml(tp, logFor, escFn, nowWeek){
-  const W = (tp.weeks || []).length, cols = 4;   // per week: RIR · Sets · Results · Notes
-  const span = 3 + W * (cols + 1);
-  const wkHead = (tp.weeks || []).map((w, i) => { const c = mesoWeekColor(tp, i);
-    return `<th colspan="${cols}" class="mgw" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
-  const colHead = (tp.weeks || []).map(() => `<td class="c">RIR</td><td class="c">Sets</td><td>Weight × Reps</td><td>Notes</td><td class="mgsp"></td>`).join('');
+  const weeks = tp.weeks || [];
+  const N = weeks.map((_, wi) => mesoSetCols(tp, logFor, wi));        // set columns per week
+  const C = N.map(n => 2 + n * 2 + 1);                                 // RIR · Sets · (lb · reps)×n · Notes
+  const span = 3 + C.reduce((a, c) => a + c + 1, 0);
+  const wkHead = weeks.map((w, i) => { const c = mesoWeekColor(tp, i);
+    return `<th colspan="${C[i]}" class="mgw" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
+  const colHead = weeks.map((_, wi) => `<td class="c">RIR</td><td class="c">Sets</td>${[...Array(N[wi])].map((_, j) =>
+    `<td class="c cw">S${j + 1} lb</td><td class="c cr">reps</td>`).join('')}<td>Notes</td><td class="mgsp"></td>`).join('');
   const cut = (txt, cls) => `<td class="${cls || ''}" title="${escFn(txt)}"><div class="cl">${escFn(txt)}</div></td>`;
   const body = (tp.days || []).map((day, di) => {
-    if(day.rest) return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="${span}">${escFn(day.name)}</td></tr>`;
-    const logs = (tp.weeks || []).map((_, wi) => logFor(wi, di));
-    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
-      const info = l ? '✓ ' + ([l.sf, l.sp].filter(Boolean).join(' · ') || 'logged') : '';
-      return `<td colspan="${cols}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((tp.weeks[wi] || {}).label || '')}</b> ${escFn(info)}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
-    const notes = (tp.weeks || []).some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
-      `<td colspan="${cols}" title="${escFn((day.notes || [])[wi] || '')}"><div class="cl">${escFn((day.notes || [])[wi] || '')}</div></td><td class="mgsp"></td>`).join('')}</tr>` : '';
+    const logs = weeks.map((_, wi) => logFor(wi, di));
+    if(day.rest){
+      const cardio = weeks.map((_, wi) => cardioTxt(logs[wi]));
+      return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="3">${escFn(day.name)}</td>${weeks.map((_, wi) =>
+        `<td colspan="${C[wi]}" title="${escFn(cardio[wi])}"><div class="cl">${cardio[wi] ? '🏃 ' + escFn(cardio[wi]) : ''}</div></td><td class="mgsp"></td>`).join('')}</tr>`;
+    }
+    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${weeks.map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
+      const bits = l ? [l.sf, l.sp, cardioTxt(l) && '🏃 ' + cardioTxt(l)].filter(Boolean) : [];
+      return `<td colspan="${C[wi]}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp, cardioTxt(l) && 'Cardio: ' + cardioTxt(l)].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((weeks[wi] || {}).label || '')}</b> ${l ? '✓ ' + escFn(bits.join(' · ') || 'logged') : ''}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
+    const notes = weeks.some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${weeks.map((_, wi) =>
+      `<td colspan="${C[wi]}" title="${escFn((day.notes || [])[wi] || '')}"><div class="cl">${escFn((day.notes || [])[wi] || '')}</div></td><td class="mgsp"></td>`).join('')}</tr>` : '';
     const rows = (day.ex || []).map((e, i) => { const name = e.n || e.cat;
       return `<tr><td class="mgex" title="${escFn(name)}"><div class="cl">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</div></td>
         <td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
-        ${(tp.weeks || []).map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
-          const mine = l && l['e' + i + 'n'] === name;
+        ${weeks.map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
+          const k = mExAt(l, name, i), sets = k >= 0 ? mesoSetsOf(l, k) : [];
           return `<td class="c">${escFn(w.rir ?? '')}</td><td class="c">${escFn(w.sets ?? '')}</td>
-            ${cut(mine ? compactSets(mesoSetsOf(l, i)) : '', 'mgres')}${cut(mine ? l['e' + i + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
-    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
-      `<td colspan="${cols}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
+            ${[...Array(N[wi])].map((_, j) => { const x = sets[j] || {};
+              return `<td class="c cw">${escFn(x.w || '')}</td><td class="c cr">${escFn(x.r || '')}</td>`; }).join('')}
+            ${cut(k >= 0 ? l['e' + k + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
+    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${weeks.map((_, wi) =>
+      `<td colspan="${C[wi]}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
     return head + notes + `<tr class="mgcols"><td>Exercise</td><td class="c">Reps</td><td class="c">Tempo</td>${colHead}</tr>` + rows + vol;
   }).join('');
-  const total = (tp.weeks || []).map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
+  const total = weeks.map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
   return `<div class="mgwrap"><table class="mg">
     <thead><tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
-    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map(v => `<td colspan="${cols}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
+    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map((v, wi) => `<td colspan="${C[wi]}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
     ${tp.progression ? `<p class="mgprogline">PROGRESSION: ${escFn(tp.progression)}</p>` : ''}`;
 }
 
@@ -1754,8 +1802,23 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeVideo();
 const FATIGUE = ['None, feel very fresh','Very little fatigue','Moderate fatigue','Very noticeable fatigue','Overwhelming fatigue'];
 const PUMP = ['Amazing pumps','Noticeable to okay pump','Very little pump','No pump'];
 // A session is filed under its slot: week w, day d → Monday of that week + d.
-const mesoDay = (tp, w, d) => addDays(mondayOf(tp.start || todayIso()), w * 7 + d);
-const mesoLog = (tp, w, d) => { const l = logOf('training', mesoDay(tp, w, d)); return l && l.m && l.w === w && l.d === d ? l : null; };
+// A logged session belongs to a day by its permanent id (older logs only carry the day's position).
+const mDayId = (day, di) => (day && day.id) || ('d' + di);
+const mLogDid = d => d.did || ('d' + d.d);
+function mesoEntry(tp, w, di){
+  const id = mDayId(tp.days[di], di);
+  return LOGS.find(l => l.kind === 'training' && l.data.m && l.data.w === w && mLogDid(l.data) === id) || null;
+}
+const mesoLog = (tp, w, d) => { const e = mesoEntry(tp, w, d); return e ? e.data : null; };
+// The date a session is filed under: its existing log's date, else that week's day d (or the next free one).
+function mesoDay(tp, w, d){
+  const e = mesoEntry(tp, w, d); if(e) return e.day;
+  const mon = addDays(mondayOf(tp.start || todayIso()), w * 7), pref = addDays(mon, Math.min(d, 6));
+  const taken = new Set(LOGS.filter(l => l.kind === 'training').map(l => l.day));
+  if(!taken.has(pref)) return pref;
+  for(let i = 0; i < 7; i++){ const x = addDays(mon, i); if(!taken.has(x)) return x; }
+  return pref;
+}
 // Per-set results live as e{i}s{j}w / e{i}s{j}r. Older logs only have e{i}w + e{i}r ("12,10,8").
 function setsOf(d, i){
   const out = [];
@@ -1789,7 +1852,9 @@ function openMeso(wi){
       return `<button data-wi="${i}" class="${i === wi ? 'on' : ''}" style="background:${col.bg};color:${col.fg};border-color:${col.bg}">${esc(w.label || 'Week ' + (i + 1))}</button>`; }).join('')}</div>
     <p class="sub" style="margin:0 0 14px">${nf(vol)} total sets this week${wk.deload && tp.deload_note ? ' · deload: ' + esc(tp.deload_note) : ''}</p>
     ${tp.days.map((day, di) => {
-      if(day.rest) return `<div class="card tday rest ${/^day/i.test(day.name || '') ? '' : 'full'}"><b>${esc(day.name)}</b></div>`;
+      if(day.rest){ const cl = mesoLog(tp, wi, di);
+        return `<div class="card tday rest ${/^day/i.test(day.name || '') ? '' : 'full'}"><div class="rrow"><b>${esc(day.name)}</b>
+          <button class="btn ghost sm cbtn" data-log="${di}">${cardioTxt(cl) ? '🏃 ' + esc(cardioTxt(cl)) : '+ Log cardio'}</button></div></div>`; }
       const log = mesoLog(tp, wi, di), note = (day.notes || [])[wi];
       return `<div class="card tday">
         <div class="tdh mday"><b>${esc(day.name)}</b>${log ? '<span>✓ logged</span>' : ''}</div>
@@ -1797,7 +1862,7 @@ function openMeso(wi){
         <div class="mex">${(day.ex || []).map(e => { const w = (e.wk || [])[wi] || {};
           return `<div class="mrow"><div class="mn">${e.v ? `<a href="${esc(e.v)}" data-vid="${esc(e.v)}" data-vt="${esc(e.n || e.cat)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ▶</a>` : esc(e.n || e.cat)}</div>
             <div class="mp">${[e.reps && e.reps + ' reps', e.tempo && 'tempo ' + e.tempo, w.rir !== '' && w.rir != null && 'RIR ' + w.rir, w.sets && w.sets + ' sets'].filter(Boolean).map(esc).join(' · ')}</div>
-            ${(() => { const p = lastPerf(e.n || e.cat, mesoDay(tp, wi, di)); return p ? `<div class="mlast">Last session (${dOf(p.day).toLocaleDateString('en-US', { weekday:'short' })} ${fmt(p.day)}): <b>${esc(perfTxt(p))}</b></div>` : ''; })()}</div>`; }).join('')}</div>
+            ${(() => { const p = lastPerf(e.n || e.cat, mesoDay(tp, wi, di)); return p ? `<div class="mlast">Last session (${dOf(p.day).toLocaleDateString('en-US', { weekday:'short' })} ${fmt(p.day)}):</div><div class="mchips">${setChipsHtml(p.sets, esc)}</div>` : ''; })()}</div>`; }).join('')}</div>
         <button class="btn ghost sm" data-log="${di}">${log ? 'Edit log' : esc(t('trk_train_log'))}</button>
       </div>`;
     }).join('')}`);
@@ -1807,7 +1872,12 @@ function openMeso(wi){
 }
 function openMesoLog(wi, di){
   const tp = secs().training_plan, day = tp.days[di], wk = tp.weeks[wi] || {};
-  const saved = mesoLog(tp, wi, di) || {}, slot = mesoDay(tp, wi, di), prev = lastSession(slot);
+  // Re-key the saved session to the current exercise order (exercises may have been moved since).
+  const raw = mesoLog(tp, wi, di) || {}, saved = {};
+  Object.keys(raw).filter(k => !/^e\d+/.test(k)).forEach(k => { saved[k] = raw[k]; });
+  (day.ex || []).forEach((e, i) => { const k = mExAt(raw, e.n || e.cat, i); if(k < 0) return;
+    Object.keys(raw).forEach(key => { const m = key.match(/^e(\d+)(\D.*)$/); if(m && +m[1] === k) saved['e' + i + m[2]] = raw[key]; }); });
+  const slot = mesoDay(tp, wi, di), prev = lastSession(slot);
   const prevWhen = prev ? `${esc(prev.data.day || '')} · ${fmt(prev.day)}` : '';
   const note = (day.notes || [])[wi];
   const chips = (key, opts, val) => `<div class="opts col" data-k="${key}">${opts.map(o => `<button type="button" class="${val === o ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
@@ -1815,14 +1885,14 @@ function openMesoLog(wi, di){
     <h1>${esc(day.name)}</h1>
     <p class="sub" style="margin:-8px 0 14px">${esc(wk.label || '')}${tp.start ? ' · ' + fmt(mesoDay(tp, wi, di)) : ''}</p>
     ${note ? `<p class="cnote"><b>Coach's Notes:</b> ${esc(note)}</p>` : ''}
-    <div class="card mlog"><p class="qt">Fatigue <small>— before you start</small></p>
-      ${prev && prev.data.sf ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sf)}</p>` : ''}${chips('sf', FATIGUE, saved.sf)}</div>
+    ${day.rest ? '' : `<div class="card mlog"><p class="qt">Fatigue <small>— before you start</small></p>
+      ${prev && prev.data.sf ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sf)}</p>` : ''}${chips('sf', FATIGUE, saved.sf)}</div>`}
     ${(day.ex || []).map((e, i) => { const w = (e.wk || [])[wi] || {};
       const p = lastPerf(e.n || e.cat, slot);
       return `<div class="card mlog">
         <p class="qt">${e.v ? `<a href="${esc(e.v)}" data-vid="${esc(e.v)}" data-vt="${esc(e.n || e.cat)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ▶</a>` : esc(e.n || e.cat)}</p>
         <p class="qh">${[e.reps && e.reps + ' reps', e.tempo && 'tempo ' + e.tempo, w.rir !== '' && w.rir != null && 'RIR ' + w.rir, w.sets && w.sets + ' sets'].filter(Boolean).map(esc).join(' · ')}</p>
-        ${p ? `<p class="qh last">Last session (${dOf(p.day).toLocaleDateString('en-US', { weekday:'short' })} ${fmt(p.day)}): ${esc(perfTxt(p))}${p.x ? `<br><small>“${esc(p.x)}”</small>` : ''}</p>` : ''}
+        ${p ? `<div class="qh last">Last session (${dOf(p.day).toLocaleDateString('en-US', { weekday:'short' })} ${fmt(p.day)})<div class="mchips">${setChipsHtml(p.sets, esc)}</div>${p.x ? `<small>“${esc(p.x)}”</small>` : ''}</div>` : ''}
         ${(() => { const mine = setsOf(saved, i), lastS = p ? p.sets : [];
           const n = Math.max(num(w.sets) || 3, mine.length);
           return `<div class="sets" data-ex="${i}"><div class="sh"><span>Set</span><span>Weight</span><span>Reps</span></div>
@@ -1832,8 +1902,13 @@ function openMesoLog(wi, di){
             <button type="button" class="addset" data-add="${i}">+ set</button></div>`; })()}
         <input class="exnote" data-k="e${i}x" value="${esc(saved['e' + i + 'x'] || '')}" placeholder="Notes">
       </div>`; }).join('')}
-    <div class="card mlog"><p class="qt">Pump <small>— for the whole session</small></p>
-      ${prev && prev.data.sp ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sp)}</p>` : ''}${chips('sp', PUMP, saved.sp)}</div>
+    ${day.rest ? '' : `<div class="card mlog"><p class="qt">Pump <small>— for the whole session</small></p>
+      ${prev && prev.data.sp ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sp)}</p>` : ''}${chips('sp', PUMP, saved.sp)}</div>`}
+    <div class="card mlog"><p class="qt">Cardio <small>— optional</small></p>
+      <div class="fgrid three" style="margin-top:8px"><div class="f" style="grid-column:span 3"><label>Type</label><input data-k="c_type" list="cardioTypes" value="${esc(saved.c_type || '')}" placeholder="Incline walk, bike, StairMaster…"></div>
+        <div class="f"><label>Minutes</label><input data-k="c_min" inputmode="numeric" value="${esc(saved.c_min || '')}"></div>
+        <div class="f"><label>Avg HR</label><input data-k="c_hr" inputmode="numeric" value="${esc(saved.c_hr || '')}" placeholder="bpm"></div></div>
+      <datalist id="cardioTypes"><option value="Incline walk"><option value="Walk"><option value="Bike"><option value="StairMaster"><option value="Elliptical"><option value="Rower"><option value="Run"><option value="Swim"><option value="HIIT"></datalist></div>
     <div class="f"><label for="s_notes">Notes on this session</label><textarea id="s_notes">${esc(saved.notes || '')}</textarea></div>
     <button class="btn" id="sSave">${esc(t('trk_train_log'))}</button>
     <p class="saved" id="sMsg"></p>`);
@@ -1865,7 +1940,7 @@ function openMesoLog(wi, di){
       if(rs.some(Boolean)) d['e' + i + 'r'] = rs.join(',');
     });
     const n = $('#s_notes').value.trim(); if(n) d.notes = n; else delete d.notes;
-    Object.assign(d, { m: 1, w: wi, d: di, day: day.name || '' });
+    Object.assign(d, { m: 1, w: wi, d: di, did: mDayId(day, di), day: day.name || '' });
     (day.ex || []).forEach((e, i) => { d['e' + i + 'n'] = e.n || e.cat; });
     if(await saveLog('training', mesoDay(tp, wi, di), d, $('#sSave'), $('#sMsg'), true)) setTimeout(() => openMeso(wi), 650);
   };

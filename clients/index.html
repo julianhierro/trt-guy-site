@@ -155,6 +155,17 @@
   .trkqa .fl{margin:0}
   .trkqa p{margin:0 0 6px;font-size:13px;color:var(--fg);white-space:pre-wrap}
   .panel.wide{width:min(1240px,100%)}
+  .sect.mday{margin-bottom:6px}
+  .sect.mday.isrest{background:#e9f3e4;border-color:#b6d7a8}
+  .dnum{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#000;color:#fff;font-size:11.5px;font-weight:800;flex:0 0 auto}
+  .isrest .dnum{background:#6aa84f}
+  .dtools{display:flex;gap:4px;align-items:center}
+  .tlx.big{font-size:14px;padding:4px 7px;border:1px solid var(--line-bright);border-radius:7px;background:var(--panel)}
+  .tlx:disabled{opacity:.3;cursor:default}
+  table.meso td.mv2{white-space:nowrap;vertical-align:middle}
+  .dins{display:flex;gap:6px;justify-content:center;margin:0 0 8px;opacity:.55;transition:opacity .15s}
+  .dins:hover{opacity:1}
+  .dins .tladd{border:1px dashed var(--line-bright);border-radius:7px;padding:5px 10px}
   .mgwrap{overflow:auto;border:1px solid #d9d9d9;border-radius:12px;background:#fff;max-height:78vh}
   table.mg{border-collapse:separate;border-spacing:0;font-size:12px;color:#000;font-family:Inter,system-ui,sans-serif}
   table.mg th,table.mg td{padding:6px 8px;border-bottom:1px solid #e3e3e3;white-space:nowrap;vertical-align:top}
@@ -170,6 +181,13 @@
   table.mg tr.mgday td.mgsess b{font-size:12px;margin-right:6px}
   table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{position:sticky;left:0;z-index:2;min-width:190px;max-width:230px;white-space:normal}
   table.mg .mgtitle2{background:#f3f3f3}
+  /* per-set weight / reps cells */
+  table.mg td.cw{background:#f7f7f7;min-width:38px;font-variant-numeric:tabular-nums;border-left:1px solid #e6e6e6}
+  table.mg td.cr{min-width:30px;font-weight:700;font-variant-numeric:tabular-nums}
+  table.mg tr.mgcols td.cw,table.mg tr.mgcols td.cr{font-size:9.5px;background:#d9d9d9}
+  .sx{display:inline-flex;align-items:baseline;gap:3px;border:1px solid #d9d9d9;border-radius:6px;padding:1px 6px;margin:0 4px 3px 0;background:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .sx i{font-style:normal;font-size:10px;color:#888}
+
   @media(max-width:520px){
     table.mg{font-size:11.5px}
     table.mg tbody tr:not(.mgrest):not(.mggap) td:first-child{min-width:128px;max-width:140px}
@@ -236,6 +254,13 @@
   table.mweek .cl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   table.mweek td:first-child .cl{max-width:210px}
   table.mweek td.res .cl{max-width:190px;font-weight:600}
+  table.mweek th.setg{border-left:1px solid var(--line);padding-bottom:0}
+  table.mweek td.cw,table.mweek th.cw{background:var(--panel-2);border-left:1px solid var(--line);min-width:48px}
+  table.mweek td.cr,table.mweek th.cr{min-width:40px}
+  table.mweek td.cr{font-weight:700}
+  table.mweek td.cw{font-weight:600;font-variant-numeric:tabular-nums}
+  table.mweek td.lastc{white-space:nowrap;font-size:11.5px}
+  .mwrest .hint{margin-left:6px}
   table.mweek td.csub .cl{max-width:180px}
   table.mweek td.nt .cl{max-width:160px}
   table.mweek td a{color:var(--fg);text-decoration:none}
@@ -248,7 +273,8 @@
   table.meso th span{font-size:8px;letter-spacing:.04em}
   table.meso td{padding:2px;vertical-align:top}
   table.meso select{padding:6px;font-size:12.5px;min-width:130px}
-  table.meso td:nth-child(2) select{min-width:210px}
+  table.meso td:nth-child(2) select{min-width:140px}
+  table.meso td:nth-child(3) select{min-width:240px}
   table.meso input.sm{width:72px;padding:6px;font-size:12.5px}
   table.meso input.xs{width:46px;padding:6px 4px;font-size:12.5px;text-align:center}
   table.meso .dl{background:var(--accent-soft)}
@@ -378,7 +404,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-14T07:00Z';
+const BUILD = '2026-10-14T11:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1374,7 +1400,8 @@ function tWeekStats(c, m){
   const a = k => tAvg(got.map(d => tNum(d[k])));
   return { days, n: got.length, weight: a('weight'), kcal: tAvg(got.map(tKcalOf)), protein: a('protein'), carbs: a('carbs'),
     fat: a('fat'), fiber: a('fiber'), steps: a('steps'), sys: a('sys'), dia: a('dia'), pulse: a('pulse'),
-    cardio: got.reduce((s, d) => s + (tNum(d.cardio) || 0), 0) };
+    cardio: got.reduce((s, d) => s + (tNum(d.cardio) || 0), 0)
+      + (c._logs || []).filter(l => l.kind === 'training' && l.day >= m && l.day <= tAdd(m, 6)).reduce((s, l) => s + (tNum(l.data.c_min) || 0), 0) };
 }
 const tlRowsOf = c => {
   const r = (c.sections || {}).timeline_rows;
@@ -1730,11 +1757,18 @@ let EX_CUSTOM = null;
 async function loadExCustom(){
   if(EX_CUSTOM) return false;
   try { EX_CUSTOM = (await api('/clients?action=exlib')).lib || {}; } catch(e){ EX_CUSTOM = {}; return false; }
+  Object.keys(EX_CUSTOM).forEach(cat => { EX_LIB[cat] = EX_LIB[cat] || []; }) ;
   Object.keys(EX_CUSTOM).forEach(cat => (EX_CUSTOM[cat] || []).forEach(([n, v]) => {
-    EX_LIB[cat] = EX_LIB[cat] || [];
     if(!EX_LIB[cat].some(([x]) => x === n)) EX_LIB[cat].push([n, v || '', 'custom']);
   }));
   return true;
+}
+async function addCategory(cat){
+  await loadExCustom();
+  EX_CUSTOM[cat] = EX_CUSTOM[cat] || [];
+  EX_LIB[cat] = EX_LIB[cat] || [];
+  try { await api('/clients', { method:'POST', body: JSON.stringify({ action:'exlib_save', lib: EX_CUSTOM }) }); toast(`Muscle group “${cat}” added`); }
+  catch(e){ alert('Could not save the muscle group: ' + e.message); }
 }
 async function addToLibrary(cat, n, v){
   await loadExCustom();
@@ -1755,6 +1789,13 @@ function mesoWeekColor(tp, i){
   const bg = w.deload ? MESO_DELOAD : MESO_WEEK_COLORS[Math.min(i, MESO_WEEK_COLORS.length - 1)];
   const dark = ['#CC0000', '#FF0000', MESO_DELOAD].includes(bg);
   return { bg, fg: dark ? '#fff' : '#000' };
+}
+// Where an exercise sits in a logged session — matched by name, so moving exercises keeps their results.
+function mExAt(l, name, i){
+  if(!l) return -1;
+  if(l['e' + i + 'n'] === name) return i;
+  for(let j = 0; j < 40; j++) if(l['e' + j + 'n'] === name) return j;
+  return -1;
 }
 function mesoSetsOf(d, i){
   const out = [];
@@ -1787,7 +1828,7 @@ function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
         const g = MUSCLE_OF[e.cat] || e.cat || 'Other';
         pres[g] = pres[g] || Array(W).fill(0); done[g] = done[g] || Array(W).fill(null);
         pres[g][wi] += Number(((e.wk || [])[wi] || {}).sets) || 0;
-        if(l){ const n = l['e' + i + 'n'] === (e.n || e.cat) ? mesoSetsOf(l, i).filter(x => x && x.r).length : 0;
+        if(l){ const k = mExAt(l, e.n || e.cat, i), n = k >= 0 ? mesoSetsOf(l, k).filter(x => x && x.r).length : 0;
           done[g][wi] = (done[g][wi] || 0) + n; }
       });
     });
@@ -1802,36 +1843,64 @@ function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
         return `<td>${p}${d != null ? `<small class="${d >= p ? 'ok' : 'low'}"> · ${d} done</small>` : ''}</td>`; }).join('')}</tr>`).join('')}
       <tr class="tot"><td>Total</td>${(tp.weeks || []).map((_, wi) => `<td>${tot(wi)}</td>`).join('')}</tr></tbody></table></div>`;
 }
+// Per-set chips: "1 205×10 · 2 205×8 · 3 200×6" — every set keeps its own weight.
+function setChipsHtml(sets, escFn){
+  return (sets || []).map((x, j) => x && (x.w || x.r) ? `<span class="sx"><i>${j + 1}</i>${escFn(x.w || '—')}×${escFn(x.r || '—')}</span>` : '').join('');
+}
+const cardioTxt = l => l && (l.c_min || l.c_type) ? [l.c_type, l.c_min && l.c_min + ' min', l.c_hr && l.c_hr + ' bpm'].filter(Boolean).join(' · ') : '';
+// How many set columns a week needs: the most sets prescribed or logged in that week.
+function mesoSetCols(tp, logFor, wi){
+  let n = 1;
+  (tp.days || []).forEach((day, di) => {
+    if(day.rest) return;
+    const l = logFor(wi, di);
+    (day.ex || []).forEach((e, i) => {
+      n = Math.max(n, Number(((e.wk || [])[wi] || {}).sets) || 0);
+      const k = mExAt(l, e.n || e.cat, i);
+      if(k >= 0) n = Math.max(n, mesoSetsOf(l, k).length);
+    });
+  });
+  return Math.min(n, 8);
+}
 function mesoGridHtml(tp, logFor, escFn, nowWeek){
-  const W = (tp.weeks || []).length, cols = 4;   // per week: RIR · Sets · Results · Notes
-  const span = 3 + W * (cols + 1);
-  const wkHead = (tp.weeks || []).map((w, i) => { const c = mesoWeekColor(tp, i);
-    return `<th colspan="${cols}" class="mgw" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
-  const colHead = (tp.weeks || []).map(() => `<td class="c">RIR</td><td class="c">Sets</td><td>Weight × Reps</td><td>Notes</td><td class="mgsp"></td>`).join('');
+  const weeks = tp.weeks || [];
+  const N = weeks.map((_, wi) => mesoSetCols(tp, logFor, wi));        // set columns per week
+  const C = N.map(n => 2 + n * 2 + 1);                                 // RIR · Sets · (lb · reps)×n · Notes
+  const span = 3 + C.reduce((a, c) => a + c + 1, 0);
+  const wkHead = weeks.map((w, i) => { const c = mesoWeekColor(tp, i);
+    return `<th colspan="${C[i]}" class="mgw" style="background:${c.bg};color:${c.fg}">${escFn(w.label || 'Week ' + (i + 1))}${i === nowWeek ? ' •' : ''}</th><th class="mgsp"></th>`; }).join('');
+  const colHead = weeks.map((_, wi) => `<td class="c">RIR</td><td class="c">Sets</td>${[...Array(N[wi])].map((_, j) =>
+    `<td class="c cw">S${j + 1} lb</td><td class="c cr">reps</td>`).join('')}<td>Notes</td><td class="mgsp"></td>`).join('');
   const cut = (txt, cls) => `<td class="${cls || ''}" title="${escFn(txt)}"><div class="cl">${escFn(txt)}</div></td>`;
   const body = (tp.days || []).map((day, di) => {
-    if(day.rest) return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="${span}">${escFn(day.name)}</td></tr>`;
-    const logs = (tp.weeks || []).map((_, wi) => logFor(wi, di));
-    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
-      const info = l ? '✓ ' + ([l.sf, l.sp].filter(Boolean).join(' · ') || 'logged') : '';
-      return `<td colspan="${cols}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((tp.weeks[wi] || {}).label || '')}</b> ${escFn(info)}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
-    const notes = (tp.weeks || []).some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
-      `<td colspan="${cols}" title="${escFn((day.notes || [])[wi] || '')}"><div class="cl">${escFn((day.notes || [])[wi] || '')}</div></td><td class="mgsp"></td>`).join('')}</tr>` : '';
+    const logs = weeks.map((_, wi) => logFor(wi, di));
+    if(day.rest){
+      const cardio = weeks.map((_, wi) => cardioTxt(logs[wi]));
+      return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="3">${escFn(day.name)}</td>${weeks.map((_, wi) =>
+        `<td colspan="${C[wi]}" title="${escFn(cardio[wi])}"><div class="cl">${cardio[wi] ? '🏃 ' + escFn(cardio[wi]) : ''}</div></td><td class="mgsp"></td>`).join('')}</tr>`;
+    }
+    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${weeks.map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
+      const bits = l ? [l.sf, l.sp, cardioTxt(l) && '🏃 ' + cardioTxt(l)].filter(Boolean) : [];
+      return `<td colspan="${C[wi]}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp, cardioTxt(l) && 'Cardio: ' + cardioTxt(l)].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((weeks[wi] || {}).label || '')}</b> ${l ? '✓ ' + escFn(bits.join(' · ') || 'logged') : ''}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
+    const notes = weeks.some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${weeks.map((_, wi) =>
+      `<td colspan="${C[wi]}" title="${escFn((day.notes || [])[wi] || '')}"><div class="cl">${escFn((day.notes || [])[wi] || '')}</div></td><td class="mgsp"></td>`).join('')}</tr>` : '';
     const rows = (day.ex || []).map((e, i) => { const name = e.n || e.cat;
       return `<tr><td class="mgex" title="${escFn(name)}"><div class="cl">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</div></td>
         <td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
-        ${(tp.weeks || []).map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
-          const mine = l && l['e' + i + 'n'] === name;
+        ${weeks.map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
+          const k = mExAt(l, name, i), sets = k >= 0 ? mesoSetsOf(l, k) : [];
           return `<td class="c">${escFn(w.rir ?? '')}</td><td class="c">${escFn(w.sets ?? '')}</td>
-            ${cut(mine ? compactSets(mesoSetsOf(l, i)) : '', 'mgres')}${cut(mine ? l['e' + i + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
-    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${(tp.weeks || []).map((_, wi) =>
-      `<td colspan="${cols}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
+            ${[...Array(N[wi])].map((_, j) => { const x = sets[j] || {};
+              return `<td class="c cw">${escFn(x.w || '')}</td><td class="c cr">${escFn(x.r || '')}</td>`; }).join('')}
+            ${cut(k >= 0 ? l['e' + k + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
+    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${weeks.map((_, wi) =>
+      `<td colspan="${C[wi]}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
     return head + notes + `<tr class="mgcols"><td>Exercise</td><td class="c">Reps</td><td class="c">Tempo</td>${colHead}</tr>` + rows + vol;
   }).join('');
-  const total = (tp.weeks || []).map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
+  const total = weeks.map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
   return `<div class="mgwrap"><table class="mg">
     <thead><tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
-    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map(v => `<td colspan="${cols}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
+    <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map((v, wi) => `<td colspan="${C[wi]}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
     ${tp.progression ? `<p class="mgprogline">PROGRESSION: ${escFn(tp.progression)}</p>` : ''}`;
 }
 
@@ -1844,7 +1913,7 @@ async function drawMesoFull(c, b){
   const start = tMon(tp.start || tIso(new Date()));
   const nowIdx = Math.floor((tD(tIso(new Date())) - tD(start)) / 6048e5);
   const logs = (c._logs || []).filter(l => l.kind === 'training' && l.data.m);
-  const logFor = (wi, di) => { const l = logs.find(x => x.day === tAdd(start, wi * 7 + di)); return l && l.data.w === wi && l.data.d === di ? l.data : null; };
+  const logFor = (wi, di) => { const id = mDayId(tp.days[di], di); const l = logs.find(x => x.data.w === wi && mLogDid(x.data) === id); return l ? l.data : null; };
   b.innerHTML = `<div class="mseg"><button id="msWeek">Week view</button><button class="on">Full plan</button><button id="msEdit">Edit plan</button></div>
     ${mesoGridHtml(tp, logFor, esc, nowIdx)}
     ${mesoVolumeHtml(tp, logFor, esc, nowIdx)}
@@ -1857,6 +1926,9 @@ async function drawMesoFull(c, b){
    he did, set by set, with last session alongside. */
 let MW = null;       // week open in the week view
 let MESO_MODE = 'week';
+// A logged session belongs to a day by its permanent id (older logs only carry the day's position).
+const mDayId = (day, di) => (day && day.id) || ('d' + di);
+const mLogDid = d => d.did || ('d' + d.d);
 function mSetsOf(d, i){
   const out = [];
   for(let j = 0; j < 12; j++){ const w = d['e' + i + 's' + j + 'w'], r = d['e' + i + 's' + j + 'r']; if(w || r) out[j] = { w: w || '', r: r || '' }; }
@@ -1874,7 +1946,9 @@ async function drawMesoWeek(c, b){
   if(MW == null || MW >= tp.weeks.length) MW = Math.max(0, Math.min(tp.weeks.length - 1, nowIdx));
   const wi = MW, slot = di => tAdd(start, wi * 7 + di);
   const logs = (c._logs || []).filter(l => l.kind === 'training' && l.data.m);
-  const logFor = di => { const l = logs.find(x => x.day === slot(di)); return l && l.data.w === wi && l.data.d === di ? l.data : null; };
+  const entry = di => { const id = mDayId(tp.days[di], di); return logs.find(x => x.data.w === wi && mLogDid(x.data) === id) || null; };
+  const logFor = di => { const e = entry(di); return e ? e.data : null; };
+  const when = di => (entry(di) || {}).day || slot(di);
   const lastFor = (name, before) => {
     for(const l of logs.filter(x => x.day < before).sort((a, b) => a.day < b.day ? 1 : -1))
       for(let i = 0; i < 40; i++) if(l.data['e' + i + 'n'] === name){ const s = mSetsOf(l.data, i).filter(Boolean); if(s.length) return { day: l.day, sets: s }; }
@@ -1887,27 +1961,32 @@ async function drawMesoWeek(c, b){
       return `<button data-mw="${i}" class="${i === wi ? 'on' : ''}" style="background:${col.bg};color:${col.fg};border-color:${col.bg}">${esc(w.label)}${i === nowIdx ? ' •' : ''}</button>`; }).join('')}</div>
     <p class="hint" style="margin:0 0 12px"><b>${esc(tp.name || '')}</b> · ${esc(tp.progression || '')} · ${vol} sets this week${tp.weeks[wi] && tp.weeks[wi].deload && tp.deload_note ? ' · deload: ' + esc(tp.deload_note) : ''}</p>
     ${tp.days.map((day, di) => {
-      if(day.rest) return `<div class="sect mwrest"><b>${esc(day.name)}</b></div>`;
+      if(day.rest){ const cl = logFor(di); return `<div class="sect mwrest"><b>${esc(day.name)}</b>${cardioTxt(cl) ? ` <span class="hint">· 🏃 ${esc(cardioTxt(cl))}</span>` : ''}</div>`; }
       const lg = logFor(di), note = (day.notes || [])[wi];
+      // one weight box + one reps box per set — as many as the most sets on this day
+      const nS = Math.min(8, Math.max(1, ...(day.ex || []).map((e, i) => Math.max(Number(((e.wk || [])[wi] || {}).sets) || 0,
+        (k => k >= 0 ? mSetsOf(lg, k).length : 0)(mExAt(lg, e.n || e.cat, i))))));
       return `<div class="sect">
-        <div class="shead"><h3>${esc(day.name)} <span class="csub">${fmtDate(slot(di))}</span></h3>
-          <span class="hint">${lg ? `✓ logged${lg.sf ? ' · Fatigue: <b>' + esc(lg.sf) + '</b>' : ''}${lg.sp ? ' · Pump: <b>' + esc(lg.sp) + '</b>' : ''}` : 'not logged yet'}</span></div>
+        <div class="shead"><h3>${esc(day.name)} <span class="csub">${fmtDate(when(di))}</span></h3>
+          <span class="hint">${lg ? `✓ logged${lg.sf ? ' · Fatigue: <b>' + esc(lg.sf) + '</b>' : ''}${lg.sp ? ' · Pump: <b>' + esc(lg.sp) + '</b>' : ''}${cardioTxt(lg) ? ' · 🏃 <b>' + esc(cardioTxt(lg)) + '</b>' : ''}` : 'not logged yet'}</span></div>
         ${note ? `<p class="hint" style="margin:0 0 8px">Coach's Notes: <b style="color:var(--fg)">${esc(note)}</b></p>` : ''}
         <div style="overflow-x:auto"><table class="mweek">
-          <thead><tr><th>Exercise</th><th class="c">Reps</th><th class="c">Tempo</th><th class="c">RIR</th><th class="c">Sets</th><th>Weight × Reps</th><th>Last session</th><th>Notes</th></tr></thead>
+          <thead><tr><th rowspan="2">Exercise</th><th rowspan="2" class="c">Reps</th><th rowspan="2" class="c">Tempo</th><th rowspan="2" class="c">RIR</th><th rowspan="2" class="c">Sets</th>
+            ${[...Array(nS)].map((_, j) => `<th colspan="2" class="c setg">Set ${j + 1}</th>`).join('')}<th rowspan="2">Last session</th><th rowspan="2">Notes</th></tr>
+            <tr>${[...Array(nS)].map(() => '<th class="c cw">lb</th><th class="c cr">reps</th>').join('')}</tr></thead>
           <tbody>${(day.ex || []).map((e, i) => { const w = (e.wk || [])[wi] || {}, name = e.n || e.cat;
-            const mine = lg && lg['e' + i + 'n'] === name ? mSetsOf(lg, i) : [];
-            const last = lastFor(name, slot(di));
-            const res = compactSets(mine), lastTxt = last ? compactSets(last.sets) : '', nt = lg && lg['e' + i + 'n'] === name ? lg['e' + i + 'x'] || '' : '';
+            const k = mExAt(lg, name, i), mine = k >= 0 ? mSetsOf(lg, k) : [];
+            const last = lastFor(name, when(di));
+            const nt = k >= 0 ? lg['e' + k + 'x'] || '' : '';
             return `<tr><td title="${esc(name)}"><div class="cl">${e.v ? `<a href="${esc(e.v)}" target="_blank" rel="noopener">${esc(name)} ↗</a>` : esc(name)}</div></td>
               <td class="c">${esc(e.reps || '')}</td><td class="c">${esc(e.tempo || '')}</td><td class="c">${esc(w.rir ?? '')}</td><td class="c">${esc(w.sets ?? '')}</td>
-              <td class="res" title="${esc(res)}"><div class="cl">${res ? esc(res) : '<span class="csub">—</span>'}</div></td>
-              <td class="csub" title="${esc(lastTxt)}"><div class="cl">${last ? `${esc(lastTxt)} <span>· ${fmtDate(last.day)}</span>` : '—'}</div></td>
+              ${[...Array(nS)].map((_, j) => { const x = mine[j] || {}; return `<td class="c cw">${esc(x.w || '')}</td><td class="c cr">${esc(x.r || '')}</td>`; }).join('')}
+              <td class="lastc">${last ? `${setChipsHtml(last.sets, esc)}<span class="csub">${fmtDate(last.day)}</span>` : '<span class="csub">—</span>'}</td>
               <td class="nt" title="${esc(nt)}"><div class="cl">${esc(nt)}</div></td></tr>`; }).join('')}</tbody></table></div>
         ${lg && lg.notes ? `<p class="hint" style="margin:8px 0 0">Session notes: <b style="color:var(--fg)">${esc(lg.notes)}</b></p>` : ''}
       </div>`;
     }).join('')}
-    ${mesoVolumeHtml(tp, (w, d) => { const l = logs.find(x => x.day === tAdd(start, w * 7 + d)); return l && l.data.w === w && l.data.d === d ? l.data : null; }, esc, nowIdx)}`;
+    ${mesoVolumeHtml(tp, (w, d) => { const id = mDayId(tp.days[d], d); const l = logs.find(x => x.data.w === w && mLogDid(x.data) === id); return l ? l.data : null; }, esc, nowIdx)}`;
   $$('#pBody [data-mw]').forEach(btn => btn.onclick = () => { MW = +btn.dataset.mw; drawMesoWeek(c, b); });
   $('#msEdit').onclick = () => { MESO_MODE = 'edit'; drawTraining(c, b); };
   $('#msFull').onclick = () => { MESO_MODE = 'full'; drawTraining(c, b); };
@@ -1918,15 +1997,21 @@ function drawMeso(c, b){
   const tp = c.sections.training_plan;
   tp.weeks = tp.weeks || []; tp.days = tp.days || [];
   const nW = tp.weeks.length;
+  // Every day keeps a permanent id so logged sessions follow it when days move.
+  tp.days.forEach((d, i) => { if(!d.id) d.id = 'd' + i; });
   tp.days.forEach(d => { d.ex = d.ex || []; d.notes = d.notes || []; d.ex.forEach(e => { e.wk = e.wk || []; for(let i = 0; i < nW; i++) e.wk[i] = e.wk[i] || { rir:'', sets:'' }; }); });
   const nowIdx = tp.start ? Math.floor((tD(tIso(new Date())) - tD(tMon(tp.start))) / 6048e5) : null;
   const vol = w => tp.days.reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (tNum((e.wk[w] || {}).sets) || 0), 0), 0);
+  const cats = () => Object.keys(EX_LIB);
   const exOpts = e => {
     const list = EX_LIB[e.cat] || [];
     const known = list.some(([n]) => n === e.n);
     return `<option value="">— pick ${esc(e.cat || 'exercise')} —</option>` + list.map(([n, , tag]) => `<option value="${esc(n)}" ${n === e.n ? 'selected' : ''}>${esc(n)}${tag ? ' ★' : ''}</option>`).join('') +
       (e.n && !known ? `<option selected>${esc(e.n)}</option>` : '') + '<option value="__custom">+ New exercise…</option>';
   };
+  const newId = () => 'd' + Math.random().toString(36).slice(2, 8);
+  const blankDay = rest => ({ id: newId(), name: rest ? 'Rest / Cardio' : 'Day', rest: !!rest, ex: [], notes: [] });
+  const trainingDays = tp.days.filter(d => !d.rest).length;
   b.innerHTML = `
     <div class="mseg"><button id="msWeek">Week view</button><button id="msFull">Full plan</button><button class="on">Edit plan</button></div>
     <div class="sect">
@@ -1940,32 +2025,46 @@ function drawMeso(c, b){
       <div class="mweeks">${tp.weeks.map((w, i) => `<div class="r"><input data-wl="${i}" value="${esc(w.label || '')}">
         <label class="dowl"><input type="checkbox" data-wd="${i}" ${w.deload ? 'checked' : ''}>Deload</label></div>`).join('')}</div>
       <div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm" id="msAddW">+ Week</button>${nW > 1 ? '<button class="btn sm danger" id="msDelW">Remove last week</button>' : ''}</div>
+      <p class="hint" style="margin-top:12px">${tp.days.length} days in the week · ${trainingDays} training · ${tp.days.length - trainingDays} rest. A week holds up to 7.</p>
     </div>
-    ${tp.days.map((d, di) => `<div class="sect">
-      <div class="shead"><input data-dn="${di}" value="${esc(d.name || '')}" style="font-weight:700;max-width:320px">
-        <div style="display:flex;gap:8px;align-items:center"><label class="sw"><input type="checkbox" data-dr="${di}" ${d.rest ? 'checked' : ''}><span class="track"></span>Rest day</label>
-        <button class="btn sm danger" data-ddel="${di}">✕</button></div></div>
-      ${d.rest ? '<p class="hint">Rest / cardio — shows as a rest day on his page.</p>' : `
+    ${tp.days.map((d, di) => `<div class="sect mday ${d.rest ? 'isrest' : ''}">
+      <div class="shead">
+        <div style="display:flex;gap:6px;align-items:center;flex:1">
+          <span class="dnum">${di + 1}</span>
+          <input data-dn="${di}" value="${esc(d.name || '')}" style="font-weight:700;max-width:320px">
+        </div>
+        <div class="dtools">
+          <label class="sw"><input type="checkbox" data-dr="${di}" ${d.rest ? 'checked' : ''}><span class="track"></span>Rest</label>
+          <button class="tlx big" data-dup="${di}" title="Move up" ${di === 0 ? 'disabled' : ''}>↑</button>
+          <button class="tlx big" data-ddn="${di}" title="Move down" ${di === tp.days.length - 1 ? 'disabled' : ''}>↓</button>
+          <button class="tlx big" data-dcopy="${di}" title="Duplicate day">⧉</button>
+          <button class="tlx big" data-ddel="${di}" title="Delete day">✕</button>
+        </div>
+      </div>
+      ${d.rest ? '<p class="hint" style="margin:0">Rest / cardio — shows as a rest day on his page.</p>' : `
       <div style="overflow-x:auto"><table class="meso">
-        <thead><tr><th>Category</th><th>Exercise</th><th></th><th>Reps</th><th>Tempo</th>${tp.weeks.map((w, i) => { const col = mesoWeekColor(tp, i);
+        <thead><tr><th></th><th>Muscle group</th><th>Exercise</th><th></th><th>Reps</th><th>Tempo</th>${tp.weeks.map((w, i) => { const col = mesoWeekColor(tp, i);
           return `<th colspan="2" style="background:${col.bg};color:${col.fg}">${esc(w.label)}<br><span>RIR · Sets</span></th>`; }).join('')}<th></th></tr></thead>
         <tbody>${d.ex.map((e, ei) => `<tr>
-          <td><select data-ec="${di}.${ei}">${EX_CATS.map(cat => `<option ${cat === e.cat ? 'selected' : ''}>${esc(cat)}</option>`).join('')}</select></td>
+          <td class="mv2"><button class="tlx" data-eup="${di}.${ei}" ${ei === 0 ? 'disabled' : ''} title="Move up">↑</button><button class="tlx" data-edn="${di}.${ei}" ${ei === d.ex.length - 1 ? 'disabled' : ''} title="Move down">↓</button></td>
+          <td><select data-ec="${di}.${ei}">${cats().map(cat => `<option ${cat === e.cat ? 'selected' : ''}>${esc(cat)}</option>`).join('')}
+            ${e.cat && !cats().includes(e.cat) ? `<option selected>${esc(e.cat)}</option>` : ''}<option value="__newcat">+ New muscle group…</option></select></td>
           <td><select data-en="${di}.${ei}">${exOpts(e)}</select></td>
           <td>${e.v ? `<a href="${esc(e.v)}" target="_blank" rel="noopener" title="Video">↗</a>` : ''}</td>
           <td><input data-er="${di}.${ei}" value="${esc(e.reps || '')}" class="sm"></td>
           <td><input data-et="${di}.${ei}" value="${esc(e.tempo || '')}" class="sm"></td>
-          ${e.wk.map((w, wi) => `<td class="${tp.weeks[wi].deload ? 'dl' : ''}"><input data-wr="${di}.${ei}.${wi}" value="${esc(w.rir ?? '')}" class="xs"></td>
-            <td class="${tp.weeks[wi].deload ? 'dl' : ''}"><input data-ws="${di}.${ei}.${wi}" value="${esc(w.sets ?? '')}" class="xs"></td>`).join('')}
-          <td><button class="tlx" data-exdel="${di}.${ei}">✕</button></td></tr>`).join('')}
-          <tr class="cn"><td colspan="5"><b>Coach's Notes</b></td>${tp.weeks.map((w, wi) => `<td colspan="2"><textarea data-cn="${di}.${wi}" rows="2">${esc(d.notes[wi] || '')}</textarea></td>`).join('')}<td></td></tr>
-          <tr class="cn"><td colspan="5" class="hint">Sets</td>${tp.weeks.map((w, wi) => `<td colspan="2" class="hint">${d.ex.reduce((a, e) => a + (tNum((e.wk[wi] || {}).sets) || 0), 0)}</td>`).join('')}<td></td></tr>
+          ${e.wk.map((w, wi) => `<td><input data-wr="${di}.${ei}.${wi}" value="${esc(w.rir ?? '')}" class="xs"></td>
+            <td><input data-ws="${di}.${ei}.${wi}" value="${esc(w.sets ?? '')}" class="xs"></td>`).join('')}
+          <td class="mv2"><button class="tlx" data-excopy="${di}.${ei}" title="Duplicate">⧉</button><button class="tlx" data-exdel="${di}.${ei}" title="Delete">✕</button></td></tr>`).join('')}
+          <tr class="cn"><td></td><td colspan="5"><b>Coach's Notes</b></td>${tp.weeks.map((w, wi) => `<td colspan="2"><textarea data-cn="${di}.${wi}" rows="2">${esc(d.notes[wi] || '')}</textarea></td>`).join('')}<td></td></tr>
+          <tr class="cn"><td></td><td colspan="5" class="hint">Sets</td>${tp.weeks.map((w, wi) => `<td colspan="2" class="hint">${d.ex.reduce((a, e) => a + (tNum((e.wk[wi] || {}).sets) || 0), 0)}</td>`).join('')}<td></td></tr>
         </tbody></table></div>
       <button class="tladd" data-exadd="${di}">+ exercise</button>`}
-    </div>`).join('')}
+    </div>
+    <div class="dins"><button class="tladd" data-insrest="${di}">+ Rest day here</button><button class="tladd" data-instrain="${di}">+ Training day here</button></div>`).join('')}
+    ${tp.days.length ? '' : `<div class="dins"><button class="tladd" data-insrest="-1">+ Rest day</button><button class="tladd" data-instrain="-1">+ Training day</button></div>`}
     <div class="sect">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn sm" id="msAddD">+ Day</button>
-        <span class="hint">Volume (total sets): ${tp.weeks.map((w, wi) => `${esc(w.label)} <b>${vol(wi)}</b>`).join(' · ')}</span></div>
+      <span class="hint">Volume (total sets): ${tp.weeks.map((w, wi) => `${esc(w.label)} <b>${vol(wi)}</b>`).join(' · ')}</span>
       ${mesoVolumeHtml(tp, () => null, esc, nowIdx)}
     </div>
     <div style="display:flex;justify-content:space-between"><span class="hint">Edits are kept as you type. Hit Save to publish them to his page.</span>
@@ -1973,6 +2072,7 @@ function drawMeso(c, b){
 
   const redraw = () => { const st = $('#pBody').scrollTop; drawTraining(c, b); $('#pBody').scrollTop = st; };
   const ix = s => s.split('.').map(Number);
+  const swap = (arr, i, j) => { if(j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; };
   $('#msWeek').onclick = () => { MESO_MODE = 'week'; drawTraining(c, b); };
   $('#msFull').onclick = () => { MESO_MODE = 'full'; drawTraining(c, b); };
   $('#ms_name').oninput = e => { tp.name = e.target.value; };
@@ -1982,12 +2082,38 @@ function drawMeso(c, b){
   $$('#pBody [data-wd]').forEach(i => i.onchange = () => { tp.weeks[+i.dataset.wd].deload = i.checked; redraw(); });
   $('#msAddW').onclick = () => { tp.weeks.push({ label: 'Week ' + (nW + 1) }); redraw(); };
   if($('#msDelW')) $('#msDelW').onclick = () => { if(!confirm('Remove ' + tp.weeks[nW - 1].label + '?')) return; tp.weeks.pop(); tp.days.forEach(d => { (d.ex || []).forEach(e => e.wk.length = nW - 1); (d.notes || []).length = Math.min((d.notes || []).length, nW - 1); }); redraw(); };
+  // days
   $$('#pBody [data-dn]').forEach(i => i.oninput = () => { tp.days[+i.dataset.dn].name = i.value; });
   $$('#pBody [data-dr]').forEach(i => i.onchange = () => { tp.days[+i.dataset.dr].rest = i.checked; redraw(); });
-  $$('#pBody [data-ddel]').forEach(btn => btn.onclick = () => { const d = tp.days[+btn.dataset.ddel]; if(!confirm(`Remove ${d.name || 'this day'}?`)) return; tp.days.splice(+btn.dataset.ddel, 1); redraw(); });
-  $('#msAddD').onclick = () => { tp.days.push({ name: 'Day ' + (tp.days.length + 1), rest: false, ex: [], notes: [] }); redraw(); };
+  $$('#pBody [data-dup]').forEach(btn => btn.onclick = () => { const i = +btn.dataset.dup; swap(tp.days, i, i - 1); redraw(); });
+  $$('#pBody [data-ddn]').forEach(btn => btn.onclick = () => { const i = +btn.dataset.ddn; swap(tp.days, i, i + 1); redraw(); });
+  $$('#pBody [data-dcopy]').forEach(btn => btn.onclick = () => {
+    if(tp.days.length >= 7) return alert('A week holds 7 days. Remove one first.');
+    const i = +btn.dataset.dcopy, cp = JSON.parse(JSON.stringify(tp.days[i]));
+    cp.id = newId(); cp.name = (cp.name || 'Day') + ' (copy)';
+    tp.days.splice(i + 1, 0, cp); redraw();
+  });
+  $$('#pBody [data-ddel]').forEach(btn => btn.onclick = () => { const d = tp.days[+btn.dataset.ddel]; if(!confirm(`Remove ${d.name || 'this day'}? Sessions he already logged for it stay stored.`)) return; tp.days.splice(+btn.dataset.ddel, 1); redraw(); });
+  const insert = (after, rest) => {
+    if(tp.days.length >= 7) return alert('A week holds 7 days. Remove one first.');
+    const d = blankDay(rest);
+    if(!rest) d.name = 'Day ' + (tp.days.filter(x => !x.rest).length + 1);
+    tp.days.splice(after + 1, 0, d); redraw();
+  };
+  $$('#pBody [data-insrest]').forEach(btn => btn.onclick = () => insert(+btn.dataset.insrest, true));
+  $$('#pBody [data-instrain]').forEach(btn => btn.onclick = () => insert(+btn.dataset.instrain, false));
+  // exercises
   const ex = s => { const [a, z] = ix(s); return tp.days[a].ex[z]; };
-  $$('#pBody [data-ec]').forEach(i => i.onchange = () => { const e = ex(i.dataset.ec); e.cat = i.value; e.n = ''; e.v = ''; redraw(); });
+  $$('#pBody [data-ec]').forEach(i => i.onchange = async () => {
+    const e = ex(i.dataset.ec);
+    if(i.value === '__newcat'){
+      const n = prompt('New muscle group (e.g. Traps, Adductors, Neck):', ''); if(!n || !n.trim()){ redraw(); return; }
+      const cat = n.trim();
+      if(!EX_LIB[cat]) await addCategory(cat);
+      e.cat = cat; e.n = ''; e.v = '';
+    } else { e.cat = i.value; e.n = ''; e.v = ''; }
+    redraw();
+  });
   $$('#pBody [data-en]').forEach(i => i.onchange = () => {
     const e = ex(i.dataset.en);
     if(i.value === '__custom'){
@@ -2003,10 +2129,13 @@ function drawMeso(c, b){
   $$('#pBody [data-wr]').forEach(i => i.oninput = () => { const [a, z, w] = ix(i.dataset.wr); tp.days[a].ex[z].wk[w].rir = i.value; });
   $$('#pBody [data-ws]').forEach(i => { i.oninput = () => { const [a, z, w] = ix(i.dataset.ws); tp.days[a].ex[z].wk[w].sets = i.value; }; i.onchange = redraw; });
   $$('#pBody [data-cn]').forEach(i => i.oninput = () => { const [a, w] = ix(i.dataset.cn); tp.days[a].notes[w] = i.value; });
+  $$('#pBody [data-eup]').forEach(btn => btn.onclick = () => { const [a, z] = ix(btn.dataset.eup); swap(tp.days[a].ex, z, z - 1); redraw(); });
+  $$('#pBody [data-edn]').forEach(btn => btn.onclick = () => { const [a, z] = ix(btn.dataset.edn); swap(tp.days[a].ex, z, z + 1); redraw(); });
+  $$('#pBody [data-excopy]').forEach(btn => btn.onclick = () => { const [a, z] = ix(btn.dataset.excopy); tp.days[a].ex.splice(z + 1, 0, JSON.parse(JSON.stringify(tp.days[a].ex[z]))); redraw(); });
   $$('#pBody [data-exdel]').forEach(btn => btn.onclick = () => { const [a, z] = ix(btn.dataset.exdel); tp.days[a].ex.splice(z, 1); redraw(); });
   $$('#pBody [data-exadd]').forEach(btn => btn.onclick = () => {
     const d = tp.days[+btn.dataset.exadd], last = d.ex[d.ex.length - 1];
-    d.ex.push({ cat: last ? last.cat : EX_CATS[0], n: '', v: '', reps: last ? last.reps : '8-12', tempo: last ? last.tempo : '3100',
+    d.ex.push({ cat: last ? last.cat : cats()[0], n: '', v: '', reps: last ? last.reps : '8-12', tempo: last ? last.tempo : '3100',
       wk: tp.weeks.map((w, wi) => last ? Object.assign({}, last.wk[wi]) : { rir:'', sets:'' }) });
     redraw();
   });
