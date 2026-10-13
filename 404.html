@@ -222,6 +222,18 @@
   .hist th:first-child,.hist td:first-child{text-align:left}
   .hist td{border-top:1px solid var(--line);padding:10px 6px;text-align:right;white-space:nowrap}
   .histwrap{overflow-x:auto;margin:0 -4px}
+  .hist tr[data-wv],.hist tr.tap{cursor:pointer}
+  .hist tr[data-wv]:hover td,.hist tr.tap:hover td{background:var(--bg-2)}
+  .hist.wv tr.now td{background:var(--acc-soft)}
+  .hist.wv tr.fut td{color:var(--line-2)}
+  .hist.wv td small{color:var(--mut);font-size:11px}
+  .hist.wv tr.nrow td{border-top:0;padding-top:0;text-align:left;white-space:normal;color:var(--mut);font-size:12.5px}
+  .hist.wv tr.avg td{border-top:2px solid var(--line-2);font-weight:700}
+  .hist.wv tr.tg td{color:var(--mut)}
+  .links{display:flex;gap:18px}
+  .wvq{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px 14px;margin-top:10px}
+  .wvq span{display:block;font-size:11.5px;color:var(--mut)}
+  .wvq b{font-size:14px;font-weight:600}
 
   .btn.sm{width:auto;padding:10px 14px;font-size:13.5px;margin-top:12px}
   .doses{display:grid;gap:7px}
@@ -343,7 +355,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-12T19:00Z';
+const BUILD = '2026-10-13T15:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -426,6 +438,7 @@ const DEFAULT_COPY = {
   trk_pics_label: 'Progress pics',
   trk_skin_label: 'Skin folds (mm)',
   trk_train_log: 'Log this session',
+  trk_weekview: 'Week view',
 };
 let C = Object.assign({}, DEFAULT_COPY);
 // t('week_txt', {n:2, total:8}) — {placeholders} are filled from the second argument.
@@ -1011,7 +1024,8 @@ function renderWeek(){
       <button class="btn" id="wLog" data-copy="${logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'}">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
       <button class="btn ghost" id="wWeekly" data-copy="${doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'}">${esc(t(doneWeekly ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
     </div>
-    <button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button>`;
+    <div class="links"><button class="linkbtn" id="wView" data-copy="trk_weekview">${esc(t('trk_weekview'))}</button>
+      <button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button></div>`;
   document.querySelectorAll('#aWeek .days button').forEach(b => b.onclick = () => openDaily(b.dataset.day));
   document.querySelectorAll('#aWeek [data-dk]').forEach(cb => cb.onchange = async () => {
     cb.disabled = true;
@@ -1021,19 +1035,27 @@ function renderWeek(){
   $('#wLog').onclick = () => openDaily(today);
   $('#wWeekly').onclick = () => openWeekly(mon);
   $('#wHist').onclick = openHistory;
+  $('#wView').onclick = () => openWeekView(mon);
 }
 
+// Where Back (and a finished save) lands: home, or the screen that opened this one.
+let RET = null;
+function goBack(){
+  const r = RET; RET = null;
+  if(r) r(); else { closeSection(); renderWeek(); }
+}
 function showSection(html){
   $('#aHome').hidden = true;
   $('#aSection').hidden = false;
   $('#aSection').innerHTML = `<button class="back" id="sBack" data-copy="back">${esc(t('back'))}</button>` + html;
-  $('#sBack').onclick = () => { closeSection(); renderWeek(); };
+  $('#sBack').onclick = goBack;
   if(history.state == null || !history.state.sec) history.pushState({ sec:'tracker' }, '', location.pathname);
   window.scrollTo(0, 0);
 }
 const dayLabel = s => dOf(s).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
 
-function openDaily(day){
+function openDaily(day, ret){
+  RET = ret || null;
   const d = logOf('daily', day) || {};
   const tg = targetFor(mondayOf(day));
   const tk = { protein:'protein', carbs:'carbs', fat:'fat', fiber:'fiber', kcal:'kcal', steps:'steps' };
@@ -1064,8 +1086,8 @@ function openDaily(day){
     kc.placeholder = (p != null && c != null && f != null) ? String(Math.round((p + c) * 4 + f * 9)) : '';
   };
   ['#d_protein','#d_carbs','#d_fat'].forEach(id => $(id).addEventListener('input', autoK)); autoK();
-  $('#dPrev').onclick = () => openDaily(addDays(day, -1));
-  $('#dNext').onclick = () => openDaily(addDays(day, 1));
+  $('#dPrev').onclick = () => openDaily(addDays(day, -1), ret);
+  $('#dNext').onclick = () => openDaily(addDays(day, 1), ret);
   $('#dSave').onclick = async () => {
     const data = {};
     DAILY_FIELDS.forEach(([k]) => { const v = num($('#d_' + k).value); if(v != null) data[k] = v; });
@@ -1103,7 +1125,8 @@ async function uploadPhoto(file){
   return j.url;
 }
 
-function openWeekly(mon){
+function openWeekly(mon, ret){
+  RET = ret || null;
   const draftKey = `tgc-wk:${SLUG}:${mon}`;
   let draft = null; try { draft = JSON.parse(localStorage.getItem(draftKey) || 'null'); } catch(e){}
   const d = Object.assign({}, logOf('weekly', mon) || draft || {});
@@ -1163,8 +1186,8 @@ function openWeekly(mon){
       box.classList.remove('busy');
     };
   });
-  $('#wPrev').onclick = () => openWeekly(addDays(mon, -7));
-  $('#wNext').onclick = () => openWeekly(addDays(mon, 7));
+  $('#wPrev').onclick = () => openWeekly(addDays(mon, -7), ret);
+  $('#wNext').onclick = () => openWeekly(addDays(mon, 7), ret);
   $('#wSave').onclick = async () => {
     const data = {};
     Object.keys(d).forEach(k => { const v = d[k]; if(v != null && String(v).trim() !== '') data[k] = typeof v === 'string' ? v.trim() : v; });
@@ -1177,7 +1200,7 @@ async function saveLog(kind, day, data, btn, msg, stay){
   try {
     await putLog(kind, day, data);
     msg.textContent = t('trk_saved');
-    if(!stay) setTimeout(() => { closeSection(); renderWeek(); }, 650);
+    if(!stay) setTimeout(goBack, 650);
     return true;
   } catch(e){
     msg.textContent = e.message;
@@ -1188,14 +1211,63 @@ async function saveLog(kind, day, data, btn, msg, stay){
   }
 }
 
+/* ── Week view: the sheet's Daily Check In block — Mon to Sun, averages, targets ── */
+function openWeekView(mon){
+  RET = null;
+  const today = todayIso(), st = weekStats(mon), tg = targetFor(mon), cw = coachWeek(mon);
+  const dn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const cols = [['weight','Weight',1],['protein','P'],['carbs','C'],['fat','F'],['fiber','Fiber'],['kcal','Kcals'],['steps','Steps'],['bp','BP'],['pulse','Pulse'],['cardio','Cardio']];
+  const cellOf = (d, k, dp) => k === 'bp' ? (d.sys != null ? nf(d.sys) + '/' + nf(d.dia ?? null) : '—') : k === 'kcal' ? nf(kcalOf(d)) : nf(num(d[k]), dp || 0);
+  const rows = dn.map((n, i) => {
+    const day = addDays(mon, i), d = logOf('daily', day) || {}, fut = day > today;
+    return `<tr class="${fut ? 'fut' : 'tap'} ${day === today ? 'now' : ''}" ${fut ? '' : `data-day="${day}"`}><td><b>${n}</b> <small>${fmt(day)}</small></td>
+      ${cols.map(([k, , dp]) => `<td>${cellOf(d, k, dp)}</td>`).join('')}</tr>
+      ${d.notes ? `<tr class="nrow"><td colspan="${cols.length + 1}">${esc(d.notes)}</td></tr>` : ''}`;
+  }).join('');
+  const avgRow = `<tr class="avg"><td><b>Averages</b></td><td>${nf(st.weight, 1)}</td><td>${nf(st.protein)}</td><td>${nf(st.carbs)}</td><td>${nf(st.fat)}</td>
+    <td>${nf(st.fiber)}</td><td>${nf(st.kcal)}</td><td>${nf(st.steps)}</td><td>${st.sys != null ? nf(st.sys) + '/' + nf(st.dia) : '—'}</td><td>${nf(st.pulse)}</td><td>${st.n ? nf(st.cardio) : '—'}</td></tr>`;
+  const tgRow = `<tr class="tg"><td><b>Target</b></td><td>${tg.target_bw != null ? nf(tg.target_bw, 1) : '—'}</td><td>${nf(tg.protein ?? null)}</td><td>${nf(tg.carbs ?? null)}</td><td>${nf(tg.fat ?? null)}</td>
+    <td>${nf(tg.fiber ?? null)}</td><td>${nf(tg.kcal ?? null)}</td><td>${nf(tg.steps ?? null)}</td><td>—</td><td>—</td><td>${nf(tg.cardio ?? null)}</td></tr>`;
+  const wk = logOf('weekly', mon);
+  const sessions = LOGS.filter(l => l.kind === 'training' && l.day >= mon && l.day <= addDays(mon, 6)).sort((a, b) => a.day < b.day ? -1 : 1);
+  showSection(`
+    <h1 data-copy="trk_weekview">${esc(t('trk_weekview'))}</h1>
+    <div class="dnav"><button id="vPrev" aria-label="Previous week">‹</button>
+      <b>${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}</b>
+      <button id="vNext" aria-label="Next week" ${mon >= mondayOf(today) ? 'disabled' : ''}>›</button></div>
+    ${tg.goal ? `<p class="sub" style="margin:-6px 0 12px">${esc(tg.goal)}</p>` : ''}
+    <div class="card" style="padding:12px 10px"><div class="histwrap"><table class="hist wv">
+      <thead><tr><th>Day</th>${cols.map(([, l]) => `<th>${l}</th>`).join('')}</tr></thead>
+      <tbody>${rows}${avgRow}${tgRow}</tbody></table></div></div>
+    <p class="updated" style="margin-top:10px">Tap a day to fill it in or fix it. Cardio is the week's total minutes.</p>
+    <div class="btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn ghost" id="vWeekly">${esc(t(wk ? 'trk_weekly_done' : 'trk_weekly_btn'))}</button>
+      <button class="btn ghost" id="vLog">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
+    </div>
+    ${wk ? `<div class="card" style="margin-top:14px;padding:16px 18px"><div class="lbl">${esc(t('trk_weekly_title'))}</div>
+      <div class="wvq">${[['score','Score'],['energy','Energy'],['stress','Stress'],['mood','Mood'],['motivation','Motivation'],['sleep','Sleep'],['win','Win']].filter(([k]) => wk[k])
+        .map(([k, l]) => `<div><span>${l}</span><b>${esc(wk[k])}</b></div>`).join('')}
+      ${wk.m_waist != null ? `<div><span>Waist</span><b>${nf(wk.m_waist, 1)}</b></div>` : ''}
+      ${skinTotal(wk) != null ? `<div><span>Skin folds</span><b>${nf(skinTotal(wk), 1)} mm</b></div>` : ''}</div></div>` : ''}
+    ${sessions.length ? `<div class="card" style="margin-top:14px;padding:16px 18px"><div class="lbl">Sessions</div>
+      ${sessions.map(l => `<p style="margin:8px 0 0;font-size:14px"><b>${dOf(l.day).toLocaleDateString('en-US', { weekday:'short' })}</b> · ${esc(l.data.day || 'Session')}</p>`).join('')}</div>` : ''}`);
+  const back = () => openWeekView(mon);
+  document.querySelectorAll('#aSection tr[data-day]').forEach(tr => tr.onclick = () => openDaily(tr.dataset.day, back));
+  $('#vPrev').onclick = () => openWeekView(addDays(mon, -7));
+  $('#vNext').onclick = () => openWeekView(addDays(mon, 7));
+  $('#vLog').onclick = () => openDaily(today, back);
+  $('#vWeekly').onclick = () => openWeekly(mon, back);
+}
+
 function openHistory(){
+  RET = null;
   const mon = mondayOf(todayIso());
   const rows = [];
   for(let i = 0; i < 52; i++){
     const m = addDays(mon, -7 * i), s = weekStats(m), tg = targetFor(m), cw = coachWeek(m);
     if(!s.n && !logOf('weekly', m)) continue;
     const wk = logOf('weekly', m) || {};
-    rows.push(`<tr><td><b>${cw ? 'W' + cw : ''}</b> ${fmt(m)}</td><td>${nf(s.weight, 1)}</td><td>${nf(s.kcal)}${tg.kcal ? `<br><small style="color:var(--mut)">${nf(tg.kcal)}</small>` : ''}</td>
+    rows.push(`<tr data-wv="${m}"><td><b>${cw ? 'W' + cw : ''}</b> ${fmt(m)}</td><td>${nf(s.weight, 1)}</td><td>${nf(s.kcal)}${tg.kcal ? `<br><small style="color:var(--mut)">${nf(tg.kcal)}</small>` : ''}</td>
       <td>${nf(s.protein)}</td><td>${nf(s.carbs)}</td><td>${nf(s.fat)}</td><td>${nf(s.steps)}</td>
       <td>${s.sys != null ? nf(s.sys) + '/' + nf(s.dia) : '—'}</td><td>${nf(s.cardio)}</td><td>${wk.m_waist != null ? nf(wk.m_waist, 1) : '—'}</td>
       <td>${skinTotal(wk) != null ? nf(skinTotal(wk), 1) : '—'}</td><td>${wk.score || '—'}</td></tr>`);
@@ -1207,11 +1279,12 @@ function openHistory(){
     ${rows.length ? `<div class="card" style="padding:14px 12px"><div class="histwrap"><table class="hist">
       <thead><tr><th>Week</th><th>Weight</th><th>Kcals</th><th>P</th><th>C</th><th>F</th><th>Steps</th><th>BP</th><th>Cardio</th><th>Waist</th><th>Skin</th><th>Score</th></tr></thead>
       <tbody>${rows.join('')}</tbody></table></div></div>` : '<div class="card" style="color:var(--mut)">Nothing logged yet.</div>'}
-    <p class="updated">Weekly averages of your daily logs. Cardio is the week's total minutes.</p>
+    <p class="updated">Weekly averages of your daily logs. Cardio is the week's total minutes. Tap a week to open it.</p>
     ${picWeeks.length ? `<div class="lbl grp" data-copy="trk_pics_label">${esc(t('trk_pics_label'))}</div>
       ${picWeeks.map(l => `<div class="picrow"><div class="sub">${fmt(l.day)}</div><div class="pics">${PICS.map(([k, lb]) => l.data[k]
         ? `<a class="pic" href="${esc(l.data[k])}" target="_blank" rel="noopener"><img src="${esc(l.data[k])}" alt="${esc(lb)}"><span class="pl">${esc(lb)}</span></a>`
         : `<span class="pic"><span class="plus">—</span><span class="pl">${esc(lb)}</span></span>`).join('')}</div></div>`).join('')}` : ''}`);
+  document.querySelectorAll('#aSection tr[data-wv]').forEach(tr => tr.onclick = () => openWeekView(tr.dataset.wv));
 }
 
 /* ── Timeline: the sheet's Timeline tab, read-only for him ─────────────── */
