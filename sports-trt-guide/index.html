@@ -48,6 +48,16 @@
   .faq h3{font-size:18px;margin:20px 0 4px;font-weight:700}
   .tstm{border-left:3px solid var(--acc);padding:4px 0 4px 18px;margin:18px 0;color:var(--txt)}
   .tstm .who{font-weight:700;margin-bottom:6px}
+  .bonusbox{text-align:left}
+  .bonusgrid{display:flex;gap:22px;align-items:center}
+  .bonusgrid .bonusimg{flex:0 0 38%;max-width:38%;width:38%;margin:0;border-radius:12px}
+  .bonusgrid .bonustext{flex:1;min-width:0}
+  .bonustitle{font-family:var(--display);font-weight:800;font-size:clamp(20px,2.4vw,26px);line-height:1.1;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+  .bonusgrid p{margin:0 0 8px;font-size:16px}
+  .bonusgrid p:last-child{margin-bottom:0}
+  .bonustag{display:inline-block;margin-top:10px;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--ok)}
+  @media(max-width:700px){.bonusgrid{flex-direction:column;align-items:stretch}
+    .bonusgrid .bonusimg{flex:none;max-width:100%;width:100%}}
   .disc{font-size:13px;color:var(--mut);text-align:center;margin:24px 0}
   .foot{text-align:center;color:var(--mut);font-size:13px;padding:20px 0 40px}
 </style>
@@ -108,10 +118,16 @@
   </div>
   <img class="slot" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='520'><rect width='100%25' height='100%25' fill='%23e9edf3'/><text x='50%25' y='50%25' font-family='Inter,sans-serif' font-size='26' fill='%238a94a3' text-anchor='middle' dominant-baseline='middle'>Your image — replace in the editor</text></svg>" alt="">
 
-  <div class="guarantee" data-eid="bonus">
-    <div class="badge" data-eid="bonus-k">Free Bonus</div>
-    <p data-eid="bonus-t"><b data-eid="bonus-tb">The Fertility Guide</b></p>
-    <p data-eid="bonus-b">You get it completely for free. No extra charges for it.</p>
+  <div class="guarantee bonusbox" data-eid="bonus">
+    <div class="bonusgrid" data-eid="bonus-g">
+      <img class="slot bonusimg" data-eid="bonus-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='760'><rect width='100%25' height='100%25' fill='%23dfe6f3'/><text x='50%25' y='50%25' font-family='Inter,sans-serif' font-size='22' fill='%238a94a3' text-anchor='middle' dominant-baseline='middle'>Bonus image — replace in the editor</text></svg>" alt="">
+      <div class="bonustext" data-eid="bonus-c">
+        <div class="bonustitle" data-eid="bonus-k">Bonus: The Enhanced Man Guide to Restoring Fertility</div>
+        <p data-eid="bonus-t">The exact protocol I use to go from zero sperm count to getting my wife pregnant.</p>
+        <p data-eid="bonus-b">You get it completely for free today.</p>
+        <div class="bonustag" data-eid="bonus-tag">Free limited-time bonus</div>
+      </div>
+    </div>
   </div>
 
   <div class="ctablock" data-cta>
