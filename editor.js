@@ -1407,8 +1407,17 @@
     if (!document.body.contains(hoverEl)) { hideHoverTools(); return; }
     var r = hoverEl.getBoundingClientRect();
     if (r.bottom < 0 || r.top > window.innerHeight) { hideHoverTools(); return; }
-    hoverTools.style.top = Math.max(8, r.top + 8) + "px";
-    hoverTools.style.left = (r.right - 8) + "px";
+    // Sit OUTSIDE the block, not on top of it — parked inside the top-right
+    // corner the bar covered the very words you were editing. Above the block
+    // by preference, below it when there is no room up there.
+    var bh = hoverTools.offsetHeight || 38, gap = 6;
+    var top = r.top - bh - gap;
+    if (top < 8) {
+      top = r.bottom + gap;
+      if (top + bh > window.innerHeight - 8) top = Math.max(8, r.top + 8);  // nowhere to go: old spot
+    }
+    hoverTools.style.top = top + "px";
+    hoverTools.style.left = Math.min(r.right, window.innerWidth - 8) + "px";
   }
   function showHoverFor(el, kind) {
     if (hoverEl && hoverEl !== el && hoverEl.classList) hoverEl.classList.remove("jv-hovered");
