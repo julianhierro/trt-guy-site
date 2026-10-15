@@ -76,6 +76,8 @@ function tagsFor(source, result) {
     base.push('trt-101-guide', 'trt-interested');
   } else if (source === 'fertility-guide') {
     base.push('fertility-guide', 'trt-interested');
+  } else if (source === 'signup') {
+    base.push('sign up');
   }
   return base;
 }
@@ -88,6 +90,7 @@ const SOURCE_LABEL = {
   'trt-rules': 'TRT Guy 5 TRT Non-Negotiables',
   'trt-101-guide': 'TRT Guy TRT 101 Guide',
   'fertility-guide': 'TRT Guy Fertility Guide',
+  signup: 'TRT Guy Email Sign Up',
 };
 
 module.exports = async (req, res) => {
@@ -107,7 +110,7 @@ module.exports = async (req, res) => {
 
     const firstName = (data.firstName || data.first_name || data.name || '').toString().trim();
     const email = (data.email || '').toString().trim();
-    const source = ['quiz', 'course', 'coaching', 'injection-guide', 'trt-rules', 'trt-101-guide', 'fertility-guide'].includes(data.source) ? data.source : 'course';
+    const source = ['quiz', 'course', 'coaching', 'injection-guide', 'trt-rules', 'trt-101-guide', 'fertility-guide', 'signup'].includes(data.source) ? data.source : 'course';
     const result = data.result === 'positive' ? 'positive' : 'negative';
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
