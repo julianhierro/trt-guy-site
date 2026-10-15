@@ -1,8 +1,8 @@
 {
  "page": "ped-health/index.html",
- "sha256": "043f1eb3a3d98d2ce7a64559aea3223efd74eaa42e870fc1f99814e71d475edb",
- "approved_at": "2026-09-03T11:37:50",
- "approved_for": "he asked to be able to reorganize questions himself — loads editor v4 which adds per-question move up/down",
+ "sha256": "def53cc6a801e4036ef55009c3d19bb9bd6f6618160d64ba9c8718bd3eea2453",
+ "approved_at": "2026-10-15T16:46:27",
+ "approved_for": "he asked: an untouched 1-10 slider submits as its starting value (5) instead of blank — script only, no question changes",
  "questions": [
   [
    "name",

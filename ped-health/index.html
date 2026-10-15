@@ -230,7 +230,7 @@ function answered(f){
   const r = f.querySelector('input[type=radio]');
   if(r) return !!f.querySelector('input[type=radio]:checked');
   const rg = f.querySelector('input[type=range]');
-  if(rg) return rg.dataset.touched === '1';
+  if(rg) return true; // a slider always has an answer — left alone, it counts as its starting value
   const el = f.querySelector('input,textarea');
   return !!(el && el.value.trim());
 }
@@ -355,7 +355,7 @@ function buildQA(){
         // read the option's CURRENT text, so wording edited in the editor is what gets sent
         a = c ? (c.parentNode.textContent.replace(/\s+/g,' ').trim() || c.value) : '';
       }
-      else if(rg) a = rg.dataset.touched==='1' ? rg.value+' / 10' : '';
+      else if(rg) a = rg.value+' / 10'; // untouched = the value it sits on (5)
       else { const el=f.querySelector('input:not([type=radio]):not([type=range]),textarea'); a = el ? el.value.trim() : ''; }
     }
     return { q: labelOf(f), a: a };
