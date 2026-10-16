@@ -382,8 +382,8 @@
     <div class="toolbar">
       <input class="search" id="q" placeholder="Search name, email, phone…">
       <div class="chips" id="filters">
-        <button class="chip on" data-f="active">Active</button>
-        <button class="chip" data-f="lead">New / leads</button>
+        <button class="chip on" data-f="active">Clients</button>
+        <button class="chip" data-f="lead">Leads</button>
         <button class="chip" data-f="paused">Paused</button>
         <button class="chip" data-f="ended">Ended</button>
         <button class="chip" data-f="all">All</button>
@@ -433,7 +433,7 @@ const PHASES = [
   ['maintenance', 'Maintenance Phase'],
   ['custom',      'Custom'],
 ];
-const STATUSES = [['lead','New / lead'],['active','Active'],['paused','Paused'],['ended','Ended']];
+const STATUSES = [['lead','Lead (applied)'],['active','Client'],['paused','Paused'],['ended','Ended']];
 const PAYMETHODS = ['Stripe','PayPal','Bank transfer','Zelle','Crypto','Cash','Other'];
 
 // The four blocks a client sees on their page. `key` is what lives in sections{}.
@@ -737,7 +737,7 @@ function showImport(list, have){
         $$('#filters .chip').forEach(x => x.classList.toggle('on', x.dataset.f === 'lead'));
       }
       render();
-      toast('Imported — showing under New / leads');
+      toast('Imported — showing under Leads');
     } catch(e){ b.disabled = false; b.textContent = 'Import'; alert('Failed: ' + e.message); }
   });
 }
