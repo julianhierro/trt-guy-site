@@ -799,6 +799,9 @@ const DEFAULT_RESOURCES = [
   { label:'Getting Started - Training',          link:'', pedOnly:false, on:true },
 ];
 
+// Every client's profile starts with these personal slots, empty until his plan is ready.
+const DEFAULT_MY_RESOURCES = ['Training Plan', 'PED Protocol', 'Weekly Measurements', 'Weekly Check-in'];
+
 $('#btnResources').onclick = async () => {
   let list;
   try { list = (await api('/clients?action=resources')).resources; }
@@ -813,7 +816,7 @@ function drawResourcesPanel(list){
   p.innerHTML = `
     <div class="phead">
       <div><h2>Additional resources</h2>
-        <p class="hint" style="margin:4px 0 0">Shown under the quick-access buttons on every client's page. Paste a link once and every client has it. No link, no row.</p></div>
+        <p class="hint" style="margin:4px 0 0">Shown under the quick-access buttons on every client's page. These are the defaults every client gets. Paste a link once and every client has it. No link, no row. Each client's own documents go under Plan → Personal resources.</p></div>
       <button class="btn sm" id="pClose">Close</button>
     </div>
     <div class="pbody"><div class="rowlist" id="resList"></div>
@@ -1287,6 +1290,12 @@ function drawBody(){
       }).join('')}
 
       <div class="sect">
+        <div class="shead"><h3>Personal resources</h3><button class="btn sm" id="addMyRes">+ Add</button></div>
+        <p class="hint">This client's own documents. They appear at the top of their Additional Resources menu once a link is pasted. A slot with no link stays hidden.</p>
+        <div class="rowlist" id="myres"></div>
+      </div>
+
+      <div class="sect">
         <div class="shead"><h3>Extra quick links</h3><button class="btn sm" id="addExtra">+ Add</button></div>
         <p class="hint">Anything else worth one tap — supplement list, form check video, WhatsApp.</p>
         <div class="rowlist" id="extras"></div>
@@ -1373,6 +1382,24 @@ function drawBody(){
       progs[0].end = addWeeks(progs[0].start, progs[0].weeks);
       drawProgs();
     };
+
+    // Personal resources: the four slots every client starts with, filled in once his plan is done.
+    const myres = Array.isArray((c.sections || {}).my_resources)
+      ? c.sections.my_resources.map(x => Object.assign({}, x))
+      : DEFAULT_MY_RESOURCES.map(l => ({ label:l, link:'' }));
+    const drawMyRes = () => {
+      $('#myres').innerHTML = myres.map((x,i) => `<div class="r">
+        <input data-m="label" data-i="${i}" value="${esc(x.label || '')}" placeholder="Label" style="flex:0 0 34%">
+        <input data-m="link" data-e="link" data-i="${i}" value="${esc(x.link || '')}" placeholder="Paste the link once it's ready">
+        <button class="btn sm danger" data-mrm="${i}">✕</button></div>`).join('') ||
+        '<p class="hint">None yet.</p>';
+      $$('#myres [data-mrm]').forEach(btn => btn.onclick = () => { myres.splice(+btn.dataset.mrm,1); drawMyRes(); });
+      $$('#myres [data-m]').forEach(inp => inp.oninput = () => { myres[+inp.dataset.i][inp.dataset.m] = inp.value; });
+      wireOpenLinks($('#myres'));
+    };
+    OPEN._myres = myres;
+    drawMyRes();
+    $('#addMyRes').onclick = () => { myres.push({label:'',link:''}); drawMyRes(); };
 
     const extras = ((c.sections || {}).extras) || [];
     const drawExtras = () => {
@@ -2493,6 +2520,8 @@ function collect(){
         text: $('#s_' + s.key + '_text').value,
       };
     });
+    if(c._myres) sec.my_resources = c._myres.filter(x => (x.label || '').trim() || (x.link || '').trim())
+      .map(x => ({ label:(x.label || '').trim(), link:(x.link || '').trim() }));
     sec.extras = (c._extras || []).filter(x => (x.label || '').trim() || (x.link || '').trim());
     c.sections = sec;
   }

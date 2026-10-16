@@ -816,13 +816,13 @@ function openApp(){
     else openProtocol(b.dataset.pid);
   });
 
-  // Additional Resources — one shared library, the worker sends what this client may see.
-  const res = RESOURCES || [];
+  // Additional Resources: his own documents first, then the shared library the worker sends.
+  // Nothing without a link is shown; slots get filled in as his plan is finished.
+  const res = ((secs.my_resources || [])).concat(RESOURCES || [])
+    .filter(r => (r.label || '').trim() && (r.link || '').trim());
   $('#aRes').innerHTML = res.length ? `<details class="resbox">
       <summary><span data-copy="resources_label">${esc(t('resources_label'))}</span><span class="go">›</span></summary>
-      ${res.map(r => (r.link || '').trim()
-        ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`
-        : `<span class="res-soon">${esc(r.label)}</span>`).join('')}
+      ${res.map(r => `<a href="${esc(r.link.trim())}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`).join('')}
     </details>` : '';
 
   $('#aWeek').hidden = !trackerOn;
