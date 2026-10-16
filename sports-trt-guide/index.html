@@ -359,18 +359,24 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
       msg.textContent = d.percent + '% off applied — you pay ' + money(d.amount) + '.';
       paintTotal(d.amount, d.was);
       if (elements) elements.update({ amount: d.amount });
-      var btn = $('paybtn'); if (btn) btn.textContent = 'Pay ' + money(d.amount) + ' \u2192';
     } catch (e) { msg.className = 'cpmsg no'; msg.textContent = 'Could not check that code.'; }
   }
   function paintTotal(now, was) {
-    var t = document.querySelector('.ototal .amt'); if (!t) return;
+    // :not(.cut) matters — once a struck price is inserted it comes first in
+    // the DOM, and a plain .amt lookup would rewrite that instead of the total.
+    var t = document.querySelector('.ototal .amt:not(.cut)'); if (!t) return;
     var old = document.querySelector('.ototal .amt.cut'); if (old) old.remove();
+    var list = document.querySelector('.ototal .owas');      // the $47 "was" price
     t.textContent = money(now);
     if (was && was !== now) {
+      if (list) list.style.display = 'none';                 // one struck price, not two
       var c = document.createElement('span');
       c.className = 'amt cut'; c.textContent = money(was);
       t.parentNode.insertBefore(c, t);
+    } else if (list) {
+      list.style.display = '';
     }
+    var btn = $('paybtn'); if (btn) btn.textContent = 'Pay ' + money(now) + ' \u2192';
   }
   document.addEventListener('click', function (e) {
     if (e.target && e.target.closest && e.target.closest('#cpbtn')) { e.preventDefault(); applyCoupon(); }
