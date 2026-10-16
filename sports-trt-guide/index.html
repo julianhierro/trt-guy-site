@@ -92,6 +92,9 @@
   .cpmsg.ok{color:var(--ok);font-weight:600}
   .cpmsg.no{color:#c62828}
   .ototal .amt.cut{color:var(--mut);text-decoration:line-through;font-size:22px;margin-right:8px}
+  /* a class, not an inline style: the editor rewrites the style attribute
+     on elements it manages, which quietly undid display:none */
+  .ototal.discounted .owas{display:none}
   .oerr{color:#c62828;font-size:14px;margin-top:10px;min-height:20px}
   .osecure{color:var(--mut);font-size:12.5px;text-align:center;margin-top:12px}
   .onotready{background:#fff5f5;border:1px solid rgba(226,72,58,.45);border-radius:12px;padding:13px 15px;font-size:14px;margin-bottom:16px}
@@ -366,15 +369,15 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
     // the DOM, and a plain .amt lookup would rewrite that instead of the total.
     var t = document.querySelector('.ototal .amt:not(.cut)'); if (!t) return;
     var old = document.querySelector('.ototal .amt.cut'); if (old) old.remove();
-    var list = document.querySelector('.ototal .owas');      // the $47 "was" price
+    var box = document.querySelector('.ototal');
     t.textContent = money(now);
     if (was && was !== now) {
-      if (list) list.style.display = 'none';                 // one struck price, not two
+      if (box) box.classList.add('discounted');              // one struck price, not two
       var c = document.createElement('span');
       c.className = 'amt cut'; c.textContent = money(was);
       t.parentNode.insertBefore(c, t);
-    } else if (list) {
-      list.style.display = '';
+    } else if (box) {
+      box.classList.remove('discounted');
     }
     var btn = $('paybtn'); if (btn) btn.textContent = 'Pay ' + money(now) + ' \u2192';
   }
