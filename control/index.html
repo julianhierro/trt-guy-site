@@ -645,12 +645,18 @@
     },
     {
       id:'sportsguide', icon:'', tag:'Low Ticket Funnel', name:'Sports TRT Guide',
-      description:'The paid guide \u2014 TRT vs sports TRT/HRT vs running steroid cycles. The sales page is still the placeholder it was cloned from.',
+      description:'The paid guide at $29.99 \u2014 sales page, Stripe checkout and the delivery page, with the fertility guide as a free bonus.',
       home:'https://trt-guy.com/sports-trt-guide/',
       pages:[
         { kind:'asset', key:'trtguy-sports-trt-guide', tags:[], name:'Sales Page',
-          description:'Headline, subhead, bullets, price and the checkout button \u2014 click any of it and type. The hero is still the grey image placeholder, and the body copy is the one it was cloned with.',
-          url:'https://trt-guy.com/sports-trt-guide/' }
+          description:'Headline, subhead, bullets, the free fertility bonus and the price \u2014 click any of it and type. Every button goes to the order form.',
+          url:'https://trt-guy.com/sports-trt-guide/' },
+        { kind:'asset', key:'trtguy-order', tags:[], name:'Order Form',
+          description:'The checkout. Card fields are Stripe\u2019s own, so they are not editable \u2014 but the headline, the order summary wording and the guarantee are.',
+          url:'https://trt-guy.com/order/' },
+        { kind:'thanks', key:'trtguy-order-thanks', tags:["trt-guy", "sports-trt-guide", "fertility-guide"], name:'Thank You / Delivery',
+          description:'Where buyers land after paying. Verifies the payment with Stripe, then hands over both PDFs.',
+          url:'https://trt-guy.com/order/thanks/' }
       ]
     },
     {

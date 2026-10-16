@@ -143,6 +143,14 @@ if (!STRIPE_PK || /REPLACE_ME/.test(STRIPE_PK)) {
   });
 }
 </script>
+<script>
+/* Page tracking — same beacon the funnel pages use, so the Control Center
+   can show views → orders for this step. */
+var TRACK='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtguy-order';
+function tgv(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'anon';}}
+function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+encodeURIComponent(tgv());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){}}
+track('view');
+</script>
 <script src="/px.js" defer></script>
 </body>
 </html>

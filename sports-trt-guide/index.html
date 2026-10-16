@@ -219,7 +219,7 @@ function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+e
 if(!/[?&]edit=1/.test(location.search)) track('view');
 
 /* Checkout wiring — set CHECKOUT_URL to your paid checkout link and every button uses it. */
-var CHECKOUT_URL = ""; // ← paste your GHL order-form / Stripe checkout link here
+var CHECKOUT_URL = "/order/"; // our own Stripe checkout on trt-guy.com
 document.querySelectorAll('[data-checkout]').forEach(function(a){
   a.addEventListener('click', function(e){
     if(CHECKOUT_URL){ return; /* real link set below */ }
