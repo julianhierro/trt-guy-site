@@ -671,7 +671,7 @@ async function tryPin(pin){
     body: JSON.stringify({ slug: SLUG, pin }),
   });
   const j = await res.json().catch(() => ({}));
-  if(!res.ok) throw new Error(j.error || 'Something went wrong.');
+  if(!res.ok){ const e = new Error(j.error || 'Something went wrong.'); e.status = res.status; throw e; }
   PIN = pin;
   RESOURCES = Array.isArray(j.resources) ? j.resources : [];
   return j.client;
@@ -691,7 +691,14 @@ async function boot(){
 
   if(saved){
     try { CLIENT = await tryPin(saved); openApp(); return; }
-    catch(e){ localStorage.removeItem(PINKEY); }
+    catch(e){
+      // Only forget the code when it's really wrong. A weak signal or a slow
+      // wake-up must not make him type it again.
+      if(e.status === 401 || e.status === 404) localStorage.removeItem(PINKEY);
+      else {
+        try { await new Promise(r => setTimeout(r, 1500)); CLIENT = await tryPin(saved); openApp(); return; } catch(e2){}
+      }
+    }
   }
   // No code yet: is this even a client page?
   let found = null;
@@ -726,6 +733,8 @@ function openApp(){
   const c = CLIENT;
   document.title = 'TRT Guy — ' + (c.first || c.name || '');
   installManifest(c);
+  // Keep the code in the address bar too, so "Add to Home Screen" saves it.
+  if(PIN && !EDIT){ try { history.replaceState(history.state, '', location.pathname + '?pin=' + encodeURIComponent(PIN)); } catch(e){} }
   $('#aFooter').textContent = t('footer');
 
   // phase — we show how long they've been IN the phase, not a fixed length
@@ -894,7 +903,7 @@ function openSection(k){
     ${CLIENT.updated_at ? `<p class="updated" data-copy="updated">${esc(t('updated', { date: new Date(CLIENT.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) }))}</p>` : ''}`;
   if(EDIT && document.body.classList.contains('tg-edit')) markEditable();
   $('#sBack').onclick = closeSection;
-  history.pushState({ sec:k }, '', location.pathname);
+  history.pushState({ sec:k }, '', location.pathname + location.search);
   window.scrollTo(0, 0);
 }
 function closeSection(){
@@ -922,7 +931,9 @@ function installManifest(c){
     const mf = {
       name: 'TRT Guy — ' + (c.first || c.name || ''),
       short_name: c.first || 'TRT Guy',
-      start_url: '/' + c.slug,
+      // The code rides in the start link: a home-screen icon has its own storage
+      // on iPhone, so this is what lets it open without asking again.
+      start_url: '/' + c.slug + (PIN ? '?pin=' + encodeURIComponent(PIN) : ''),
       scope: '/' + c.slug,
       display: 'standalone',
       background_color: '#ffffff',
@@ -1237,7 +1248,7 @@ function showSection(html){
   $('#aSection').hidden = false;
   $('#aSection').innerHTML = `<button class="back" id="sBack" data-copy="back">${esc(t('back'))}</button>` + html;
   $('#sBack').onclick = goBack;
-  if(history.state == null || !history.state.sec) history.pushState({ sec:'tracker' }, '', location.pathname);
+  if(history.state == null || !history.state.sec) history.pushState({ sec:'tracker' }, '', location.pathname + location.search);
   window.scrollTo(0, 0);
 }
 const dayLabel = s => dOf(s).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
