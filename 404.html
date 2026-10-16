@@ -733,7 +733,7 @@ function openApp(){
   const begun = !!start && new Date(start + 'T00:00:00') <= Date.now();
   if(!begun){
     $('#aPhase').innerHTML = `<div class="lbl" data-copy="dash_label">${esc(t('dash_label'))}</div>
-      <h1>${esc(c.first || c.name || '')}</h1>`;
+      <h1>${esc(c.name || c.first || '')}</h1>`;
   } else {
     const days = Math.max(0, Math.floor((Date.now() - new Date(start + 'T00:00:00')) / 86400000));
     const weeksIn = Math.floor(days / 7) + 1;
