@@ -120,6 +120,37 @@
   .mship span{display:block;font:600 11px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
   .mship b{font-size:16px;letter-spacing:-.01em}
 
+  /* self-coached session: timers, exercise controls, picker */
+  .timers{position:sticky;top:var(--barh,50px);z-index:5;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:0 0 14px;
+    background:var(--bg-2);padding:6px 0}
+  .timers .tm{display:flex;align-items:center;gap:6px;min-width:0;background:#0b0d10;color:#fff;border-radius:12px;padding:8px 8px 8px 10px}
+  .timers .tm span{font:600 9.5px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+  .timers .tm b{flex:1;min-width:0;font:700 18px Inter,sans-serif;font-variant-numeric:tabular-nums}
+  .timers .tm button{background:#fff2;border:0;color:#fff;border-radius:8px;padding:6px 9px;font:600 12px Inter,sans-serif;cursor:pointer}
+  .exctl{display:flex;justify-content:space-between;align-items:center;margin:-4px 0 6px}
+  .exctl button{background:none;border:1px solid var(--line-2);border-radius:8px;width:32px;height:30px;margin-left:5px;cursor:pointer;font-size:14px;color:var(--txt)}
+  .exctl button:disabled{opacity:.3;cursor:default}
+  .mgtag{font:600 10.5px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);background:var(--bg-2);border-radius:6px;padding:4px 7px}
+  .addex{display:block;width:100%;background:none;border:1px dashed var(--line-2);border-radius:12px;padding:9px;margin:0 0 10px;
+    font:600 13px Inter,sans-serif;color:var(--mut);cursor:pointer}
+  .rmset{margin-left:8px}
+  .chgnote{margin:0 0 12px}
+  .mwhen{display:block;font:600 11px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:2px}
+  .vbox.pick{max-width:460px;background:#fff;color:var(--txt)}
+  .vbox.pick .vhead{color:var(--txt)}
+  .vbox.pick .vx{color:var(--txt);background:var(--bg-2)}
+  .pbody{padding:4px 16px 18px;max-height:70vh;overflow:auto}
+  .pbody .pl{display:block;font:600 12px Inter,sans-serif;color:var(--mut);margin:12px 0 5px}
+  .pbody select,.pbody input{width:100%;box-sizing:border-box;font:15px Inter,sans-serif;padding:10px 11px;border:1px solid var(--line-2);border-radius:10px;background:#fff}
+  .pklist{display:grid;gap:6px;margin-top:10px}
+  .pklist button{text-align:left;background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font:500 14.5px Inter,sans-serif;cursor:pointer}
+  .pklist button:hover{border-color:var(--acc)}
+  .pknew{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+  .pknew summary{cursor:pointer;font:600 14px Inter,sans-serif}
+  .pknew .btn{margin-top:14px}
+  .mg td.mgoff{background:#f3f3f3}
+  .mg .mgoffh{background:#f3f3f3!important;color:#999!important;font-weight:400}
+
   /* tiles */
   .tiles{display:grid;gap:10px;margin-top:6px}
   .tile{display:flex;align-items:center;gap:14px;border-left:3px solid transparent;width:100%;text-align:left;background:var(--card);
@@ -1705,6 +1736,7 @@ function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
   (tp.days || []).forEach((day, di) => {
     if(day.rest) return;
     (tp.weeks || []).forEach((_, wi) => {
+      if(!inWeek(tp, wi, di)) return;
       const l = logFor(wi, di);
       (day.ex || []).forEach((e, i) => {
         const g = MUSCLE_OF[e.cat] || e.cat || 'Other';
@@ -1734,7 +1766,7 @@ const cardioTxt = l => l && (l.c_min || l.c_type) ? [l.c_type, l.c_min && l.c_mi
 function mesoSetCols(tp, logFor, wi){
   let n = 1;
   (tp.days || []).forEach((day, di) => {
-    if(day.rest) return;
+    if(day.rest || !inWeek(tp, wi, di)) return;
     const l = logFor(wi, di);
     (day.ex || []).forEach((e, i) => {
       n = Math.max(n, Number(((e.wk || [])[wi] || {}).sets) || 0);
@@ -1755,13 +1787,16 @@ function mesoGridHtml(tp, logFor, escFn, nowWeek){
     `<td class="c cw">S${j + 1} lb</td><td class="c cr">reps</td>`).join('')}<td>Notes</td><td class="mgsp"></td>`).join('');
   const cut = (txt, cls) => `<td class="${cls || ''}" title="${escFn(txt)}"><div class="cl">${escFn(txt)}</div></td>`;
   const body = (tp.days || []).map((day, di) => {
-    const logs = weeks.map((_, wi) => logFor(wi, di));
+    const logs = weeks.map((_, wi) => inWeek(tp, wi, di) ? logFor(wi, di) : null);
+    const off = wi => !inWeek(tp, wi, di);
+    const offTd = wi => `<td colspan="${C[wi]}" class="mgoff"></td><td class="mgsp"></td>`;
+    if(day.rest && tp.schedule) return '';
     if(day.rest){
       const cardio = weeks.map((_, wi) => cardioTxt(logs[wi]));
       return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="3">${escFn(day.name)}</td>${weeks.map((_, wi) =>
         `<td colspan="${C[wi]}" title="${escFn(cardio[wi])}"><div class="cl">${cardio[wi] ? '🏃 ' + escFn(cardio[wi]) : ''}</div></td><td class="mgsp"></td>`).join('')}</tr>`;
     }
-    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${weeks.map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
+    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${weeks.map((_, wi) => { if(off(wi)) return `<td colspan="${C[wi]}" class="mgsess mgoffh"><div class="cl">not this week</div></td><td class="mgsp"></td>`; const l = logs[wi], col = mesoWeekColor(tp, wi);
       const bits = l ? [l.sf, l.sp, cardioTxt(l) && '🏃 ' + cardioTxt(l)].filter(Boolean) : [];
       return `<td colspan="${C[wi]}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp, cardioTxt(l) && 'Cardio: ' + cardioTxt(l)].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((weeks[wi] || {}).label || '')}</b> ${l ? '✓ ' + escFn(bits.join(' · ') || 'logged') : ''}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
     const notes = weeks.some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${weeks.map((_, wi) =>
@@ -1769,17 +1804,17 @@ function mesoGridHtml(tp, logFor, escFn, nowWeek){
     const rows = (day.ex || []).map((e, i) => { const name = e.n || e.cat;
       return `<tr><td class="mgex" title="${escFn(name)}"><div class="cl">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</div></td>
         <td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
-        ${weeks.map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
+        ${weeks.map((_, wi) => { if(off(wi)) return offTd(wi); const w = (e.wk || [])[wi] || {}, l = logs[wi];
           const k = mExAt(l, name, i), sets = k >= 0 ? mesoSetsOf(l, k) : [];
           return `<td class="c">${escFn(w.rir ?? '')}</td><td class="c">${escFn(w.sets ?? '')}</td>
             ${[...Array(N[wi])].map((_, j) => { const x = sets[j] || {};
               return `<td class="c cw">${escFn(x.w || '')}</td><td class="c cr">${escFn(x.r || '')}</td>`; }).join('')}
             ${cut(k >= 0 ? l['e' + k + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
-    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${weeks.map((_, wi) =>
+    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${weeks.map((_, wi) => off(wi) ? offTd(wi) :
       `<td colspan="${C[wi]}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
     return head + notes + `<tr class="mgcols"><td>Exercise</td><td class="c">Reps</td><td class="c">Tempo</td>${colHead}</tr>` + rows + vol;
   }).join('');
-  const total = weeks.map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
+  const total = weeks.map((_, wi) => (tp.days || []).reduce((a, d, di) => !inWeek(tp, wi, di) ? a : a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
   return `<div class="mgwrap"><table class="mg">
     <thead><tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
     <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map((v, wi) => `<td colspan="${C[wi]}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
@@ -1834,20 +1869,35 @@ const PUMP = ['Amazing pumps','Noticeable to okay pump','Very little pump','No p
 // A logged session belongs to a day by its permanent id (older logs only carry the day's position).
 const mDayId = (day, di) => (day && day.id) || ('d' + di);
 const mLogDid = d => d.did || ('d' + d.d);
-function mesoEntry(tp, w, di){
-  const id = mDayId(tp.days[di], di);
-  return LOGS.find(l => l.kind === 'training' && l.data.m && l.data.w === w && mLogDid(l.data) === id) || null;
+/* Which days run in week wi. A plan with a `schedule` rotates its sessions through
+   the calendar (schedule[wi] = 7 day ids, Monday first), so Upper 1 can land on a
+   different weekday each week. Without one, every week repeats `days` in order.
+   Rest slots get their own id per slot so each rest day can carry its own cardio. */
+function wDays(tp, wi){
+  const days = tp.days || [], row = (tp.schedule || [])[wi];
+  if(!row) return days.map((day, di) => ({ day, id: mDayId(day, di), slot: di }));
+  return row.map((id, slot) => {
+    const day = days.find((d, di) => mDayId(d, di) === id) || { name: 'Rest', rest: true, ex: [] };
+    return { day, id: day.rest ? id + '@' + slot : id, slot };
+  });
 }
+// Does template day di run in week wi?
+const inWeek = (tp, wi, di) => !tp.schedule || ((tp.schedule[wi]) || []).includes(mDayId((tp.days || [])[di], di));
+const mesoEntryById = (w, id) => LOGS.find(l => l.kind === 'training' && l.data.m && l.data.w === w && mLogDid(l.data) === id) || null;
+function mesoEntry(tp, w, di){ return mesoEntryById(w, mDayId(tp.days[di], di)); }
 const mesoLog = (tp, w, d) => { const e = mesoEntry(tp, w, d); return e ? e.data : null; };
-// The date a session is filed under: its existing log's date, else that week's day d (or the next free one).
-function mesoDay(tp, w, d){
-  const e = mesoEntry(tp, w, d); if(e) return e.day;
-  const mon = addDays(mondayOf(tp.start || todayIso()), w * 7), pref = addDays(mon, Math.min(d, 6));
+// The date a session is filed under: its existing log's date; on a schedule, its calendar slot;
+// otherwise that week's day d (or the next free one).
+function mesoDayOf(tp, w, sl){
+  const e = mesoEntryById(w, sl.id); if(e) return e.day;
+  const mon = addDays(mondayOf(tp.start || todayIso()), w * 7), pref = addDays(mon, Math.min(sl.slot, 6));
+  if(tp.schedule) return pref;
   const taken = new Set(LOGS.filter(l => l.kind === 'training').map(l => l.day));
   if(!taken.has(pref)) return pref;
   for(let i = 0; i < 7; i++){ const x = addDays(mon, i); if(!taken.has(x)) return x; }
   return pref;
 }
+const mesoDay = (tp, w, d) => mesoDayOf(tp, w, wDays(tp, w)[d] || { id: mDayId(tp.days[d], d), slot: d });
 // Per-set results live as e{i}s{j}w / e{i}s{j}r. Older logs only have e{i}w + e{i}r ("12,10,8").
 function setsOf(d, i){
   const out = [];
@@ -1868,11 +1918,15 @@ function lastPerf(name, before){
 }
 const lastSession = before => LOGS.filter(l => l.kind === 'training' && l.data.m && l.day < before).sort((a, b) => a.day < b.day ? 1 : -1)[0] || null;
 const perfTxt = p => compactSets(p.sets);
+const exLink = e => e.v ? `<a href="${esc(e.v)}" data-vid="${esc(e.v)}" data-vt="${esc(e.n || e.cat)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ▶</a>` : esc(e.n || e.cat);
+const rxLine = (e, w) => [e.reps && e.reps + ' reps', e.tempo && 'tempo ' + e.tempo, w.rir !== '' && w.rir != null && 'RIR ' + w.rir, w.sets && w.sets + ' sets'].filter(Boolean).map(esc).join(' · ');
 function openMeso(wi){
   const tp = secs().training_plan;
   if(wi == null) wi = trainingWeekIndex(tp);
-  const wk = tp.weeks[wi] || {};
-  const vol = tp.days.reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (num(((e.wk || [])[wi] || {}).sets) || 0), 0), 0);
+  const wk = tp.weeks[wi] || {}, slots = wDays(tp, wi);
+  const vol = slots.reduce((a, sl) => a + (sl.day.ex || []).reduce((x, e) => x + (num(((e.wk || [])[wi] || {}).sets) || 0), 0), 0);
+  // On a rotating schedule every slot is a calendar day, so show which.
+  const when = sl => tp.schedule && tp.start ? `<small class="mwhen">${esc(dOf(mesoDayOf(tp, wi, sl)).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }))}</small>` : '';
   showSection(`
     <div class="seg"><button class="on">This week</button><button id="segFull">Full plan</button></div>
     <h1>${esc(tp.name || t('tile_training'))}</h1>
@@ -1880,98 +1934,265 @@ function openMeso(wi){
     <div class="wtabs">${tp.weeks.map((w, i) => { const col = mesoWeekColor(tp, i);
       return `<button data-wi="${i}" class="${i === wi ? 'on' : ''}" style="background:${col.bg};color:${col.fg};border-color:${col.bg}">${esc(w.label || 'Week ' + (i + 1))}</button>`; }).join('')}</div>
     <p class="sub" style="margin:0 0 14px">${nf(vol)} total sets this week${wk.deload && tp.deload_note ? ' · deload: ' + esc(tp.deload_note) : ''}</p>
-    ${tp.days.map((day, di) => {
-      if(day.rest){ const cl = mesoLog(tp, wi, di);
-        return `<div class="card tday rest ${/^day/i.test(day.name || '') ? '' : 'full'}"><div class="rrow"><b>${esc(day.name)}</b>
-          <button class="btn ghost sm cbtn" data-log="${di}">${cardioTxt(cl) ? '🏃 ' + esc(cardioTxt(cl)) : '+ Log cardio'}</button></div></div>`; }
-      const log = mesoLog(tp, wi, di), note = (day.notes || [])[wi];
+    ${slots.map((sl, s) => { const day = sl.day;
+      if(day.rest){ const ce = mesoEntryById(wi, sl.id), cl = ce ? ce.data : null;
+        return `<div class="card tday rest ${/^day/i.test(day.name || '') || tp.schedule ? '' : 'full'}"><div class="rrow"><b>${when(sl)}${esc(day.name)}</b>
+          <button class="btn ghost sm cbtn" data-log="${s}">${cardioTxt(cl) ? '🏃 ' + esc(cardioTxt(cl)) : '+ Log cardio'}</button></div></div>`; }
+      const le = mesoEntryById(wi, sl.id), log = le ? le.data : null, note = (day.notes || [])[wi];
       return `<div class="card tday">
-        <div class="tdh mday"><b>${esc(day.name)}</b>${log ? '<span>✓ logged</span>' : ''}</div>
+        <div class="tdh mday"><b>${when(sl)}${esc(day.name)}</b>${log ? `<span>✓ logged${log.dur ? ' · ⏱ ' + esc(log.dur) : ''}</span>` : ''}</div>
         ${note ? `<p class="cnote"><b>Coach's Notes:</b> ${esc(note)}</p>` : ''}
         <div class="mex">${(day.ex || []).map(e => { const w = (e.wk || [])[wi] || {};
-          return `<div class="mrow"><div class="mn">${e.v ? `<a href="${esc(e.v)}" data-vid="${esc(e.v)}" data-vt="${esc(e.n || e.cat)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ▶</a>` : esc(e.n || e.cat)}</div>
-            <div class="mp">${[e.reps && e.reps + ' reps', e.tempo && 'tempo ' + e.tempo, w.rir !== '' && w.rir != null && 'RIR ' + w.rir, w.sets && w.sets + ' sets'].filter(Boolean).map(esc).join(' · ')}</div>
-            ${(() => { const p = lastPerf(e.n || e.cat, mesoDay(tp, wi, di)); return p ? `<div class="mlast">Last session (${dOf(p.day).toLocaleDateString('en-US', { weekday:'short' })} ${fmt(p.day)}):</div><div class="mchips">${setChipsHtml(p.sets, esc)}</div>` : ''; })()}</div>`; }).join('')}</div>
-        <button class="btn ghost sm" data-log="${di}">${log ? 'Edit log' : esc(t('trk_train_log'))}</button>
+          return `<div class="mrow"><div class="mn">${exLink(e)}</div>
+            <div class="mp">${rxLine(e, w)}</div>
+            ${(() => { const p = lastPerf(e.n || e.cat, mesoDayOf(tp, wi, sl)); return p ? `<div class="mlast">Last session (${dOf(p.day).toLocaleDateString('en-US', { weekday:'short' })} ${fmt(p.day)}):</div><div class="mchips">${setChipsHtml(p.sets, esc)}</div>` : ''; })()}</div>`; }).join('')}</div>
+        <button class="btn ghost sm" data-log="${s}">${log ? 'Edit log' : esc(t('trk_train_log'))}</button>
       </div>`;
     }).join('')}`);
   document.querySelectorAll('#aSection .wtabs button').forEach(b => b.onclick = () => openMeso(+b.dataset.wi));
   $('#segFull').onclick = openMesoFull;
   document.querySelectorAll('#aSection [data-log]').forEach(b => b.onclick = () => openMesoLog(wi, +b.dataset.log));
 }
-function openMesoLog(wi, di){
-  const tp = secs().training_plan, day = tp.days[di], wk = tp.weeks[wi] || {};
-  // Re-key the saved session to the current exercise order (exercises may have been moved since).
-  const raw = mesoLog(tp, wi, di) || {}, saved = {};
-  Object.keys(raw).filter(k => !/^e\d+/.test(k)).forEach(k => { saved[k] = raw[k]; });
-  (day.ex || []).forEach((e, i) => { const k = mExAt(raw, e.n || e.cat, i); if(k < 0) return;
-    Object.keys(raw).forEach(key => { const m = key.match(/^e(\d+)(\D.*)$/); if(m && +m[1] === k) saved['e' + i + m[2]] = raw[key]; }); });
-  const slot = mesoDay(tp, wi, di), prev = lastSession(slot);
+
+/* ── Self-coached: the client runs his own program from the session screen —
+   add / remove / move exercises (picked by muscle group, or new ones he
+   creates), add / remove sets, a rest timer and a workout timer. Changes to
+   the exercise list are saved into that day of his plan for every later week. ── */
+const selfCoached = () => !!((secs().tracker || {}).self);
+// The Reference tab's exercise library — a copy of EX_LIB in clients/index.html.
+const EX_LIB = {"Horizontal Press": [["Barbell Bench Press Normal Grip", "https://www.youtube.com/watch?v=gMgvBspQ9lk"], ["Barbell Bench Press Wide Grip", "https://www.youtube.com/watch?v=EeE3f4VWFDo"], ["Barbell Bench Press Narrow Grip", "https://www.youtube.com/watch?v=FiQUzPtS90E"], ["Dumbbell Horizontal Press", "https://www.youtube.com/watch?v=YQ2s_Y7g5Qk"], ["Seated Machine Bench Press", "https://www.youtube.com/watch?v=NwzUje3z0qY"], ["Horizontal Machine Chest Press", "https://youtu.be/z4YEEwGD2Q0?t=16"], ["Cable Flys", "https://www.youtube.com/watch?v=4mfLHnFL0Uw"], ["Dips", "https://www.youtube.com/watch?v=4LA1kF7yCGo"], ["Dip machine", "https://www.youtube.com/shorts/UVdP0sB7dDc"], ["Dips - Assisted", "https://www.youtube.com/watch?v=yZ83t4mrPrI"], ["Machine Fly", "https://www.youtube.com/watch?v=FDay9wFe5uE"], ["Smith Machine Bench", "https://www.youtube.com/watch?v=O5viuEPDXKY"], ["Push Up", "https://www.youtube.com/watch?v=mm6_WcoCVTA"], ["Deficit Push Ups", "https://www.youtube.com/watch?v=gmNlqsE3Onc"], ["Dumbbell Fly", "https://www.youtube.com/watch?v=JFm8KbhjibM"], ["Push up from knees", "https://www.youtube.com/watch?v=WcHtt6zT3Go"]], "Incline Press": [["High Incline Dumbbell Press", "https://youtu.be/GFYrRBoov3w"], ["Incline Barbell Press Medium Grip", "https://youtu.be/lJ2o89kcnxY"], ["Incline Barbell Press Narrow Grip", "https://youtu.be/Zfi0KcIJi6c"], ["Incline Barbell Press Wide Grip", "https://youtu.be/FxQ0XEoFYQk"], ["Incline Dumbbell Flye", "https://youtu.be/8oR5hBwbIBc"], ["Incline Dumbbell Press", "https://youtu.be/5CECBjd7HLQ"], ["Incline Machine Chest Press", "https://youtu.be/TrTSvn5-MTk"], ["Low Incline Dumbbell Press", "https://youtu.be/B09ZkYsnKko"], ["Smith Machine High Incline Press", "https://youtu.be/GFYrRBoov3w"], ["Smith Machine Low Incline Press", "https://youtu.be/B09ZkYsnKko"], ["Smith Machine Incline Press", "https://youtu.be/8urE8Z8AMQ4"]], "Horizontal Pull": [["Barbell Bent Over Row", "https://www.youtube.com/watch?v=6FZHJGzMFEc"], ["2-Arm Dumbbell Row", "https://www.youtube.com/watch?v=5PoEksoJNaw"], ["Cable Row", "https://www.youtube.com/watch?v=NYok5zjbDcw"], ["Cable One Arm Row", "https://www.youtube.com/watch?v=PFGa5_PvgVQ"], ["Dumbbell One Arm Row", "https://www.youtube.com/watch?v=DMo3HJoawrU"], ["Dumbbell Chest Supported Row", "https://www.youtube.com/watch?v=tZUYS7X50so"], ["Underhand EZ Bent Over Row", "https://www.youtube.com/watch?v=H260SUUyJBM"], ["Chest Supported Machine Row", "https://www.youtube.com/watch?v=bmWA2yO9Aa0"], ["Hammer Strength Horizontal Row", "https://www.youtube.com/watch?v=0GU9_kT6tBY"], ["Hammer Strength High Row", "https://www.youtube.com/watch?v=gg5hwJuv6KI"], ["T Bar Row", "https://www.youtube.com/watch?v=0UBRfiO4zDs"], ["Hammer Low Row", "https://www.youtube.com/watch?v=opjbouBmUWg"], ["Smith Machine Row", "https://www.youtube.com/watch?v=3QcJggd_L24"], ["Cambered Bar Row", "https://youtu.be/jiowkUMomlw"], ["Inverted Row", "https://youtu.be/KOaCM1HMwU0"], ["Seal Row", "https://youtu.be/4H2ItXwUTp8"]], "Vertical Pull": [["Normal Grip Pullup", "https://www.youtube.com/watch?v=aAggnpPyR6E"], ["Assisted Normal Grip Pullup", "https://www.youtube.com/watch?v=8ygapPMYK1I"], ["Parallel Grip Pullup", "https://www.youtube.com/watch?v=XWt6FQAK5wM"], ["Assissted Parallel Pull Up", "https://www.youtube.com/watch?v=GdsRZAeeDUc"], ["Underhand Pullup", "https://www.youtube.com/watch?v=9JC1EwqezGY"], ["Wide Grip Pullup", "https://www.youtube.com/watch?v=GRgWPT9XSQQ"], ["Parallel Pulldown", "https://www.youtube.com/watch?v=--utaPT7XYQ"], ["Underhand Pulldown", "https://www.youtube.com/watch?v=VprlTxpB1rk"], ["Wide Grip Pulldown", "https://www.youtube.com/watch?v=YCKPD4BSD2E"], ["Normal Grip Pulldown", "https://www.youtube.com/watch?v=EUIri47Epcg"], ["Machine Pulldown", "https://youtu.be/vjrEYyQ6EW0"], ["One Arm Pulldown", "https://www.youtube.com/watch?v=J81mealJ9j4"], ["Hammer Strength High Row", "https://www.youtube.com/watch?v=gg5hwJuv6KI"], ["Straight Arm Pulldown", "https://www.youtube.com/watch?v=G9uNaXGTJ4w"]], "Hip Hinge": [["Dumbbell Straight Leg Deadlift", "https://www.youtube.com/watch?v=cYKYGwcg0U8"], ["Glute Ham Raises", "https://www.youtube.com/watch?v=SBGYSfoqyfU"], ["Smith Machine Good Mornings", ""], ["Stiff Legged Deadlift", "https://www.youtube.com/watch?v=CN_7cz3P-1U"], ["Deadlift", "https://www.youtube.com/watch?v=AweC3UaM14o"], ["Trap Bar Deadlift", "https://www.youtube.com/watch?v=VNgxEhOoOjo"], ["45-Degree Back Raise", "https://www.youtube.com/watch?v=5_ejbGfdAQE"], ["Hack Squat Good Mornings", "https://www.youtube.com/watch?v=xBjSyZagZL0"], ["Low Bar Good Morning", "https://www.youtube.com/watch?v=mnxn-7SO9Ks"], ["HIgh Bar Good Morning", "https://www.youtube.com/watch?v=dEJ0FTm-CEk"]], "Hamstrings": [["45 Degree Back Raise", "https://youtu.be/5_ejbGfdAQE"], ["Dumbbell Stiff Legged Deadlift", "https://youtu.be/cYKYGwcg0U8"], ["Glute Ham Raise", "https://youtu.be/SBGYSfoqyfU"], ["High Bar Good Morning", "https://youtu.be/dEJ0FTm-CEk"], ["Low Bar Good Morning", "https://youtu.be/mnxn-7SO9Ks"], ["Lying Leg Curl", "https://youtu.be/n5WDXD_mpVY"], ["Seated Leg Curl", "https://youtu.be/Orxowest56U"], ["Single Leg Curl", "https://youtu.be/N6FVnaasdq0"], ["Stiff Legged Deadlift", "https://youtu.be/CN_7cz3P-1U"]], "Quad": [["Barbell Bulgarian Lunge", "https://www.youtube.com/watch?v=giUKtDvwhrM"], ["Barbell Walking Lunge", "https://www.youtube.com/watch?v=XJyUHKWKnxc"], ["Dumbbell Bulgarian Lunge", "https://youtu.be/vLuhN_glFZ8"], ["Dumbbell Lunges", "https://www.youtube.com/watch?v=eFWCn5iEbTU"], ["Leg Extensions", "https://www.youtube.com/watch?v=m0FOpMEgero"], ["Leg Press", "https://www.youtube.com/watch?v=yZmx_Ac3880"], ["Smith Machine Squat", "https://www.youtube.com/watch?v=-eO_VydErV0"], ["High Bar Back Squat", "https://www.youtube.com/watch?v=i7J5h7BJ07g"], ["Goblet Squat", "https://www.youtube.com/watch?v=zBV3ceGyAxw"], ["Bodyweight Squat", "https://www.youtube.com/watch?v=0EpP3pYUYTk"], ["Hack Squat", "https://www.youtube.com/watch?v=rYgNArpwE7E"], ["Pendulum Squats", "https://youtu.be/OcgrPkHHuUs?t=7"], ["Smith Machine Wide Stance Squats", "https://www.youtube.com/watch?v=9O3lA9HsZU8"], ["Sumo Squat", "https://www.youtube.com/watch?v=4eDJa5MnAmY"], ["Belt Squat", "https://youtu.be/L__-j2v_LPM"], ["Narrow Stance Squat", "https://youtu.be/1IIPcUCKxcE"], ["Front Squat Cross Grip", "https://youtu.be/0DQvn2qsOG4"], ["Front Squat", "https://youtu.be/HHxNbhP16UE"]], "Side Delts": [["Barbell Upright Row", "https://youtu.be/um3VVzqunPU"], ["Cable Cross Body Lateral Raise", "https://youtu.be/2OMbdPF7mz4"], ["Cable Upright Row", "https://youtu.be/qr3ziolhjvQ"], ["Dumbbell Upright Row", "https://youtu.be/Ub6QruNKfbY"], ["Lateral Raise", "https://youtu.be/OuG1smZTsQQ"], ["Leaning Cable Lateral Raise", "https://youtu.be/lq7eLC30b9w"], ["Machine Lateral Raise", "https://youtu.be/0o07iGKUarI"], ["Smith Machine Upright Row", "https://youtu.be/QIpa-9dtkgA"], ["Thumbs Down Lateral Raise", "https://youtu.be/D1f7d1OcobY"], ["Top Hold Lateral Raise", "https://youtu.be/SKf8wHlIFX0"]], "Triceps": [["Cable Overhead Tricep Extension", "https://www.youtube.com/watch?v=1u18yJELsh0"], ["Rope Overhead Triceps Extension", "https://www.youtube.com/watch?v=kqidUIf1eJE"], ["Barbell Skull Crusher", "https://www.youtube.com/watch?v=l3rHYPtMUo8"], ["Tricep Extension Machine", "https://www.youtube.com/watch?v=_JoblP7fggo"], ["Tricep Push Down", "https://www.youtube.com/watch?v=6Fzep104f0s"], ["Dips", "https://www.youtube.com/watch?v=4LA1kF7yCGo"], ["Dip machine", "https://www.youtube.com/shorts/UVdP0sB7dDc"], ["Dumbbell Skullcrusher", "https://www.youtube.com/watch?v=jPjhQ2hsAds"], ["Cable Rope Pushdown", "https://www.youtube.com/watch?v=-xa-6cQaZKY"], ["Assisted Dips", "https://www.youtube.com/watch?v=yZ83t4mrPrI"]], "Biceps": [["EZ Bar Cable Curl", "https://www.youtube.com/watch?v=opFVuRi_3b8"], ["EZ Bar Curls", "https://www.youtube.com/watch?v=MCjBeB844rU&feature=youtu.be"], ["Dumbbell Alternating Curl", "https://www.youtube.com/watch?v=WYezBGuUsdw"], ["2-Arm Dumbbell Bicep Curl", "https://youtu.be/yYB76DOBPsM"], ["Dumbbell Hammer Curl", "https://youtu.be/xsOm9xn83-8"], ["Incline Dumbbell Curl", "https://youtu.be/2jsTYbOkx1U"], ["Machine Preacher Curl", "https://www.youtube.com/watch?v=Ja6ZlIDONac"], ["Spider Curls", "https://www.youtube.com/watch?v=ke2shAeQ0O8"], ["Incline Dumbbell Curl", "https://www.youtube.com/watch?v=aTYlqC_JacQ"]], "Rear Delts": [["Barbell Facepull", "https://youtu.be/hPWYuhJMUhU"], ["Bent Lateral Raise", "https://youtu.be/34gVHrkaiz0"], ["Cable Cross Body Bent Lateral Raise", "https://youtu.be/f0g5NkYiWUY"], ["Cable Rope Facepull", "https://youtu.be/-MODnZdnmAQ"], ["Cable Single Arm Rear Delt Raise", "https://youtu.be/qz1OLup4W_M"], ["Dumbbell Facepull", "https://youtu.be/nzTY7j9ocR8"], ["Incline Dumbbell Facepull", "https://youtu.be/90cE3rCLtmo"], ["Incline Dumbbell Lateral Raise", "https://youtu.be/z3PRz2aVA10"], ["Kneeling Cable Facepull", "https://youtu.be/8CGMuud1ANw"], ["Machine Reverse Flye", "https://youtu.be/5YK4bgzXDp0"]], "Abs": [["Ab machine (any)", ""], ["Captain Char Leg Raises", "https://www.youtube.com/watch?v=skmbJPuUn3Q"], ["Decline Sit Ups", "https://www.youtube.com/watch?v=N7hf1_vcX5w"]], "Glutes": [["Barbell Hip Thrust", "https://www.youtube.com/watch?v=2zcsFcTLMsI"], ["Barbell Walking Lunge", "https://www.youtube.com/watch?v=XJyUHKWKnxc"], ["Stiff Legged Deadlift", "https://www.youtube.com/watch?v=CN_7cz3P-1U"], ["Deadlift", "https://www.youtube.com/watch?v=AweC3UaM14o"], ["Dumbbell Deficit Reverse Lunge", "https://www.youtube.com/watch?v=S8UKm6oHGis"], ["Sumo Squat", "https://www.youtube.com/watch?v=4eDJa5MnAmY"], ["Dumbbell Straight Leg Deadlift", "https://www.youtube.com/watch?v=cYKYGwcg0U8"], ["Seated Abduction", "https://www.youtube.com/watch?v=G_8LItOiZ0Q"], ["Barbell Bulgarian Lunge", "https://www.youtube.com/watch?v=giUKtDvwhrM"], ["Barbell Walking Lunge", "https://www.youtube.com/watch?v=XJyUHKWKnxc"], ["Dumbbell Bulgarian Lunge", "https://youtu.be/vLuhN_glFZ8"], ["Dumbbell Lunges", "https://www.youtube.com/watch?v=eFWCn5iEbTU"]], "Calves": [["Machine Calf Raises", "https://www.youtube.com/watch?v=u8-wLlBxFE4"], ["Donkey Calf Raises", "https://www.youtube.com/watch?v=JL30z9tqMDA"], ["Smith Calf Raises", "https://www.youtube.com/shorts/wlqTemUXPXY"], ["Seated Calf Raises", "https://www.youtube.com/watch?v=paSkfNotQis"], ["Leg Press Calf Raises", "https://www.youtube.com/watch?v=dhRz1Ns60Zg"]], "Forearms": [["Barbell Standing Wrist Curls", "https://youtu.be/lfQR7oVS8eo"], ["Dumbbell Standing Wrist Curls", "https://youtu.be/iQ4JjOK73PE"], ["Dumbbell Bench Wrist Curls", "https://youtu.be/2wPpcJBe03oo"], ["Cable Wrist Curls", "https://youtu.be/WVAaKJvToe0"]]};
+let EXLIB_CUSTOM = null;
+async function exLibCustom(){
+  if(EXLIB_CUSTOM) return EXLIB_CUSTOM;
+  try { EXLIB_CUSTOM = (await logApi({ action:'exlib' })).lib || {}; } catch(e){ EXLIB_CUSTOM = {}; }
+  return EXLIB_CUSTOM;
+}
+function exLibAll(){
+  const out = {};
+  Object.keys(EX_LIB).forEach(c => { out[c] = EX_LIB[c].map(x => ({ n: x[0], v: x[1] || '' })); });
+  Object.keys(EXLIB_CUSTOM || {}).forEach(c => {
+    out[c] = out[c] || [];
+    (EXLIB_CUSTOM[c] || []).forEach(x => { if(!out[c].some(y => y.n === x[0])) out[c].push({ n: x[0], v: x[1] || '', mine: true }); });
+  });
+  return out;
+}
+// Pick an exercise by muscle group, or create a new one. Resolves {n, cat, v} or null.
+async function pickExercise(){
+  await exLibCustom();
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.className = 'vpop'; ov.id = 'expick';
+    const close = v => { ov.remove(); document.body.style.overflow = ''; resolve(v); };
+    let cat = '';
+    const draw = () => {
+      const lib = exLibAll(), cats = Object.keys(lib);
+      ov.innerHTML = `<div class="vbox pick" role="dialog" aria-label="Add exercise">
+        <div class="vhead"><b>Add exercise</b><button class="vx" aria-label="Close">×</button></div>
+        <div class="pbody">
+          <label class="pl">Muscle group</label>
+          <select id="pkCat"><option value="">Choose…</option>${cats.map(c => `<option ${c === cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+          ${cat ? `<div class="pklist">${(lib[cat] || []).map((x, i) => `<button type="button" data-i="${i}">${esc(x.n)}${x.mine ? ' <small>★</small>' : ''}${x.v ? ' <small>▶</small>' : ''}</button>`).join('') || '<p class="qh">Nothing in this group yet.</p>'}</div>` : ''}
+          <details class="pknew" ${cats.length ? '' : 'open'}><summary>+ Create a new exercise</summary>
+            <label class="pl">Name</label><input id="pkName" placeholder="e.g. Precor Cable Curl">
+            <label class="pl">Muscle group</label>
+            <select id="pkNewCat">${cats.map(c => `<option ${c === cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}<option value="__new">+ New muscle group…</option></select>
+            <input id="pkNewCatName" placeholder="New muscle group name" hidden>
+            <label class="pl">Video link <small>— optional</small></label><input id="pkVid" placeholder="https://youtube.com/…">
+            <button type="button" class="btn" id="pkCreate">Create and add</button>
+            <p class="saved" id="pkMsg"></p>
+          </details>
+        </div></div>`;
+      ov.querySelector('.vx').onclick = () => close(null);
+      ov.querySelector('#pkCat').onchange = e => { cat = e.target.value; draw(); };
+      ov.querySelectorAll('.pklist button').forEach(b => b.onclick = () => { const x = lib[cat][+b.dataset.i]; close({ n: x.n, cat, v: x.v }); });
+      const nc = ov.querySelector('#pkNewCat');
+      nc.onchange = () => { ov.querySelector('#pkNewCatName').hidden = nc.value !== '__new'; };
+      ov.querySelector('#pkCreate').onclick = async () => {
+        const name = ov.querySelector('#pkName').value.trim();
+        const c = nc.value === '__new' ? ov.querySelector('#pkNewCatName').value.trim() : nc.value;
+        const v = ov.querySelector('#pkVid').value.trim(), msg = ov.querySelector('#pkMsg');
+        if(!name || !c){ msg.textContent = 'Give it a name and a muscle group.'; return; }
+        msg.textContent = 'Saving…';
+        try { EXLIB_CUSTOM = (await logApi({ action:'exlib_add', cat: c, name, video: v })).lib || EXLIB_CUSTOM; }
+        catch(e){ msg.textContent = e.message; return; }
+        close({ n: name, cat: c, v });
+      };
+    };
+    ov.onclick = e => { if(e.target === ov) close(null); };
+    document.body.appendChild(ov);
+    document.body.style.overflow = 'hidden';
+    draw();
+  });
+}
+// Timers: the workout clock starts when he taps Start and survives leaving the
+// page (its start time is stored); the rest clock restarts every time he fills in a set.
+const mmss = ms => { const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0'); };
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch(e){} };
+let TICK = null;
+
+function openMesoLog(wi, s, keep){
+  const tp = secs().training_plan, sl = wDays(tp, wi)[s], day = sl.day, wk = tp.weeks[wi] || {};
+  const SELF = selfCoached() && !day.rest;
+  const slot = mesoDayOf(tp, wi, sl), prev = lastSession(slot);
   const prevWhen = prev ? `${esc(prev.data.day || '')} · ${fmt(prev.day)}` : '';
   const note = (day.notes || [])[wi];
+  // Working copy: the exercise list and what he has typed, so adding or moving an
+  // exercise can redraw the screen without losing anything.
+  let st = keep;
+  if(!st){
+    const le = mesoEntryById(wi, sl.id), raw = le ? le.data : {};
+    const ex = (day.ex || []).map(e => JSON.parse(JSON.stringify(e)));
+    // exercises logged in this session but since taken off the plan stay visible
+    for(let i = 0; i < 40; i++){ const nm = raw['e' + i + 'n']; if(nm && !ex.some(e => (e.n || e.cat) === nm)) ex.push({ n: nm, cat: '', wk: [] }); }
+    const top = {};
+    Object.keys(raw).filter(k => !/^e\d+/.test(k)).forEach(k => { top[k] = raw[k]; });
+    const rows = ex.map((e, i) => { const k = mExAt(raw, e.n || e.cat, i), w = (e.wk || [])[wi] || {};
+      const sets = k >= 0 ? setsOf(raw, k) : [];
+      return { sets, x: k >= 0 ? raw['e' + k + 'x'] || '' : '', n: Math.max(num(w.sets) || 3, sets.length) }; });
+    st = { ex, rows, top, changed: false };
+  }
   const chips = (key, opts, val) => `<div class="opts col" data-k="${key}">${opts.map(o => `<button type="button" class="${val === o ? 'on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+  const woKey = 'tg-wo:' + SLUG + ':' + slot + ':' + sl.id, restKey = 'tg-rest:' + SLUG;
+  const addHere = i => SELF ? `<button type="button" class="addex" data-at="${i}">+ Add exercise here</button>` : '';
   showSection(`
+    ${SELF ? `<div class="timers" id="tmBar">
+      <div class="tm"><span>Workout</span><b id="tmWo">${st.top.dur ? esc(st.top.dur) : '0:00'}</b>
+        <button type="button" id="tmWoBtn">${lsGet(woKey) ? 'Running' : st.top.dur ? 'Restart' : 'Start'}</button></div>
+      <div class="tm"><span>Rest</span><b id="tmRest">0:00</b><button type="button" id="tmRestBtn">Reset</button></div>
+    </div>` : ''}
     <h1>${esc(day.name)}</h1>
-    <p class="sub" style="margin:-8px 0 14px">${esc(wk.label || '')}${tp.start ? ' · ' + fmt(mesoDay(tp, wi, di)) : ''}</p>
+    <p class="sub" style="margin:-8px 0 14px">${esc(wk.label || '')}${tp.start ? ' · ' + fmt(slot) : ''}</p>
     ${note ? `<p class="cnote"><b>Coach's Notes:</b> ${esc(note)}</p>` : ''}
     ${day.rest ? '' : `<div class="card mlog"><p class="qt">Fatigue <small>— before you start</small></p>
-      ${prev && prev.data.sf ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sf)}</p>` : ''}${chips('sf', FATIGUE, saved.sf)}</div>`}
-    ${(day.ex || []).map((e, i) => { const w = (e.wk || [])[wi] || {};
-      const p = lastPerf(e.n || e.cat, slot);
-      return `<div class="card mlog">
-        <p class="qt">${e.v ? `<a href="${esc(e.v)}" data-vid="${esc(e.v)}" data-vt="${esc(e.n || e.cat)}" target="_blank" rel="noopener">${esc(e.n || e.cat)} ▶</a>` : esc(e.n || e.cat)}</p>
-        <p class="qh">${[e.reps && e.reps + ' reps', e.tempo && 'tempo ' + e.tempo, w.rir !== '' && w.rir != null && 'RIR ' + w.rir, w.sets && w.sets + ' sets'].filter(Boolean).map(esc).join(' · ')}</p>
+      ${prev && prev.data.sf ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sf)}</p>` : ''}${chips('sf', FATIGUE, st.top.sf)}</div>`}
+    ${addHere(0)}
+    ${st.ex.map((e, i) => { const w = (e.wk || [])[wi] || {}, row = st.rows[i];
+      const p = lastPerf(e.n || e.cat, slot), lastS = p ? p.sets : [];
+      return `<div class="card mlog" data-exc="${i}">
+        ${SELF ? `<div class="exctl">${e.cat ? `<span class="mgtag">${esc(e.cat)}</span>` : '<span></span>'}
+          <span><button type="button" data-up="${i}" ${i ? '' : 'disabled'} aria-label="Move up">↑</button><button type="button" data-dn="${i}" ${i < st.ex.length - 1 ? '' : 'disabled'} aria-label="Move down">↓</button><button type="button" data-rm="${i}" aria-label="Remove">✕</button></span></div>` : ''}
+        <p class="qt">${exLink(e)}</p>
+        <p class="qh">${rxLine(e, w)}</p>
         ${p ? `<div class="qh last">Last session (${dOf(p.day).toLocaleDateString('en-US', { weekday:'short' })} ${fmt(p.day)})<div class="mchips">${setChipsHtml(p.sets, esc)}</div>${p.x ? `<small>“${esc(p.x)}”</small>` : ''}</div>` : ''}
-        ${(() => { const mine = setsOf(saved, i), lastS = p ? p.sets : [];
-          const n = Math.max(num(w.sets) || 3, mine.length);
-          return `<div class="sets" data-ex="${i}"><div class="sh"><span>Set</span><span>Weight</span><span>Reps</span></div>
-            ${[...Array(n)].map((_, j) => { const m = mine[j] || {}, l = lastS[j] || {};
-              return `<div class="set"><span>${j + 1}</span><input inputmode="decimal" data-sw="${i}.${j}" value="${esc(m.w || '')}" placeholder="${esc(l.w || '')}">
-                <input inputmode="numeric" data-sr="${i}.${j}" value="${esc(m.r || '')}" placeholder="${esc(l.r || '')}"></div>`; }).join('')}
-            <button type="button" class="addset" data-add="${i}">+ set</button></div>`; })()}
-        <input class="exnote" data-k="e${i}x" value="${esc(saved['e' + i + 'x'] || '')}" placeholder="Notes">
-      </div>`; }).join('')}
+        <div class="sets" data-ex="${i}"><div class="sh"><span>Set</span><span>Weight</span><span>Reps</span></div>
+          ${[...Array(row.n)].map((_, j) => { const m = row.sets[j] || {}, l = lastS[j] || {};
+            return `<div class="set"><span>${j + 1}</span><input inputmode="decimal" data-sw="${i}.${j}" value="${esc(m.w || '')}" placeholder="${esc(l.w || '')}">
+              <input inputmode="numeric" data-sr="${i}.${j}" value="${esc(m.r || '')}" placeholder="${esc(l.r || '')}"></div>`; }).join('')}
+          <button type="button" class="addset" data-add="${i}">+ set</button>${row.n > 1 ? `<button type="button" class="addset rmset" data-less="${i}">− set</button>` : ''}</div>
+        <input class="exnote" data-x="${i}" value="${esc(row.x || '')}" placeholder="Notes">
+      </div>${addHere(i + 1)}`; }).join('')}
+    ${SELF && st.changed ? `<p class="qh chgnote">Exercise changes save to ${esc(day.name)} for the rest of the program.</p>` : ''}
     ${day.rest ? '' : `<div class="card mlog"><p class="qt">Pump <small>— for the whole session</small></p>
-      ${prev && prev.data.sp ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sp)}</p>` : ''}${chips('sp', PUMP, saved.sp)}</div>`}
+      ${prev && prev.data.sp ? `<p class="qh">Last session (${prevWhen}): ${esc(prev.data.sp)}</p>` : ''}${chips('sp', PUMP, st.top.sp)}</div>`}
     <div class="card mlog"><p class="qt">Cardio <small>— optional</small></p>
-      <div class="fgrid three" style="margin-top:8px"><div class="f" style="grid-column:span 3"><label>Type</label><input data-k="c_type" list="cardioTypes" value="${esc(saved.c_type || '')}" placeholder="Incline walk, bike, StairMaster…"></div>
-        <div class="f"><label>Minutes</label><input data-k="c_min" inputmode="numeric" value="${esc(saved.c_min || '')}"></div>
-        <div class="f"><label>Avg HR</label><input data-k="c_hr" inputmode="numeric" value="${esc(saved.c_hr || '')}" placeholder="bpm"></div></div>
+      <div class="fgrid three" style="margin-top:8px"><div class="f" style="grid-column:span 3"><label>Type</label><input data-k="c_type" list="cardioTypes" value="${esc(st.top.c_type || '')}" placeholder="Incline walk, bike, StairMaster…"></div>
+        <div class="f"><label>Minutes</label><input data-k="c_min" inputmode="numeric" value="${esc(st.top.c_min || '')}"></div>
+        <div class="f"><label>Avg HR</label><input data-k="c_hr" inputmode="numeric" value="${esc(st.top.c_hr || '')}" placeholder="bpm"></div></div>
       <datalist id="cardioTypes"><option value="Incline walk"><option value="Walk"><option value="Bike"><option value="StairMaster"><option value="Elliptical"><option value="Rower"><option value="Run"><option value="Swim"><option value="HIIT"></datalist></div>
-    <div class="f"><label for="s_notes">Notes on this session</label><textarea id="s_notes">${esc(saved.notes || '')}</textarea></div>
+    <div class="f"><label for="s_notes">Notes on this session</label><textarea id="s_notes">${esc(st.top.notes || '')}</textarea></div>
     <button class="btn" id="sSave">${esc(t('trk_train_log'))}</button>
     <p class="saved" id="sMsg"></p>`);
-  const d = {};
-  Object.keys(saved).forEach(k => { d[k] = saved[k]; });
+
+  // Read everything typed on screen back into st (before a redraw or a save).
+  const grab = () => {
+    document.querySelectorAll('#aSection .sets').forEach(box => {
+      const i = +box.dataset.ex, sets = [];
+      box.querySelectorAll('.set').forEach((r, j) => { sets[j] = { w: r.querySelector('[data-sw]').value.trim(), r: r.querySelector('[data-sr]').value.trim() }; });
+      st.rows[i].sets = sets; st.rows[i].n = Math.max(1, sets.length);
+    });
+    document.querySelectorAll('#aSection [data-x]').forEach(inp => { st.rows[+inp.dataset.x].x = inp.value.trim(); });
+    document.querySelectorAll('#aSection input[data-k]').forEach(inp => { const v = inp.value.trim(); if(v) st.top[inp.dataset.k] = v; else delete st.top[inp.dataset.k]; });
+    const n = $('#s_notes'); if(n){ const v = n.value.trim(); if(v) st.top.notes = v; else delete st.top.notes; }
+  };
+  // callers grab() before changing st, so the redraw must not read the old screen again
+  const redraw = () => { const y = window.scrollY; openMesoLog(wi, s, st); window.scrollTo(0, y); };
+
   document.querySelectorAll('#aSection .opts').forEach(box => box.querySelectorAll('button').forEach(b => b.onclick = () => {
     const on = !b.classList.contains('on');
     box.querySelectorAll('button').forEach(x => x.classList.remove('on'));
-    if(on){ b.classList.add('on'); d[box.dataset.k] = b.dataset.v; } else delete d[box.dataset.k];
+    if(on){ b.classList.add('on'); st.top[box.dataset.k] = b.dataset.v; } else delete st.top[box.dataset.k];
   }));
-  $('#sBack').onclick = () => openMeso(wi);
-  document.querySelectorAll('#aSection .addset').forEach(b => b.onclick = () => {
-    const box = b.closest('.sets'), i = box.dataset.ex, j = box.querySelectorAll('.set').length;
-    b.insertAdjacentHTML('beforebegin', `<div class="set"><span>${j + 1}</span><input inputmode="decimal" data-sw="${i}.${j}"><input inputmode="numeric" data-sr="${i}.${j}"></div>`);
-  });
+  $('#sBack').onclick = () => { if(TICK){ clearInterval(TICK); TICK = null; } openMeso(wi); };
+  document.querySelectorAll('#aSection [data-add]').forEach(b => b.onclick = () => { grab(); st.rows[+b.dataset.add].n++; redraw(); });
+  document.querySelectorAll('#aSection [data-less]').forEach(b => b.onclick = () => { grab(); const r = st.rows[+b.dataset.less];
+    r.n = Math.max(1, r.n - 1); r.sets = r.sets.slice(0, r.n); redraw(); });
+
+  if(SELF){
+    const move = (i, to) => { grab(); [st.ex[i], st.ex[to]] = [st.ex[to], st.ex[i]]; [st.rows[i], st.rows[to]] = [st.rows[to], st.rows[i]]; st.changed = true; redraw(); };
+    document.querySelectorAll('#aSection [data-up]').forEach(b => b.onclick = () => move(+b.dataset.up, +b.dataset.up - 1));
+    document.querySelectorAll('#aSection [data-dn]').forEach(b => b.onclick = () => move(+b.dataset.dn, +b.dataset.dn + 1));
+    document.querySelectorAll('#aSection [data-rm]').forEach(b => b.onclick = () => {
+      const i = +b.dataset.rm;
+      if(!confirm('Remove ' + (st.ex[i].n || st.ex[i].cat) + ' from ' + day.name + '?')) return;
+      grab(); st.ex.splice(i, 1); st.rows.splice(i, 1); st.changed = true; redraw();
+    });
+    document.querySelectorAll('#aSection .addex').forEach(b => b.onclick = async () => {
+      grab();
+      const x = await pickExercise(); if(!x) return;
+      const at = +b.dataset.at, n = 3;
+      st.ex.splice(at, 0, { cat: x.cat, n: x.n, v: x.v || '', reps: '', tempo: '', wk: (tp.weeks || []).map(() => ({ rir: '', sets: String(n) })) });
+      st.rows.splice(at, 0, { sets: [], x: '', n });
+      st.changed = true; redraw();
+    });
+
+    // timers
+    const woEl = $('#tmWo'), restEl = $('#tmRest');
+    $('#tmWoBtn').onclick = () => {
+      if(lsGet(woKey) && !confirm('Restart the workout timer from zero?')) return;
+      lsSet(woKey, String(Date.now())); delete st.top.dur; $('#tmWoBtn').textContent = 'Running'; tick();
+    };
+    $('#tmRestBtn').onclick = () => { lsSet(restKey, String(Date.now())); tick(); };
+    document.querySelectorAll('#aSection [data-sr]').forEach(inp => inp.addEventListener('change', () => {
+      if(inp.value.trim()) lsSet(restKey, String(Date.now()));
+      if(!lsGet(woKey) && !st.top.dur){ lsSet(woKey, String(Date.now())); $('#tmWoBtn').textContent = 'Running'; }
+      tick();
+    }));
+    const tick = () => {
+      if(!document.body.contains(woEl)){ clearInterval(TICK); TICK = null; return; }
+      const w0 = +lsGet(woKey), r0 = +lsGet(restKey);
+      if(w0) woEl.textContent = mmss(Date.now() - w0);
+      restEl.textContent = r0 && w0 ? mmss(Date.now() - r0) : '0:00';
+    };
+    if(TICK) clearInterval(TICK);
+    TICK = setInterval(tick, 1000); tick();
+  }
+
   $('#sSave').onclick = async () => {
-    document.querySelectorAll('#aSection input[data-k]').forEach(inp => { const v = inp.value.trim(); if(v) d[inp.dataset.k] = v; else delete d[inp.dataset.k]; });
-    // per-set boxes → e{i}s{j}w / e{i}s{j}r, plus the joined summary older screens read
-    Object.keys(d).filter(k => /^e\d+(s\d+)?[wr]$/.test(k)).forEach(k => delete d[k]);
-    document.querySelectorAll('#aSection .sets').forEach(box => {
-      const i = box.dataset.ex, ws = [], rs = [];
-      box.querySelectorAll('.set').forEach((row, j) => {
-        const w = row.querySelector('[data-sw]').value.trim(), r = row.querySelector('[data-sr]').value.trim();
-        if(w) d['e' + i + 's' + j + 'w'] = w;
-        if(r) d['e' + i + 's' + j + 'r'] = r;
-        if(w || r){ ws.push(w); rs.push(r); }
+    grab();
+    const d = Object.assign({}, st.top);
+    st.ex.forEach((e, i) => {
+      const row = st.rows[i], ws = [], rs = [];
+      (row.sets || []).forEach((x, j) => {
+        if(x.w) d['e' + i + 's' + j + 'w'] = x.w;
+        if(x.r) d['e' + i + 's' + j + 'r'] = x.r;
+        if(x.w || x.r){ ws.push(x.w); rs.push(x.r); }
       });
+      // the joined summary older screens read
       if(ws.some(Boolean)) d['e' + i + 'w'] = [...new Set(ws.filter(Boolean))].length === 1 ? ws.find(Boolean) : ws.join(',');
       if(rs.some(Boolean)) d['e' + i + 'r'] = rs.join(',');
+      if(row.x) d['e' + i + 'x'] = row.x;
+      d['e' + i + 'n'] = e.n || e.cat;
     });
-    const n = $('#s_notes').value.trim(); if(n) d.notes = n; else delete d.notes;
-    Object.assign(d, { m: 1, w: wi, d: di, did: mDayId(day, di), day: day.name || '' });
-    (day.ex || []).forEach((e, i) => { d['e' + i + 'n'] = e.n || e.cat; });
-    if(await saveLog('training', mesoDay(tp, wi, di), d, $('#sSave'), $('#sMsg'), true)) setTimeout(() => openMeso(wi), 650);
+    if(SELF){ const w0 = +lsGet(woKey); if(w0){ d.dur = mmss(Date.now() - w0); lsSet(woKey, null); lsSet(restKey, null); } }
+    Object.assign(d, { m: 1, w: wi, d: sl.slot, did: sl.id, day: day.name || '' });
+    // His own edits to the exercise list go into the plan for every later week.
+    if(SELF && st.changed){
+      const plan = JSON.parse(JSON.stringify(tp)), tday = plan.days.find((x, di) => mDayId(x, di) === sl.id);
+      if(tday){
+        tday.ex = st.ex.filter(e => (e.wk || []).length || e.cat).map(e => { const c = JSON.parse(JSON.stringify(e)); return c; });
+        try {
+          const j = await logApi({ action:'plan_save', training_plan: plan });
+          CLIENT.sections.training_plan = j.training_plan || plan;
+          st.changed = false;
+        } catch(e){ $('#sMsg').textContent = 'Could not save the exercise changes: ' + e.message; return; }
+      }
+    }
+    if(await saveLog('training', slot, d, $('#sSave'), $('#sMsg'), true)){
+      if(TICK){ clearInterval(TICK); TICK = null; }
+      setTimeout(() => openMeso(wi), 650);
+    }
   };
 }
 

@@ -187,6 +187,8 @@
   /* per-set weight / reps cells */
   table.mg td.cw{background:#f7f7f7;min-width:38px;font-variant-numeric:tabular-nums;border-left:1px solid #e6e6e6}
   table.mg td.cr{min-width:30px;font-weight:700;font-variant-numeric:tabular-nums}
+  table.mg td.mgoff{background:#f3f3f3}
+  table.mg .mgoffh{background:#f3f3f3!important;color:#999!important;font-weight:400}
   table.mg tr.mgcols td.cw,table.mg tr.mgcols td.cr{font-size:9.5px;background:#d9d9d9}
   .sx{display:inline-flex;align-items:baseline;gap:3px;border:1px solid #d9d9d9;border-radius:6px;padding:1px 6px;margin:0 4px 3px 0;background:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
   .sx i{font-style:normal;font-size:10px;color:#888}
@@ -1633,6 +1635,9 @@ async function drawTracking(c, b){
         <select id="trk_cday" style="width:auto">${['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map((d, i) =>
           `<option value="${i}" ${(tr.checkin_day ?? 6) === i ? 'selected' : ''}>${d}</option>`).join('')}</select></div>
       <p class="hint">His Weekly check-in stays greyed out until this day each week. Earlier weeks stay open if he's late.</p>
+      <div class="shead" style="margin-top:12px"><h3 style="font-size:13.5px">Self-coached</h3>
+        <label class="sw"><input type="checkbox" id="trk_self" ${tr.self ? 'checked' : ''}><span class="track"></span>On</label></div>
+      <p class="hint">Lets him run his own training from his page: add, remove and move exercises (by muscle group, or new ones he creates), add or remove sets, plus a rest timer and a workout timer. His exercise changes save into his program.</p>
     </div>
     <div id="trkBody"><p class="hint">Loading logs…</p></div>`;
   try { await ensureLogs(c); }
@@ -1988,6 +1993,7 @@ function mesoVolumeHtml(tp, logFor, escFn, nowWeek){
   (tp.days || []).forEach((day, di) => {
     if(day.rest) return;
     (tp.weeks || []).forEach((_, wi) => {
+      if(!inWeek(tp, wi, di)) return;
       const l = logFor(wi, di);
       (day.ex || []).forEach((e, i) => {
         const g = MUSCLE_OF[e.cat] || e.cat || 'Other';
@@ -2017,7 +2023,7 @@ const cardioTxt = l => l && (l.c_min || l.c_type) ? [l.c_type, l.c_min && l.c_mi
 function mesoSetCols(tp, logFor, wi){
   let n = 1;
   (tp.days || []).forEach((day, di) => {
-    if(day.rest) return;
+    if(day.rest || !inWeek(tp, wi, di)) return;
     const l = logFor(wi, di);
     (day.ex || []).forEach((e, i) => {
       n = Math.max(n, Number(((e.wk || [])[wi] || {}).sets) || 0);
@@ -2038,13 +2044,16 @@ function mesoGridHtml(tp, logFor, escFn, nowWeek){
     `<td class="c cw">S${j + 1} lb</td><td class="c cr">reps</td>`).join('')}<td>Notes</td><td class="mgsp"></td>`).join('');
   const cut = (txt, cls) => `<td class="${cls || ''}" title="${escFn(txt)}"><div class="cl">${escFn(txt)}</div></td>`;
   const body = (tp.days || []).map((day, di) => {
-    const logs = weeks.map((_, wi) => logFor(wi, di));
+    const logs = weeks.map((_, wi) => inWeek(tp, wi, di) ? logFor(wi, di) : null);
+    const off = wi => !inWeek(tp, wi, di);
+    const offTd = wi => `<td colspan="${C[wi]}" class="mgoff"></td><td class="mgsp"></td>`;
+    if(day.rest && tp.schedule) return '';
     if(day.rest){
       const cardio = weeks.map((_, wi) => cardioTxt(logs[wi]));
       return `<tr class="mgrest${/^day/i.test(day.name || '') ? '' : ' full'}"><td colspan="3">${escFn(day.name)}</td>${weeks.map((_, wi) =>
         `<td colspan="${C[wi]}" title="${escFn(cardio[wi])}"><div class="cl">${cardio[wi] ? '🏃 ' + escFn(cardio[wi]) : ''}</div></td><td class="mgsp"></td>`).join('')}</tr>`;
     }
-    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${weeks.map((_, wi) => { const l = logs[wi], col = mesoWeekColor(tp, wi);
+    const head = `<tr class="mgday"><td>${escFn(day.name)}</td><td colspan="2"></td>${weeks.map((_, wi) => { if(off(wi)) return `<td colspan="${C[wi]}" class="mgsess mgoffh"><div class="cl">not this week</div></td><td class="mgsp"></td>`; const l = logs[wi], col = mesoWeekColor(tp, wi);
       const bits = l ? [l.sf, l.sp, cardioTxt(l) && '🏃 ' + cardioTxt(l)].filter(Boolean) : [];
       return `<td colspan="${C[wi]}" class="mgsess" style="background:${col.bg};color:${col.fg}" title="${escFn(l ? [l.sf && 'Fatigue: ' + l.sf, l.sp && 'Pump: ' + l.sp, cardioTxt(l) && 'Cardio: ' + cardioTxt(l)].filter(Boolean).join(' · ') : '')}"><div class="cl"><b>${escFn((weeks[wi] || {}).label || '')}</b> ${l ? '✓ ' + escFn(bits.join(' · ') || 'logged') : ''}</div></td><td class="mgsp"></td>`; }).join('')}</tr>`;
     const notes = weeks.some((_, wi) => (day.notes || [])[wi]) ? `<tr class="mgcn"><td>Coach's Notes</td><td colspan="2"></td>${weeks.map((_, wi) =>
@@ -2052,17 +2061,17 @@ function mesoGridHtml(tp, logFor, escFn, nowWeek){
     const rows = (day.ex || []).map((e, i) => { const name = e.n || e.cat;
       return `<tr><td class="mgex" title="${escFn(name)}"><div class="cl">${e.v ? `<a href="${escFn(e.v)}" data-vid="${escFn(e.v)}" data-vt="${escFn(name)}" target="_blank" rel="noopener">${escFn(name)} ▶</a>` : escFn(name)}</div></td>
         <td class="mgex c">${escFn(e.reps || '')}</td><td class="mgex c">${escFn(e.tempo || '')}</td>
-        ${weeks.map((_, wi) => { const w = (e.wk || [])[wi] || {}, l = logs[wi];
+        ${weeks.map((_, wi) => { if(off(wi)) return offTd(wi); const w = (e.wk || [])[wi] || {}, l = logs[wi];
           const k = mExAt(l, name, i), sets = k >= 0 ? mesoSetsOf(l, k) : [];
           return `<td class="c">${escFn(w.rir ?? '')}</td><td class="c">${escFn(w.sets ?? '')}</td>
             ${[...Array(N[wi])].map((_, j) => { const x = sets[j] || {};
               return `<td class="c cw">${escFn(x.w || '')}</td><td class="c cr">${escFn(x.r || '')}</td>`; }).join('')}
             ${cut(k >= 0 ? l['e' + k + 'x'] || '' : '', 'mgnote')}<td class="mgsp"></td>`; }).join('')}</tr>`; }).join('');
-    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${weeks.map((_, wi) =>
+    const vol = `<tr class="mgvol"><td>Sets</td><td colspan="2"></td>${weeks.map((_, wi) => off(wi) ? offTd(wi) :
       `<td colspan="${C[wi]}">${(day.ex || []).reduce((a, e) => a + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0)}</td><td class="mgsp"></td>`).join('')}</tr>`;
     return head + notes + `<tr class="mgcols"><td>Exercise</td><td class="c">Reps</td><td class="c">Tempo</td>${colHead}</tr>` + rows + vol;
   }).join('');
-  const total = weeks.map((_, wi) => (tp.days || []).reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
+  const total = weeks.map((_, wi) => (tp.days || []).reduce((a, d, di) => !inWeek(tp, wi, di) ? a : a + (d.ex || []).reduce((x, e) => x + (Number(((e.wk || [])[wi] || {}).sets) || 0), 0), 0));
   return `<div class="mgwrap"><table class="mg">
     <thead><tr><th class="mgtitle">${escFn(tp.name || '')}</th><th colspan="2" class="mgtitle2"></th>${wkHead}</tr></thead>
     <tbody>${body}<tr class="mgvol tot"><td>Volume (total sets)</td><td colspan="2"></td>${total.map((v, wi) => `<td colspan="${C[wi]}">${v}</td><td class="mgsp"></td>`).join('')}</tr></tbody></table></div>
@@ -2094,6 +2103,16 @@ let MESO_MODE = 'week';
 // A logged session belongs to a day by its permanent id (older logs only carry the day's position).
 const mDayId = (day, di) => (day && day.id) || ('d' + di);
 const mLogDid = d => d.did || ('d' + d.d);
+// Rotating schedule (schedule[wi] = 7 day ids, Monday first) — same as the client page.
+function wDays(tp, wi){
+  const days = tp.days || [], row = (tp.schedule || [])[wi];
+  if(!row) return days.map((day, di) => ({ day, id: mDayId(day, di), slot: di }));
+  return row.map((id, slot) => {
+    const day = days.find((d, di) => mDayId(d, di) === id) || { name: 'Rest', rest: true, ex: [] };
+    return { day, id: day.rest ? id + '@' + slot : id, slot };
+  });
+}
+const inWeek = (tp, wi, di) => !tp.schedule || ((tp.schedule[wi]) || []).includes(mDayId((tp.days || [])[di], di));
 function mSetsOf(d, i){
   const out = [];
   for(let j = 0; j < 12; j++){ const w = d['e' + i + 's' + j + 'w'], r = d['e' + i + 's' + j + 'r']; if(w || r) out[j] = { w: w || '', r: r || '' }; }
@@ -2111,22 +2130,23 @@ async function drawMesoWeek(c, b){
   if(MW == null || MW >= tp.weeks.length) MW = Math.max(0, Math.min(tp.weeks.length - 1, nowIdx));
   const wi = MW, slot = di => tAdd(start, wi * 7 + di);
   const logs = (c._logs || []).filter(l => l.kind === 'training' && l.data.m);
-  const entry = di => { const id = mDayId(tp.days[di], di); return logs.find(x => x.data.w === wi && mLogDid(x.data) === id) || null; };
+  const slots = wDays(tp, wi);
+  const entry = di => { const id = slots[di].id; return logs.find(x => x.data.w === wi && mLogDid(x.data) === id) || null; };
   const logFor = di => { const e = entry(di); return e ? e.data : null; };
-  const when = di => (entry(di) || {}).day || slot(di);
+  const when = di => (entry(di) || {}).day || slot(slots[di].slot);
   const lastFor = (name, before) => {
     for(const l of logs.filter(x => x.day < before).sort((a, b) => a.day < b.day ? 1 : -1))
       for(let i = 0; i < 40; i++) if(l.data['e' + i + 'n'] === name){ const s = mSetsOf(l.data, i).filter(Boolean); if(s.length) return { day: l.day, sets: s }; }
     return null;
   };
-  const vol = tp.days.reduce((a, d) => a + (d.ex || []).reduce((x, e) => x + (tNum(((e.wk || [])[wi] || {}).sets) || 0), 0), 0);
+  const vol = slots.reduce((a, sl) => a + (sl.day.ex || []).reduce((x, e) => x + (tNum(((e.wk || [])[wi] || {}).sets) || 0), 0), 0);
   b.innerHTML = `
     <div class="mseg"><button class="on">Week view</button><button id="msFull">Full plan</button><button id="msEdit">Edit plan</button></div>
     <div class="wtabs">${tp.weeks.map((w, i) => { const col = mesoWeekColor(tp, i);
       return `<button data-mw="${i}" class="${i === wi ? 'on' : ''}" style="background:${col.bg};color:${col.fg};border-color:${col.bg}">${esc(w.label)}${i === nowIdx ? ' •' : ''}</button>`; }).join('')}</div>
     <p class="hint" style="margin:0 0 12px"><b>${esc(tp.name || '')}</b> · ${esc(tp.progression || '')} · ${vol} sets this week${tp.weeks[wi] && tp.weeks[wi].deload && tp.deload_note ? ' · deload: ' + esc(tp.deload_note) : ''}</p>
-    ${tp.days.map((day, di) => {
-      if(day.rest){ const cl = logFor(di); return `<div class="sect mwrest"><b>${esc(day.name)}</b>${cardioTxt(cl) ? ` <span class="hint">· 🏃 ${esc(cardioTxt(cl))}</span>` : ''}</div>`; }
+    ${slots.map(({ day }, di) => {
+      if(day.rest){ const cl = logFor(di); return `<div class="sect mwrest"><b>${tp.schedule ? fmtDate(when(di)) + ' · ' : ''}${esc(day.name)}</b>${cardioTxt(cl) ? ` <span class="hint">· 🏃 ${esc(cardioTxt(cl))}</span>` : ''}</div>`; }
       const lg = logFor(di), note = (day.notes || [])[wi];
       // one weight box + one reps box per set — as many as the most sets on this day
       const nS = Math.min(8, Math.max(1, ...(day.ex || []).map((e, i) => Math.max(Number(((e.wk || [])[wi] || {}).sets) || 0,
@@ -2548,7 +2568,7 @@ function collect(){
     c.sections = sec;
   }
   if(TAB === 'tracking' && $('#trk_on')){
-    c.sections = Object.assign({}, c.sections || {}, { tracker: { on: $('#trk_on').checked, skinfolds: $('#trk_sf').checked, checkin_day: Number($('#trk_cday').value) } });
+    c.sections = Object.assign({}, c.sections || {}, { tracker: { on: $('#trk_on').checked, skinfolds: $('#trk_sf').checked, checkin_day: Number($('#trk_cday').value), self: $('#trk_self').checked } });
   }
 }
 function upsertLocal(cl){
