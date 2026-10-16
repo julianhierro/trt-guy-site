@@ -479,7 +479,6 @@
 <div id="vApp" hidden>
   <header class="bar"><div class="wrap in">
     <span class="logo">TRT Guy</span>
-    <span class="who" id="aWho"></span>
   </div></header>
   <main class="wrap">
     <div id="aHome">
@@ -719,9 +718,6 @@ function openApp(){
   const c = CLIENT;
   document.title = 'TRT Guy — ' + (c.first || c.name || '');
   installManifest(c);
-  // Bold just the name, wherever {first} sits in his wording.
-  const whoName = c.first || c.name || '';
-  $('#aWho').innerHTML = esc(t('header_who', { first: '\u0001' })).replace('\u0001', '<b>' + esc(whoName) + '</b>');
   $('#aFooter').textContent = t('footer');
 
   // phase — we show how long they've been IN the phase, not a fixed length
