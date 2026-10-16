@@ -114,6 +114,12 @@
   .curprog h2{margin:0 0 2px;font-size:18px;letter-spacing:-.01em}
   .curprog .dates{font-size:13px;color:var(--mut)}
 
+  /* membership dates on the top card */
+  .mship{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .mship div{flex:1 1 140px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+  .mship span{display:block;font:600 11px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
+  .mship b{font-size:16px;letter-spacing:-.01em}
+
   /* tiles */
   .tiles{display:grid;gap:10px;margin-top:6px}
   .tile{display:flex;align-items:center;gap:14px;border-left:3px solid transparent;width:100%;text-align:left;background:var(--card);
@@ -552,6 +558,8 @@ const DEFAULT_COPY = {
   resources_label: 'Additional Resources',
   extras_sub: 'Tap to open',
   dash_label: 'TRT Guy Dashboard',
+  mship_start: 'Start date',
+  mship_end: 'End date',
   empty_plan: 'Your plan is being written up. It will appear here — nothing to do on your side.',
   back: '← Back',
   open_default: 'Open my {section}',
@@ -724,12 +732,18 @@ function openApp(){
   // (the plan's length can change, so a "week X of Y" would go stale).
   // Until the phase has a start date that has arrived, he hasn't officially
   // started: the card is just his name, no phase.
+  // Membership dates (Details tab start / end), so he knows exactly when it runs.
+  const fmtY = d => { const dt = new Date(d + 'T12:00:00'); return isNaN(dt) ? '' : dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
+  const mship = (c.start_date || c.end_date) ? `<div class="mship">
+      ${c.start_date ? `<div><span data-copy="mship_start">${esc(t('mship_start'))}</span><b>${fmtY(c.start_date)}</b></div>` : ''}
+      ${c.end_date ? `<div><span data-copy="mship_end">${esc(t('mship_end'))}</span><b>${fmtY(c.end_date)}</b></div>` : ''}
+    </div>` : '';
   const ph = c.phase || {};
   const start = ph.start;
   const begun = !!start && new Date(start + 'T00:00:00') <= Date.now();
   if(!begun){
     $('#aPhase').innerHTML = `<div class="lbl" data-copy="dash_label">${esc(t('dash_label'))}</div>
-      <h1>${esc(c.name || c.first || '')}</h1>`;
+      <h1>${esc(c.name || c.first || '')}</h1>${mship}`;
   } else {
     const days = Math.max(0, Math.floor((Date.now() - new Date(start + 'T00:00:00')) / 86400000));
     const weeksIn = Math.floor(days / 7) + 1;
@@ -738,7 +752,7 @@ function openApp(){
     <h1>${esc(ph.name || t('phase_untitled'))}</h1>
     <div class="dates">Started ${fmt(start)}</div>
     <div class="weeksin"><b>Week ${weeksIn}</b> in this phase</div>
-    ${ph.focus ? `<div class="focus">${esc(ph.focus)}</div>` : ''}`;
+    ${ph.focus ? `<div class="focus">${esc(ph.focus)}</div>` : ''}${mship}`;
   }
 
   // a note from Julian, if there is one
