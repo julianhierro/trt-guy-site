@@ -288,11 +288,11 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
 
 <script>
 /* ── Checkout, on this page ───────────────────────────────────────────────
-   Stripe's Card Element, not the Payment Element: the Payment Element keeps
-   offering Link's "save my information" signup (email, mobile, full name)
-   whatever the intent allows, and Julian wants a card field and nothing else.
-   Card data still lives in Stripe's own iframes — it never reaches this page.
-   The amount is decided by the worker, never here. Skipped in ?edit=1. */
+   Stripe's Payment Element — the polished one. The intent is opened as the
+   page loads so the card form is there straight away, and the buyer's email
+   is attached to it just before the payment is confirmed. The amount is
+   decided by the worker, never here. Skipped in ?edit=1 so the editor and
+   Stripe's iframes stay out of each other's way. */
 (function () {
   if (/[?&]edit=1/.test(location.search)) return;
   var STRIPE_PK = 'pk_live_51UDPjeC64DWJl9A9EXAruEDv7uUdQA2kxE98GsLBQ3ti2UQGz6W1r76VEnKnW1RYgw76J4LJ5tBU02BwQMIuSCMq00HwfCHZzE';
@@ -302,45 +302,51 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
   if (!window.Stripe || !$('payment-element')) return;
   var err = function (m) { var e = $('oerr'); if (e) e.textContent = m || ''; };
 
-  var stripe = Stripe(STRIPE_PK), card = null, busy = false;
+  var stripe = Stripe(STRIPE_PK), elements = null, piId = null, busy = false, opening = false;
 
-  // The card field goes up straight away — nothing to wait for.
-  function mount() {
-    if (card || !$('payment-element')) return;
-    card = stripe.elements().create('card', {
-      hidePostalCode: false,
-      style: { base: { fontSize: '16px', color: '#0b0d10', fontFamily: 'Inter, sans-serif',
-                       '::placeholder': { color: '#8a94a3' } }, invalid: { color: '#c62828' } },
-    });
-    card.mount('#payment-element');
-    card.on('change', function (e) { err(e.error ? e.error.message : ''); });
+  async function mount() {
+    if (opening || document.querySelector('#payment-element iframe') || !$('payment-element')) return;
+    opening = true;
+    try {
+      if (!piId) {
+        var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product: PRODUCT }) });
+        var d = await r.json();
+        if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
+        piId = d.clientSecret.split('_secret_')[0];
+        elements = stripe.elements({ clientSecret: d.clientSecret, appearance: { theme: 'stripe',
+          variables: { colorPrimary: '#1a5cff', borderRadius: '10px', fontFamily: 'Inter, sans-serif', fontSizeBase: '15px' } } });
+      }
+      elements.create('payment', { layout: 'tabs' }).mount('#payment-element');
+    } catch (e) { err(e.message); }
+    opening = false;
   }
   mount();
-  // The editor rebuilds parts of the page once published edits land, which can
-  // take the mounted field with it — put it back if that happens.
-  setTimeout(function () { if (!document.querySelector('#payment-element iframe')) { card = null; mount(); } }, 2500);
-  setTimeout(function () { if (!document.querySelector('#payment-element iframe')) { card = null; mount(); } }, 6000);
+  // The editor rebuilds parts of this page once published edits land, which can
+  // take the mounted form with it — put it back if that happens.
+  setTimeout(mount, 2500);
+  setTimeout(mount, 6000);
 
   document.addEventListener('click', async function (ev) {
-    var hit = ev.target && ev.target.closest && ev.target.closest('#paybtn');
-    if (!hit) return;
+    if (!ev.target || !ev.target.closest || !ev.target.closest('#paybtn')) return;
     ev.preventDefault();
     if (busy) return;
     var btn = $('paybtn'), label = btn.textContent;
     var name = ($('oname').value || '').trim(), email = ($('oemail').value || '').trim();
     if (!name) { err('Enter your name.'); $('oname').focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Enter a valid email — it is where your guide goes.'); $('oemail').focus(); return; }
-    if (!card) { mount(); err('One moment — getting the card field ready.'); return; }
+    if (!elements) { err('One moment — getting the card form ready.'); mount(); return; }
 
     busy = true; btn.style.opacity = '.6'; btn.style.pointerEvents = 'none'; btn.textContent = 'Processing…'; err('');
     try {
-      var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product: PRODUCT, email: email, name: name }) });
-      var d = await r.json();
-      if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
-      var res = await stripe.confirmCardPayment(d.clientSecret, {
-        payment_method: { card: card, billing_details: { name: name, email: email } },
-      });
+      // Put the buyer on the payment before it is confirmed, so the receipt,
+      // the GHL contact and the delivery email all have somewhere to go.
+      await fetch(API + '/pay-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentIntentId: piId, email: email, name: name }) });
+      var res = await stripe.confirmPayment({ elements: elements,
+        confirmParams: { return_url: location.origin + '/order/thanks/',
+                         payment_method_data: { billing_details: { name: name, email: email } } },
+        redirect: 'if_required' });
       if (res.error) throw new Error(res.error.message || 'The payment did not go through.');
       location.href = '/order/thanks/?pi=' + encodeURIComponent(res.paymentIntent.id);
       return;
