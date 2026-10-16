@@ -385,13 +385,10 @@
     <div class="toolbar">
       <input class="search" id="q" placeholder="Search name, email, phone…">
       <div class="chips" id="filters">
-        <button class="chip on" data-f="active">Clients</button>
-        <button class="chip" data-f="lead">Leads</button>
-        <button class="chip" data-f="paused">Paused</button>
-        <button class="chip" data-f="ended">Ended</button>
-        <button class="chip" data-f="all">All</button>
+
       </div>
       <span style="flex:1"></span>
+      <button class="btn" id="btnStatuses">Statuses</button>
       <button class="btn" id="btnResources">Resources</button>
       <button class="btn" id="btnCopy">Page wording</button>
       <button class="btn" id="btnTemplate">Plan template</button>
@@ -436,7 +433,31 @@ const PHASES = [
   ['maintenance', 'Maintenance Phase'],
   ['custom',      'Custom'],
 ];
-const STATUSES = [['lead','Lead (applied)'],['active','Client'],['paused','Paused'],['ended','Ended']];
+// Pipeline stages. Julian edits these in "Statuses" (saved in tg_settings via the worker).
+// `lead` (where applicants land) and `active` (a paying client) always exist.
+const DEFAULT_STATUSES = [['active','Client'],['lead','Lead'],['follow-up','Follow up later'],['paused','Paused'],['ended','Ended']];
+let STATUSES = DEFAULT_STATUSES.slice();
+const LOCKED_STATUSES = ['lead', 'active'];
+function setStatuses(list){
+  STATUSES = (Array.isArray(list) && list.length) ? list.map(x => [x.key, x.label]) : DEFAULT_STATUSES.slice();
+}
+// Options for a status <select>; a value no longer on the list still shows, so nothing is silently changed.
+function statusOptions(cur){
+  const opts = STATUSES.slice();
+  if(cur && !opts.some(s => s[0] === cur)) opts.push([cur, cur]);
+  return opts.map(s => `<option value="${esc(s[0])}" ${cur === s[0] ? 'selected' : ''}>${esc(s[1])}</option>`).join('');
+}
+// Filter chips are drawn from the status list, plus All.
+function buildChips(){
+  const box = $('#filters');
+  if(!STATUSES.some(s => s[0] === FILTER) && FILTER !== 'all') FILTER = 'active';
+  box.innerHTML = [...STATUSES, ['all', 'All']].map(s =>
+    `<button class="chip ${FILTER === s[0] ? 'on' : ''}" data-f="${esc(s[0])}">${esc(s[1])}</button>`).join('');
+  $$('#filters .chip').forEach(b => b.onclick = () => {
+    $$('#filters .chip').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); FILTER = b.dataset.f; render();
+  });
+}
 const PAYMETHODS = ['Stripe','PayPal','Bank transfer','Zelle','Crypto','Cash','Other'];
 
 // The four blocks a client sees on their page. `key` is what lives in sections{}.
@@ -534,6 +555,7 @@ async function unlock(k){
   const j = await api('/clients');
   localStorage.setItem(KEYLS, k);
   CLIENTS = j.clients || [];
+  setStatuses(j.statuses); buildChips();
   $('#gate').hidden = true;
   $('#app').hidden = false;
   $('#btnLock').hidden = false;
@@ -547,7 +569,7 @@ $('#btnUnlock').onclick = async () => {
 };
 $('#pw').addEventListener('keydown', e => { if(e.key === 'Enter') $('#btnUnlock').click(); });
 $('#btnLock').onclick = () => { localStorage.removeItem(KEYLS); location.reload(); };
-$('#btnRefresh').onclick = async () => { CLIENTS = (await api('/clients')).clients || []; render(); toast('Refreshed'); };
+$('#btnRefresh').onclick = async () => { const j = await api('/clients'); CLIENTS = j.clients || []; setStatuses(j.statuses); buildChips(); render(); toast('Refreshed'); };
 
 /* ── list ─────────────────────────────────────────────────────────────────── */
 function visible(){
@@ -627,7 +649,7 @@ function render(){
         <td data-l="Term"><div>${fmtDate(c.start_date)} → ${fmtDate(c.end_date)}</div>
           <div class="left ${leftCls}">${leftTxt}</div></td>
         <td data-l="Paid"><div>${money(c.amount_paid)}</div><div class="csub">${esc(c.pay_method || '')}</div></td>
-        <td data-l="Status"><select class="rowstatus st-${esc(c.status || 'lead')}" data-id="${c.id}" title="Change status">${STATUSES.map(st => `<option value="${st[0]}" ${((c.status || 'lead') === st[0]) ? 'selected' : ''}>${st[1]}</option>`).join('')}</select>
+        <td data-l="Status"><select class="rowstatus st-${esc(c.status || 'lead')}" data-id="${c.id}" title="Change status">${statusOptions(c.status || 'lead')}</select>
           ${pageEmpty(c) ? '<div class="csub" style="color:var(--muted);margin-top:4px">page empty</div>' : ''}</td>
         <td data-l="" class="acts"><button class="btn sm">Open</button>
           <button class="btn sm danger rowdel" data-id="${c.id}" title="Delete">Delete</button></td>
@@ -702,10 +724,6 @@ async function delSelected(){
   toast(failed ? `Deleted ${ids.length - failed}, ${failed} failed` : `Deleted ${ids.length}`);
 }
 $('#q').addEventListener('input', e => { QUERY = e.target.value.trim().toLowerCase(); render(); });
-$$('#filters .chip').forEach(b => b.onclick = () => {
-  $$('#filters .chip').forEach(x => x.classList.remove('on'));
-  b.classList.add('on'); FILTER = b.dataset.f; render();
-});
 
 /* ── create / import ──────────────────────────────────────────────────────── */
 $('#btnNew').onclick = async () => {
@@ -761,7 +779,7 @@ function showImport(list, have){
         $$('#filters .chip').forEach(x => x.classList.toggle('on', x.dataset.f === 'lead'));
       }
       render();
-      toast('Imported — showing under Leads');
+      toast('Imported — showing under Lead');
     } catch(e){ b.disabled = false; b.textContent = 'Import'; alert('Failed: ' + e.message); }
   });
 }
@@ -969,6 +987,80 @@ function drawCopyPanel(copy){
   };
 }
 
+/* ── statuses ─────────────────────────────────────────────────────────────
+   Julian's own pipeline: add, rename, reorder, remove. Lead and Client stay. */
+$('#btnStatuses').onclick = () => drawStatusPanel(STATUSES.map(s => ({ key: s[0], label: s[1] })));
+
+function drawStatusPanel(list){
+  closePanel();
+  const used = k => CLIENTS.filter(c => (c.status || 'lead') === k).length;
+  const scrim = document.createElement('div'); scrim.className = 'scrim'; scrim.id = 'scrim';
+  const p = document.createElement('div'); p.className = 'panel'; p.id = 'panel';
+  p.innerHTML = `
+    <div class="phead">
+      <div><h2>Statuses</h2>
+        <p class="hint" style="margin:4px 0 0">Your stages for leads and clients, in the order they show on the list. New applicants land in Lead; Client is who counts as a paying client.</p></div>
+      <button class="btn sm" id="pClose">Close</button>
+    </div>
+    <div class="pbody" id="pBody">
+      <div class="sect">
+        ${list.map((s, i) => `
+          <div class="strow" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+            <input data-st="${i}" value="${esc(s.label)}" style="flex:1">
+            <span class="hint" style="min-width:62px;margin:0">${used(s.key)} ${used(s.key) === 1 ? 'person' : 'people'}</span>
+            <button class="btn sm" data-up="${i}" ${i === 0 ? 'disabled' : ''} title="Move up">↑</button>
+            <button class="btn sm" data-dn="${i}" ${i === list.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
+            ${LOCKED_STATUSES.includes(s.key)
+              ? '<span class="hint" style="min-width:64px;margin:0;text-align:center">built in</span>'
+              : `<button class="btn sm danger" data-rm="${i}" style="min-width:64px">Remove</button>`}
+          </div>`).join('')}
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <input id="stNew" placeholder="New status, e.g. Call booked" style="flex:1">
+          <button class="btn sm" id="stAdd">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="pfoot">
+      <span></span>
+      <button class="btn primary" id="pSave">Save</button>
+    </div>`;
+  document.body.append(scrim, p);
+  scrim.onclick = closePanel;
+  p.querySelector('#pClose').onclick = closePanel;
+  // Keep typed labels when the list redraws.
+  const sync = () => $$('#pBody [data-st]').forEach(i => { list[+i.dataset.st].label = i.value; });
+  $$('#pBody [data-up]').forEach(b => b.onclick = () => { sync(); const i = +b.dataset.up; [list[i-1], list[i]] = [list[i], list[i-1]]; drawStatusPanel(list); });
+  $$('#pBody [data-dn]').forEach(b => b.onclick = () => { sync(); const i = +b.dataset.dn; [list[i+1], list[i]] = [list[i], list[i+1]]; drawStatusPanel(list); });
+  $$('#pBody [data-rm]').forEach(b => b.onclick = () => {
+    sync();
+    const s = list[+b.dataset.rm], n = used(s.key);
+    if(n) return alert(`${n} ${n === 1 ? 'person has' : 'people have'} the status "${s.label}". Move them to another status first.`);
+    list.splice(+b.dataset.rm, 1); drawStatusPanel(list);
+  });
+  const add = () => {
+    sync();
+    const label = $('#stNew').value.trim();
+    if(!label) return;
+    let base = label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'status';
+    let key = base, n = 2;
+    while(list.some(s => s.key === key) || key === 'all') key = `${base}-${n++}`;
+    list.push({ key, label }); drawStatusPanel(list);
+    $('#stNew').focus();
+  };
+  p.querySelector('#stAdd').onclick = add;
+  p.querySelector('#stNew').addEventListener('keydown', e => { if(e.key === 'Enter') add(); });
+  p.querySelector('#pSave').onclick = async () => {
+    sync();
+    if(list.some(s => !s.label.trim())) return alert('Every status needs a name.');
+    const btn = $('#pSave'); btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const j = await api('/clients', { method:'POST', body: JSON.stringify({ action:'statuses_save', statuses: list.map(s => ({ key: s.key, label: s.label.trim() })) }) });
+      setStatuses(j.statuses); buildChips(); render();
+      toast('Statuses saved'); closePanel();
+    } catch(e){ alert('Could not save: ' + e.message); btn.disabled = false; btn.textContent = 'Save'; }
+  };
+}
+
 /* ── plan template ────────────────────────────────────────────────────────
    One master plan. New clients (added or imported) inherit it; existing
    clients are never touched by editing it. */
@@ -1078,7 +1170,7 @@ function drawBody(){
         <div class="fld"><label class="fl">Phone</label><input id="f_phone" value="${esc(c.phone || '')}"></div>
         <div class="fld"><label class="fl">Instagram</label><input id="f_instagram" value="${esc(c.instagram || '')}"></div>
         <div class="fld"><label class="fl">Status</label><select id="f_status">
-          ${STATUSES.map(s => `<option value="${s[0]}" ${((c.status||'lead')===s[0])?'selected':''}>${s[1]}</option>`).join('')}
+          ${statusOptions(c.status || 'lead')}
         </select></div>
         <div class="fld"><label class="fl">Type of client</label><select id="f_client_type">
           <option value="">—</option>
