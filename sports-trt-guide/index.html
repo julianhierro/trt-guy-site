@@ -56,7 +56,10 @@
   .bonustitle{font-family:var(--display);font-weight:800;font-size:clamp(20px,2.4vw,26px);line-height:1.1;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
   .bonusgrid p{margin:0 0 8px;font-size:16px}
   .bonusgrid p:last-child{margin-bottom:0}
-  .bonustag{display:inline-block;margin-top:10px;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--ok)}
+  .bonusprice{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .bonuswas{font-family:var(--display);font-weight:700;font-size:24px;color:var(--mut);text-decoration:line-through}
+  .bonusfree{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:.04em;text-transform:uppercase;color:var(--ok)}
+  .bonusnote{font-size:13.5px;color:var(--mut)}
   @media(max-width:700px){.bonusgrid{flex-direction:column;align-items:stretch}
     .bonusgrid .bonusimg{flex:none;max-width:100%;width:100%}}
   html{scroll-behavior:smooth}
@@ -147,7 +150,7 @@
         <div class="bonustitle" data-eid="bonus-k">Bonus: The Enhanced Man Guide to Restoring Fertility</div>
         <p data-eid="bonus-t">The exact protocol I use to go from zero sperm count to getting my wife pregnant.</p>
         <p data-eid="bonus-b">You get it completely for free today.</p>
-        <div class="bonustag" data-eid="bonus-tag">Free limited-time bonus</div>
+        <div class="bonusprice" data-eid="bonus-tag"><span class="bonuswas" data-eid="bonus-was">$39</span><span class="bonusfree" data-eid="bonus-free">FREE</span><span class="bonusnote" data-eid="bonus-note">today, with the guide</span></div>
       </div>
     </div>
   </div>
@@ -235,7 +238,7 @@
     <div class="ocols" data-eid="ord-g">
       <div class="ocol sum" data-eid="ord-r">
         <div class="oline" data-eid="ord-i1"><span data-eid="ord-i1a"><b data-eid="ord-i1b">TRT vs. Sports TRT/HRT vs. Running Steroid Cycles</b><span class="s" data-eid="ord-i1c">The full guide, 29 pages, instant download.</span></span><span data-eid="ord-i1d">$29.99</span></div>
-        <div class="oline" data-eid="ord-i2"><span data-eid="ord-i2a"><b data-eid="ord-i2b">Bonus: The Enhanced Man Guide to Restoring Fertility</b><span class="s" data-eid="ord-i2c">Yours free with the guide today.</span></span><span class="ofree" data-eid="ord-i2d">FREE</span></div>
+        <div class="oline" data-eid="ord-i2"><span data-eid="ord-i2a"><b data-eid="ord-i2b">Bonus: The Enhanced Man Guide to Restoring Fertility</b><span class="s" data-eid="ord-i2c">Yours free with the guide today.</span></span><span data-eid="ord-i2d"><span class="owas" data-eid="ord-i2e">$39</span><span class="ofree" data-eid="ord-i2f">FREE</span></span></div>
         <div class="ototal" data-eid="ord-t"><span data-eid="ord-ta"><b data-eid="ord-tb">Total</b></span><span data-eid="ord-tc"><span class="owas" data-eid="ord-td">$47</span><span class="amt" data-eid="ord-te">$29.99</span></span></div>
         <div class="guarantee" data-eid="ord-gu" style="margin-top:16px;text-align:left;padding:16px 18px"><b data-eid="ord-gua">90-Day 100% Money Back Guarantee.</b> <span data-eid="ord-gub">If it is not for you, email julian@trt-guy.com and I will refund you, no questions asked.</span></div>
       </div>
@@ -252,7 +255,7 @@
           <div id="payment-element" data-eid="ord-pe" data-noedit></div>
           <a class="cta" id="paybtn" href="#order" role="button" data-eid="ord-btn">Pay $29.99 →</a>
           <div class="oerr" id="oerr" data-eid="ord-err" data-noedit role="alert"></div>
-          <div class="osecure" data-eid="ord-sec">🔒 Card details go straight to Stripe. They never touch this site.</div>
+          <div class="osecure" data-eid="ord-sec">🔒 Your card details are kept private and secure.</div>
         </form>
       </div>
     </div>
@@ -317,11 +320,23 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
     } catch (e) { err(e.message); }
     opening = false;
   }
-  $('oemail').addEventListener('blur', openIntent);
-  $('oemail').addEventListener('change', openIntent);
+  // Delegated + capture: the editor rebuilds parts of this page after the
+  // published edits land, which quietly orphans listeners bound to the
+  // original nodes. Listening on the document survives that.
+  ['blur', 'change', 'input'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      if (e.target && e.target.id === 'oemail') openIntent();
+    }, true);
+  });
+  // If the field is already filled (autofill, or coming back), get the card
+  // field up without waiting to be prompted.
+  setTimeout(openIntent, 1200);
+  setTimeout(openIntent, 4200);
 
-  btn.addEventListener('click', async function (e) {
+  document.addEventListener('click', async function (e) {
+    if (!e.target || !e.target.closest || !e.target.closest('#paybtn')) return;
     e.preventDefault();
+    var btn = $('paybtn');
     var email = $('oemail').value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Enter your email first.'); $('oemail').focus(); return; }
     if (!ready) { err('One moment — getting the card form ready.'); await openIntent(); if (!ready) return; err(''); }
