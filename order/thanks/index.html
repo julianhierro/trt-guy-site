@@ -54,8 +54,7 @@ if (EDITING) {
   $('files').hidden = false;
   $('files').innerHTML =
     '<a class="dl" href="#">The Sports TRT Guide ↓</a>' +
-    '<a class="dl bonus" href="#">Bonus: The Fertility Guide ↓</a>' +
-    '<p class="mut" style="margin:14px 0 0">Save them somewhere you will find them again — the links also live in your email.</p>';
+    '<a class="dl bonus" href="#">Bonus: The Fertility Guide ↓</a>';
 } else if (!pi) {
   $('lead').hidden = true;
   $('problem').hidden = false;
@@ -81,8 +80,7 @@ if (EDITING) {
       } catch (e) {}
       $('files').hidden = false;
       $('files').innerHTML = (d.downloads || []).map((f, i) =>
-        '<a class="dl' + (i ? ' bonus' : '') + '" href="' + f.url + '" download>' + f.label + ' ↓</a>').join('')
-        + '<p class="mut" style="margin:14px 0 0">Save them somewhere you will find them again — the links also live in your email.</p>';
+        '<a class="dl' + (i ? ' bonus' : '') + '" href="' + f.url + '" download>' + f.label + ' ↓</a>').join('');
     })
     .catch(() => {
       $('lead').hidden = true;
