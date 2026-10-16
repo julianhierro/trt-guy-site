@@ -727,16 +727,17 @@ function openApp(){
   // (the plan's length can change, so a "week X of Y" would go stale).
   const ph = c.phase || {};
   const start = ph.start || c.start_date;
-  let weeksIn = null;
+  let weeksIn = null, upcoming = false;
   if(start){
     const s = new Date(start + 'T00:00:00');
+    upcoming = s > Date.now();   // a start date still ahead reads "Starts", with no week count yet
     const days = Math.max(0, Math.floor((Date.now() - s) / 86400000));
-    weeksIn = Math.floor(days / 7) + 1;
+    if(!upcoming) weeksIn = Math.floor(days / 7) + 1;
   }
   $('#aPhase').innerHTML = `
     <div class="lbl" data-copy="phase_label">${esc(t('phase_label'))}</div>
     <h1>${esc(ph.name || t('phase_untitled'))}</h1>
-    ${start ? `<div class="dates">Started ${fmt(start)}</div>` : ''}
+    ${start ? `<div class="dates">${upcoming ? 'Starts' : 'Started'} ${fmt(start)}</div>` : ''}
     ${weeksIn ? `<div class="weeksin"><b>Week ${weeksIn}</b> in this phase</div>` : ''}
     ${ph.focus ? `<div class="focus">${esc(ph.focus)}</div>` : ''}`;
 
