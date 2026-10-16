@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/px.js"></script>
 <script src="https://js.stripe.com/v3/" async></script>
 <link rel="stylesheet" href="/editor.css?v=1">
 <style>html.jv-pending body{visibility:hidden}</style>
@@ -329,8 +330,20 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
   // can take the mounted form with it — one guarded re-mount covers that.
   setTimeout(mount, 3000);
 
+  // One InitiateCheckout per visit, the first time they open the order form.
+  var checkoutTracked = false;
+  function trackCheckout() {
+    if (checkoutTracked || !window.tgPx) return;
+    checkoutTracked = true;
+    try { tgPx.track('InitiateCheckout', { value: AMOUNT / 100, currency: CURRENCY.toUpperCase(), content_name: 'Sports TRT Guide' }); } catch (e) {}
+  }
+  document.addEventListener('click', function (ev) {
+    if (ev.target && ev.target.closest && ev.target.closest('[data-checkout]')) trackCheckout();
+  }, true);
+
   document.addEventListener('click', async function (ev) {
     if (!ev.target || !ev.target.closest || !ev.target.closest('#paybtn')) return;
+    trackCheckout();
     ev.preventDefault();
     if (busy) return;
     var btn = $('paybtn'), label = btn.textContent;
