@@ -1178,7 +1178,7 @@ function drawBody(){
         <p>Their access code. They enter it once on <span class="mono">trt-guy.com/${esc(c.slug)}</span>, then the page remembers it.</p>
         <button class="btn sm" id="btnCopyLink">Copy link + code</button>
         <button class="btn sm" id="btnCopyWelcome">Copy welcome message</button>
-        <button class="btn sm" id="btnNewPin">New code</button>
+        <button class="btn sm" id="btnNewPin">Change code</button>
       </div>
       <div class="grid2">
         <div class="fld"><label class="fl">Name</label><input id="f_name" value="${esc(c.name || '')}"></div>
@@ -1227,9 +1227,14 @@ function drawBody(){
     // Julian's welcome text for a new client, word for word, with this client's link and code.
     $('#btnCopyWelcome').onclick = () => copyText(WELCOME_MSG(`${SITE}/${OPEN.slug}`, OPEN.pin || ''));
     $('#btnNewPin').onclick = async () => {
-      if(!confirm('Generate a new access code? The old one stops working.')) return;
-      const j = await api('/clients', { method:'POST', body: JSON.stringify({ action:'newpin', id:c.id }) });
-      OPEN = j.client; upsertLocal(j.client); $('#pinCode').textContent = j.client.pin; toast('New code');
+      const v = prompt('New 4-digit access code for ' + (OPEN.name || 'this client') + '.\nLeave it empty for a random one. The old code stops working.', '');
+      if(v === null) return;
+      const pin = v.trim();
+      if(pin && !/^\d{4}$/.test(pin)) return alert('The code must be exactly 4 digits.');
+      try {
+        const j = await api('/clients', { method:'POST', body: JSON.stringify({ action:'newpin', id:c.id, pin }) });
+        OPEN = j.client; upsertLocal(j.client); $('#pinCode').textContent = j.client.pin; toast('Code changed to ' + j.client.pin);
+      } catch(e){ alert('Could not change the code: ' + e.message); }
     };
 
   } else if(TAB === 'plan'){
