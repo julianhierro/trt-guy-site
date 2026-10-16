@@ -67,6 +67,17 @@ if (EDITING) {
     .then(({ ok, d }) => {
       if (!ok || !d.success) throw new Error((d && d.error) || 'not verified');
       $('lead').textContent = 'Payment confirmed. Both files are yours to keep — download them now.';
+      /* Purchase, browser side. The worker already sent its own copy with this
+         same event id, so Meta counts one conversion and keeps whichever
+         signals each copy carried. */
+      try {
+        if (d.pixel && window.fbq) {
+          fbq('track', 'Purchase',
+              { value: d.pixel.value, currency: d.pixel.currency, content_name: d.pixel.contentName,
+                content_type: 'product', num_items: 1 },
+              { eventID: d.pixel.eventId });
+        }
+      } catch (e) {}
       $('files').hidden = false;
       $('files').innerHTML = (d.downloads || []).map((f, i) =>
         '<a class="dl' + (i ? ' bonus' : '') + '" href="' + f.url + '" download>' + f.label + ' ↓</a>').join('')
