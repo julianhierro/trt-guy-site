@@ -62,9 +62,10 @@
   html{scroll-behavior:smooth}
   .order{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 26px;margin:30px 0;scroll-margin-top:16px}
   .order h2{margin-top:0}
-  .ocols{display:flex;gap:24px;align-items:flex-start}
-  .ocol{flex:1;min-width:0}
-  .ocol.sum{flex:.9}
+  .ocols{display:block}
+  .ocol{min-width:0}
+  .ocol.sum{margin-bottom:22px}
+  .order .cta{display:block;width:100%;max-width:none;margin:18px 0 0}
   .ofield{margin-bottom:14px}
   .ofield label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
   .ofield input{width:100%;font:inherit;font-size:15px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;color:var(--txt)}
@@ -79,7 +80,6 @@
   .oerr{color:#c62828;font-size:14px;margin-top:10px;min-height:20px}
   .osecure{color:var(--mut);font-size:12.5px;text-align:center;margin-top:12px}
   .onotready{background:#fff5f5;border:1px solid rgba(226,72,58,.45);border-radius:12px;padding:13px 15px;font-size:14px;margin-bottom:16px}
-  @media(max-width:760px){.ocols{flex-direction:column}.ocol.sum{order:-1;width:100%}}
   .disc{font-size:13px;color:var(--mut);text-align:center;margin:24px 0}
   .foot{text-align:center;color:var(--mut);font-size:13px;padding:20px 0 40px}
 </style>
@@ -233,6 +233,12 @@
     <h2 data-eid="ord-h">Get The Guide</h2>
     <div class="onotready" id="onotready" data-eid="ord-nr" hidden>Checkout is not switched on yet.</div>
     <div class="ocols" data-eid="ord-g">
+      <div class="ocol sum" data-eid="ord-r">
+        <div class="oline" data-eid="ord-i1"><span data-eid="ord-i1a"><b data-eid="ord-i1b">TRT vs. Sports TRT/HRT vs. Running Steroid Cycles</b><span class="s" data-eid="ord-i1c">The full guide, 29 pages, instant download.</span></span><span data-eid="ord-i1d">$29.99</span></div>
+        <div class="oline" data-eid="ord-i2"><span data-eid="ord-i2a"><b data-eid="ord-i2b">Bonus: The Enhanced Man Guide to Restoring Fertility</b><span class="s" data-eid="ord-i2c">Yours free with the guide today.</span></span><span class="ofree" data-eid="ord-i2d">FREE</span></div>
+        <div class="ototal" data-eid="ord-t"><span data-eid="ord-ta"><b data-eid="ord-tb">Total</b></span><span data-eid="ord-tc"><span class="owas" data-eid="ord-td">$47</span><span class="amt" data-eid="ord-te">$29.99</span></span></div>
+        <div class="guarantee" data-eid="ord-gu" style="margin-top:16px;text-align:left;padding:16px 18px"><b data-eid="ord-gua">90-Day 100% Money Back Guarantee.</b> <span data-eid="ord-gub">If it is not for you, email julian@trt-guy.com and I will refund you, no questions asked.</span></div>
+      </div>
       <div class="ocol" data-eid="ord-l">
         <form id="payform" data-eid="ord-f" novalidate>
           <div class="ofield" data-eid="ord-f1">
@@ -248,12 +254,6 @@
           <div class="oerr" id="oerr" data-eid="ord-err" data-noedit role="alert"></div>
           <div class="osecure" data-eid="ord-sec">🔒 Card details go straight to Stripe. They never touch this site.</div>
         </form>
-      </div>
-      <div class="ocol sum" data-eid="ord-r">
-        <div class="oline" data-eid="ord-i1"><span data-eid="ord-i1a"><b data-eid="ord-i1b">TRT vs. Sports TRT/HRT vs. Running Steroid Cycles</b><span class="s" data-eid="ord-i1c">The full guide, 29 pages, instant download.</span></span><span data-eid="ord-i1d">$29.99</span></div>
-        <div class="oline" data-eid="ord-i2"><span data-eid="ord-i2a"><b data-eid="ord-i2b">Bonus: The Enhanced Man Guide to Restoring Fertility</b><span class="s" data-eid="ord-i2c">Yours free with the guide today.</span></span><span class="ofree" data-eid="ord-i2d">FREE</span></div>
-        <div class="ototal" data-eid="ord-t"><span data-eid="ord-ta"><b data-eid="ord-tb">Total</b></span><span data-eid="ord-tc"><span class="owas" data-eid="ord-td">$47</span><span class="amt" data-eid="ord-te">$29.99</span></span></div>
-        <div class="guarantee" data-eid="ord-gu" style="margin-top:16px;text-align:left;padding:16px 18px"><b data-eid="ord-gua">90-Day 100% Money Back Guarantee.</b> <span data-eid="ord-gub">If it is not for you, email julian@trt-guy.com and I will refund you, no questions asked.</span></div>
       </div>
     </div>
   </div>
