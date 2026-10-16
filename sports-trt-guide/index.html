@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
 <link rel="stylesheet" href="/editor.css?v=1">
 <style>html.jv-pending body{visibility:hidden}</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
@@ -58,6 +59,27 @@
   .bonustag{display:inline-block;margin-top:10px;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--ok)}
   @media(max-width:700px){.bonusgrid{flex-direction:column;align-items:stretch}
     .bonusgrid .bonusimg{flex:none;max-width:100%;width:100%}}
+  html{scroll-behavior:smooth}
+  .order{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 26px;margin:30px 0;scroll-margin-top:16px}
+  .order h2{margin-top:0}
+  .ocols{display:flex;gap:24px;align-items:flex-start}
+  .ocol{flex:1;min-width:0}
+  .ocol.sum{flex:.9}
+  .ofield{margin-bottom:14px}
+  .ofield label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+  .ofield input{width:100%;font:inherit;font-size:15px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;color:var(--txt)}
+  .ofield input:focus{outline:2px solid rgba(26,92,255,.35);outline-offset:1px}
+  .oline{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .oline:last-of-type{border-bottom:0}
+  .oline .s{display:block;color:var(--mut);font-size:13px}
+  .ofree{color:var(--ok);font-weight:800}
+  .ototal{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:2px solid var(--txt)}
+  .ototal .amt{font-family:var(--display);font-weight:800;font-size:28px}
+  .owas{color:var(--mut);text-decoration:line-through;margin-right:8px}
+  .oerr{color:#c62828;font-size:14px;margin-top:10px;min-height:20px}
+  .osecure{color:var(--mut);font-size:12.5px;text-align:center;margin-top:12px}
+  .onotready{background:#fff5f5;border:1px solid rgba(226,72,58,.45);border-radius:12px;padding:13px 15px;font-size:14px;margin-bottom:16px}
+  @media(max-width:760px){.ocols{flex-direction:column}.ocol.sum{order:-1;width:100%}}
   .disc{font-size:13px;color:var(--mut);text-align:center;margin:24px 0}
   .foot{text-align:center;color:var(--mut);font-size:13px;padding:20px 0 40px}
 </style>
@@ -76,7 +98,7 @@
   <div class="ctablock" data-cta>
     <div class="price">Only $29.99 Today (Originally $47)</div>
     <div class="guar-line">90-Day 100% Money Back Guarantee</div>
-    <a class="cta" href="/order/" data-checkout>Get The Guide (Only $29.99) →</a>
+    <a class="cta" href="#order" data-checkout>Get The Guide (Only $29.99) →</a>
   </div>
 
   <p>If you'd like to lose fat, build muscle mass and get in the best shape of your life in 2026 on a 100% plant-base diet, then this 7-day high protein vegan challenge is for you!</p>
@@ -98,7 +120,7 @@
   <div class="ctablock" data-cta>
     <div class="price">Only $29.99 Today (Originally $47)</div>
     <div class="guar-line">90-Day 100% Money Back Guarantee</div>
-    <a class="cta" href="/order/" data-checkout>Get The Guide (Only $29.99) →</a>
+    <a class="cta" href="#order" data-checkout>Get The Guide (Only $29.99) →</a>
   </div>
 
   <h2>Here's Exactly What You'll Find Inside:</h2>
@@ -133,7 +155,7 @@
   <div class="ctablock" data-cta>
     <div class="price">Only $29.99 Today (Originally $47)</div>
     <div class="guar-line">90-Day 100% Money Back Guarantee</div>
-    <a class="cta" href="/order/" data-checkout>Get The Guide (Only $29.99) →</a>
+    <a class="cta" href="#order" data-checkout>Get The Guide (Only $29.99) →</a>
   </div>
 
   <h2>Here's What To Do Next</h2>
@@ -165,7 +187,7 @@
   <div class="ctablock" data-cta>
     <div class="price">Only $29.99 Today (Originally $47)</div>
     <div class="guar-line">90-Day 100% Money Back Guarantee</div>
-    <a class="cta" href="/order/" data-checkout>Get The Guide (Only $29.99) →</a>
+    <a class="cta" href="#order" data-checkout>Get The Guide (Only $29.99) →</a>
   </div>
 
   <h2>This Is Truly A Limited Offer So Claim Your Copy Now!</h2>
@@ -204,7 +226,36 @@
   <div class="ctablock" data-cta>
     <div class="price">Only $29.99 Today (Originally $47)</div>
     <div class="guar-line">90-Day 100% Money Back Guarantee</div>
-    <a class="cta" href="/order/" data-checkout>Get The Guide (Only $29.99) →</a>
+    <a class="cta" href="#order" data-checkout>Get The Guide (Only $29.99) →</a>
+  </div>
+
+  <div class="order" id="order" data-eid="ord">
+    <h2 data-eid="ord-h">Get The Guide</h2>
+    <div class="onotready" id="onotready" data-eid="ord-nr" hidden>Checkout is not switched on yet.</div>
+    <div class="ocols" data-eid="ord-g">
+      <div class="ocol" data-eid="ord-l">
+        <form id="payform" data-eid="ord-f" novalidate>
+          <div class="ofield" data-eid="ord-f1">
+            <label for="oname" data-eid="ord-ln">Name</label>
+            <input id="oname" type="text" autocomplete="name" placeholder="First and last name" data-noedit required>
+          </div>
+          <div class="ofield" data-eid="ord-f2">
+            <label for="oemail" data-eid="ord-le">Email</label>
+            <input id="oemail" type="email" autocomplete="email" placeholder="Where your guide gets sent" data-noedit required>
+          </div>
+          <div id="payment-element" data-eid="ord-pe" data-noedit></div>
+          <a class="cta" id="paybtn" href="#order" role="button" data-eid="ord-btn">Pay $29.99 →</a>
+          <div class="oerr" id="oerr" data-eid="ord-err" data-noedit role="alert"></div>
+          <div class="osecure" data-eid="ord-sec">🔒 Card details go straight to Stripe. They never touch this site.</div>
+        </form>
+      </div>
+      <div class="ocol sum" data-eid="ord-r">
+        <div class="oline" data-eid="ord-i1"><span data-eid="ord-i1a"><b data-eid="ord-i1b">TRT vs. Sports TRT/HRT vs. Running Steroid Cycles</b><span class="s" data-eid="ord-i1c">The full guide, 29 pages, instant download.</span></span><span data-eid="ord-i1d">$29.99</span></div>
+        <div class="oline" data-eid="ord-i2"><span data-eid="ord-i2a"><b data-eid="ord-i2b">Bonus: The Enhanced Man Guide to Restoring Fertility</b><span class="s" data-eid="ord-i2c">Yours free with the guide today.</span></span><span class="ofree" data-eid="ord-i2d">FREE</span></div>
+        <div class="ototal" data-eid="ord-t"><span data-eid="ord-ta"><b data-eid="ord-tb">Total</b></span><span data-eid="ord-tc"><span class="owas" data-eid="ord-td">$47</span><span class="amt" data-eid="ord-te">$29.99</span></span></div>
+        <div class="guarantee" data-eid="ord-gu" style="margin-top:16px;text-align:left;padding:16px 18px"><b data-eid="ord-gua">90-Day 100% Money Back Guarantee.</b> <span data-eid="ord-gub">If it is not for you, email julian@trt-guy.com and I will refund you, no questions asked.</span></div>
+      </div>
+    </div>
   </div>
 
   <p class="disc">This is educational information, not medical advice. Talk to a licensed physician before starting anything.</p>
@@ -219,7 +270,7 @@ function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+e
 if(!/[?&]edit=1/.test(location.search)) track('view');
 
 /* Checkout wiring — set CHECKOUT_URL to your paid checkout link and every button uses it. */
-var CHECKOUT_URL = "/order/"; // our own Stripe checkout on trt-guy.com
+var CHECKOUT_URL = "#order"; // the checkout is at the bottom of this page
 document.querySelectorAll('[data-checkout]').forEach(function(a){
   a.addEventListener('click', function(e){
     if(CHECKOUT_URL){ return; /* real link set below */ }
@@ -231,6 +282,58 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
 </script>
 
 <!-- ═══ Inline editor (add ?edit=1) — edit all text + bullets; swap images via Add ▸ Image ═══ -->
+
+<script>
+/* ── Checkout, on this page ───────────────────────────────────────────────
+   Publishable key only: it can start a payment and nothing else. The amount
+   and the delivery live in the worker, so nothing here decides what is paid.
+   Skipped entirely in ?edit=1 so the editor is not fighting Stripe's iframes. */
+(function () {
+  if (/[?&]edit=1/.test(location.search)) return;
+  var STRIPE_PK = 'pk_live_51UDPjeC64DWJl9A9EXAruEDv7uUdQA2kxE98GsLBQ3ti2UQGz6W1r76VEnKnW1RYgw76J4LJ5tBU02BwQMIuSCMq00HwfCHZzE';
+  var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
+  var PRODUCT = 'sports-trt-guide';
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('payform'); if (!form || !window.Stripe) return;
+  var btn = $('paybtn'), label = btn.textContent;
+  var err = function (m) { $('oerr').textContent = m || ''; };
+
+  var stripe = Stripe(STRIPE_PK), elements = null, ready = false, opening = false;
+
+  async function openIntent() {
+    if (opening || ready) return;
+    var email = $('oemail').value.trim(), name = $('oname').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    opening = true; err('');
+    try {
+      var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product: PRODUCT, email: email, name: name }) });
+      var d = await r.json();
+      if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
+      elements = stripe.elements({ clientSecret: d.clientSecret, appearance: { theme: 'stripe',
+        variables: { colorPrimary: '#1a5cff', borderRadius: '10px', fontFamily: 'Inter, sans-serif' } } });
+      elements.create('payment', { layout: 'tabs' }).mount('#payment-element');
+      ready = true;
+    } catch (e) { err(e.message); }
+    opening = false;
+  }
+  $('oemail').addEventListener('blur', openIntent);
+  $('oemail').addEventListener('change', openIntent);
+
+  btn.addEventListener('click', async function (e) {
+    e.preventDefault();
+    var email = $('oemail').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Enter your email first.'); $('oemail').focus(); return; }
+    if (!ready) { err('One moment — getting the card form ready.'); await openIntent(); if (!ready) return; err(''); }
+    btn.style.pointerEvents = 'none'; btn.textContent = 'Processing…'; err('');
+    var res = await stripe.confirmPayment({ elements: elements,
+      confirmParams: { return_url: location.origin + '/order/thanks/' }, redirect: 'if_required' });
+    if (res.error) { err(res.error.message || 'The payment did not go through.');
+      btn.style.pointerEvents = ''; btn.textContent = label; return; }
+    location.href = '/order/thanks/?pi=' + encodeURIComponent(res.paymentIntent.id);
+  });
+})();
+</script>
 <script>window.JV_EDITOR={ site:"td-sports-trt-guide", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <script>
 (function () {
