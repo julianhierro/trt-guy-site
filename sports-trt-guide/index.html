@@ -82,6 +82,16 @@
   .ototal{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:2px solid var(--txt)}
   .ototal .amt{font-family:var(--display);font-weight:800;font-size:28px}
   .owas{color:var(--mut);text-decoration:line-through;margin-right:8px}
+  .coupon .cprow{display:flex;gap:8px}
+  .coupon .cprow input{flex:1;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .coupon .cprow button{flex:none;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.08em;
+    text-transform:uppercase;padding:0 20px;border:1px solid var(--txt);background:var(--txt);color:#fff;border-radius:10px;cursor:pointer}
+  .coupon .cprow button:hover{background:#000}
+  .coupon .opt{color:var(--mut);font-weight:400;text-transform:none;letter-spacing:0}
+  .cpmsg{font-size:13.5px;margin-top:7px;min-height:18px}
+  .cpmsg.ok{color:var(--ok);font-weight:600}
+  .cpmsg.no{color:#c62828}
+  .ototal .amt.cut{color:var(--mut);text-decoration:line-through;font-size:22px;margin-right:8px}
   .oerr{color:#c62828;font-size:14px;margin-top:10px;min-height:20px}
   .osecure{color:var(--mut);font-size:12.5px;text-align:center;margin-top:12px}
   .onotready{background:#fff5f5;border:1px solid rgba(226,72,58,.45);border-radius:12px;padding:13px 15px;font-size:14px;margin-bottom:16px}
@@ -254,6 +264,14 @@
             <label for="oemail" data-eid="ord-le">Email</label>
             <input id="oemail" type="email" autocomplete="email" placeholder="Where your guide gets sent" data-noedit required>
           </div>
+          <div class="ofield coupon" data-eid="ord-cp">
+            <label for="ocoupon" data-eid="ord-lc">Coupon code <span class="opt" data-eid="ord-lco">(optional)</span></label>
+            <div class="cprow" data-eid="ord-cprow">
+              <input id="ocoupon" type="text" autocomplete="off" spellcheck="false" placeholder="Enter your code" data-noedit>
+              <button type="button" id="cpbtn" data-noedit>Apply</button>
+            </div>
+            <div class="cpmsg" id="cpmsg" data-eid="ord-cpm" data-noedit></div>
+          </div>
           <div id="payment-element" data-eid="ord-pe" data-noedit></div>
           <a class="cta" id="paybtn" href="#order" role="button" data-eid="ord-btn">Pay $29.99 →</a>
           <div class="oerr" id="oerr" data-eid="ord-err" data-noedit role="alert"></div>
@@ -311,6 +329,55 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
   // stripe.js is loaded async so it never blocks the page — wait for it
   // rather than giving up, which would leave the form blank for good.
   var stripe = null, elements = null, busy = false, waited = 0;
+  var applied = null;                     // the coupon the worker agreed to
+
+  function money(c) { return '$' + (c / 100).toFixed(2); }
+
+  // The worker decides whether a code is real and what it is worth — the page
+  // only shows the answer. Nothing here can change what gets charged.
+  async function applyCoupon() {
+    var box = $('ocoupon'), msg = $('cpmsg');
+    var code = (box.value || '').trim();
+    if (!code) { msg.className = 'cpmsg'; msg.textContent = ''; return; }
+    msg.className = 'cpmsg'; msg.textContent = 'Checking…';
+    try {
+      var r = await fetch(API + '/coupon', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, product: PRODUCT }) });
+      var d = await r.json();
+      if (!d.ok) {
+        applied = null;
+        msg.className = 'cpmsg no';
+        msg.textContent = d.reason === 'expired' ? 'That code has expired.'
+                        : d.reason === 'wrong-product' ? 'That code is not for this guide.'
+                        : 'That code is not valid.';
+        paintTotal(AMOUNT, null);
+        if (elements) elements.update({ amount: AMOUNT });
+        return;
+      }
+      applied = d;
+      msg.className = 'cpmsg ok';
+      msg.textContent = d.percent + '% off applied — you pay ' + money(d.amount) + '.';
+      paintTotal(d.amount, d.was);
+      if (elements) elements.update({ amount: d.amount });
+      var btn = $('paybtn'); if (btn) btn.textContent = 'Pay ' + money(d.amount) + ' \u2192';
+    } catch (e) { msg.className = 'cpmsg no'; msg.textContent = 'Could not check that code.'; }
+  }
+  function paintTotal(now, was) {
+    var t = document.querySelector('.ototal .amt'); if (!t) return;
+    var old = document.querySelector('.ototal .amt.cut'); if (old) old.remove();
+    t.textContent = money(now);
+    if (was && was !== now) {
+      var c = document.createElement('span');
+      c.className = 'amt cut'; c.textContent = money(was);
+      t.parentNode.insertBefore(c, t);
+    }
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.closest && e.target.closest('#cpbtn')) { e.preventDefault(); applyCoupon(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target && e.target.id === 'ocoupon') { e.preventDefault(); applyCoupon(); }
+  });
   (function ready() {
     if (window.Stripe) { stripe = Stripe(TEST ? PK_TEST : STRIPE_PK); mount(); return; }
     if ((waited += 100) > 15000) { err('The card form could not load. Refresh the page, or email julian@trt-guy.com.'); return; }
@@ -358,7 +425,8 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
       var sub = await elements.submit();                 // validates the card fields first
       if (sub.error) throw new Error(sub.error.message);
       var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product: PRODUCT, email: email, name: name, test: TEST }) });
+        body: JSON.stringify({ product: PRODUCT, email: email, name: name, test: TEST,
+                               coupon: applied ? applied.code : undefined }) });
       var d = await r.json();
       if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
       var res = await stripe.confirmPayment({ elements: elements, clientSecret: d.clientSecret,
