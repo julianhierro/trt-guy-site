@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="stylesheet" href="/editor.css?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,7 +44,18 @@ const pi = new URLSearchParams(location.search).get('pi')
         || new URLSearchParams(location.search).get('payment_intent');
 const $ = id => document.getElementById(id);
 
-if (!pi) {
+const EDITING = /[?&]edit=1/.test(location.search);
+
+if (EDITING) {
+  // Nothing has been paid for in the editor, so show the delivered state —
+  // otherwise there is only an error message to look at.
+  $('lead').textContent = 'Payment confirmed. Both files are yours to keep — download them now.';
+  $('files').hidden = false;
+  $('files').innerHTML =
+    '<a class="dl" href="#">The Sports TRT Guide ↓</a>' +
+    '<a class="dl bonus" href="#">Bonus: The Fertility Guide ↓</a>' +
+    '<p class="mut" style="margin:14px 0 0">Save them somewhere you will find them again — the links also live in your email.</p>';
+} else if (!pi) {
   $('lead').hidden = true;
   $('problem').hidden = false;
   $('problem').innerHTML = "<b>We could not find your order reference.</b><br>If you have just paid, check your email for the receipt — or write to julian@trt-guy.com and I will send your files straight over.";
@@ -75,6 +87,8 @@ function tgv(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random
 function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+encodeURIComponent(tgv());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){}}
 track('view');track('optin');
 </script>
+<script>window.JV_EDITOR={ site:"td-order-thanks", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
+<script src="/editor.js?v=3"></script>
 <script src="/px.js" defer></script>
 </body>
 </html>
