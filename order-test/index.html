@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$1 Test Order | TRT Guy</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/" async></script>
+<style>
+  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;
+    --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.6}
+  .wrap{max-width:560px;margin:0 auto;padding:34px 18px 70px}
+  .wordmark{display:block;height:40px;aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;margin:0 auto 20px;font-size:0;color:transparent;overflow:hidden}
+  h1{font-family:var(--display);font-weight:800;font-size:32px;text-transform:uppercase;text-align:center;margin-bottom:6px}
+  .note{background:#fff8e6;border:1px solid #e3c35a;border-radius:12px;padding:13px 15px;font-size:14px;margin:16px 0}
+  .order{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 24px}
+  .ofield{margin-bottom:14px}
+  .ofield label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+  .ofield input{width:100%;font:inherit;font-size:15px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe}
+  .oline{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .ototal{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0 18px;padding-top:12px;border-top:2px solid var(--txt)}
+  .ototal .amt{font-family:var(--display);font-weight:800;font-size:28px}
+  .cta{display:block;width:100%;background:var(--acc);color:#fff;text-decoration:none;text-align:center;border-radius:14px;margin-top:18px;
+    font-family:var(--display);font-weight:800;font-size:22px;text-transform:uppercase;padding:17px 20px;cursor:pointer}
+  .cta:hover{background:var(--acc-d)}
+  .oerr{color:#c62828;font-size:14px;margin-top:10px;min-height:20px}
+  .osecure{color:var(--mut);font-size:12.5px;text-align:center;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">TRT-GUY</div>
+  <h1>$1 Test Order</h1>
+  <div class="note"><b>This is a real charge on live keys</b> — $1.00, so the whole flow can be walked end to end. Refund it in Stripe afterwards. It is kept off the Meta pixel and tagged <code>test-purchase</code>, so it cannot skew your numbers.</div>
+  <div class="order">
+    <div class="oline"><span>Test order — delivers both guides</span><span>$1.00</span></div>
+    <div class="ototal"><span><b>Total</b></span><span class="amt">$1.00</span></div>
+    <form id="payform" novalidate>
+      <div class="ofield"><label for="oname">Name</label><input id="oname" type="text" autocomplete="name" placeholder="First and last name" required></div>
+      <div class="ofield"><label for="oemail">Email</label><input id="oemail" type="email" autocomplete="email" placeholder="Where the files get sent" required></div>
+      <div id="payment-element"></div>
+      <a class="cta" id="paybtn" href="#" role="button">Pay $1.00 →</a>
+      <div class="oerr" id="oerr" role="alert"></div>
+      <div class="osecure">🔒 Your card details are kept private and secure.</div>
+    </form>
+  </div>
+</div>
+<script>
+/* ── Checkout, on this page ───────────────────────────────────────────────
+   Stripe's Payment Element in deferred mode: it renders from the amount
+   alone, so nothing waits on our server before the form appears. The
+   payment itself is created on the worker when Pay is pressed — the amount
+   is still decided there, never here. Skipped in ?edit=1. */
+(function () {
+  if (/[?&]edit=1/.test(location.search)) return;
+  var STRIPE_PK = 'pk_live_51UDPjeC64DWJl9A9EXAruEDv7uUdQA2kxE98GsLBQ3ti2UQGz6W1r76VEnKnW1RYgw76J4LJ5tBU02BwQMIuSCMq00HwfCHZzE';
+  var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
+  var PRODUCT = 'test-1', AMOUNT = 100, CURRENCY = 'usd';
+  /* Test mode: only on a local copy of this page, and only with ?test=1. It
+     uses Stripe's test keys so a full purchase can be walked through with a
+     test card. It can never switch on for a real visitor on trt-guy.com. */
+  var LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  var TEST = LOCAL && /[?&]test=1/.test(location.search);
+  var PK_TEST = 'pk_test_REPLACE_ME';
+  var $ = function (id) { return document.getElementById(id); };
+  var err = function (m) { var e = $('oerr'); if (e) e.textContent = m || ''; };
+
+  // stripe.js is loaded async so it never blocks the page — wait for it
+  // rather than giving up, which would leave the form blank for good.
+  var stripe = null, elements = null, busy = false, waited = 0;
+  (function ready() {
+    if (window.Stripe) { stripe = Stripe(TEST ? PK_TEST : STRIPE_PK); mount(); return; }
+    if ((waited += 100) > 15000) { err('The card form could not load. Refresh the page, or email julian@trt-guy.com.'); return; }
+    setTimeout(ready, 100);
+  })();
+
+  function mount() {
+    var slot = $('payment-element');
+    if (!stripe || !slot || slot.querySelector('iframe')) return;
+    elements = stripe.elements({
+      mode: 'payment', amount: AMOUNT, currency: CURRENCY,
+      appearance: { theme: 'stripe', variables: { colorPrimary: '#1a5cff', borderRadius: '10px',
+                                                  fontFamily: 'Inter, sans-serif', fontSizeBase: '15px' } },
+    });
+    elements.create('payment', { layout: 'tabs' }).mount(slot);
+  }
+  // The editor rebuilds parts of this page when published edits land, which
+  // can take the mounted form with it — one guarded re-mount covers that.
+  setTimeout(mount, 3000);
+
+  document.addEventListener('click', async function (ev) {
+    if (!ev.target || !ev.target.closest || !ev.target.closest('#paybtn')) return;
+    ev.preventDefault();
+    if (busy) return;
+    var btn = $('paybtn'), label = btn.textContent;
+    var name = ($('oname').value || '').trim(), email = ($('oemail').value || '').trim();
+    if (!name) { err('Enter your name.'); $('oname').focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Enter a valid email — it is where your guide goes.'); $('oemail').focus(); return; }
+    if (!elements) { mount(); err('One moment — getting the card form ready.'); return; }
+
+    busy = true; btn.style.opacity = '.6'; btn.style.pointerEvents = 'none'; btn.textContent = 'Processing…'; err('');
+    try {
+      var sub = await elements.submit();                 // validates the card fields first
+      if (sub.error) throw new Error(sub.error.message);
+      var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product: PRODUCT, email: email, name: name, test: TEST }) });
+      var d = await r.json();
+      if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
+      var res = await stripe.confirmPayment({ elements: elements, clientSecret: d.clientSecret,
+        confirmParams: { return_url: location.origin + '/order/thanks/',
+                         payment_method_data: { billing_details: { name: name, email: email } } },
+        redirect: 'if_required' });
+      if (res.error) throw new Error(res.error.message || 'The payment did not go through.');
+      location.href = '/order/thanks/?pi=' + encodeURIComponent(res.paymentIntent.id) + (TEST ? '&test=1' : '');
+      return;
+    } catch (e) { err(e.message); }
+    busy = false; btn.style.opacity = ''; btn.style.pointerEvents = ''; btn.textContent = label;
+  });
+})();
+
+</script>
+</body>
+</html>

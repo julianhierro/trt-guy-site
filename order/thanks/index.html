@@ -40,6 +40,7 @@
 </div>
 <script>
 const API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
+const TEST = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && /[?&]test=1/.test(location.search);
 const pi = new URLSearchParams(location.search).get('pi')
         || new URLSearchParams(location.search).get('payment_intent');
 const $ = id => document.getElementById(id);
@@ -62,7 +63,7 @@ if (EDITING) {
 } else {
   // The worker re-checks with Stripe that this really was paid before it hands
   // anything over, so a guessed reference gets nothing.
-  fetch(API + '/pay-done', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentIntentId: pi }) })
+  fetch(API + '/pay-done', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentIntentId: pi, test: TEST }) })
     .then(r => r.json().then(d => ({ ok: r.ok, d })))
     .then(({ ok, d }) => {
       if (!ok || !d.success) throw new Error((d && d.error) || 'not verified');

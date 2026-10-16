@@ -297,6 +297,12 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
   var STRIPE_PK = 'pk_live_51UDPjeC64DWJl9A9EXAruEDv7uUdQA2kxE98GsLBQ3ti2UQGz6W1r76VEnKnW1RYgw76J4LJ5tBU02BwQMIuSCMq00HwfCHZzE';
   var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
   var PRODUCT = 'sports-trt-guide', AMOUNT = 2999, CURRENCY = 'usd';
+  /* Test mode: only on a local copy of this page, and only with ?test=1. It
+     uses Stripe's test keys so a full purchase can be walked through with a
+     test card. It can never switch on for a real visitor on trt-guy.com. */
+  var LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  var TEST = LOCAL && /[?&]test=1/.test(location.search);
+  var PK_TEST = 'pk_test_REPLACE_ME';
   var $ = function (id) { return document.getElementById(id); };
   var err = function (m) { var e = $('oerr'); if (e) e.textContent = m || ''; };
 
@@ -304,7 +310,7 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
   // rather than giving up, which would leave the form blank for good.
   var stripe = null, elements = null, busy = false, waited = 0;
   (function ready() {
-    if (window.Stripe) { stripe = Stripe(STRIPE_PK); mount(); return; }
+    if (window.Stripe) { stripe = Stripe(TEST ? PK_TEST : STRIPE_PK); mount(); return; }
     if ((waited += 100) > 15000) { err('The card form could not load. Refresh the page, or email julian@trt-guy.com.'); return; }
     setTimeout(ready, 100);
   })();
@@ -338,7 +344,7 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
       var sub = await elements.submit();                 // validates the card fields first
       if (sub.error) throw new Error(sub.error.message);
       var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product: PRODUCT, email: email, name: name }) });
+        body: JSON.stringify({ product: PRODUCT, email: email, name: name, test: TEST }) });
       var d = await r.json();
       if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
       var res = await stripe.confirmPayment({ elements: elements, clientSecret: d.clientSecret,
@@ -346,7 +352,7 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
                          payment_method_data: { billing_details: { name: name, email: email } } },
         redirect: 'if_required' });
       if (res.error) throw new Error(res.error.message || 'The payment did not go through.');
-      location.href = '/order/thanks/?pi=' + encodeURIComponent(res.paymentIntent.id);
+      location.href = '/order/thanks/?pi=' + encodeURIComponent(res.paymentIntent.id) + (TEST ? '&test=1' : '');
       return;
     } catch (e) { err(e.message); }
     busy = false; btn.style.opacity = ''; btn.style.pointerEvents = ''; btn.textContent = label;
