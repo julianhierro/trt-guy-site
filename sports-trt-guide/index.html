@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://js.stripe.com/v3/"></script>
+<script src="https://js.stripe.com/v3/" async></script>
 <link rel="stylesheet" href="/editor.css?v=1">
 <style>html.jv-pending body{visibility:hidden}</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
@@ -288,44 +288,40 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
 
 <script>
 /* ── Checkout, on this page ───────────────────────────────────────────────
-   Stripe's Payment Element — the polished one. The intent is opened as the
-   page loads so the card form is there straight away, and the buyer's email
-   is attached to it just before the payment is confirmed. The amount is
-   decided by the worker, never here. Skipped in ?edit=1 so the editor and
-   Stripe's iframes stay out of each other's way. */
+   Stripe's Payment Element in deferred mode: it renders from the amount
+   alone, so nothing waits on our server before the form appears. The
+   payment itself is created on the worker when Pay is pressed — the amount
+   is still decided there, never here. Skipped in ?edit=1. */
 (function () {
   if (/[?&]edit=1/.test(location.search)) return;
   var STRIPE_PK = 'pk_live_51UDPjeC64DWJl9A9EXAruEDv7uUdQA2kxE98GsLBQ3ti2UQGz6W1r76VEnKnW1RYgw76J4LJ5tBU02BwQMIuSCMq00HwfCHZzE';
   var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
-  var PRODUCT = 'sports-trt-guide';
+  var PRODUCT = 'sports-trt-guide', AMOUNT = 2999, CURRENCY = 'usd';
   var $ = function (id) { return document.getElementById(id); };
-  if (!window.Stripe || !$('payment-element')) return;
   var err = function (m) { var e = $('oerr'); if (e) e.textContent = m || ''; };
 
-  var stripe = Stripe(STRIPE_PK), elements = null, piId = null, busy = false, opening = false;
+  // stripe.js is loaded async so it never blocks the page — wait for it
+  // rather than giving up, which would leave the form blank for good.
+  var stripe = null, elements = null, busy = false, waited = 0;
+  (function ready() {
+    if (window.Stripe) { stripe = Stripe(STRIPE_PK); mount(); return; }
+    if ((waited += 100) > 15000) { err('The card form could not load. Refresh the page, or email julian@trt-guy.com.'); return; }
+    setTimeout(ready, 100);
+  })();
 
-  async function mount() {
-    if (opening || document.querySelector('#payment-element iframe') || !$('payment-element')) return;
-    opening = true;
-    try {
-      if (!piId) {
-        var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ product: PRODUCT }) });
-        var d = await r.json();
-        if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
-        piId = d.clientSecret.split('_secret_')[0];
-        elements = stripe.elements({ clientSecret: d.clientSecret, appearance: { theme: 'stripe',
-          variables: { colorPrimary: '#1a5cff', borderRadius: '10px', fontFamily: 'Inter, sans-serif', fontSizeBase: '15px' } } });
-      }
-      elements.create('payment', { layout: 'tabs' }).mount('#payment-element');
-    } catch (e) { err(e.message); }
-    opening = false;
+  function mount() {
+    var slot = $('payment-element');
+    if (!stripe || !slot || slot.querySelector('iframe')) return;
+    elements = stripe.elements({
+      mode: 'payment', amount: AMOUNT, currency: CURRENCY,
+      appearance: { theme: 'stripe', variables: { colorPrimary: '#1a5cff', borderRadius: '10px',
+                                                  fontFamily: 'Inter, sans-serif', fontSizeBase: '15px' } },
+    });
+    elements.create('payment', { layout: 'tabs' }).mount(slot);
   }
-  mount();
-  // The editor rebuilds parts of this page once published edits land, which can
-  // take the mounted form with it — put it back if that happens.
-  setTimeout(mount, 2500);
-  setTimeout(mount, 6000);
+  // The editor rebuilds parts of this page when published edits land, which
+  // can take the mounted form with it — one guarded re-mount covers that.
+  setTimeout(mount, 3000);
 
   document.addEventListener('click', async function (ev) {
     if (!ev.target || !ev.target.closest || !ev.target.closest('#paybtn')) return;
@@ -335,15 +331,17 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
     var name = ($('oname').value || '').trim(), email = ($('oemail').value || '').trim();
     if (!name) { err('Enter your name.'); $('oname').focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Enter a valid email — it is where your guide goes.'); $('oemail').focus(); return; }
-    if (!elements) { err('One moment — getting the card form ready.'); mount(); return; }
+    if (!elements) { mount(); err('One moment — getting the card form ready.'); return; }
 
     busy = true; btn.style.opacity = '.6'; btn.style.pointerEvents = 'none'; btn.textContent = 'Processing…'; err('');
     try {
-      // Put the buyer on the payment before it is confirmed, so the receipt,
-      // the GHL contact and the delivery email all have somewhere to go.
-      await fetch(API + '/pay-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentIntentId: piId, email: email, name: name }) });
-      var res = await stripe.confirmPayment({ elements: elements,
+      var sub = await elements.submit();                 // validates the card fields first
+      if (sub.error) throw new Error(sub.error.message);
+      var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product: PRODUCT, email: email, name: name }) });
+      var d = await r.json();
+      if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
+      var res = await stripe.confirmPayment({ elements: elements, clientSecret: d.clientSecret,
         confirmParams: { return_url: location.origin + '/order/thanks/',
                          payment_method_data: { billing_details: { name: name, email: email } } },
         redirect: 'if_required' });
