@@ -268,6 +268,31 @@
   .hist.wv tr.avg td{border-top:2px solid var(--line-2);font-weight:700}
   .hist.wv tr.tg td{color:var(--mut)}
   .links{display:flex;gap:18px}
+  .gcard{padding:12px 10px;margin-bottom:14px}
+  .gwrap{overflow-x:auto;margin:0 -2px}
+  table.grid{border-collapse:separate;border-spacing:0;font-size:12.5px}
+  table.grid th{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:10.5px;color:var(--mut);
+    padding:4px 3px 6px;white-space:nowrap;text-align:center;background:var(--bg-2)}
+  table.grid td{padding:2px;border-top:1px solid var(--line)}
+  table.grid .gday{position:sticky;left:0;z-index:1;background:#fff;text-align:left;padding:4px 8px;white-space:nowrap;min-width:64px}
+  table.grid th.gday{background:var(--bg-2)}
+  table.grid td.gday{cursor:pointer}
+  table.grid td.gday b{display:block;font-size:13px}
+  table.grid td.gday small{color:var(--mut);font-size:11px}
+  table.grid input{width:58px;border:1px solid var(--line-2);border-radius:7px;padding:7px 4px;font:600 14px Inter,sans-serif;text-align:center;
+    color:var(--txt);background:#fff;outline:0;font-variant-numeric:tabular-nums}
+  table.grid input:focus{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc-soft)}
+  table.grid input::placeholder{color:#b4bbc4;font-weight:500}
+  table.grid input.gnote{width:180px;text-align:left;font-weight:500;font-size:13px}
+  table.grid input:disabled{background:var(--bg-2);border-color:transparent}
+  table.grid tr.now td,table.grid tr.now td.gday{background:var(--acc-soft)}
+  table.grid tr.now input{background:#fff}
+  table.grid tr.avg td,table.grid tr.tg td{text-align:center;font-variant-numeric:tabular-nums;padding:7px 4px}
+  table.grid tr.avg td{font-weight:800;border-top:2px solid var(--line-2)}
+  table.grid tr.tg td{color:var(--mut)}
+  .gsave{display:flex;align-items:center;gap:12px;margin-top:10px}
+  .gsave .btn{width:auto;margin:0;padding:12px 22px}
+  .gsave .saved{margin:0}
   .vpop{position:fixed;inset:0;z-index:200;background:rgba(11,13,16,.72);display:flex;align-items:center;justify-content:center;padding:16px}
   .vbox{width:100%;max-width:820px;background:#000;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)}
   .vhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 10px 16px;color:#fff;font-size:14.5px}
@@ -539,7 +564,7 @@
 // Build stamp. On load the page re-fetches itself past the browser cache and
 // compares this value; if the copy we were handed is old, it reloads once. A
 // stale cache can otherwise hide a deploy for hours without any sign.
-const BUILD = '2026-10-14T11:00Z';
+const BUILD = '2026-10-16T15:00Z';
 (async () => {
   try {
     const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache: 'reload' });
@@ -1496,15 +1521,20 @@ function openWeekView(mon){
       : '<p class="sub" style="margin:8px 0 0">No notes yet. Add them in the Daily view.</p>'}
     ${tg.note ? `<div class="wnote coach"><b>Timeline note</b><p>${esc(tg.note)}</p></div>` : ''}</div>`;
 
+  // The sheet's Daily Check In block: every day of the week editable at once.
+  const GF = [['weight','Weight'],['protein','Protein'],['carbs','Carbs'],['fat','Fats'],['fiber','Fiber'],['kcal','Kcals'],['steps','Steps'],
+    ['sys','Sys'],['dia','Dia'],['pulse','Pulse'],['cardio','Cardio']];
   const rows = days.map(({ n, day, d }) => {
     const fut = day > today;
-    return `<tr class="${fut ? 'fut' : 'tap'} ${day === today ? 'now' : ''}" ${fut ? '' : `data-day="${day}"`}><td><b>${n}</b> <small>${fmt(day)}</small>${(d.notes || '').trim() ? ' ✎' : ''}</td>
-      ${cols.map(([k, , dp]) => `<td>${cellOf(d, k, dp)}</td>`).join('')}</tr>`;
+    const auto = (d.protein != null && d.carbs != null && d.fat != null) ? Math.round((num(d.protein) + num(d.carbs)) * 4 + num(d.fat) * 9) : '';
+    return `<tr class="${fut ? 'fut' : ''} ${day === today ? 'now' : ''}"><td class="gday" ${fut ? '' : `data-day="${day}"`}><b>${n}</b><small>${fmt(day)}</small></td>
+      ${GF.map(([k]) => `<td><input data-gd="${day}" data-gk="${k}" inputmode="decimal" value="${d[k] == null ? '' : esc(d[k])}" ${k === 'kcal' && auto !== '' ? `placeholder="${auto}"` : ''} ${fut ? 'disabled' : ''}></td>`).join('')}
+      <td><input class="gnote" data-gd="${day}" data-gk="notes" value="${esc(d.notes || '')}" ${fut ? 'disabled' : ''}></td></tr>`;
   }).join('');
-  const avgRow = `<tr class="avg"><td><b>Averages</b></td><td>${nf(st.weight, 1)}</td><td>${nf(st.protein)}</td><td>${nf(st.carbs)}</td><td>${nf(st.fat)}</td>
-    <td>${nf(st.fiber)}</td><td>${nf(st.kcal)}</td><td>${nf(st.steps)}</td><td>${st.sys != null ? nf(st.sys) + '/' + nf(st.dia) : '—'}</td><td>${nf(st.pulse)}</td><td>${st.n ? nf(st.cardio) : '—'}</td></tr>`;
-  const tgRow = `<tr class="tg"><td><b>Target</b></td><td>${tg.target_bw != null ? nf(tg.target_bw, 1) : '—'}</td><td>${nf(tg.protein ?? null)}</td><td>${nf(tg.carbs ?? null)}</td><td>${nf(tg.fat ?? null)}</td>
-    <td>${nf(tg.fiber ?? null)}</td><td>${nf(tg.kcal ?? null)}</td><td>${nf(tg.steps ?? null)}</td><td>—</td><td>—</td><td>${nf(tg.cardio ?? null)}</td></tr>`;
+  const avgRow = `<tr class="avg"><td class="gday"><b>Averages</b></td><td>${nf(st.weight, 1)}</td><td>${nf(st.protein)}</td><td>${nf(st.carbs)}</td><td>${nf(st.fat)}</td>
+    <td>${nf(st.fiber)}</td><td>${nf(st.kcal)}</td><td>${nf(st.steps)}</td><td>${nf(st.sys)}</td><td>${nf(st.dia)}</td><td>${nf(st.pulse)}</td><td>${st.n ? nf(st.cardio) : '—'}</td><td></td></tr>`;
+  const tgRow = `<tr class="tg"><td class="gday"><b>Target</b></td><td>${tg.target_bw != null ? nf(tg.target_bw, 1) : '—'}</td><td>${nf(tg.protein ?? null)}</td><td>${nf(tg.carbs ?? null)}</td><td>${nf(tg.fat ?? null)}</td>
+    <td>${nf(tg.fiber ?? null)}</td><td>${nf(tg.kcal ?? null)}</td><td>${nf(tg.steps ?? null)}</td><td>—</td><td>—</td><td>—</td><td>${nf(tg.cardio ?? null)}</td><td></td></tr>`;
 
   const wk = logOf('weekly', mon);
   const sessions = LOGS.filter(l => l.kind === 'training' && l.day >= mon && l.day <= addDays(mon, 6)).sort((a, b) => a.day < b.day ? -1 : 1);
@@ -1516,13 +1546,14 @@ function openWeekView(mon){
       <b>${cw ? esc(t('trk_week', { n: cw })) + ' · ' : ''}${fmt(mon)} – ${fmt(addDays(mon, 6))}</b>
       <button id="vNext" aria-label="Next week" ${mon >= mondayOf(today) ? 'disabled' : ''}>›</button></div>
     ${tg.goal || tg.event ? `<p class="sub" style="margin:-6px 0 12px">${esc([tg.goal, tg.event].filter(Boolean).join(' · '))}</p>` : ''}
+    <div class="card gcard"><div class="lbl" style="padding:2px 4px 8px">Daily Check In</div><div class="gwrap"><table class="grid">
+      <thead><tr><th class="gday">Day</th>${GF.map(([, l]) => `<th>${l}</th>`).join('')}<th>Notes</th></tr></thead>
+      <tbody>${rows}${avgRow}${tgRow}</tbody></table></div>
+      <div class="gsave"><button class="btn" id="gSave">Save week</button><span class="saved" id="gMsg"></span></div>
+      <p class="updated" style="margin:6px 4px 2px">Fill in any days, then Save week. Kcals fill in from the macros if left blank. Tap a day's name for its full daily view.</p></div>
     <div class="card wsum"><div class="lbl">Averages</div>${avgHtml}</div>
     ${rxHtml}
     ${notesHtml}
-    <div class="card" style="padding:12px 10px;margin-bottom:14px"><div class="lbl" style="padding:4px 6px 8px">Day by day</div><div class="histwrap"><table class="hist wv">
-      <thead><tr><th>Day</th>${cols.map(([, l]) => `<th>${l}</th>`).join('')}</tr></thead>
-      <tbody>${rows}${avgRow}${tgRow}</tbody></table></div>
-      <p class="updated" style="margin:8px 6px 4px">Tap a day to fill it in or fix it. ✎ = has a note.</p></div>
     ${wk ? `<div class="card wsum"><div class="lbl">${esc(t('trk_weekly_title'))}</div>
       <div class="wvq">${[['score','Score'],['energy','Energy'],['stress','Stress'],['mood','Mood'],['motivation','Motivation'],['sleep','Sleep'],['adherence','Diet adherence'],['win','Win'],['action','Number one action']].filter(([k]) => wk[k])
         .map(([k, l]) => `<div><span>${l}</span><b>${esc(wk[k])}</b></div>`).join('')}
@@ -1538,7 +1569,34 @@ function openWeekView(mon){
       <button class="btn ghost" id="vLog">${esc(t(logOf('daily', today) ? 'trk_log_edit' : 'trk_log_btn'))}</button>
     </div>`);
   const back = () => openWeekView(mon);
-  document.querySelectorAll('#aSection tr[data-day], #aSection .wnote[data-day]').forEach(el => el.onclick = () => openDaily(el.dataset.day, back));
+  document.querySelectorAll('#aSection td.gday[data-day], #aSection .wnote[data-day]').forEach(el => el.onclick = () => openDaily(el.dataset.day, back));
+  // live kcal hint as macros are typed
+  document.querySelectorAll('#aSection input[data-gk="protein"], #aSection input[data-gk="carbs"], #aSection input[data-gk="fat"]').forEach(inp => inp.addEventListener('input', () => {
+    const g = k => num((document.querySelector(`#aSection input[data-gd="${inp.dataset.gd}"][data-gk="${k}"]`) || {}).value);
+    const kc = document.querySelector(`#aSection input[data-gd="${inp.dataset.gd}"][data-gk="kcal"]`);
+    const p = g('protein'), c = g('carbs'), f = g('fat');
+    if(kc) kc.placeholder = (p != null && c != null && f != null) ? String(Math.round((p + c) * 4 + f * 9)) : '';
+  }));
+  $('#gSave').onclick = async () => {
+    const btn = $('#gSave'), msg = $('#gMsg'); btn.disabled = true; btn.textContent = 'Saving…'; msg.textContent = '';
+    let saved = 0;
+    try {
+      for(const { day, d } of days){
+        if(day > today) continue;
+        const ins = [...document.querySelectorAll(`#aSection input[data-gd="${day}"]`)];
+        const data = Object.assign({}, d);     // keeps protocol ticks and anything not on this grid
+        ins.forEach(i => { const k = i.dataset.gk, v = i.value.trim();
+          if(k === 'notes'){ if(v) data.notes = v; else delete data.notes; }
+          else { const n = num(v); if(n != null) data[k] = n; else delete data[k]; } });
+        if(data.kcal == null && data.protein != null && data.carbs != null && data.fat != null) data.kcal = Math.round((data.protein + data.carbs) * 4 + data.fat * 9);
+        if(JSON.stringify(data) === JSON.stringify(d)) continue;
+        if(!Object.keys(d).length && !Object.keys(data).length) continue;
+        await putLog('daily', day, data); saved++;
+      }
+      openWeekView(mon);
+      const m2 = $('#gMsg'); if(m2) m2.textContent = saved ? `Saved ${saved} day${saved > 1 ? 's' : ''} ✓` : 'Nothing changed';
+    } catch(e){ msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Save week'; }
+  };
   $('#segD').onclick = () => openDaily(today < addDays(mon, 6) ? (today < mon ? mon : today) : addDays(mon, 6), back);
   $('#vPrev').onclick = () => openWeekView(addDays(mon, -7));
   $('#vNext').onclick = () => openWeekView(addDays(mon, 7));
