@@ -799,6 +799,18 @@ const DEFAULT_RESOURCES = [
   { label:'Getting Started - Training',          link:'', pedOnly:false, on:true },
 ];
 
+const WELCOME_MSG = (link, pin) => `Good morning, brother. While I finish putting your plans together, please visit the link below:
+
+${link}
+
+Access code: ${pin}
+
+This will be your main coaching profile, where you’ll find all the information related to our coaching.
+
+For now, please go through all the additional resources so you can get up to speed on how everything works and what to expect moving forward.
+
+Let me know if you have any questions.`;
+
 // Every client's profile starts with these personal slots, empty until his plan is ready.
 const DEFAULT_MY_RESOURCES = ['Training Plan', 'PED Protocol', 'Weekly Measurements', 'Weekly Check-in'];
 
@@ -1165,6 +1177,7 @@ function drawBody(){
         <div class="code" id="pinCode">${esc(c.pin || '----')}</div>
         <p>Their access code. They enter it once on <span class="mono">trt-guy.com/${esc(c.slug)}</span>, then the page remembers it.</p>
         <button class="btn sm" id="btnCopyLink">Copy link + code</button>
+        <button class="btn sm" id="btnCopyWelcome">Copy welcome message</button>
         <button class="btn sm" id="btnNewPin">New code</button>
       </div>
       <div class="grid2">
@@ -1211,6 +1224,8 @@ function drawBody(){
     $('#f_end_date').oninput = e => { e.target.dataset.auto = '0'; };
 
     $('#btnCopyLink').onclick = () => copyText(`${SITE}/${c.slug}\nAccess code: ${c.pin || ''}`);
+    // Julian's welcome text for a new client, word for word, with this client's link and code.
+    $('#btnCopyWelcome').onclick = () => copyText(WELCOME_MSG(`${SITE}/${OPEN.slug}`, OPEN.pin || ''));
     $('#btnNewPin').onclick = async () => {
       if(!confirm('Generate a new access code? The old one stops working.')) return;
       const j = await api('/clients', { method:'POST', body: JSON.stringify({ action:'newpin', id:c.id }) });
