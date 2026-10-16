@@ -552,6 +552,7 @@ const DEFAULT_COPY = {
   tile_weekly_checkin: 'Weekly Check In', tile_weekly_checkin_sub: '',
   resources_label: 'Additional Resources',
   extras_sub: 'Tap to open',
+  dash_label: 'TRT Guy Dashboard',
   empty_plan: 'Your plan is being written up. It will appear here — nothing to do on your side.',
   back: '← Back',
   open_default: 'Open my {section}',
@@ -731,7 +732,8 @@ function openApp(){
   const start = ph.start;
   const begun = !!start && new Date(start + 'T00:00:00') <= Date.now();
   if(!begun){
-    $('#aPhase').innerHTML = `<h1>${esc(c.first || c.name || '')}</h1>`;
+    $('#aPhase').innerHTML = `<div class="lbl" data-copy="dash_label">${esc(t('dash_label'))}</div>
+      <h1>${esc(c.first || c.name || '')}</h1>`;
   } else {
     const days = Math.max(0, Math.floor((Date.now() - new Date(start + 'T00:00:00')) / 86400000));
     const weeksIn = Math.floor(days / 7) + 1;
@@ -809,8 +811,11 @@ function openApp(){
     tiles.push(`<a class="tile" href="${esc(x.link)}" target="_blank" rel="noopener">
       <span class="t"><b>${esc(x.label || 'Open')}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span><span class="go">↗</span></a>`);
   });
-  $('#aTiles').innerHTML = tiles.join('') ||
-    `<div class="card" style="color:var(--mut)" data-copy="empty_plan">${esc(t('empty_plan'))}</div>`;
+  // No plan yet: the note (when there is one) already says so, so the
+  // placeholder card only shows when there's no note, across the full width.
+  $('#aTiles').innerHTML = tiles.join('') || (noteOn ? '' :
+    `<div class="card" style="color:var(--mut);grid-column:1/-1;margin:0" data-copy="empty_plan">${esc(t('empty_plan'))}</div>`);
+  $('#aTiles').hidden = !$('#aTiles').innerHTML;
   document.querySelectorAll('#aTiles .tile[data-k]').forEach(b => b.onclick = () => openSection(b.dataset.k));
   document.querySelectorAll('#aTiles .tile[data-tk]').forEach(b => b.onclick = () => {
     if(b.dataset.tk === 'timeline') openTimeline();
@@ -823,7 +828,7 @@ function openApp(){
   // Nothing without a link is shown; slots get filled in as his plan is finished.
   const res = ((secs.my_resources || [])).concat(RESOURCES || [])
     .filter(r => (r.label || '').trim() && (r.link || '').trim());
-  $('#aRes').innerHTML = res.length ? `<details class="resbox">
+  $('#aRes').innerHTML = res.length ? `<details class="resbox"${tiles.length ? '' : ' open'}>
       <summary><span data-copy="resources_label">${esc(t('resources_label'))}</span><span class="go">›</span></summary>
       ${res.map(r => `<a href="${esc(r.link.trim())}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`).join('')}
     </details>` : '';
