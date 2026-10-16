@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your guide is ready | TRT Guy</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;
+    --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.6}
+  .wrap{max-width:640px;margin:0 auto;padding:34px 18px 70px;text-align:center}
+  .wordmark{display:block;height:44px;aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;margin:0 auto 24px;font-size:0;color:transparent;overflow:hidden}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,6vw,42px);line-height:1.05;text-transform:uppercase;margin-bottom:12px}
+  p{margin:0 0 14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 24px;margin:22px 0;text-align:left}
+  .dl{display:block;background:var(--acc);color:#fff;text-decoration:none;text-align:center;border-radius:14px;margin:12px 0;
+    font-family:var(--display);font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:.02em;padding:16px 20px}
+  .dl:hover{background:var(--acc-d)}
+  .dl.bonus{background:var(--ok)}
+  .mut{color:var(--mut);font-size:14px}
+  .err{background:#fff5f5;border:1px solid rgba(226,72,58,.45);border-radius:12px;padding:16px;text-align:left}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">TRT-GUY</div>
+  <h1>You're In. Here's Your Guide.</h1>
+  <p id="lead" class="mut">Checking your payment…</p>
+  <div id="files" class="card" hidden></div>
+  <div id="problem" class="err" hidden></div>
+  <p class="mut">A receipt and these same links are on their way to your email. If anything does not arrive, reply to that email or write to julian@trt-guy.com and I will sort it out.</p>
+</div>
+<script>
+const API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
+const pi = new URLSearchParams(location.search).get('pi')
+        || new URLSearchParams(location.search).get('payment_intent');
+const $ = id => document.getElementById(id);
+
+if (!pi) {
+  $('lead').hidden = true;
+  $('problem').hidden = false;
+  $('problem').innerHTML = "<b>We could not find your order reference.</b><br>If you have just paid, check your email for the receipt — or write to julian@trt-guy.com and I will send your files straight over.";
+} else {
+  // The worker re-checks with Stripe that this really was paid before it hands
+  // anything over, so a guessed reference gets nothing.
+  fetch(API + '/pay-done', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentIntentId: pi }) })
+    .then(r => r.json().then(d => ({ ok: r.ok, d })))
+    .then(({ ok, d }) => {
+      if (!ok || !d.success) throw new Error((d && d.error) || 'not verified');
+      $('lead').textContent = 'Payment confirmed. Both files are yours to keep — download them now.';
+      $('files').hidden = false;
+      $('files').innerHTML = (d.downloads || []).map((f, i) =>
+        '<a class="dl' + (i ? ' bonus' : '') + '" href="' + f.url + '" download>' + f.label + ' ↓</a>').join('')
+        + '<p class="mut" style="margin:14px 0 0">Save them somewhere you will find them again — the links also live in your email.</p>';
+    })
+    .catch(() => {
+      $('lead').hidden = true;
+      $('problem').hidden = false;
+      $('problem').innerHTML = "<b>We could not confirm that payment yet.</b><br>If your card was charged, your receipt is in your email — forward it to julian@trt-guy.com and I will send the files straight over.";
+    });
+}
+</script>
+<script src="/px.js" defer></script>
+</body>
+</html>
