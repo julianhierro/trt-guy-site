@@ -87,6 +87,9 @@
   .pill.lead{background:var(--accent-soft);border-color:var(--line-bright);color:var(--fg)}
   .pill.paused{background:var(--panel-2);border-color:var(--line-bright);color:var(--muted)}
   .pill.ended{color:var(--muted-2)}
+  .rowstatus{font:inherit;font-size:12px;padding:5px 8px;border:1px solid var(--line-bright);border-radius:6px;background:var(--panel-2);color:var(--fg);cursor:pointer}
+  .rowstatus.st-active{background:var(--fg);border-color:var(--fg);color:#fff}
+  .rowstatus.st-lead{background:var(--accent-soft)}
   .type{display:inline-block;font-size:12px;font-weight:600;color:var(--muted)}
   .left{font-size:12.5px;color:var(--muted)}
   .left.warn{color:var(--muted)}
@@ -624,7 +627,7 @@ function render(){
         <td data-l="Term"><div>${fmtDate(c.start_date)} → ${fmtDate(c.end_date)}</div>
           <div class="left ${leftCls}">${leftTxt}</div></td>
         <td data-l="Paid"><div>${money(c.amount_paid)}</div><div class="csub">${esc(c.pay_method || '')}</div></td>
-        <td data-l="Status"><span class="pill ${esc(c.status || 'lead')}">${esc(c.status || 'lead')}</span>
+        <td data-l="Status"><select class="rowstatus st-${esc(c.status || 'lead')}" data-id="${c.id}" title="Change status">${STATUSES.map(st => `<option value="${st[0]}" ${((c.status || 'lead') === st[0]) ? 'selected' : ''}>${st[1]}</option>`).join('')}</select>
           ${pageEmpty(c) ? '<div class="csub" style="color:var(--muted);margin-top:4px">page empty</div>' : ''}</td>
         <td data-l="" class="acts"><button class="btn sm">Open</button>
           <button class="btn sm danger rowdel" data-id="${c.id}" title="Delete">Delete</button></td>
@@ -639,6 +642,27 @@ function render(){
     render();
   });
   $$('#list .rowdel').forEach(b => b.onclick = e => { e.stopPropagation(); delOne(b.dataset.id); });
+  // Status right from the list: lead → client without opening the file.
+  $$('#list .rowstatus').forEach(sel => {
+    sel.onclick = e => e.stopPropagation();
+    sel.onchange = async e => {
+      e.stopPropagation();
+      const c = CLIENTS.find(x => x.id === sel.dataset.id);
+      if(!c) return;
+      const prev = c.status || 'lead';
+      sel.disabled = true;
+      try {
+        await api('/clients', { method:'POST', body: JSON.stringify({ id: c.id, status: sel.value }) });
+        c.status = sel.value;
+        const label = (STATUSES.find(t => t[0] === sel.value) || [0, sel.value])[1];
+        toast(`${c.name || c.slug} → ${label}`);
+        render();
+      } catch(err){
+        sel.value = prev; sel.disabled = false;
+        toast('Could not save — try again');
+      }
+    };
+  });
   const all = $('#selAll');
   if(all) all.onclick = e => {
     e.stopPropagation();
