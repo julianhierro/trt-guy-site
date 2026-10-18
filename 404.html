@@ -936,8 +936,12 @@ function openApp(){
       ${res.map(r => `<a href="${esc(r.link.trim())}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`).join('')}
     </details>` : '';
 
-  $('#aWeek').hidden = !trackerOn;
-  if(trackerOn) loadLogs();
+  /* The week tracker (This Week: day chips, averages, weekly check-in) is still
+     being built, so it is shown on the test profile only. Every other client
+     sees his plan without it, whatever the tracker switch says. */
+  const devPreview = (c.status === 'test');
+  $('#aWeek').hidden = !(trackerOn && devPreview);
+  if(trackerOn && devPreview) loadLogs();
 
   a2hs();
   show('vApp');
