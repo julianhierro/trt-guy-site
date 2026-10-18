@@ -142,7 +142,8 @@
   .rowlist .r{display:flex;gap:8px;align-items:center}
   .draghandle{flex:0 0 auto;cursor:grab;color:var(--muted-2);font-size:16px;line-height:1;padding:0 4px;user-select:none}
   .draghandle:active{cursor:grabbing}
-  .resrow.drop-hi{outline:2px dashed var(--accent);outline-offset:3px;border-radius:10px}
+  .resrow.drop-hi,
+  .myrow.drop-hi{outline:2px dashed var(--accent);outline-offset:3px;border-radius:10px}
   a.openlink{flex:0 0 auto;text-decoration:none;padding:8px 11px}
   table.trk{width:100%;border-collapse:collapse;font-size:12.5px}
   table.trk th{font-size:9px;padding:0 7px 8px;text-align:right}
@@ -1298,7 +1299,7 @@ function drawBody(){
 
       <div class="sect">
         <div class="shead"><h3>Program Resources</h3><button class="btn sm" id="addMyRes">+ Add</button></div>
-        <p class="hint">His plan documents. Every client starts with the full set; switch one off to hide it from his page, and a slot with no link stays hidden either way.</p>
+        <p class="hint">His plan documents, in the order they appear on his page &mdash; drag the handle to rearrange. Switch one off to hide it, and a slot with no link stays hidden either way.</p>
         <div class="rowlist" id="myres"></div>
       </div>
 
@@ -1401,20 +1402,33 @@ function drawBody(){
     DEFAULT_MY_RESOURCES.forEach(l => {
       if(!myres.some(x => norm(x.label) === norm(l))) myres.push({ label:l, link:'', on:true });
     });
-    // standard slots first, in their usual order; anything he added himself after
-    myres.sort((a, b) => {
-      const ia = DEFAULT_MY_RESOURCES.findIndex(l => norm(l) === norm(a.label));
-      const ib = DEFAULT_MY_RESOURCES.findIndex(l => norm(l) === norm(b.label));
-      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-    });
+    // No re-sorting here: the order in this list is the order on his page,
+    // and it is his to arrange.
+    let myDrag = null;
     const drawMyRes = () => {
-      $('#myres').innerHTML = myres.map((x,i) => `<div class="r">
+      $('#myres').innerHTML = myres.map((x,i) => `<div class="r myrow" data-i="${i}">
+        <span class="draghandle" draggable="true" data-mi="${i}" title="Drag to reorder">⠿</span>
         <label class="sw" style="flex:0 0 auto;margin-right:4px" title="Show this on his page"><input type="checkbox" data-m="on" data-i="${i}" ${x.on === false ? '' : 'checked'}><span class="track"></span></label>
-        <input data-m="label" data-i="${i}" value="${esc(x.label || '')}" placeholder="Label" style="flex:0 0 30%">
+        <input data-m="label" data-i="${i}" value="${esc(x.label || '')}" placeholder="Label" style="flex:0 0 28%">
         <input data-m="link" data-e="link" data-i="${i}" value="${esc(x.link || '')}" placeholder="Paste the link once it's ready">
         <button class="btn sm danger" data-mrm="${i}">✕</button></div>`).join('') ||
         '<p class="hint">None yet.</p>';
       $$('#myres [data-mrm]').forEach(btn => btn.onclick = () => { myres.splice(+btn.dataset.mrm,1); drawMyRes(); });
+      // Drag to reorder — the order here is the order of the buttons on his page.
+      $$('#myres .draghandle').forEach(h => { h.ondragstart = e => {
+        myDrag = +h.dataset.mi; e.dataTransfer.effectAllowed = 'move';
+        try{ e.dataTransfer.setData('text/plain',''); }catch(_){}
+      }; });
+      $$('#myres .myrow').forEach(row => {
+        row.ondragover = e => { e.preventDefault(); row.classList.add('drop-hi'); };
+        row.ondragleave = () => row.classList.remove('drop-hi');
+        row.ondrop = e => {
+          e.preventDefault(); row.classList.remove('drop-hi');
+          const to = +row.dataset.i;
+          if(myDrag === null || myDrag === to) return;
+          const [m] = myres.splice(myDrag, 1); myres.splice(to, 0, m); myDrag = null; drawMyRes();
+        };
+      });
       $$('#myres [data-m]').forEach(inp => {
         if(inp.type === 'checkbox') inp.onchange = () => { myres[+inp.dataset.i].on = inp.checked; };
         else inp.oninput = () => { myres[+inp.dataset.i][inp.dataset.m] = inp.value; };
