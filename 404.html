@@ -873,7 +873,10 @@ function openApp(){
      built, so it is the test profile's alone. A client sees his own documents,
      which is also what stops Timeline appearing twice: once as the in-app
      screen and again as the sheet in his plan. */
-  const devPreview = (c.status === 'test');
+  // Either the test profile, or any one client switched into the preview from
+  // his Plan tab — so work in progress can be tried on a real plan without
+  // reclassifying him or showing it to everyone.
+  const devPreview = (c.status === 'test') || !!(secs.dev && secs.dev.on);
   const tiles = ORDER.filter(k => {
     if(!secs[k] || !secs[k].on) return false;
     if(trackerOn && (k === 'daily_checkin' || k === 'weekly_checkin')) return false;
@@ -949,8 +952,10 @@ function openApp(){
   /* The Timeline tile IS the PED protocol — the same thing by two names. When
      the tracker is on, the slot is dropped so a client is not handed both. With
      the tracker off there is no Timeline, so his document stays. */
-  const isPedSlot = l => { const n = norm(l); return n.includes('pedprotocol') || n.includes('pedsprotocol') || n.includes('ppdprotocol'); };
-  const mine = full.filter(r => r.on !== false && !(trackerOn && devPreview && isPedSlot(r.label)));
+  // In the preview the in-app Timeline screen is present, so his Timeline
+  // document (the same thing by another name) is not listed beside it.
+  const isTimelineSlot = l => { const n = norm(l); return ALIAS.some(x => n.includes(x)); };
+  const mine = full.filter(r => r.on !== false && !(trackerOn && devPreview && isTimelineSlot(r.label)));
   if(mine.length){
     $('#aTiles').insertAdjacentHTML('beforeend', mine.map(r => {
       const link = (r.link || '').trim();

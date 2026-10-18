@@ -1332,6 +1332,14 @@ function drawBody(){
       </div>
 
       <div class="sect">
+        <div class="shead">
+          <h3>Development preview</h3>
+          <label class="sw"><input type="checkbox" id="dev_on" ${((((c.sections||{}).dev)||{}).on) ? 'checked' : ''}><span class="track"></span>On</label>
+        </div>
+        <p class="hint">Gives this one client the in-progress features — This Week, Timeline, Pharmacology — and builds him from the Dev template instead of the Client template. Everyone else is untouched. Leave it off for a paying client unless you are testing on him deliberately.</p>
+      </div>
+
+      <div class="sect">
         <div class="shead"><h3>Program Resources</h3><button class="btn sm" id="addMyRes">+ Add</button></div>
         <p class="hint">His plan documents, in the order they appear on his page &mdash; drag the handle to rearrange. Switch one off to hide it, and a slot with no link stays hidden either way.</p>
         <div class="rowlist" id="myres"></div>
@@ -2651,6 +2659,9 @@ function collect(){
         text: $('#s_' + s.key + '_text').value,
       };
     });
+    const devBox = $('#dev_on');
+    if(devBox) sec.dev = { on: devBox.checked };
+    else if(((c.sections || {}).dev)) sec.dev = c.sections.dev;
     if(c._myres) sec.my_resources = c._myres.filter(x => (x.label || '').trim() || (x.link || '').trim())
       .map(x => ({ label:(x.label || '').trim(), link:(x.link || '').trim(), on: x.on !== false }));
     sec.extras = (c._extras || []).filter(x => (x.label || '').trim() || (x.link || '').trim());
