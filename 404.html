@@ -194,6 +194,9 @@
 
   /* his own documents: the blue edge is enough to set them apart */
   .tile.mine{border-left-color:var(--acc)}
+  /* a slot whose document is not ready — visible, but plainly not openable */
+  .tile.soon{opacity:.5;cursor:default;border-left-color:var(--line)}
+  .tile.soon:hover{border-color:var(--line);border-left-color:var(--line)}
 
   /* additional resources — a menu that opens in place */
   .resbox{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
@@ -615,6 +618,7 @@ const DEFAULT_COPY = {
   tile_peds: 'PED Protocol',              tile_peds_sub: 'Compounds, doses, timing',
   tile_weekly_checkin: 'Weekly Check In', tile_weekly_checkin_sub: '',
   resources_label: 'Additional Resources',
+  res_pending: 'Coming soon',
   extras_sub: 'Tap to open',
   dash_label: 'TRT Guy Dashboard',
   mship_start: 'Start date',
@@ -909,13 +913,18 @@ function openApp(){
   // Program Resources — the documents for his plan. They are what he opens
   // every day, so they get their own buttons rather than being buried in a
   // menu with the shared library.
+  // The whole plan is shown, not just the finished parts: a slot with no link
+  // yet sits there greyed out so he can see what is coming, and cannot tap it.
   const mine = (secs.my_resources || [])
-    .filter(r => r.on !== false && (r.label || '').trim() && (r.link || '').trim());
+    .filter(r => r.on !== false && (r.label || '').trim());
   if(mine.length){
-    $('#aTiles').insertAdjacentHTML('beforeend', mine.map(r =>
-      `<a class="tile mine" href="${esc(r.link.trim())}" target="_blank" rel="noopener">
-         <span class="t"><b>${esc(r.label)}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span>
-         <span class="go">↗</span></a>`).join(''));
+    $('#aTiles').insertAdjacentHTML('beforeend', mine.map(r => {
+      const link = (r.link || '').trim();
+      const inner = `<span class="t"><b>${esc(r.label)}</b><span data-copy="${link ? 'extras_sub' : 'res_pending'}">${esc(t(link ? 'extras_sub' : 'res_pending'))}</span></span>`;
+      return link
+        ? `<a class="tile mine" href="${esc(link)}" target="_blank" rel="noopener">${inner}<span class="go">↗</span></a>`
+        : `<div class="tile mine soon" aria-disabled="true">${inner}</div>`;
+    }).join(''));
     $('#aTiles').hidden = false;
   }
 
