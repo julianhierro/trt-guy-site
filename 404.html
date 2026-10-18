@@ -192,6 +192,12 @@
   .editbar button:hover{filter:brightness(1.15)}
   .editbar span{padding:0 4px;color:#aeb6c2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+  /* his own documents: same button, with a mark so they read as his */
+  .tile.mine{border-left-color:var(--acc)}
+  .tile.mine .t b::after{content:"Yours";margin-left:9px;vertical-align:2px;font:700 10px/1 Inter,sans-serif;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--acc);background:rgba(26,92,255,.1);
+    padding:4px 7px;border-radius:5px}
+
   /* additional resources — a menu that opens in place */
   .resbox{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
     overflow:hidden}
@@ -903,11 +909,22 @@ function openApp(){
     else openProtocol(b.dataset.pid);
   });
 
-  // Additional Resources: his own documents first, then the shared library the worker sends.
-  // Nothing without a link is shown; slots get filled in as his plan is finished.
-  const res = ((secs.my_resources || [])).concat(RESOURCES || [])
+  // His own documents are the things he opens every day, so they get their own
+  // buttons rather than being buried in a menu with the shared library.
+  const mine = (secs.my_resources || [])
     .filter(r => r.on !== false && (r.label || '').trim() && (r.link || '').trim());
-  $('#aRes').innerHTML = res.length ? `<details class="resbox"${tiles.length ? '' : ' open'}>
+  if(mine.length){
+    $('#aTiles').insertAdjacentHTML('beforeend', mine.map(r =>
+      `<a class="tile mine" href="${esc(r.link.trim())}" target="_blank" rel="noopener">
+         <span class="t"><b>${esc(r.label)}</b><span data-copy="extras_sub">${esc(t('extras_sub'))}</span></span>
+         <span class="go">↗</span></a>`).join(''));
+    $('#aTiles').hidden = false;
+  }
+
+  // Additional Resources: the shared library only — the general reading every
+  // client gets, kept out of the way of his own plan.
+  const res = (RESOURCES || []).filter(r => (r.label || '').trim() && (r.link || '').trim());
+  $('#aRes').innerHTML = res.length ? `<details class="resbox">
       <summary><span data-copy="resources_label">${esc(t('resources_label'))}</span><span class="go">›</span></summary>
       ${res.map(r => `<a href="${esc(r.link.trim())}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`).join('')}
     </details>` : '';
