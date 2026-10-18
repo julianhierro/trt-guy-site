@@ -814,7 +814,7 @@ For now, please go through all the additional resources so you can get up to spe
 Let me know if you have any questions.`;
 
 // Every client's profile starts with these personal slots, empty until his plan is ready.
-const DEFAULT_MY_RESOURCES = ['Training Plan', 'PED Protocol', 'Weekly Measurements', 'Weekly Check-in'];
+const DEFAULT_MY_RESOURCES = ['Daily Check-in', 'Weekly Check-in', 'PED Protocol', 'Weekly Measurements', 'Meal Plan'];
 
 $('#btnResources').onclick = async () => {
   let list;
@@ -1289,33 +1289,16 @@ function drawBody(){
           <input id="mac_note" value="${esc(mac.note || '')}" placeholder="Same every day — training and rest."></div>
       </div>
 
-      ${SECTIONS.map(s => {
-        const v = sectionOf(c, s.key);
-        return `<div class="sect">
-          <div class="shead">
-            <h3>${s.name}</h3>
-            <label class="sw"><input type="checkbox" id="s_${s.key}_on" ${v.on?'checked':''}><span class="track"></span>Show</label>
-          </div>
-          <p class="hint" style="margin-bottom:12px">${s.blurb}</p>
-          <div class="grid2">
-            <div class="fld"><label class="fl">Button link</label>
-              <input id="s_${s.key}_link" value="${esc(v.link)}" placeholder="https://docs.google.com/…"></div>
-            <div class="fld"><label class="fl">Button label</label>
-              <input id="s_${s.key}_linkLabel" value="${esc(v.linkLabel)}" placeholder="Open my ${s.name.toLowerCase()}"></div>
-          </div>
-          <div class="fld"><label class="fl">Written for them — only shown when there is no link</label>
-            <textarea id="s_${s.key}_text" placeholder="Plain text. **bold**, - bullets and links work.">${esc(v.text)}</textarea></div>
-          ${s.key === 'training' ? `
-          <label class="fl">Programs — the current one and everything before it</label>
-          <p class="hint" style="margin:0 0 8px">Mark one as current. The rest show under “Programs you've done”, so he can always open an old block.</p>
-          <div class="rowlist" id="progs"></div>
-          <button class="btn sm" id="addProg" style="margin-top:10px">+ Add program</button>` : ''}
-        </div>`;
-      }).join('')}
+      <div class="sect">
+        <div class="shead"><h3>Programs</h3></div>
+        <p class="hint" style="margin-bottom:12px">Mark one as current. The rest show under “Programs you've done”, so he can always open an old block.</p>
+        <div class="rowlist" id="progs"></div>
+        <button class="btn sm" id="addProg" style="margin-top:10px">+ Add program</button>
+      </div>
 
       <div class="sect">
         <div class="shead"><h3>Personal resources</h3><button class="btn sm" id="addMyRes">+ Add</button></div>
-        <p class="hint">This client's own documents. They appear at the top of their Additional Resources menu once a link is pasted. A slot with no link stays hidden.</p>
+        <p class="hint">This client&rsquo;s own documents. Switch one off to hide it from his page; a slot with no link stays hidden either way.</p>
         <div class="rowlist" id="myres"></div>
       </div>
 
@@ -1410,15 +1393,19 @@ function drawBody(){
     // Personal resources: the four slots every client starts with, filled in once his plan is done.
     const myres = Array.isArray((c.sections || {}).my_resources)
       ? c.sections.my_resources.map(x => Object.assign({}, x))
-      : DEFAULT_MY_RESOURCES.map(l => ({ label:l, link:'' }));
+      : DEFAULT_MY_RESOURCES.map(l => ({ label:l, link:'', on:true }));
     const drawMyRes = () => {
       $('#myres').innerHTML = myres.map((x,i) => `<div class="r">
-        <input data-m="label" data-i="${i}" value="${esc(x.label || '')}" placeholder="Label" style="flex:0 0 34%">
+        <label class="sw" style="flex:0 0 auto;margin-right:4px" title="Show this on his page"><input type="checkbox" data-m="on" data-i="${i}" ${x.on === false ? '' : 'checked'}><span class="track"></span></label>
+        <input data-m="label" data-i="${i}" value="${esc(x.label || '')}" placeholder="Label" style="flex:0 0 30%">
         <input data-m="link" data-e="link" data-i="${i}" value="${esc(x.link || '')}" placeholder="Paste the link once it's ready">
         <button class="btn sm danger" data-mrm="${i}">✕</button></div>`).join('') ||
         '<p class="hint">None yet.</p>';
       $$('#myres [data-mrm]').forEach(btn => btn.onclick = () => { myres.splice(+btn.dataset.mrm,1); drawMyRes(); });
-      $$('#myres [data-m]').forEach(inp => inp.oninput = () => { myres[+inp.dataset.i][inp.dataset.m] = inp.value; });
+      $$('#myres [data-m]').forEach(inp => {
+        if(inp.type === 'checkbox') inp.onchange = () => { myres[+inp.dataset.i].on = inp.checked; };
+        else inp.oninput = () => { myres[+inp.dataset.i][inp.dataset.m] = inp.value; };
+      });
       wireOpenLinks($('#myres'));
     };
     OPEN._myres = myres;
@@ -2554,16 +2541,20 @@ function collect(){
       },
       programs: (c._progs || []).filter(p => (p.name || '').trim() || (p.link || '').trim()),
     });
+    // The old per-section blocks are gone from this screen — keep whatever the
+    // client already had so programs and the tracker carry on working.
     SECTIONS.forEach(s => {
+      const box = $('#s_' + s.key + '_on');
+      if(!box){ sec[s.key] = ((c.sections || {})[s.key]) || { on:false, link:'', linkLabel:'', text:'' }; return; }
       sec[s.key] = {
-        on: $('#s_' + s.key + '_on').checked,
+        on: box.checked,
         link: $('#s_' + s.key + '_link').value.trim(),
         linkLabel: $('#s_' + s.key + '_linkLabel').value.trim(),
         text: $('#s_' + s.key + '_text').value,
       };
     });
     if(c._myres) sec.my_resources = c._myres.filter(x => (x.label || '').trim() || (x.link || '').trim())
-      .map(x => ({ label:(x.label || '').trim(), link:(x.link || '').trim() }));
+      .map(x => ({ label:(x.label || '').trim(), link:(x.link || '').trim(), on: x.on !== false }));
     sec.extras = (c._extras || []).filter(x => (x.label || '').trim() || (x.link || '').trim());
     c.sections = sec;
   }

@@ -680,7 +680,11 @@ function paintStaticCopy(){
 }
 
 const meta = k => ({ name: t('tile_' + k), blurb: t('tile_' + k + '_sub') });
-const ORDER = ['training','daily_checkin','peds','weekly_checkin'];
+// The old section tiles (Training, Daily Check In, PED Protocol, Weekly Check In)
+// pointed at the same documents as his personal resources, so the home screen
+// listed everything twice. Personal resources are the single list now; the
+// in-app tracker tiles below are unaffected.
+const ORDER = [];
 
 let CLIENT = null;
 let RESOURCES = [];
@@ -902,7 +906,7 @@ function openApp(){
   // Additional Resources: his own documents first, then the shared library the worker sends.
   // Nothing without a link is shown; slots get filled in as his plan is finished.
   const res = ((secs.my_resources || [])).concat(RESOURCES || [])
-    .filter(r => (r.label || '').trim() && (r.link || '').trim());
+    .filter(r => r.on !== false && (r.label || '').trim() && (r.link || '').trim());
   $('#aRes').innerHTML = res.length ? `<details class="resbox"${tiles.length ? '' : ' open'}>
       <summary><span data-copy="resources_label">${esc(t('resources_label'))}</span><span class="go">›</span></summary>
       ${res.map(r => `<a href="${esc(r.link.trim())}" target="_blank" rel="noopener">${esc(r.label)}<span class="go">↗</span></a>`).join('')}
