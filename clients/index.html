@@ -1412,8 +1412,11 @@ function drawBody(){
     // the standard ones he is missing as empty rows — no link, so nothing
     // shows on his page until it is filled in.
     const norm = x => (x || '').toLowerCase().replace(/[^a-z]/g, '');
+    // "Training Plan" already is the Training slot — compare loosely so a row
+    // he has under an older name is not duplicated beneath it.
+    const covers = (a, b) => { a = norm(a); b = norm(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
     DEFAULT_MY_RESOURCES.forEach(l => {
-      if(!myres.some(x => norm(x.label) === norm(l))) myres.push({ label:l, link:'', on:true });
+      if(!myres.some(x => covers(x.label, l))) myres.push({ label:l, link:'', on:true });
     });
     // No re-sorting here: the order in this list is the order on his page,
     // and it is his to arrange.

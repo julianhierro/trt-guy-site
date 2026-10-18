@@ -915,8 +915,20 @@ function openApp(){
   // menu with the shared library.
   // The whole plan is shown, not just the finished parts: a slot with no link
   // yet sits there greyed out so he can see what is coming, and cannot tap it.
-  const mine = (secs.my_resources || [])
-    .filter(r => r.on !== false && (r.label || '').trim());
+  /* The standard plan, so every client's page has the same shape even if his
+     record was saved before a slot existed. Stored rows win — their order,
+     links and switches are untouched; only slots he has none of are added. A
+     slot switched off stays off, so to hide one, switch it off rather than
+     delete it. */
+  const STANDARD = ['Training','Daily Check-in','Weekly Check-in','PED Protocol','Weekly Measurements','Meal Plan'];
+  const norm = x => (x || '').toLowerCase().replace(/[^a-z]/g, '');
+  const stored = (secs.my_resources || []).filter(r => (r.label || '').trim());
+  const full = stored.slice();
+  // "Training Plan" is the Training slot — compare loosely so an older label
+  // does not end up sitting next to a duplicate of itself.
+  const covers = (a, b) => { a = norm(a); b = norm(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
+  STANDARD.forEach(l => { if(!stored.some(r => covers(r.label, l))) full.push({ label:l, link:'', on:true }); });
+  const mine = full.filter(r => r.on !== false);
   if(mine.length){
     $('#aTiles').insertAdjacentHTML('beforeend', mine.map(r => {
       const link = (r.link || '').trim();
