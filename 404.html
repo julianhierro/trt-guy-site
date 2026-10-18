@@ -685,7 +685,7 @@ function paintStaticCopy(){
 const meta = k => ({ name: t('tile_' + k), blurb: t('tile_' + k + '_sub') });
 // The old section tiles (Training, Daily Check In, PED Protocol, Weekly Check In)
 // pointed at the same documents as his personal resources, so the home screen
-// listed everything twice. Personal resources are the single list now; the
+// listed everything twice. Program Resources are the single list now; the
 // in-app tracker tiles below are unaffected.
 const ORDER = [];
 
@@ -906,8 +906,9 @@ function openApp(){
     else openProtocol(b.dataset.pid);
   });
 
-  // His own documents are the things he opens every day, so they get their own
-  // buttons rather than being buried in a menu with the shared library.
+  // Program Resources — the documents for his plan. They are what he opens
+  // every day, so they get their own buttons rather than being buried in a
+  // menu with the shared library.
   const mine = (secs.my_resources || [])
     .filter(r => r.on !== false && (r.label || '').trim() && (r.link || '').trim());
   if(mine.length){

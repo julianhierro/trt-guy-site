@@ -830,7 +830,7 @@ function drawResourcesPanel(list){
   p.innerHTML = `
     <div class="phead">
       <div><h2>Additional resources</h2>
-        <p class="hint" style="margin:4px 0 0">Shown under the quick-access buttons on every client's page. These are the defaults every client gets. Paste a link once and every client has it. No link, no row. Each client's own documents go under Plan → Personal resources.</p></div>
+        <p class="hint" style="margin:4px 0 0">Shown under the quick-access buttons on every client's page. These are the defaults every client gets. Paste a link once and every client has it. No link, no row. Each client&rsquo;s own documents go under Plan &rarr; Program Resources.</p></div>
       <button class="btn sm" id="pClose">Close</button>
     </div>
     <div class="pbody"><div class="rowlist" id="resList"></div>
@@ -1297,8 +1297,8 @@ function drawBody(){
       </div>
 
       <div class="sect">
-        <div class="shead"><h3>Personal resources</h3><button class="btn sm" id="addMyRes">+ Add</button></div>
-        <p class="hint">This client&rsquo;s own documents. Switch one off to hide it from his page; a slot with no link stays hidden either way.</p>
+        <div class="shead"><h3>Program Resources</h3><button class="btn sm" id="addMyRes">+ Add</button></div>
+        <p class="hint">His plan documents. Every client starts with the full set; switch one off to hide it from his page, and a slot with no link stays hidden either way.</p>
         <div class="rowlist" id="myres"></div>
       </div>
 
@@ -1390,7 +1390,7 @@ function drawBody(){
       drawProgs();
     };
 
-    // Personal resources: the four slots every client starts with, filled in once his plan is done.
+    // Program Resources: the slots every client starts with, filled in once his plan is done.
     const myres = Array.isArray((c.sections || {}).my_resources)
       ? c.sections.my_resources.map(x => Object.assign({}, x))
       : DEFAULT_MY_RESOURCES.map(l => ({ label:l, link:'', on:true }));
@@ -1400,6 +1400,12 @@ function drawBody(){
     const norm = x => (x || '').toLowerCase().replace(/[^a-z]/g, '');
     DEFAULT_MY_RESOURCES.forEach(l => {
       if(!myres.some(x => norm(x.label) === norm(l))) myres.push({ label:l, link:'', on:true });
+    });
+    // standard slots first, in their usual order; anything he added himself after
+    myres.sort((a, b) => {
+      const ia = DEFAULT_MY_RESOURCES.findIndex(l => norm(l) === norm(a.label));
+      const ib = DEFAULT_MY_RESOURCES.findIndex(l => norm(l) === norm(b.label));
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
     });
     const drawMyRes = () => {
       $('#myres').innerHTML = myres.map((x,i) => `<div class="r">
