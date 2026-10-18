@@ -826,7 +826,10 @@ Let me know if you have any questions.`;
 
 // Fallback only: the real list lives on the Plan template screen, and is what
 // both the manager and every client page follow.
-const DEFAULT_MY_RESOURCES = ['Training', 'Daily Check-in', 'Weekly Check-in', 'PED Protocol', 'Weekly Measurements', 'Meal Plan'];
+const DEFAULT_MY_RESOURCES = ['Training', 'Daily Check-in', 'Weekly Check-in', 'Timeline', 'Weekly Measurements', 'Meal Plan'];
+// Slots that are the same thing under different names. Without this a client
+// with a Timeline row was handed an empty PED Protocol row beside it.
+const SLOT_ALIASES = [['timeline', 'pedprotocol', 'pedsprotocol', 'ppdprotocol']];
 
 $('#btnResources').onclick = async () => {
   let list;
@@ -1423,7 +1426,13 @@ function drawBody(){
     const norm = x => (x || '').toLowerCase().replace(/[^a-z]/g, '');
     // "Training Plan" already is the Training slot — compare loosely so a row
     // he has under an older name is not duplicated beneath it.
-    const covers = (a, b) => { a = norm(a); b = norm(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
+    const covers = (a, b) => {
+      a = norm(a); b = norm(b);
+      if(!a || !b) return false;
+      if(a === b || a.includes(b) || b.includes(a)) return true;
+      // Timeline and PED Protocol are one slot by two names
+      return SLOT_ALIASES.some(g => g.some(x => a.includes(x)) && g.some(x => b.includes(x)));
+    };
     (TEMPLATE_SLOTS.length ? TEMPLATE_SLOTS : DEFAULT_MY_RESOURCES).forEach(l => {
       if(!myres.some(x => covers(x.label, l))) myres.push({ label:l, link:'', on:true });
     });

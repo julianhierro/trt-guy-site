@@ -869,6 +869,11 @@ function openApp(){
 
   // With the in-app tracker on, the check-in tiles (old sheet links) step aside.
   const trackerOn = !!(secs.tracker && secs.tracker.on);
+  /* The in-app tracker — This Week, Timeline, Pharmacology — is still being
+     built, so it is the test profile's alone. A client sees his own documents,
+     which is also what stops Timeline appearing twice: once as the in-app
+     screen and again as the sheet in his plan. */
+  const devPreview = (c.status === 'test');
   const tiles = ORDER.filter(k => {
     if(!secs[k] || !secs[k].on) return false;
     if(trackerOn && (k === 'daily_checkin' || k === 'weekly_checkin')) return false;
@@ -887,7 +892,7 @@ function openApp(){
         : `<button class="tile" data-k="${k}">${inner}<span class="go">›</span></button>`;
     });
   // In-app tracker tiles: Timeline, the training program, each protocol.
-  if(trackerOn){
+  if(trackerOn && devPreview){
     const tk = [];
     tk.push(`<button class="tile" data-tk="timeline"><span class="t"><b data-copy="tile_timeline">${esc(t('tile_timeline'))}</b><span data-copy="tile_timeline_sub">${esc(t('tile_timeline_sub'))}</span></span><span class="go">›</span></button>`);
     tk.push(`<button class="tile" data-tk="pharma"><span class="t"><b data-copy="tile_pharma">${esc(t('tile_pharma'))}</b><span data-copy="tile_pharma_sub">${esc(t('tile_pharma_sub'))}</span></span><span class="go">›</span></button>`);
@@ -925,19 +930,27 @@ function openApp(){
   // One definition: the Plan template screen in the manager. The built-in list
   // is only a fallback for the moment before the template has been saved once.
   const STANDARD = TEMPLATE.length ? TEMPLATE
-    : ['Training','Daily Check-in','Weekly Check-in','PED Protocol','Weekly Measurements','Meal Plan'];
+    : ['Training','Daily Check-in','Weekly Check-in','Timeline','Weekly Measurements','Meal Plan'];
   const norm = x => (x || '').toLowerCase().replace(/[^a-z]/g, '');
   const stored = (secs.my_resources || []).filter(r => (r.label || '').trim());
   const full = stored.slice();
   // "Training Plan" is the Training slot — compare loosely so an older label
   // does not end up sitting next to a duplicate of itself.
-  const covers = (a, b) => { a = norm(a); b = norm(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
+  // Timeline and PED Protocol are the same slot under two names — a client with
+  // one must never be handed the other as well.
+  const ALIAS = ['timeline', 'pedprotocol', 'pedsprotocol', 'ppdprotocol'];
+  const covers = (a, b) => {
+    a = norm(a); b = norm(b);
+    if(!a || !b) return false;
+    if(a === b || a.includes(b) || b.includes(a)) return true;
+    return ALIAS.some(x => a.includes(x)) && ALIAS.some(x => b.includes(x));
+  };
   STANDARD.forEach(l => { if(!stored.some(r => covers(r.label, l))) full.push({ label:l, link:'', on:true }); });
   /* The Timeline tile IS the PED protocol — the same thing by two names. When
      the tracker is on, the slot is dropped so a client is not handed both. With
      the tracker off there is no Timeline, so his document stays. */
   const isPedSlot = l => { const n = norm(l); return n.includes('pedprotocol') || n.includes('pedsprotocol') || n.includes('ppdprotocol'); };
-  const mine = full.filter(r => r.on !== false && !(trackerOn && isPedSlot(r.label)));
+  const mine = full.filter(r => r.on !== false && !(trackerOn && devPreview && isPedSlot(r.label)));
   if(mine.length){
     $('#aTiles').insertAdjacentHTML('beforeend', mine.map(r => {
       const link = (r.link || '').trim();
@@ -960,7 +973,6 @@ function openApp(){
   /* The week tracker (This Week: day chips, averages, weekly check-in) is still
      being built, so it is shown on the test profile only. Every other client
      sees his plan without it, whatever the tracker switch says. */
-  const devPreview = (c.status === 'test');
   $('#aWeek').hidden = !(trackerOn && devPreview);
   if(trackerOn && devPreview) loadLogs();
 
