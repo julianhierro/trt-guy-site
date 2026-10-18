@@ -695,6 +695,7 @@ const ORDER = [];
 
 let CLIENT = null;
 let RESOURCES = [];
+let TEMPLATE = [];   // the plan template's slots, from the manager's Plan template screen
 let PIN = '';
 
 function fmt(d){
@@ -741,6 +742,7 @@ async function tryPin(pin){
   if(!res.ok){ const e = new Error(j.error || 'Something went wrong.'); e.status = res.status; throw e; }
   PIN = pin;
   RESOURCES = Array.isArray(j.resources) ? j.resources : [];
+  TEMPLATE = Array.isArray(j.template) ? j.template.filter(x => (x || '').trim()) : [];
   return j.client;
 }
 async function boot(){
@@ -920,7 +922,10 @@ function openApp(){
      links and switches are untouched; only slots he has none of are added. A
      slot switched off stays off, so to hide one, switch it off rather than
      delete it. */
-  const STANDARD = ['Training','Daily Check-in','Weekly Check-in','PED Protocol','Weekly Measurements','Meal Plan'];
+  // One definition: the Plan template screen in the manager. The built-in list
+  // is only a fallback for the moment before the template has been saved once.
+  const STANDARD = TEMPLATE.length ? TEMPLATE
+    : ['Training','Daily Check-in','Weekly Check-in','PED Protocol','Weekly Measurements','Meal Plan'];
   const norm = x => (x || '').toLowerCase().replace(/[^a-z]/g, '');
   const stored = (secs.my_resources || []).filter(r => (r.label || '').trim());
   const full = stored.slice();

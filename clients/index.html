@@ -484,6 +484,7 @@ const TYPE_SECTIONS = {
 
 let KEY = localStorage.getItem(KEYLS) || '';
 let CLIENTS = [];
+let TEMPLATE_SLOTS = [];   // Program Resource labels from the Plan template
 let FILTER = 'active';
 let QUERY = '';
 let OPEN = null;   // the client currently in the panel
@@ -561,6 +562,13 @@ async function unlock(k){
   localStorage.setItem(KEYLS, k);
   CLIENTS = j.clients || [];
   setStatuses(j.statuses); buildChips();
+  // The Plan template is the one definition of the slots; everything else
+  // follows it rather than keeping its own copy.
+  api('/clients?action=template').then(r => {
+    TEMPLATE_SLOTS = (((r.template || {}).sections || {}).my_resources || [])
+      .filter(x => x && (x.label || '').trim() && x.on !== false)
+      .map(x => x.label.trim());
+  }).catch(() => {});
   $('#gate').hidden = true;
   $('#app').hidden = false;
   $('#btnLock').hidden = false;
@@ -816,7 +824,8 @@ For now, please go through all the additional resources so you can get up to spe
 
 Let me know if you have any questions.`;
 
-// Every client's profile starts with these personal slots, empty until his plan is ready.
+// Fallback only: the real list lives on the Plan template screen, and is what
+// both the manager and every client page follow.
 const DEFAULT_MY_RESOURCES = ['Training', 'Daily Check-in', 'Weekly Check-in', 'PED Protocol', 'Weekly Measurements', 'Meal Plan'];
 
 $('#btnResources').onclick = async () => {
@@ -1407,7 +1416,7 @@ function drawBody(){
     // Program Resources: the slots every client starts with, filled in once his plan is done.
     const myres = Array.isArray((c.sections || {}).my_resources)
       ? c.sections.my_resources.map(x => Object.assign({}, x))
-      : DEFAULT_MY_RESOURCES.map(l => ({ label:l, link:'', on:true }));
+      : (TEMPLATE_SLOTS.length ? TEMPLATE_SLOTS : DEFAULT_MY_RESOURCES).map(l => ({ label:l, link:'', on:true }));
     // A client set up before a slot existed would simply never have it. Offer
     // the standard ones he is missing as empty rows — no link, so nothing
     // shows on his page until it is filled in.
@@ -1415,7 +1424,7 @@ function drawBody(){
     // "Training Plan" already is the Training slot — compare loosely so a row
     // he has under an older name is not duplicated beneath it.
     const covers = (a, b) => { a = norm(a); b = norm(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
-    DEFAULT_MY_RESOURCES.forEach(l => {
+    (TEMPLATE_SLOTS.length ? TEMPLATE_SLOTS : DEFAULT_MY_RESOURCES).forEach(l => {
       if(!myres.some(x => covers(x.label, l))) myres.push({ label:l, link:'', on:true });
     });
     // No re-sorting here: the order in this list is the order on his page,
