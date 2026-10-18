@@ -1293,10 +1293,6 @@ function renderWeek(){
     ${spark}
     ${tg.note ? `<p class="sub" style="margin-top:12px;color:var(--txt);white-space:pre-wrap">${esc(tg.note)}</p>` : ''}
     ${doseHtml}
-    <div class="btns">
-      <button class="btn" id="wLog" data-copy="trk_dailyview">${esc(t('trk_dailyview'))}</button>
-      <button class="btn" id="wView" data-copy="trk_weekview">${esc(t('trk_weekview'))}</button>
-    </div>
     ${weeklyBtn('wWeekly', mon, 'style="margin-top:8px"')}
     <div class="links"><button class="linkbtn" id="wHist" data-copy="trk_history">${esc(t('trk_history'))}</button></div>`;
   document.querySelectorAll('#aWeek .days button').forEach(b => b.onclick = () => openDaily(b.dataset.day));
@@ -1305,10 +1301,10 @@ function renderWeek(){
     try { await tickDose(today, cb.dataset.dk, cb.checked); } catch(e){ cb.checked = !cb.checked; alert(e.message); }
     cb.disabled = false;
   });
-  $('#wLog').onclick = () => openDaily(today);
+  // Daily / Weekly view are still in development — reachable by tapping a day,
+  // which is how Julian gets in, but no buttons on the client's home screen.
   $('#wWeekly').onclick = () => openWeekly(mon);
   $('#wHist').onclick = openHistory;
-  $('#wView').onclick = () => openWeekView(mon);
 }
 
 // Where Back (and a finished save) lands: home, or the screen that opened this one.

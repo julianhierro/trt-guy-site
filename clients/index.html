@@ -814,7 +814,7 @@ For now, please go through all the additional resources so you can get up to spe
 Let me know if you have any questions.`;
 
 // Every client's profile starts with these personal slots, empty until his plan is ready.
-const DEFAULT_MY_RESOURCES = ['Daily Check-in', 'Weekly Check-in', 'PED Protocol', 'Weekly Measurements', 'Meal Plan'];
+const DEFAULT_MY_RESOURCES = ['Training', 'Daily Check-in', 'Weekly Check-in', 'PED Protocol', 'Weekly Measurements', 'Meal Plan'];
 
 $('#btnResources').onclick = async () => {
   let list;
@@ -1394,6 +1394,13 @@ function drawBody(){
     const myres = Array.isArray((c.sections || {}).my_resources)
       ? c.sections.my_resources.map(x => Object.assign({}, x))
       : DEFAULT_MY_RESOURCES.map(l => ({ label:l, link:'', on:true }));
+    // A client set up before a slot existed would simply never have it. Offer
+    // the standard ones he is missing as empty rows — no link, so nothing
+    // shows on his page until it is filled in.
+    const norm = x => (x || '').toLowerCase().replace(/[^a-z]/g, '');
+    DEFAULT_MY_RESOURCES.forEach(l => {
+      if(!myres.some(x => norm(x.label) === norm(l))) myres.push({ label:l, link:'', on:true });
+    });
     const drawMyRes = () => {
       $('#myres').innerHTML = myres.map((x,i) => `<div class="r">
         <label class="sw" style="flex:0 0 auto;margin-right:4px" title="Show this on his page"><input type="checkbox" data-m="on" data-i="${i}" ${x.on === false ? '' : 'checked'}><span class="track"></span></label>
