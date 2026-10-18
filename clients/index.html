@@ -396,7 +396,8 @@
       <button class="btn" id="btnStatuses">Statuses</button>
       <button class="btn" id="btnResources">Resources</button>
       <button class="btn" id="btnCopy">Page wording</button>
-      <button class="btn" id="btnTemplate">Plan template</button>
+      <button class="btn" id="btnTemplate">Client template</button>
+      <button class="btn" id="btnTemplateDev" title="What the test profile is built from">Dev template</button>
       <button class="btn" id="btnImport">Import intake</button>
       <button class="btn primary" id="btnNew">+ New client</button>
     </div>
@@ -564,7 +565,7 @@ async function unlock(k){
   setStatuses(j.statuses); buildChips();
   // The Plan template is the one definition of the slots; everything else
   // follows it rather than keeping its own copy.
-  api('/clients?action=template').then(r => {
+  api('/clients?action=template').then(r => {   // the live one — clients are built from this
     TEMPLATE_SLOTS = (((r.template || {}).sections || {}).my_resources || [])
       .filter(x => x && (x.label || '').trim() && x.on !== false)
       .map(x => x.label.trim());
@@ -1098,21 +1099,29 @@ function drawStatusPanel(list){
 /* ── plan template ────────────────────────────────────────────────────────
    One master plan. New clients (added or imported) inherit it; existing
    clients are never touched by editing it. */
-$('#btnTemplate').onclick = async () => {
+/* Two of them: the live one every paying client is built from, and a
+   development one that only the test profile follows. Editing either never
+   touches an existing client. */
+async function openTemplate(dev){
   let t = {};
-  try { t = (await api('/clients?action=template')).template || {}; }
+  try { t = (await api('/clients?action=template' + (dev ? '&dev=1' : ''))).template || {}; }
   catch(e){ return alert('Could not load the template: ' + e.message); }
-  OPEN = { isTemplate:true, name:'Plan template', slug:'', phase:t.phase || {}, sections:t.sections || {} };
+  OPEN = { isTemplate:true, isDevTemplate:!!dev,
+           name: dev ? 'Development template' : 'Client template',
+           slug:'', phase:t.phase || {}, sections:t.sections || {} };
   TAB = 'plan';
   drawPanel();
-};
+}
+$('#btnTemplate').onclick = () => openTemplate(false);
+$('#btnTemplateDev').onclick = () => openTemplate(true);
 async function saveTemplate(){
   collect();
   const btn = $('#pSave'); btn.disabled = true; btn.textContent = 'Saving…';
   try {
     await api('/clients', { method:'POST', body: JSON.stringify({
-      action:'template_save', template:{ phase:OPEN.phase, sections:OPEN.sections } }) });
-    toast('Template saved');
+      action:'template_save', dev: !!OPEN.isDevTemplate,
+      template:{ phase:OPEN.phase, sections:OPEN.sections } }) });
+    toast((OPEN.isDevTemplate ? 'Development' : 'Client') + ' template saved');
     closePanel();
   } catch(e){ alert('Could not save: ' + e.message); }
   finally { const b2 = $('#pSave'); if(b2){ b2.disabled = false; b2.textContent = 'Save'; } }
