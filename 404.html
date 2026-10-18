@@ -933,7 +933,11 @@ function openApp(){
   // does not end up sitting next to a duplicate of itself.
   const covers = (a, b) => { a = norm(a); b = norm(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); };
   STANDARD.forEach(l => { if(!stored.some(r => covers(r.label, l))) full.push({ label:l, link:'', on:true }); });
-  const mine = full.filter(r => r.on !== false);
+  /* The Timeline tile IS the PED protocol — the same thing by two names. When
+     the tracker is on, the slot is dropped so a client is not handed both. With
+     the tracker off there is no Timeline, so his document stays. */
+  const isPedSlot = l => { const n = norm(l); return n.includes('pedprotocol') || n.includes('pedsprotocol') || n.includes('ppdprotocol'); };
+  const mine = full.filter(r => r.on !== false && !(trackerOn && isPedSlot(r.label)));
   if(mine.length){
     $('#aTiles').insertAdjacentHTML('beforeend', mine.map(r => {
       const link = (r.link || '').trim();
