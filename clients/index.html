@@ -428,10 +428,19 @@ const KEYLS  = 'tg-clients-key';
 
 const TYPES = [
   ['full',      'Full client'],
-  ['training',  'Training'],
-  ['nutrition', 'Nutrition'],
-  ['peds',      'PEDs'],
+  ['training',  'Training and nutrition'],
+  ['peds',      'PEDs only'],
 ];
+// 'nutrition' was its own type before training and nutrition were one option.
+const normType = t => (t === 'nutrition' ? 'training' : (t || ''));
+/* Which standard slots a type actually needs. A PEDs-only client is not being
+   trained or fed by us, so those slots are not offered to him — and a slot can
+   still be switched on or off by hand for any individual client. */
+const TYPE_SLOTS = {
+  full:     ['Training', 'Daily Check-in', 'Weekly Check-in', 'Timeline', 'Weekly Measurements', 'Meal Plan'],
+  training: ['Training', 'Daily Check-in', 'Weekly Check-in', 'Weekly Measurements', 'Meal Plan'],
+  peds:     ['Timeline', 'Daily Check-in', 'Weekly Check-in', 'Weekly Measurements'],
+};
 // The phases Julian runs. "custom" lets him name one himself.
 const PHASES = [
   ['fatloss',     'Fat Loss Phase'],
@@ -653,7 +662,7 @@ function render(){
       const d = daysLeft(c);
       const leftTxt = d === null ? '' : (d < 0 ? `${Math.abs(d)}d over` : `${d}d left`);
       const leftCls = d === null ? '' : (d < 0 ? 'over' : (d <= 21 ? 'warn' : ''));
-      const typeName = (TYPES.find(t => t[0] === c.client_type) || [null,'—'])[1];
+      const typeName = (TYPES.find(t => t[0] === normType(c.client_type)) || [null,'—'])[1];
       return `<tr data-id="${c.id}">
         <td class="cbcol" data-l=""><input type="checkbox" class="cb rowsel" data-id="${c.id}" ${SEL.has(c.id) ? 'checked' : ''}></td>
         <td class="main"><div class="cname">${esc(c.name || '—')}</div>
@@ -1218,7 +1227,7 @@ function drawBody(){
         </select></div>
         <div class="fld"><label class="fl">Type of client</label><select id="f_client_type">
           <option value="">—</option>
-          ${TYPES.map(t => `<option value="${t[0]}" ${(c.client_type===t[0])?'selected':''}>${t[1]}</option>`).join('')}
+          ${TYPES.map(t => `<option value="${t[0]}" ${(normType(c.client_type)===t[0])?'selected':''}>${t[1]}</option>`).join('')}
         </select></div>
         <div class="fld"><label class="fl">Copy setup from</label>
           <div style="display:flex;gap:8px">
@@ -1450,7 +1459,9 @@ function drawBody(){
       // Timeline and PED Protocol are one slot by two names
       return SLOT_ALIASES.some(g => g.some(x => a.includes(x)) && g.some(x => b.includes(x)));
     };
+    const wanted = TYPE_SLOTS[normType(c.client_type)] || null;
     (TEMPLATE_SLOTS.length ? TEMPLATE_SLOTS : DEFAULT_MY_RESOURCES).forEach(l => {
+      if(wanted && !wanted.some(w => covers(w, l))) return;      // not a slot this type needs
       if(!myres.some(x => covers(x.label, l))) myres.push({ label:l, link:'', on:true });
     });
     // No re-sorting here: the order in this list is the order on his page,

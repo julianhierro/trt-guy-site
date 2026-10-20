@@ -948,7 +948,19 @@ function openApp(){
     if(a === b || a.includes(b) || b.includes(a)) return true;
     return ALIAS.some(x => a.includes(x)) && ALIAS.some(x => b.includes(x));
   };
-  STANDARD.forEach(l => { if(!stored.some(r => covers(r.label, l))) full.push({ label:l, link:'', on:true }); });
+  /* Only the slots this type of client needs: a PEDs-only client is not being
+     trained or fed by us, so Training and the Meal Plan are not added to his
+     page. Anything already saved for him is left exactly as it is. */
+  const TYPE_SLOTS = {
+    full:     ['Training','Daily Check-in','Weekly Check-in','Timeline','Weekly Measurements','Meal Plan'],
+    training: ['Training','Daily Check-in','Weekly Check-in','Weekly Measurements','Meal Plan'],
+    peds:     ['Timeline','Daily Check-in','Weekly Check-in','Weekly Measurements'],
+  };
+  const wanted = TYPE_SLOTS[c.client_type === 'nutrition' ? 'training' : c.client_type] || null;
+  STANDARD.forEach(l => {
+    if(wanted && !wanted.some(w => covers(w, l))) return;
+    if(!stored.some(r => covers(r.label, l))) full.push({ label:l, link:'', on:true });
+  });
   /* The Timeline tile IS the PED protocol — the same thing by two names. When
      the tracker is on, the slot is dropped so a client is not handed both. With
      the tracker off there is no Timeline, so his document stays. */
