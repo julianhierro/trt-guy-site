@@ -57,7 +57,13 @@
   .desc{margin-top:30px;padding-top:28px;border-top:1px solid rgba(255,255,255,.14);max-width:620px}
   .desc p{color:#c3c9d2;font-size:17px;line-height:1.72;margin-bottom:17px}
   .desc p:last-child{margin-bottom:0}
-  .desc p strong{color:#fff;font-weight:600}
+  .desc p.lead{color:#fff;font-weight:600;margin-bottom:12px}
+  .desc ul{list-style:none;margin:0 0 20px;padding:0}
+  .desc li{position:relative;padding:9px 0 9px 30px;color:#c3c9d2;font-size:16.5px;line-height:1.6;
+    border-bottom:1px solid rgba(255,255,255,.08)}
+  .desc li:last-child{border-bottom:0}
+  .desc li::before{content:"";position:absolute;left:4px;top:19px;width:9px;height:9px;border-radius:2px;
+    background:#fff;transform:rotate(45deg)}
 
   /* Registration card */
   .reg{background:#fff;color:var(--txt);border-radius:12px;box-shadow:0 20px 54px rgba(0,0,0,.45);padding:24px 22px}
@@ -102,6 +108,8 @@
     .cd span{font-size:25px}
     .desc{margin-top:26px;padding-top:24px}
     .desc p{font-size:16px;line-height:1.68;margin-bottom:15px}
+    .desc li{font-size:15.5px;padding-left:27px}
+    .desc li::before{top:18px;width:8px;height:8px}
   }
 </style>
 </head>
@@ -146,7 +154,12 @@
 
   <div class="desc" data-eid="w-desc">
     <p data-eid="w-p1">In this webinar, I’ll break down the 7 simple steps to building muscle, losing fat, and getting jacked and shredded on TRT.</p>
-    <p data-eid="w-p2">I’ll share the proven frameworks I’ve used to help myself and my clients achieve real results, the biggest mistakes men make when starting TRT, and the common prescribing errors that can hold back your progress — including unnecessary aromatase inhibitors and overlooked thyroid deficiencies.</p>
+    <p class="lead" data-eid="w-p2">I’ll share:</p>
+    <ul data-eid="w-list">
+      <li data-eid="w-b1">the proven frameworks I’ve used to help myself and my clients achieve real results</li>
+      <li data-eid="w-b2">the biggest mistakes men make when starting TRT</li>
+      <li data-eid="w-b3">the common prescribing errors that can hold back your progress — including unnecessary aromatase inhibitors and overlooked thyroid deficiencies</li>
+    </ul>
     <p data-eid="w-p3">Whether you’re already on TRT or considering it, you’ll learn how to optimize your training, nutrition, and hormone management to build a leaner, stronger physique without wasting time on the wrong approach.</p>
   </div>
 
