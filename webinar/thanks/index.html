@@ -34,6 +34,10 @@
   ol.steps li:last-child{border-bottom:0}
   ol.steps li::before{content:counter(s);position:absolute;left:0;top:12px;width:26px;height:26px;border-radius:50%;
     background:var(--ink);color:#fff;font:700 13px/26px var(--body);text-align:center}
+  .cal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  .cal a{display:block;background:#fff;color:var(--ink);text-decoration:none;border-radius:10px;padding:15px 12px;font-weight:600;font-size:14.5px}
+  .cal a:hover{background:#e8ebf0}
+  @media (max-width:480px){.cal{grid-template-columns:1fr}}
   .foot{color:#8d96a3;font-size:13px;margin-top:28px}
   @media (max-width:560px){
     .shell{padding:0 17px}
@@ -66,8 +70,24 @@
     </ol>
   </div>
 
+  <div class="cal" data-eid="wt-cal" data-noedit>
+    <a id="calGoogle" href="#">Add to Google Calendar</a>
+    <a id="calIcs" href="#">Apple Calendar or Outlook</a>
+  </div>
+
   <p class="foot" data-eid="wt-foot">TRT Guy · Questions? Message me and I'll sort it.</p>
 </div>
+
+<script>
+/* Calendar buttons point at the worker, which builds the invite from the event
+   row — so a change of time or room needs no edit here. */
+(function () {
+  var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
+  var w = new URLSearchParams(location.search).get('w') || 'trt-oct';
+  document.getElementById('calGoogle').href = API + '/webinar-cal?w=' + encodeURIComponent(w);
+  document.getElementById('calIcs').href = API + '/webinar.ics?w=' + encodeURIComponent(w);
+})();
+</script>
 
 <script>
 /* Registration → Meta. px.js sends the browser pixel and the server copy with
