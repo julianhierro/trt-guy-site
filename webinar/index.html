@@ -46,17 +46,18 @@
   /* Floating registration card — sits over the black band like the original. */
   .reg{position:absolute;right:20px;top:92px;width:330px;background:var(--card);border-radius:10px;
        box-shadow:0 18px 50px rgba(0,0,0,.28);padding:22px 20px;z-index:3}
-  .reghead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-  .regtitle{font-family:var(--display);font-weight:700;font-size:23px;line-height:1.1;color:var(--ink)}
-  .cd{display:flex;gap:9px;flex:none}
-  .cd div{text-align:center;min-width:22px}
-  .cd span{display:block;font-weight:700;font-size:15px;color:var(--ink);line-height:1.1}
-  .cd small{font-size:9px;color:var(--mut);letter-spacing:.06em}
+  .reghead{margin-bottom:14px}
+  .regtitle{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.1;color:var(--ink)}
+  /* Countdown — four cells, readable on a phone, compact on the desktop card. */
+  .cd{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 16px}
+  .cd div{background:#f3f5f8;border:1px solid var(--line);border-radius:8px;padding:8px 2px;text-align:center}
+  .cd span{display:block;font-family:var(--display);font-weight:800;font-size:26px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+  .cd small{display:block;font-size:9.5px;font-weight:600;letter-spacing:.11em;color:var(--mut);margin-top:3px}
   .regname{font-weight:600;font-size:14px;color:var(--ink);line-height:1.35;margin-bottom:6px}
   .regwhen{font-size:12.5px;color:var(--mut);margin-bottom:16px}
-  .reg input{width:100%;border:1px solid var(--line);border-radius:6px;padding:13px 12px;font:400 15px/1.3 var(--body);color:var(--ink);margin-bottom:11px;background:#fff}
+  .reg input{width:100%;border:1px solid var(--line);border-radius:8px;padding:14px 12px;font:400 16px/1.3 var(--body);color:var(--ink);margin-bottom:10px;background:#fff}
   .reg input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
-  .reg button{width:100%;border:0;border-radius:6px;background:var(--ink);color:#fff;cursor:pointer;padding:15px 12px;margin-top:5px;
+  .reg button{width:100%;border:0;border-radius:8px;background:var(--ink);color:#fff;cursor:pointer;padding:16px 12px;margin-top:6px;
     font-family:var(--body);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
   .reg button:hover{background:#23282e}
   .reg button[disabled]{opacity:.6;cursor:default}
@@ -66,9 +67,24 @@
   .foot{border-top:1px solid var(--line);padding:22px 0 40px}
   .foot .shell{font-size:12.5px;color:var(--mut)}
   @media (max-width:900px){
-    .reg{position:static;width:auto;margin:26px 0 0;box-shadow:0 10px 30px rgba(0,0,0,.18)}
-    .hero .shell{padding-bottom:30px}
+    .reg{position:static;width:auto;margin:24px 0 0;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+    .hero .shell{padding-bottom:26px}
     .col{max-width:none}
+  }
+  @media (max-width:560px){
+    body{font-size:15.5px}
+    .shell{padding:0 16px}
+    .hero .shell{padding-top:22px;padding-bottom:22px}
+    .wordmark{height:32px;width:96px}
+    .meta{gap:10px;margin:22px 0 14px}
+    .badge{font-size:10px;padding:5px 9px}
+    .when{font-size:13px}
+    h1{font-size:clamp(28px,8.4vw,38px)}
+    .reg{margin-top:20px;padding:20px 16px;border-radius:12px}
+    .regtitle{font-size:21px}
+    .cd span{font-size:24px}
+    .body .shell{padding-top:26px;padding-bottom:46px}
+    .body p{font-size:16px;margin-bottom:16px}
   }
 </style>
 </head>
@@ -89,11 +105,12 @@
     <form class="reg" id="regForm" data-eid="w-reg" data-noedit>
       <div class="reghead">
         <div class="regtitle">Register Now</div>
-        <div class="cd" id="cd">
-          <div><span id="cdD">00</span><small>D</small></div>
-          <div><span id="cdH">00</span><small>H</small></div>
-          <div><span id="cdM">00</span><small>M</small></div>
-        </div>
+      </div>
+      <div class="cd" id="cd">
+        <div><span id="cdD">00</span><small>DAYS</small></div>
+        <div><span id="cdH">00</span><small>HRS</small></div>
+        <div><span id="cdM">00</span><small>MIN</small></div>
+        <div><span id="cdS">00</span><small>SEC</small></div>
       </div>
       <div class="regname">7 Steps To Build Muscle And Get Shredded On TRT</div>
       <div class="regwhen">Wed, Oct 28 2026 &nbsp;|&nbsp; 5:00 PM EST</div>
@@ -131,12 +148,13 @@
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function tick() {
     var left = Math.max(0, STARTS - Date.now());
-    var m = Math.floor(left / 60000);
-    document.getElementById('cdD').textContent = pad(Math.floor(m / 1440));
-    document.getElementById('cdH').textContent = pad(Math.floor(m % 1440 / 60));
-    document.getElementById('cdM').textContent = pad(m % 60);
+    var sec = Math.floor(left / 1000);
+    document.getElementById('cdD').textContent = pad(Math.floor(sec / 86400));
+    document.getElementById('cdH').textContent = pad(Math.floor(sec % 86400 / 3600));
+    document.getElementById('cdM').textContent = pad(Math.floor(sec % 3600 / 60));
+    document.getElementById('cdS').textContent = pad(sec % 60);
   }
-  tick(); setInterval(tick, 20000);
+  tick(); setInterval(tick, 1000);
 
   if (/[?&]edit=1/.test(location.search)) return;
 
