@@ -14,33 +14,45 @@
 <style>html.jv-pending body{visibility:hidden}</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 <style>
-  :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;
+  :root{--ink:#0b0d10;--txt:#1b1f24;--mut:#5b6572;--line:rgba(11,13,16,.14);--ok:#12994a;
     --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.6;font-size:16px}
-  .wrap{max-width:640px;margin:0 auto;padding:34px 18px 70px;text-align:center}
-  .wordmark{display:block;height:44px;aspect-ratio:1285/602;background:url("/logo.png") center/contain no-repeat;margin:0 auto 22px;font-size:0;color:transparent;overflow:hidden}
-  .tick{width:62px;height:62px;border-radius:50%;background:var(--ok);margin:0 auto 18px;position:relative}
-  .tick::after{content:"";position:absolute;left:21px;top:16px;width:17px;height:30px;border:solid #fff;border-width:0 5px 5px 0;transform:rotate(45deg)}
-  h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,6.5vw,44px);line-height:1.04;text-transform:uppercase;margin-bottom:12px}
-  .sub{font-size:18px;color:var(--mut);margin-bottom:24px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;margin:20px 0;text-align:left}
-  .card h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px}
+  body{font-family:var(--body);background:var(--ink);color:#fff;line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .shell{max-width:620px;margin:0 auto;padding:0 22px}
+  .bar{border-bottom:1px solid rgba(255,255,255,.1)}
+  .bar .shell{display:flex;justify-content:center;padding-top:22px;padding-bottom:22px;max-width:1080px}
+  .wordmark{display:block;width:150px;height:50px;background:url("/img/logo-white.png") center/contain no-repeat;font-size:0;color:transparent;overflow:hidden}
+  .wrap{padding:44px 0 72px;text-align:center}
+  .tick{width:60px;height:60px;border-radius:50%;background:var(--ok);margin:0 auto 20px;position:relative}
+  .tick::after{content:"";position:absolute;left:20px;top:15px;width:17px;height:29px;border:solid #fff;border-width:0 5px 5px 0;transform:rotate(45deg)}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,7vw,48px);line-height:1.03;text-transform:uppercase;margin-bottom:12px}
+  .sub{font-size:17px;color:#c3c9d2;margin-bottom:28px}
+  .card{background:#fff;color:var(--txt);border-radius:14px;padding:24px 22px;text-align:left;box-shadow:0 18px 46px rgba(0,0,0,.4)}
+  .card h2{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;color:var(--ink)}
   ol.steps{list-style:none;counter-reset:s;margin:0;padding:0}
-  ol.steps li{position:relative;counter-increment:s;padding:11px 0 11px 40px;border-bottom:1px solid var(--line)}
+  ol.steps li{position:relative;counter-increment:s;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   ol.steps li:last-child{border-bottom:0}
-  ol.steps li::before{content:counter(s);position:absolute;left:0;top:11px;width:26px;height:26px;border-radius:50%;
-    background:var(--acc);color:#fff;font:700 13px/26px var(--body);text-align:center}
-  .cta{display:block;background:var(--acc);color:#fff;text-decoration:none;text-align:center;border-radius:14px;margin:18px 0 6px;
-    font-family:var(--display);font-weight:800;font-size:clamp(19px,4.6vw,23px);text-transform:uppercase;letter-spacing:.02em;padding:17px 20px}
-  .cta:hover{background:var(--acc-d)}
-  .mut{color:var(--mut);font-size:14px}
-  .foot{color:var(--mut);font-size:13px;margin-top:30px}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:12px;width:26px;height:26px;border-radius:50%;
+    background:var(--ink);color:#fff;font:700 13px/26px var(--body);text-align:center}
+  .foot{color:#8d96a3;font-size:13px;margin-top:28px}
+  @media (max-width:560px){
+    .shell{padding:0 17px}
+    .wordmark{width:124px;height:42px}
+    .bar .shell{padding-top:18px;padding-bottom:18px}
+    .wrap{padding:32px 0 54px}
+    .card{padding:20px 17px}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="wordmark">TRT-GUY</div>
+
+<header class="bar" data-eid="wt-bar">
+  <div class="shell" data-eid="wt-barshell">
+    <a class="wordmark" href="/" data-eid="wt-logo">TRT-GUY</a>
+  </div>
+</header>
+
+<div class="shell wrap" data-eid="wt-wrap">
   <div class="tick" data-noedit></div>
   <h1 data-eid="wt-h">You're Registered</h1>
   <p class="sub" data-eid="wt-s">Your seat is saved. Here's what happens next.</p>
@@ -60,9 +72,9 @@
 <script>
 /* Registration → Meta. px.js sends the browser pixel and the server copy with
    one shared event id, so the conversion counts once and still lands when the
-   pixel is blocked. Demio can pass the registrant back on the redirect, so any
-   email or name in the URL is handed over for matching — hashed by the worker,
-   never stored here. */
+   pixel is blocked. The registration page passes the registrant on the redirect,
+   so any email or name in the URL is handed over for matching — hashed by the
+   worker, never stored here. */
 (function () {
   if (/[?&]edit=1/.test(location.search)) return;
   var q = new URLSearchParams(location.search);
