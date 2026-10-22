@@ -135,6 +135,7 @@
     <input type="text" id="fName" name="name" placeholder="First Name" autocomplete="given-name" required>
     <input type="email" id="fEmail" name="email" placeholder="Email" autocomplete="email" required>
     <input type="tel" id="fPhone" name="phone" placeholder="Phone number" autocomplete="tel" required>
+    <input type="text" id="fIG" name="instagram" placeholder="Instagram handle (optional)" autocomplete="off">
 
     <button type="submit" id="regBtn">Register</button>
     <div class="err" id="regErr"></div>
@@ -186,6 +187,7 @@
     var name = document.getElementById('fName').value.trim();
     var email = document.getElementById('fEmail').value.trim();
     var phone = document.getElementById('fPhone').value.trim();
+    var ig = document.getElementById('fIG').value.trim();
     if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.replace(/\D/g, '').length < 7) {
       err.textContent = 'Please fill in your name, email and phone number.';
       err.className = 'err on';
@@ -200,7 +202,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        webinar: WEBINAR, name: name, email: email, phone: phone,
+        webinar: WEBINAR, name: name, email: email, phone: phone, instagram: ig,
         source: q.get('utm_source') || q.get('src') || '',
       }),
     })
