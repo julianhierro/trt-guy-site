@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joining — TRT Guy</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background:#0b0d10;color:#fff;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
+  .wordmark{display:block;width:132px;height:44px;margin:0 auto 22px;
+    background:url("/img/logo-white.png") center/contain no-repeat;font-size:0;color:transparent;overflow:hidden}
+  h1{font-family:"Barlow Condensed",Impact,sans-serif;font-weight:800;font-size:34px;text-transform:uppercase;margin-bottom:10px}
+  p{color:#c3c9d2;font-size:16px;line-height:1.6}
+  a{color:#fff}
+</style>
+</head>
+<body>
+<div>
+  <span class="wordmark">TRT-GUY</span>
+  <h1 id="h">Opening the room</h1>
+  <p id="p">One moment…</p>
+</div>
+<script>
+/* This address is what every calendar invite and reminder points at. A saved
+   calendar entry never updates itself, so the invite holds this permanent URL
+   and the worker forwards it to whatever the room is on the day. */
+(function () {
+  var w = new URLSearchParams(location.search).get('w') || 'trt-oct';
+  var to = 'https://trt-guy-onboarding.julianhierro.workers.dev/webinar-join?w=' + encodeURIComponent(w);
+  setTimeout(function () {
+    document.getElementById('h').textContent = 'Taking a moment';
+    document.getElementById('p').innerHTML = 'If nothing happens, <a href="' + to + '">tap here</a>.';
+  }, 2500);
+  location.replace(to);
+})();
+</script>
+</body>
+</html>
