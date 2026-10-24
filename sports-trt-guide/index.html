@@ -343,9 +343,25 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
     });
     elements.create('payment', { layout: 'tabs' }).mount(slot);
   }
+  // stripe.js is async, so it is usually not there on first run. Wait for it,
+  // then build the card form. Without this nothing ever mounts and the Pay
+  // button has nothing to submit.
+  function boot() {
+    if (window.Stripe) {
+      try { stripe = Stripe(TEST ? PK_TEST : STRIPE_PK); } catch (e) { err('Card form could not start.'); return; }
+      mount();
+      return;
+    }
+    waited += 150;
+    if (waited > 20000) { err('The card form could not load. Please refresh the page.'); return; }
+    setTimeout(boot, 150);
+  }
+  boot();
+
   // The editor rebuilds parts of this page when published edits land, which
   // can take the mounted form with it — one guarded re-mount covers that.
   setTimeout(mount, 3000);
+  setInterval(mount, 5000);
 
   // One InitiateCheckout per visit, the first time they open the order form.
   var checkoutTracked = false;
