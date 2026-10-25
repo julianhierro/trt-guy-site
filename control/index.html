@@ -645,6 +645,11 @@
     },
     {
       id:'sportsguide', icon:'', tag:'Low Ticket Funnel', name:'Sports TRT Guide',
+      // Live price test. Visitors are split 50/50 on the sales page and each
+      // cell logs its own views and sales under <key>::A / <key>::B.
+      abTest:{ key:'trtguy-sports-trt-guide', name:'Price test',
+               note:'Half of new visitors see $14.99 instead of $29.99. Each side counts its own visitors and sales, so the number to compare is revenue per visitor \u2014 the cheaper price can win on sales and still lose on money.',
+               variants:[{ v:'A', label:'$29.99', price:29.99 }, { v:'B', label:'$14.99', price:14.99 }] },
       description:'The paid guide at $29.99 \u2014 sales page, Stripe checkout and the delivery page, with the fertility guide as a free bonus.',
       home:'https://trt-guy.com/sports-trt-guide/',
       pages:[
@@ -1193,6 +1198,46 @@
     wireArch();
   }
 
+  /* Price test readout. Views and sales come off the same beacon as every
+     other page, just under a per-cell key. Revenue is counted, not guessed:
+     sales x that cell's price, which is the only price that cell was shown. */
+  function abPanel(pr){
+    const t = pr.abTest; if (!t) return '';
+    const rows = t.variants.map(x => {
+      const s = st(t.key + '::' + x.v);
+      const cv = s.visitors ? (s.optins / s.visitors) * 100 : null;
+      return { ...x, visitors: s.visitors, views: s.views, buys: s.optins, cv,
+               rev: s.optins * x.price, rpv: s.visitors ? (s.optins * x.price) / s.visitors : null };
+    });
+    const totalVis = rows.reduce((a, r) => a + r.visitors, 0);
+    const best = rows.filter(r => r.rpv != null).sort((a, b) => b.rpv - a.rpv)[0];
+    const enough = rows.every(r => r.visitors >= 50) && rows.some(r => r.buys >= 1);
+    const money = v => '$' + (v || 0).toFixed(2);
+    return '<div class="card" style="grid-column:1/-1">'
+      + '<div class="cardtop"><span class="tag">A/B test</span></div>'
+      + '<div class="name">' + t.name + '</div>'
+      + '<p class="desc">' + t.note + '</p>'
+      + '<div style="display:grid;gap:10px;margin:14px 0 4px">'
+      + rows.map(r => '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;'
+          + 'padding:12px 14px;border:1px solid var(--line);border-radius:12px'
+          + (best && enough && r.v === best.v ? ';outline:2px solid #1a5cff' : '') + '">'
+          + '<b style="min-width:92px">' + r.v + ' &middot; ' + r.label + '</b>'
+          + '<span><b>' + n(r.visitors) + '</b> visitors</span>'
+          + '<span><b>' + n(r.buys) + '</b> sales</span>'
+          + '<span><b>' + (r.cv == null ? '—' : r.cv.toFixed(1) + '%') + '</b> buy</span>'
+          + '<span><b>' + money(r.rev) + '</b> revenue</span>'
+          + '<span style="margin-left:auto"><b>' + (r.rpv == null ? '—' : money(r.rpv)) + '</b> per visitor</span>'
+          + '</div>').join('')
+      + '</div>'
+      + '<p class="desc" style="margin-top:10px">'
+      + (!totalVis ? 'No visitors counted in this range yet.'
+         : !enough ? 'Too early to call \u2014 wait for at least 50 visitors on each side and a sale or two.'
+         : '<b>' + best.v + ' (' + best.label + ') is ahead</b> on revenue per visitor.')
+      + ' Preview a side without joining the test: <a href="' + pr.home + '?v=A" target="_blank" rel="noopener">?v=A</a>'
+      + ' &middot; <a href="' + pr.home + '?v=B" target="_blank" rel="noopener">?v=B</a>'
+      + '</p></div>';
+  }
+
   function renderProject(pr){
     document.getElementById('title').textContent = pr.icon + '  ' + pr.name;
     document.getElementById('subtitle').textContent = pr.description;
@@ -1202,7 +1247,7 @@
       + '<span class="where">Projects / ' + (g ? g.name + ' / ' : '') + '<b>' + pr.name + '</b></span></div>';
     document.getElementById('upBtn').addEventListener('click', () => g ? showGroup(g.id) : showFolders());
 
-    document.getElementById('grid').innerHTML = pr.pages.map((p, i) => {
+    document.getElementById('grid').innerHTML = abPanel(pr) + pr.pages.map((p, i) => {
       const s = st(p.key), isGate = p.kind === 'gate', isThanks = p.kind === 'thanks';
       const cv = isGate && s.visitors ? (s.optins/s.visitors)*100 : null;
       const kindLabel = isGate ? 'Opt-in page' : isThanks ? 'Thank-you page' : 'Asset page';
@@ -1256,8 +1301,16 @@
     else renderFolders();
   }
 
+  // Every page key we fetch stats for: the project pages, plus each live
+  // price-test cell (those are not pages, so they stay out of the rollups).
+  function abKeys(){
+    const out = [];
+    PROJECTS.forEach(pr => { if (pr.abTest) pr.abTest.variants.forEach(x => out.push({ key: pr.abTest.key + '::' + x.v })); });
+    return out;
+  }
+
   async function loadStats(){
-    const rows = await Promise.all(ALL.map(async p => {
+    const rows = await Promise.all(ALL.concat(abKeys()).map(async p => {
       try {
         const r = await fetch(STATS + '?p=' + encodeURIComponent(p.key) + rangeQS());
         const s = await r.json();

@@ -78,6 +78,10 @@ if (EDITING) {
               { eventID: d.pixel.eventId });
         }
       } catch (e) {}
+      /* Price test: count the sale against the cell that made it. The cell
+         comes back from the worker off the payment itself, so a cleared
+         browser or a different device still lands on the right one. */
+      try { if (d.variant && window.tgAbBuy) tgAbBuy(d.variant); } catch (e) {}
       $('files').hidden = false;
       $('files').innerHTML = (d.downloads || []).map((f, i) =>
         '<a class="dl' + (i ? ' bonus' : '') + '" href="' + f.url + '" download>' + f.label + ' ↓</a>').join('');
@@ -96,6 +100,11 @@ var TRACK='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtguy-o
 function tgv(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'anon';}}
 function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+encodeURIComponent(tgv());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){}}
 track('view');track('optin');
+/* The sale, logged against the sales page's own cell key — the Control
+   Center reads views and buys off the same pair of keys. */
+function tgAbBuy(v){ var k='trtguy-sports-trt-guide::'+String(v).toUpperCase();
+  var u=TRACK+'?p='+encodeURIComponent(k)+'&e=optin&v='+encodeURIComponent(tgv());
+  try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){} }
 </script>
 <script>window.JV_EDITOR={ site:"td-order-thanks", page:1, noAuth:true, api:"https://jv-dashboard-chi.vercel.app/api/content" };</script>
 <script src="/editor.js?v=3"></script>

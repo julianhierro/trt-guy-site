@@ -33,6 +33,32 @@
 <link rel="stylesheet" href="/editor.css?v=1">
 <style>html.jv-pending body{visibility:hidden}</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
+<script>
+/* ── Price test: A $29.99 (list) vs B $14.99 ───────────────────────────────
+   This page only ever decides WHICH cell a visitor is in. What that cell
+   costs lives on the worker, so a browser can pick a letter and never a
+   price. The bucket is sticky per visitor, so a buyer sees one price from
+   first visit through checkout. ?v=A / ?v=B previews a cell without joining
+   the test. Switch the whole thing off with ON = false: everyone gets A. */
+(function () {
+  var ON = true, KEY = 'tg-ab-sports-price', CENTS = { A: 2999, B: 1499 };
+  var pin = (location.search.match(/[?&]v=([ABab])(&|$)/) || [])[1];
+  var v = 'A';
+  if (pin) v = pin.toUpperCase();
+  else if (ON) {
+    // No storage means no sticky bucket, and an unstable price is worse than
+    // no test — those visitors stay on the list price.
+    try {
+      v = localStorage.getItem(KEY) || '';
+      if (v !== 'A' && v !== 'B') { v = Math.random() < 0.5 ? 'A' : 'B'; localStorage.setItem(KEY, v); }
+    } catch (e) { v = 'A'; }
+  }
+  var cents = CENTS[v] || CENTS.A;
+  window.TG_AB = { on: ON, variant: v, pinned: !!pin, cents: cents,
+                   list: '$29.99', shown: '$' + (cents / 100).toFixed(2),
+                   tracked: ON || !!pin };
+})();
+</script>
 <style>
   :root{--acc:#1a5cff;--acc-d:#0f3fd6;--bg:#f4f6fa;--card:#fff;--txt:#0b0d10;--mut:#5b6572;--line:rgba(11,13,16,.12);--ok:#12994a;
     --display:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
@@ -292,7 +318,11 @@
 var TRACK='https://jv-dashboard-chi.vercel.app/api/pageview', PAGE_KEY='trtguy-sports-trt-guide';
 function tgv(){try{var k='tg-vid',v=localStorage.getItem(k);if(!v){v=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'anon';}}
 function track(e){var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY)+'&e='+e+'&v='+encodeURIComponent(tgv());try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){}}
-if(!/[?&]edit=1/.test(location.search)) track('view');
+function trackAb(e){ /* same beacon, cell-scoped page key — this is what the Control Center's price-test panel reads */
+  var ab=window.TG_AB; if(!ab||!ab.tracked) return;
+  var u=TRACK+'?p='+encodeURIComponent(PAGE_KEY+'::'+ab.variant)+'&e='+e+'&v='+encodeURIComponent(tgv());
+  try{if(navigator.sendBeacon&&navigator.sendBeacon(u))return;}catch(x){}try{new Image().src=u;}catch(x){}}
+if(!/[?&]edit=1/.test(location.search)){ track('view'); trackAb('view'); }
 
 /* Checkout wiring — set CHECKOUT_URL to your paid checkout link and every button uses it. */
 var CHECKOUT_URL = "#order"; // the checkout is at the bottom of this page
@@ -318,7 +348,8 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
   if (/[?&]edit=1/.test(location.search)) return;
   var STRIPE_PK = 'pk_live_51UDPjeC64DWJl9A9EXAruEDv7uUdQA2kxE98GsLBQ3ti2UQGz6W1r76VEnKnW1RYgw76J4LJ5tBU02BwQMIuSCMq00HwfCHZzE';
   var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
-  var PRODUCT = 'sports-trt-guide', AMOUNT = 2999, CURRENCY = 'usd';
+  var AB = window.TG_AB || { variant: '', cents: 2999 };
+  var PRODUCT = 'sports-trt-guide', AMOUNT = AB.cents || 2999, CURRENCY = 'usd';
   /* Test mode: only on a local copy of this page, and only with ?test=1. It
      uses Stripe's test keys so a full purchase can be walked through with a
      test card. It can never switch on for a real visitor on trt-guy.com. */
@@ -390,9 +421,12 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
       var sub = await elements.submit();                 // validates the card fields first
       if (sub.error) throw new Error(sub.error.message);
       var r = await fetch(API + '/pay-intent', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product: PRODUCT, email: email, name: name, test: TEST }) });
+        body: JSON.stringify({ product: PRODUCT, email: email, name: name, variant: AB.variant || '', test: TEST }) });
       var d = await r.json();
       if (!r.ok || !d.clientSecret) throw new Error(d.error || 'Could not start the payment.');
+      // The worker priced it. If that is not the price on the page, stop —
+      // nobody gets charged an amount they were not shown.
+      if (typeof d.amount === 'number' && d.amount !== AMOUNT) throw new Error('The price on this page is out of date. Please refresh and try again.');
       var res = await stripe.confirmPayment({ elements: elements, clientSecret: d.clientSecret,
         confirmParams: { return_url: location.origin + '/order/thanks/',
                          payment_method_data: { billing_details: { name: name, email: email } } },
@@ -421,5 +455,39 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){
 })();
 </script>
 <script src="/editor.js?v=3"></script>
+<script>
+/* ── The test cell's price, written over the page's own ────────────────────
+   Only the numeral changes — every word on this page, and every published
+   edit, stays exactly as written. It runs AFTER the editor has applied
+   published edits, because touching the DOM earlier lets the auto-tagger
+   renumber data-eids and land edits on the wrong elements. Skipped in
+   ?edit=1 so the real copy is what gets edited. */
+(function () {
+  var ab = window.TG_AB;
+  if (!ab || ab.shown === ab.list) return;
+  if (/[?&]edit=1/.test(location.search)) return;
+  var FROM = /\$29\.99/g;
+  function swap() {
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) {
+      if (n.nodeValue.indexOf(ab.list) === -1) continue;
+      var t = n.parentNode && n.parentNode.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE') continue;
+      n.nodeValue = n.nodeValue.replace(FROM, ab.shown);
+    }
+  }
+  function start() {
+    swap();
+    /* The editor rebuilds nodes as edits land, and the Pay button relabels
+       itself — one observer keeps the price right without re-reading the
+       page. It settles on its own: a swapped node no longer matches. */
+    try { new MutationObserver(swap).observe(document.body, { childList: true, subtree: true, characterData: true }); } catch (e) {}
+  }
+  var cl = document.documentElement.classList;
+  if (!cl.contains('jv-pending')) { start(); return; }
+  var t = setInterval(function () { if (!cl.contains('jv-pending')) { clearInterval(t); start(); } }, 60);
+  setTimeout(function () { clearInterval(t); start(); }, 4500);
+})();
+</script>
 </body>
 </html>
