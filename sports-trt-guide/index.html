@@ -56,7 +56,9 @@
   var cents = CENTS[v] || CENTS.A;
   window.TG_AB = { on: ON, variant: v, pinned: !!pin, cents: cents,
                    list: '$29.99', shown: '$' + (cents / 100).toFixed(2),
-                   tracked: ON || !!pin };
+                   // A pinned preview looks at a side without being counted in it,
+                   // so checking the page never moves the numbers.
+                   tracked: ON && !pin };
 })();
 </script>
 <style>
