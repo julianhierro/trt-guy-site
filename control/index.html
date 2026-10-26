@@ -648,9 +648,10 @@
       // Live price test. Visitors are split 50/50 on the sales page and each
       // cell logs its own views and sales under <key>::A / <key>::B.
       abTest:{ key:'trtguy-sports-trt-guide', name:'Price test',
-               note:'Half of new visitors see $14.99 instead of $29.99. Each side counts its own visitors and sales, so the number to compare is revenue per visitor \u2014 the cheaper price can win on sales and still lose on money.',
+               settled:{ v:'B', on:'25 Oct 2026' },
+               note:'What the $29.99 / $14.99 split showed. Each side counted its own visitors and sales, so the number that decided it is revenue per visitor \u2014 the cheaper price can win on sales and still lose on money.',
                variants:[{ v:'A', label:'$29.99', price:29.99 }, { v:'B', label:'$14.99', price:14.99 }] },
-      description:'The paid guide at $29.99 \u2014 sales page, Stripe checkout and the delivery page, with the fertility guide as a free bonus.',
+      description:'The paid guide at $14.99 \u2014 sales page, Stripe checkout and the delivery page, with the fertility guide as a free bonus.',
       home:'https://trt-guy.com/sports-trt-guide/',
       pages:[
         { kind:'asset', key:'trtguy-sports-trt-guide', tags:[], name:'Sales Page',
@@ -1213,9 +1214,12 @@
     const best = rows.filter(r => r.rpv != null).sort((a, b) => b.rpv - a.rpv)[0];
     const enough = rows.every(r => r.visitors >= 50) && rows.some(r => r.buys >= 1);
     const money = v => '$' + (v || 0).toFixed(2);
+    const done = t.settled;
     return '<div class="card" style="grid-column:1/-1">'
-      + '<div class="cardtop"><span class="tag">A/B test</span></div>'
+      + '<div class="cardtop"><span class="tag">' + (done ? 'A/B test \u00b7 settled' : 'A/B test') + '</span></div>'
       + '<div class="name">' + t.name + '</div>'
+      + (done ? '<p class="desc" style="color:var(--ink)"><b>Settled ' + done.on + ' \u2014 every visitor now sees '
+                + (t.variants.find(x => x.v === done.v) || {}).label + '.</b> The split is off and these numbers stopped with it.</p>' : '')
       + '<p class="desc">' + t.note + '</p>'
       + '<div style="display:grid;gap:10px;margin:14px 0 4px">'
       + rows.map(r => '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;'
@@ -1230,7 +1234,8 @@
           + '</div>').join('')
       + '</div>'
       + '<p class="desc" style="margin-top:10px">'
-      + (!totalVis ? 'No visitors counted in this range yet.'
+      + (done ? 'Widen the date range to see the whole test \u2014 these counters only cover the range above.'
+         : !totalVis ? 'No visitors counted in this range yet.'
          : !enough ? 'Too early to call \u2014 wait for at least 50 visitors on each side and a sale or two.'
          : '<b>' + best.v + ' (' + best.label + ') is ahead</b> on revenue per visitor.')
       + ' Preview a side without joining the test: <a href="' + pr.home + '?v=A" target="_blank" rel="noopener">?v=A</a>'

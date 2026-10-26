@@ -34,18 +34,19 @@
 <style>html.jv-pending body{visibility:hidden}</style>
 <script>document.documentElement.classList.add("jv-pending");setTimeout(function(){document.documentElement.classList.remove("jv-pending");},4000);</script>
 <script>
-/* ── Price test: A $29.99 (list) vs B $14.99 ───────────────────────────────
-   This page only ever decides WHICH cell a visitor is in. What that cell
-   costs lives on the worker, so a browser can pick a letter and never a
-   price. The bucket is sticky per visitor, so a buyer sees one price from
-   first visit through checkout. ?v=A / ?v=B previews a cell without joining
-   the test. Switch the whole thing off with ON = false: everyone gets A. */
+/* ── The price everyone sees ───────────────────────────────────────────────
+   The $29.99 / $14.99 split ran until 2026-10-25 and is over: every visitor
+   now gets $14.99. The mechanism that carried the test carries the price —
+   the page says which cell, the worker says what that cell costs, so the
+   amount is still decided server-side and never here.
+   SPLIT = true puts the 50/50 test back; LIVE is the price everyone gets
+   while it is off. ?v=A still shows the old $29.99 page, uncounted. */
 (function () {
-  var ON = true, KEY = 'tg-ab-sports-price', CENTS = { A: 2999, B: 1499 };
+  var SPLIT = false, LIVE = 'B', KEY = 'tg-ab-sports-price', CENTS = { A: 2999, B: 1499 };
   var pin = (location.search.match(/[?&]v=([ABab])(&|$)/) || [])[1];
-  var v = 'A';
+  var v = LIVE;
   if (pin) v = pin.toUpperCase();
-  else if (ON) {
+  else if (SPLIT) {
     // No storage means no sticky bucket, and an unstable price is worse than
     // no test — those visitors stay on the list price.
     try {
@@ -53,12 +54,14 @@
       if (v !== 'A' && v !== 'B') { v = Math.random() < 0.5 ? 'A' : 'B'; localStorage.setItem(KEY, v); }
     } catch (e) { v = 'A'; }
   }
-  var cents = CENTS[v] || CENTS.A;
-  window.TG_AB = { on: ON, variant: v, pinned: !!pin, cents: cents,
+  var cents = CENTS[v] || CENTS[LIVE];
+  window.TG_AB = { on: SPLIT, variant: v, pinned: !!pin, cents: cents,
                    list: '$29.99', shown: '$' + (cents / 100).toFixed(2),
-                   // A pinned preview looks at a side without being counted in it,
-                   // so checking the page never moves the numbers.
-                   tracked: ON && !pin };
+                   // Cell counting belongs to the test. With the split off the
+                   // page still logs its views the way every other page does,
+                   // but the A/B numbers stop where the test stopped instead of
+                   // one side quietly running on without the other.
+                   tracked: SPLIT && !pin };
 })();
 </script>
 <style>
