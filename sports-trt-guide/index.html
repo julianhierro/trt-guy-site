@@ -83,9 +83,11 @@
      whole hero stack is tightened to fit above the fold with browser chrome. */
   @media (max-width:560px){
     .wordmark{height:32px;margin:16px 0 4px}
-    h1{font-size:clamp(26px,7vw,34px);margin:8px 0}
-    .sub{font-size:15px !important;margin:0 auto 10px;line-height:1.4}
-    header.center img.slot{max-width:175px;margin:8px auto 2px}
+    h1{font-size:clamp(24px,6.6vw,32px);margin:6px 0}
+    .sub{font-size:14px !important;margin:0 auto 8px;line-height:1.38}
+    /* svh is the viewport height WITH the browser bars showing, so the mockup
+       shrinks to whatever is actually visible instead of a guessed number. */
+    header.center img.slot{max-width:175px;max-height:19svh;width:auto;height:auto;margin:6px auto 2px}
     .ctablock{margin:10px 0}
     .price{font-size:19px;margin:6px 0 2px}
     .cta{margin:10px auto;padding:16px 18px}
@@ -96,7 +98,7 @@
     .wordmark{height:26px;margin:12px 0 2px}
     h1{font-size:24px;margin:6px 0}
     .sub{font-size:13.5px !important;margin:0 auto 8px}
-    header.center img.slot{max-width:120px;margin:6px auto 0}
+    header.center img.slot{max-width:120px;max-height:16svh;width:auto;height:auto;margin:4px auto 0}
     .price{font-size:17px}
     .cta{margin:8px auto;padding:14px 16px}
   }
