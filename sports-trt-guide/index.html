@@ -79,7 +79,17 @@
   p{margin:0 0 16px}
   img.slot{display:block;width:100%;max-width:620px;margin:22px auto;border-radius:14px;border:1px solid var(--line)}
   header.center img.slot{max-width:400px;border:0;border-radius:0;background:none;margin:16px auto 4px}
-  @media (max-width:560px){ header.center img.slot{max-width:300px} }
+  /* Phones: the first Pay button has to be on screen without scrolling, so the
+     whole hero stack is tightened to fit above the fold with browser chrome. */
+  @media (max-width:560px){
+    .wordmark{height:32px;margin:16px 0 4px}
+    h1{font-size:clamp(26px,7vw,34px);margin:8px 0}
+    .sub{font-size:15px !important;margin:0 auto 10px;line-height:1.4}
+    header.center img.slot{max-width:175px;margin:8px auto 2px}
+    .ctablock{margin:10px 0}
+    .price{font-size:19px;margin:6px 0 2px}
+    .cta{margin:10px auto;padding:16px 18px}
+  }
   .price{font-family:var(--display);font-weight:800;font-size:22px;text-transform:uppercase;text-align:center;margin:10px 0 2px}
   .guar-line{text-align:center;font-weight:700;font-size:14px;color:var(--ok);margin-bottom:2px}
   .cta{display:block;width:100%;max-width:560px;margin:14px auto;background:var(--acc);color:#fff;text-decoration:none;text-align:center;
