@@ -55,6 +55,8 @@ function bloodworkEmailHtml(firstName) {
 
 // Tags are built server-side so the browser can't inject arbitrary ones.
 function tagsFor(source, result) {
+  // Team Evil GSP list stays out of every automation: this tag only, no trt-dad base.
+  if (source === 'team-evil-gsp') return ['teamevilgsp'];
   const base = ['trt-dad'];
   if (source === 'quiz') {
     base.push('adam-quiz', result === 'positive' ? 'low-t-positive' : 'low-t-negative');
@@ -78,8 +80,6 @@ function tagsFor(source, result) {
     base.push('fertility-guide', 'trt-interested');
   } else if (source === 'signup') {
     base.push('sign up');
-  } else if (source === 'team-evil-gsp') {
-    base.push('sign up', 'team-evil-gsp');
   }
   return base;
 }

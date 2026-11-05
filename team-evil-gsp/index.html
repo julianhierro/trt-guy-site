@@ -5,9 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Sign Up | TRT Guy x Team Evil GSP</title>
-<meta content="Sign Up Below To Be Notified" name="description"/>
-<meta property="og:title" content="TRT Vs Sports TRT / HRT Vs Running Cycles"/>
-<meta property="og:description" content="Sign Up Below To Be Notified"/>
+<meta content="Sign up to be notified when we drop more content" name="description"/>
+<meta property="og:title" content="Sign up to be notified when we drop more content"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://trt-guy.com/team-evil-gsp/"/>
 <meta property="og:image" content="https://trt-guy.com/img/og-team-evil-gsp.png"/>
@@ -18,9 +17,9 @@
 <link rel="icon" href="/favicon.ico"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#0f0f10;--txt:#fff;--mut:#b4b7bc;--line:rgba(255,255,255,.22);--acc:#1a5cff;--acc-d:#0f3fd6;--ok:#4ade80;--bad:#f87171}
+:root{--bg:#000;--txt:#fff;--mut:#fff;--line:#fff;--acc:#fff;--acc-d:#d9d9d9;--ok:#fff;--bad:#fff}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--txt);font:400 16px/1.5 Inter,-apple-system,"Segoe UI",sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
@@ -30,13 +29,12 @@ main{width:100%;max-width:420px;text-align:center}
 .brands .gsp{width:56%}
 .brands .tg{width:33%}
 .brands span{color:var(--mut);font-size:18px;flex:none}
-h1{font-family:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;font-weight:700;font-size:44px;line-height:1.05;margin:0 0 12px}
-.sub{font-size:18px;color:var(--mut);margin:0 0 24px}
+.sub{font-size:18px;margin:0 0 24px}
 form{display:flex;flex-direction:column;gap:12px}
-input{font:inherit;padding:14px 16px;border:1px solid var(--line);border-radius:10px;width:100%;background:rgba(255,255,255,.06);color:var(--txt)}
+input{font:inherit;padding:14px 16px;border:1px solid var(--line);border-radius:10px;width:100%;background:#000;color:var(--txt)}
 input::placeholder{color:var(--mut)}
 input:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:transparent}
-button{font:600 17px Inter,sans-serif;padding:15px 16px;border:0;border-radius:10px;background:var(--acc);color:#fff;cursor:pointer}
+button{font:600 17px Inter,sans-serif;padding:15px 16px;border:0;border-radius:10px;background:var(--acc);color:#000;cursor:pointer}
 button:hover{background:var(--acc-d)}
 button:disabled{opacity:.6;cursor:default}
 #msg{min-height:22px;margin-top:12px;font-size:15px}
@@ -50,8 +48,7 @@ button:disabled{opacity:.6;cursor:default}
     <span aria-hidden="true">&times;</span>
     <img class="tg" src="/img/logo-white.png" alt="TRT Guy" width="1285" height="602"/>
   </div>
-  <h1>TRT Vs Sports TRT / HRT Vs Running Cycles</h1>
-  <p class="sub">Sign Up Below To Be Notified</p>
+  <p class="sub">Sign up to be notified when we drop more content</p>
   <form id="form" novalidate>
     <input id="email" type="email" placeholder="Email" autocomplete="email" required/>
     <button id="go" type="submit">Sign up</button>
@@ -81,6 +78,7 @@ form.addEventListener('submit', async function (e) {
     });
     if (!res.ok) throw new Error('bad status ' + res.status);
     form.style.display = 'none';
+    document.querySelector('.sub').style.display = 'none';
     msg.className = 'ok'; msg.textContent = "You're signed up.";
   } catch (err) {
     go.disabled = false; go.textContent = 'Sign up';
