@@ -42,6 +42,18 @@
   a.link:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(11,13,16,.10);border-color:var(--acc)}
   a.link .lbl{text-align:left}
   a.link .arw{color:var(--acc);font-size:22px;flex:0 0 auto}
+  .links-yt{margin-top:14px}
+  details.link{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(11,13,16,.05);text-align:left}
+  details.link summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;cursor:pointer;list-style:none;
+    font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.02em;text-transform:uppercase}
+  details.link summary::-webkit-details-marker{display:none}
+  details.link .arw{color:var(--acc);font-size:22px;flex:0 0 auto;transition:transform .15s ease}
+  details.link[open] .arw{transform:rotate(90deg)}
+  .videos{display:flex;flex-direction:column;gap:10px;padding:0 12px 12px}
+  a.video{display:flex;align-items:center;gap:12px;padding:8px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--txt)}
+  a.video:hover{border-color:var(--acc)}
+  a.video img{display:block;width:112px;height:63px;object-fit:cover;border-radius:6px;flex:0 0 auto}
+  a.video .vt{font-size:14px;font-weight:600;line-height:1.35}
   .foot{margin-top:40px;color:var(--mut);font-size:12px}
 </style>
 <style>html.jv-pending body{visibility:hidden}</style>
@@ -58,6 +70,17 @@
       <a class="link" href="https://trt-guy.com/trt-101-guide/get/" data-jv-removable data-eid="e200"><div class="lbl" data-eid="e201">Free TRT 101 Guide</div><span class="arw" data-noedit>&rarr;</span></a>
       <a class="link" href="https://trt-guy.com/protocol/" data-jv-removable data-eid="e220"><div class="lbl" data-eid="e221">My Protocol</div><span class="arw" data-noedit>&rarr;</span></a>
       <a class="link" href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ3y7RlZTEghPErc6CzHjYuidkCK3XC0WtPoWE6ROhhCmtFQVA39PluFNG_FGi0jtVmdBoO7XWzn" data-jv-removable data-eid="e230"><div class="lbl" data-eid="e231">Schedule a Paid 1-Hour Consultation</div><span class="arw" data-noedit>&rarr;</span></a>
+    </div>
+
+    <!-- Outside #links on purpose: the published reorder on #links appends its listed items, which would push anything else in there to the top. -->
+    <div class="links links-yt" data-eid="e249">
+      <details class="link" data-jv-removable data-eid="e250">
+        <summary data-eid="e251"><div class="lbl" data-eid="e252">YouTube</div><span class="arw" data-noedit>&rarr;</span></summary>
+        <div class="videos" data-eid="e253">
+          <!-- To add a video: copy this <a> block, then give it new data-eids, link, thumbnail and title. -->
+          <a class="video" href="https://youtu.be/aY3zxKIk_JQ" data-jv-removable data-eid="e260"><img src="/img/yt-masteron-broderick.jpg" alt="" width="112" height="63" loading="lazy" data-eid="e261"><div class="vt" data-eid="e262">How Masteron Makes You A Better Athlete Ft. Broderick Chavez</div></a>
+        </div>
+      </details>
     </div>
 
     <div class="foot">© TRT Guy</div>
