@@ -172,8 +172,8 @@
 <script>
 (function () {
   var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
-  var WEBINAR = 'trt-oct';
-  var STARTS = Date.parse('2026-10-28T22:00:00Z');   // 5:00 PM New York
+  var WEBINAR = '';                                  // whichever one is set live
+  var STARTS = Date.parse('2026-10-28T22:00:00Z');   // replaced by the live record below
 
   // Countdown. Ticks on the second boundary rather than every 1000ms of drift,
   // so the seconds never skip or repeat on a tab that has been sitting idle.
@@ -190,6 +190,31 @@
   }
   tick();
   document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
+
+  // The date shown on the page comes from the Command Center, not from this
+  // file. The editor rewrites its own elements a moment after load, so the
+  // date lines are set again once that has settled.
+  function showWhen(iso) {
+    var d = new Date(iso);
+    var long = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short',
+      month: 'short', day: 'numeric', year: 'numeric' }).format(d);
+    var time = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric',
+      minute: '2-digit', timeZoneName: 'short' }).format(d);
+    var head = document.querySelector('[data-eid="w-when"]');
+    if (head) head.textContent = long + ' · ' + time;
+    var card = document.querySelector('.regwhen');
+    if (card) card.innerHTML = long + ' &nbsp;|&nbsp; ' + time;
+  }
+  fetch(API + '/webinar-next').then(function (r) { return r.json(); }).then(function (o) {
+    var w = o && o.webinar;
+    if (!w || !w.starts_at) return;
+    WEBINAR = w.id;
+    STARTS = Date.parse(w.starts_at);
+    tick();
+    showWhen(w.starts_at);
+    setTimeout(function () { showWhen(w.starts_at); }, 1600);
+    setTimeout(function () { showWhen(w.starts_at); }, 4000);
+  }).catch(function () {});
 
   if (/[?&]edit=1/.test(location.search)) return;
 
