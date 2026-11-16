@@ -117,13 +117,14 @@ let DATA = { webinars: [], steps: [] };
    this page can never disagree with what actually sends. */
 const STEP_LABEL = {
   confirm: ['Confirmation', 'the moment they register'],
-  t24:     ['24 hours before', ''],
-  t1:      ['1 hour before', ''],
-  t10:     ['10 minutes before', ''],
-  live:    ['Going live', 'at the start time'],
+  t48:     ['Two days before', ''],
+  t24:     ['The day before', ''],
+  t5:      ['Day of — 5 hours before', ''],
+  t1:      ['Day of — 1 hour before', ''],
+  live:    ['Day of — we are starting', 'at the start time'],
   replay:  ['Replay / no-show', ''],
 };
-const STEP_ORDER = ['confirm','t24','t1','t10','live','replay'];
+const STEP_ORDER = ['confirm','t48','t24','t5','t1','live','replay'];
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
