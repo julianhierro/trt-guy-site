@@ -211,15 +211,44 @@
     var card = document.querySelector('.regwhen');
     if (card) card.innerHTML = long + ' &nbsp;|&nbsp; ' + time;
   }
+  // Headline, sub-headline and bullets come from the Command Center too, so one
+  // place changes the page. While you are editing, the page editor owns the
+  // text instead — otherwise this would overwrite what you just typed.
+  var EDITING = /[?&]edit=1/.test(location.search);
+  function showCopy(w) {
+    if (EDITING) return;
+    if (w.title) {
+      var h1 = document.querySelector('[data-eid="w-h1"]');
+      if (h1) h1.textContent = w.title;
+      var rn = document.querySelector('.regname');
+      if (rn) rn.textContent = w.title;
+      document.title = w.title + ' \u2014 TRT Guy';
+    }
+    var sub = document.querySelector('[data-eid="w-sub"]');
+    if (sub) { if (w.subhead) { sub.textContent = w.subhead; sub.hidden = false; } else { sub.hidden = true; } }
+    if (w.bullets && w.bullets.length) {
+      var ul = document.querySelector('[data-eid="w-list"]');
+      if (ul) {
+        ul.innerHTML = '';
+        w.bullets.forEach(function (b, i) {
+          var li = document.createElement('li');
+          li.setAttribute('data-eid', 'w-b' + (i + 1));
+          li.textContent = b;
+          ul.appendChild(li);
+        });
+      }
+    }
+  }
+
   fetch(API + '/webinar-next').then(function (r) { return r.json(); }).then(function (o) {
     var w = o && o.webinar;
     if (!w || !w.starts_at) return;
     WEBINAR = w.id;
     STARTS = Date.parse(w.starts_at);
     tick();
-    showWhen(w.starts_at);
-    setTimeout(function () { showWhen(w.starts_at); }, 1600);
-    setTimeout(function () { showWhen(w.starts_at); }, 4000);
+    showWhen(w.starts_at); showCopy(w);
+    setTimeout(function () { showWhen(w.starts_at); showCopy(w); }, 1600);
+    setTimeout(function () { showWhen(w.starts_at); showCopy(w); }, 4000);
   }).catch(function () {});
 
   if (/[?&]edit=1/.test(location.search)) return;
