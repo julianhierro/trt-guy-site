@@ -233,7 +233,8 @@ function render(){
       <div class="acts"><button class="btn pri act" data-act="save">Save</button>
         <button class="btn ghost act" data-act="clone">Run it again on a new date</button>
         <button class="btn ghost act" data-act="regs">Registrations</button>
-        <button class="btn ghost act" data-act="run">Send due reminders now</button></div>
+        <button class="btn ghost act" data-act="run">Send due reminders now</button>
+        <button class="btn ghost act" data-act="testall">Email me all of them</button></div>
 
       <h3>Emails</h3>
       ${STEP_ORDER.map(st => {
@@ -248,7 +249,8 @@ function render(){
           <label>Subject</label><input class="m" data-m="subject" value="${esc(m.subject)}">
           <label style="margin-top:9px">Preview line</label><input class="m" data-m="preview" value="${esc(m.preview)}" placeholder="The grey line the inbox shows after the subject">
           <label style="margin-top:9px">Message</label><textarea class="m" data-m="body">${esc(m.body)}</textarea>
-          <div class="acts"><button class="btn act" data-act="msg">Save this email</button></div>
+          <div class="acts"><button class="btn act" data-act="msg">Save this email</button>
+            <button class="btn ghost act" data-act="test">Send me a test</button></div>
         </div>`;
       }).join('')}
       <p class="hint">You can drop <code>{{first_name}}</code>, <code>{{join_link}}</code>, <code>{{title}}</code>,
@@ -297,6 +299,13 @@ document.addEventListener('click', async ev => {
         active: g('active') === '1' } }) });
       flash('Saved — the page, the invite and the reminders all moved.');
       await load();
+    } else if(act === 'test' || act === 'testall'){
+      // Always goes to your own address — the worker ignores any other.
+      const step = act === 'test' ? b.closest('.msg').dataset.step : 'all';
+      const r = await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'test', id, step }) });
+      if(r && r.error) throw new Error(r.error);
+      const n = (r.sent || []).length;
+      flash(n === 1 ? 'Sent to ' + r.to + '.' : n + ' sent to ' + r.to + '.');
     } else if(act === 'clone'){
       // Everything on this card comes along: the copy, the bullets, the WhatsApp
       // link and all seven emails. Only the date and the room start empty.
