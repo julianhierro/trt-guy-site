@@ -119,15 +119,17 @@ let DATA = { webinars: [], steps: [] };
 /* Each reminder, in the order they go out. The offsets come from the worker so
    this page can never disagree with what actually sends. */
 const STEP_LABEL = {
-  confirm: ['Confirmation', 'the moment they register'],
-  t48:     ['Two days before', ''],
-  t24:     ['The day before', ''],
-  t5:      ['Day of — 5 hours before', ''],
-  t1:      ['Day of — 1 hour before', ''],
-  live:    ['Day of — we are starting', 'at the start time'],
+  confirm: ['1 · You\u2019re in', 'the moment they register'],
+  d5:      ['2 · Five days out', ''],
+  d4:      ['3 · Four days out', ''],
+  d3:      ['4 · Three days out', ''],
+  d2:      ['5 · Two days out', ''],
+  d1:      ['6 · The night before', ''],
+  morning: ['7 · Morning of', ''],
+  live:    ['We\u2019re live', ''],
   replay:  ['Replay / no-show', ''],
 };
-const STEP_ORDER = ['confirm','t48','t24','t5','t1','live','replay'];
+const STEP_ORDER = ['confirm','d5','d4','d3','d2','d1','morning','live','replay'];
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -207,6 +209,8 @@ function render(){
       </div>
       <div style="margin-top:12px"><label>Room link</label>
         <input class="f" data-f="join_url" value="${esc(w.join_url)}" placeholder="Blank sends people back to the sign-up page">
+        <label style="margin-top:12px">WhatsApp group</label>
+        <input class="f" data-f="whatsapp_url" value="${esc(w.whatsapp_url || '')}" placeholder="Invite link — fills {{whatsapp}} in any email">
         <p class="hint">Invites point at <code>trt-guy.com/webinar/join/</code>, which forwards here — so you can change the room after people have saved the date.</p></div>
       <div class="acts"><button class="btn pri act" data-act="save">Save</button>
         <button class="btn ghost act" data-act="regs">Registrations</button>
@@ -223,12 +227,14 @@ function render(){
             <span class="off">${esc(off)}${empty ? ' · nothing written, so nothing sends' : ''}</span></div>
           ${resultLine((w.step_stats || {})[st])}
           <label>Subject</label><input class="m" data-m="subject" value="${esc(m.subject)}">
+          <label style="margin-top:9px">Preview line</label><input class="m" data-m="preview" value="${esc(m.preview)}" placeholder="The grey line the inbox shows after the subject">
           <label style="margin-top:9px">Message</label><textarea class="m" data-m="body">${esc(m.body)}</textarea>
           <div class="acts"><button class="btn act" data-act="msg">Save this email</button></div>
         </div>`;
       }).join('')}
       <p class="hint">You can drop <code>{{first_name}}</code>, <code>{{join_link}}</code>, <code>{{title}}</code>,
-        <code>{{date}}</code>, <code>{{time}}</code> and <code>{{calendar}}</code> into any of them.
+        <code>{{day}}</code>, <code>{{date}}</code>, <code>{{time}}</code>, <code>{{calendar}}</code>
+        and <code>{{whatsapp}}</code> into any of them.
         A line that holds only the join link disappears while there is no room link.</p>
       <div id="regs-${esc(w.id)}"></div>
     </div>`;
@@ -265,7 +271,8 @@ document.addEventListener('click', async ev => {
       const when = wallToUtc(g('date'), g('time'), 'America/New_York');
       if(!when) throw new Error('Pick a date and a time.');
       await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'save', webinar:{
-        id, title: g('title'), starts_at: when.toISOString(), join_url: g('join_url'), active: g('active') === '1' } }) });
+        id, title: g('title'), starts_at: when.toISOString(), join_url: g('join_url'),
+        whatsapp_url: g('whatsapp_url'), active: g('active') === '1' } }) });
       flash('Saved — the page, the invite and the reminders all moved.');
       await load();
     } else if(act === 'msg'){
@@ -273,6 +280,7 @@ document.addEventListener('click', async ev => {
       await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'message', id,
         step: box.dataset.step,
         subject: box.querySelector('.m[data-m="subject"]').value,
+        preview: box.querySelector('.m[data-m="preview"]').value,
         body: box.querySelector('.m[data-m="body"]').value }) });
       flash('Email saved.');
       await load();

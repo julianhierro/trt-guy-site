@@ -38,6 +38,10 @@
   .cal a{display:block;background:#fff;color:var(--ink);text-decoration:none;border-radius:10px;padding:15px 12px;font-weight:600;font-size:14.5px}
   .cal a:hover{background:#e8ebf0}
   @media (max-width:480px){.cal{grid-template-columns:1fr}}
+  .wa{margin-top:10px}
+  .wa a{display:block;background:#25d366;color:#07130b;text-decoration:none;border-radius:10px;
+        padding:15px 12px;font-weight:700;font-size:14.5px;text-align:center}
+  .wa a:hover{background:#1fbb59}
   .foot{color:#8d96a3;font-size:13px;margin-top:28px}
   @media (max-width:560px){
     .shell{padding:0 17px}
@@ -75,6 +79,10 @@
     <a id="calIcs" href="#">Apple Calendar or Outlook</a>
   </div>
 
+  <div class="wa" id="waWrap" data-eid="wt-wa" data-noedit hidden>
+    <a id="waJoin" href="#" target="_blank" rel="noopener">Join the WhatsApp group</a>
+  </div>
+
   <p class="foot" data-eid="wt-foot">TRT Guy · Questions? Message me and I'll sort it.</p>
 </div>
 
@@ -83,12 +91,25 @@
    so a change of time or room needs no edit here. */
 (function () {
   var API = 'https://trt-guy-onboarding.julianhierro.workers.dev';
-  var w = new URLSearchParams(location.search).get('w') || 'trt-oct';
+  var w = new URLSearchParams(location.search).get('w') || '';
   var ics = API + '/webinar.ics?w=' + encodeURIComponent(w);
   var g = document.getElementById('calGoogle');
   var a = document.getElementById('calIcs');
   if (g) g.href = API + '/webinar-cal?w=' + encodeURIComponent(w);
   if (a) a.href = ics;   // works on its own if the script below never runs
+
+  // The group link lives on the webinar record, so it can be changed in the
+  // Command Center without touching this page.
+  fetch(API + '/webinar-next' + (w ? '?w=' + encodeURIComponent(w) : ''), { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var link = d && d.webinar && d.webinar.whatsapp;
+      if (!link) return;
+      var wrap = document.getElementById('waWrap'), btn = document.getElementById('waJoin');
+      if (!wrap || !btn) return;
+      btn.href = link; wrap.hidden = false;
+    })
+    .catch(function () {});
 
   // Safari and the in-app browsers (Instagram, Facebook) refuse a download that
   // comes from another domain, so fetch the file and hand it over from this page.
