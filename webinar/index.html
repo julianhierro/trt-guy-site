@@ -224,8 +224,13 @@
       if (rn) rn.textContent = w.title;
       document.title = w.title + ' \u2014 TRT Guy';
     }
-    var sub = document.querySelector('[data-eid="w-sub"]');
-    if (sub) { if (w.subhead) { sub.textContent = w.subhead; sub.hidden = false; } else { sub.hidden = true; } }
+    // Each text line: filled from the record, hidden when the record is blank.
+    [['w-sub', w.subhead], ['w-p1', w.intro], ['w-p2', w.lead], ['w-p3', w.outro]]
+      .forEach(function (pair) {
+        var el = document.querySelector('[data-eid="' + pair[0] + '"]');
+        if (!el) return;
+        if (pair[1]) { el.textContent = pair[1]; el.hidden = false; } else { el.hidden = true; }
+      });
     if (w.bullets && w.bullets.length) {
       var ul = document.querySelector('[data-eid="w-list"]');
       if (ul) {

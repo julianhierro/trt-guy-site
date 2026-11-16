@@ -211,17 +211,27 @@ function render(){
       </div>
       <div style="margin-top:12px"><label>Room link</label>
         <input class="f" data-f="join_url" value="${esc(w.join_url)}" placeholder="Blank sends people back to the sign-up page">
+        <label style="margin-top:12px">Opening paragraph</label>
+        <textarea class="f bullets" data-f="intro" rows="3">${esc(w.intro || '')}</textarea>
+
         <label style="margin-top:12px">Sub-headline</label>
         <input class="f" data-f="subhead" value="${esc(w.subhead || '')}" placeholder="The line under the headline on the sign-up page">
 
+        <label style="margin-top:12px">Line above the bullets</label>
+        <input class="f" data-f="lead" value="${esc(w.lead || '')}" placeholder="e.g. What you’ll learn:">
+
         <label style="margin-top:12px">Bullet points</label>
         <textarea class="f bullets" data-f="bullets" rows="6" placeholder="One per line">${esc((w.bullets || []).join('\n'))}</textarea>
-        <p class="hint">One per line. These are the “What you’ll learn” list on the sign-up page.</p>
+        <p class="hint">One per line. Leave any field blank and it disappears from the page.</p>
+
+        <label style="margin-top:12px">Closing paragraph</label>
+        <textarea class="f bullets" data-f="outro" rows="3">${esc(w.outro || '')}</textarea>
 
         <label style="margin-top:12px">WhatsApp group</label>
         <input class="f" data-f="whatsapp_url" value="${esc(w.whatsapp_url || '')}" placeholder="Invite link — fills {{whatsapp}} in any email">
         <p class="hint">Invites point at <code>trt-guy.com/webinar/join/</code>, which forwards here — so you can change the room after people have saved the date.</p></div>
       <div class="acts"><button class="btn pri act" data-act="save">Save</button>
+        <button class="btn ghost act" data-act="clone">Run it again on a new date</button>
         <button class="btn ghost act" data-act="regs">Registrations</button>
         <button class="btn ghost act" data-act="run">Send due reminders now</button></div>
 
@@ -282,9 +292,26 @@ document.addEventListener('click', async ev => {
       await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'save', webinar:{
         id, title: g('title'), starts_at: when.toISOString(), join_url: g('join_url'),
         whatsapp_url: g('whatsapp_url'), subhead: g('subhead'),
+        intro: g('intro'), lead: g('lead'), outro: g('outro'),
         bullets: g('bullets').split('\n').map(function (b) { return b.trim(); }).filter(Boolean),
         active: g('active') === '1' } }) });
       flash('Saved — the page, the invite and the reminders all moved.');
+      await load();
+    } else if(act === 'clone'){
+      // Everything on this card comes along: the copy, the bullets, the WhatsApp
+      // link and all seven emails. Only the date and the room start empty.
+      const d = prompt('New date and time, as 2027-01-20 18:30 (Eastern):');
+      if(!d) return;
+      const m = /^\s*(\d{4}-\d{2}-\d{2})[ T](\d{1,2}:\d{2})\s*$/.exec(d);
+      if(!m) throw new Error('Use the form 2027-01-20 18:30');
+      const when = wallToUtc(m[1], m[2].padStart(5,'0'), 'America/New_York');
+      if(!when) throw new Error('That date did not make sense.');
+      const nid = prompt('A short id for it (letters, numbers and dashes):', 'trt-' + m[1]);
+      if(!nid) return;
+      const r = await api('/webinar-admin', { method:'POST', body: JSON.stringify({
+        action:'clone', from:id, id:nid, starts_at: when.toISOString() }) });
+      if(r && r.error) throw new Error(r.error);
+      flash('Copied. Set its room link, then switch the old one off when you are ready.');
       await load();
     } else if(act === 'msg'){
       const box = b.closest('.msg');
