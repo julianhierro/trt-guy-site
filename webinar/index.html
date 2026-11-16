@@ -78,9 +78,9 @@
   .regwhen{font-size:12.5px;color:var(--mut);margin-bottom:16px}
   .reg input{width:100%;border:1px solid var(--line);border-radius:8px;padding:14px 12px;font:400 16px/1.3 var(--body);color:var(--ink);margin-bottom:10px;background:#fff}
   .reg input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
-  .reg button{width:100%;border:0;border-radius:8px;background:var(--ink);color:#fff;cursor:pointer;padding:16px 12px;margin-top:6px;
+  .reg button{width:100%;border:0;border-radius:8px;background:var(--acc);color:#fff;cursor:pointer;padding:16px 12px;margin-top:6px;
     font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
-  .reg button:hover{background:#23282e}
+  .reg button:hover{background:#0f4ae0}
   .reg button[disabled]{opacity:.6;cursor:default}
   .fine{font-size:11.5px;color:var(--mut);line-height:1.5;margin-top:12px}
   .err{font-size:13px;color:#c0202a;margin-top:10px;display:none}
@@ -147,7 +147,7 @@
 
     <input type="text" id="fName" name="name" placeholder="First Name" autocomplete="given-name" required>
     <input type="email" id="fEmail" name="email" placeholder="Email" autocomplete="email" required>
-    <input type="tel" id="fPhone" name="phone" placeholder="Phone number" autocomplete="tel" required>
+    <input type="tel" id="fPhone" name="phone" placeholder="Phone number (optional)" autocomplete="tel">
     <input type="text" id="fIG" name="instagram" placeholder="Instagram handle (optional)" autocomplete="off">
 
     <button type="submit" id="regBtn">Register</button>
@@ -234,8 +234,8 @@
     var email = document.getElementById('fEmail').value.trim();
     var phone = document.getElementById('fPhone').value.trim();
     var ig = document.getElementById('fIG').value.trim();
-    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.replace(/\D/g, '').length < 7) {
-      err.textContent = 'Please fill in your name, email and phone number.';
+    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      err.textContent = 'Please fill in your name and email.';
       err.className = 'err on';
       return;
     }
@@ -267,6 +267,58 @@
         err.textContent = e3.message || 'Something went wrong. Please try again.';
         err.className = 'err on';
       });
+  });
+})();
+</script>
+<script>
+(function () {
+  if (!document.body) return;
+  var SKIP = { SCRIPT:1, STYLE:1, NOSCRIPT:1, TEMPLATE:1, BR:1, LINK:1, META:1, HEAD:1 };
+  var SVG = "http://www.w3.org/2000/svg";
+  function skip(el) {
+    return !!(SKIP[el.tagName]
+      || (el.namespaceURI === SVG && el.tagName.toLowerCase() !== "svg")
+      || (el.closest && el.closest(".jv-toolbar, .jv-launcher"))
+      || (el.closest && el.closest("[data-noedit]")));
+  }
+  var n = 0;
+  Array.prototype.forEach.call(document.body.querySelectorAll("*"), function (el) {
+    if (skip(el)) return;
+    if (!el.hasAttribute("data-eid")) el.setAttribute("data-eid", "e" + (++n));
+  });
+  var BLOCKSEL = "address,article,aside,blockquote,dd,details,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,li,main,nav,ol,p,pre,section,summary,table,tbody,td,th,thead,tr,ul";
+  function isTextLeaf(el) {
+    if (skip(el)) return false;
+    if (!(el.textContent || "").replace(/\s+/g, " ").trim()) return false;
+    if (el.querySelector(BLOCKSEL)) return false;
+    var anchors = el.querySelectorAll("a");
+    if (anchors.length) {
+      var clone = el.cloneNode(true);
+      Array.prototype.forEach.call(clone.querySelectorAll("a"), function (a) { if (a.parentNode) a.parentNode.removeChild(a); });
+      if (!(clone.textContent || "").replace(/\s+/g, " ").trim()) return false;
+    }
+    return true;
+  }
+  (function walk(el) {
+    var c = el.children;
+    for (var i = 0; i < c.length; i++) {
+      var child = c[i];
+      if (skip(child)) continue;
+      if (isTextLeaf(child)) child.setAttribute("data-etext", "1");
+      else walk(child);
+    }
+  })(document.body);
+  Array.prototype.forEach.call(document.body.querySelectorAll("[data-eid]:not([data-etext])"), function (el) {
+    if (skip(el) || el.closest("[data-etext]")) return;
+    Array.prototype.slice.call(el.childNodes).forEach(function (node) {
+      if (node.nodeType === 3 && node.nodeValue && node.nodeValue.replace(/\s+/g, " ").trim()) {
+        var span = document.createElement("span");
+        span.setAttribute("data-eid", "e" + (++n));
+        span.setAttribute("data-etext", "1");
+        node.parentNode.replaceChild(span, node);
+        span.appendChild(node);
+      }
+    });
   });
 })();
 </script>
