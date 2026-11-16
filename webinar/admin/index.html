@@ -50,6 +50,9 @@
   .msg .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
   .msg .nm{font-weight:700;font-size:14px}
   .msg .off{font-size:12px;color:var(--mut)}
+  .msg .res{font-size:12px;color:var(--mut);margin:-4px 0 10px}
+  .msg .res b{color:var(--ink)}
+  .msg .res .pc{opacity:.65}
   .hint{font-size:12.5px;color:var(--mut);margin-top:7px}
   code{background:#eef1f6;border-radius:4px;padding:1px 5px;font-size:12.5px}
   table{width:100%;border-collapse:collapse;font-size:13.5px}
@@ -218,6 +221,7 @@ function render(){
         return `<div class="msg" data-step="${st}">
           <div class="top"><span class="nm">${STEP_LABEL[st][0]}</span>
             <span class="off">${esc(off)}${empty ? ' · nothing written, so nothing sends' : ''}</span></div>
+          ${resultLine((w.step_stats || {})[st])}
           <label>Subject</label><input class="m" data-m="subject" value="${esc(m.subject)}">
           <label style="margin-top:9px">Message</label><textarea class="m" data-m="body">${esc(m.body)}</textarea>
           <div class="acts"><button class="btn act" data-act="msg">Save this email</button></div>
@@ -229,6 +233,17 @@ function render(){
       <div id="regs-${esc(w.id)}"></div>
     </div>`;
   }).join('') || '<div class="card"><p class="muted">No webinars yet. Add one below.</p></div>';
+}
+
+// Sent / opened / clicked for one step. Opens come from an invisible image in
+// the email, so Apple Mail's pre-loading inflates them and images-off hides
+// them — clicks are the number to trust.
+function resultLine(st){
+  if(!st || !st.sent) return '';
+  const pc = n => Math.round((n / st.sent) * 100) + '%';
+  return `<div class="res"><b>${st.sent}</b> sent`
+       + ` · <b>${st.opened || 0}</b> opened <span class="pc">${pc(st.opened || 0)}</span>`
+       + ` · <b>${st.clicked || 0}</b> clicked <span class="pc">${pc(st.clicked || 0)}</span></div>`;
 }
 
 function offsetText(min){
