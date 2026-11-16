@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webinar Command Center — TRT Guy</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0b0d10;--bg:#f4f6fa;--card:#fff;--txt:#1b1f24;--mut:#5b6572;--line:rgba(11,13,16,.14);
+    --acc:#1a5cff;--ok:#12994a;--warn:#c0202a;
+    --display:"Barlow Condensed",Impact,sans-serif;--body:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--body);background:var(--bg);color:var(--txt);line-height:1.55;font-size:15px;-webkit-font-smoothing:antialiased}
+  .bar{background:var(--ink);color:#fff}
+  .shell{max-width:980px;margin:0 auto;padding:0 20px}
+  .bar .shell{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
+  .wordmark{display:block;width:104px;height:34px;background:url("/img/logo-white.png") left center/contain no-repeat;font-size:0;color:transparent;overflow:hidden}
+  .bar nav{display:flex;gap:14px;align-items:center;font-size:13px}
+  .bar nav a,.bar nav button{color:#c3c9d2;text-decoration:none;background:none;border:0;font:inherit;cursor:pointer}
+  .bar nav a:hover,.bar nav button:hover{color:#fff}
+  h1{font-family:var(--display);font-weight:800;font-size:30px;text-transform:uppercase;margin:26px 0 4px}
+  .lede{color:var(--mut);margin-bottom:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+  .card h2{font-family:var(--display);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+  .card h3{font-size:14px;font-weight:700;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 12px;font:400 15px/1.4 var(--body);color:var(--ink);background:#fff}
+  textarea{min-height:120px;resize:vertical;font-size:14px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,92,255,.14)}
+  .btn{display:inline-block;border:0;border-radius:9px;background:var(--ink);color:#fff;cursor:pointer;padding:12px 18px;
+    font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase}
+  .btn:hover{background:#23282e}
+  .btn.pri{background:var(--acc)}
+  .btn.pri:hover{background:#0f3fd6}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#eef1f6}
+  .btn[disabled]{opacity:.55;cursor:default}
+  .acts{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;align-items:center}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
+  .pill.live{background:rgba(18,153,74,.14);color:var(--ok)}
+  .pill.past{background:rgba(192,32,42,.12);color:var(--warn)}
+  .pill.off{background:rgba(11,13,16,.08);color:var(--mut)}
+  .when{font-size:13px;color:var(--mut);margin-top:6px}
+  .when b{color:var(--ink);font-weight:600}
+  .msg{border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:10px;background:#fbfcfe}
+  .msg .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+  .msg .nm{font-weight:700;font-size:14px}
+  .msg .off{font-size:12px;color:var(--mut)}
+  .hint{font-size:12.5px;color:var(--mut);margin-top:7px}
+  code{background:#eef1f6;border-radius:4px;padding:1px 5px;font-size:12.5px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:8px 10px;border-bottom:1px solid var(--line)}
+  td{padding:9px 10px;border-bottom:1px solid var(--line)}
+  tr:last-child td{border-bottom:0}
+  .flash{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:12px 20px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+  .flash.on{opacity:1}
+  .gate{max-width:380px;margin:70px auto;text-align:center}
+  .err{color:var(--warn);font-size:13.5px;margin-top:10px}
+  .muted{color:var(--mut)}
+  @media (max-width:560px){ .shell{padding:0 15px} h1{font-size:25px} .card{padding:16px} }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="shell">
+    <a class="wordmark" href="/control/">TRT-GUY</a>
+    <nav>
+      <a href="/webinar/" target="_blank">Sign-up page</a>
+      <a href="/webinar/thanks/" target="_blank">Thank you</a>
+      <button id="btnLock" hidden>Lock</button>
+    </nav>
+  </div>
+</header>
+
+<!-- passcode -->
+<div class="shell gate" id="gate">
+  <h1>Webinar Command Center</h1>
+  <p class="lede">Enter the passcode to load your webinars.</p>
+  <input id="gateKey" type="password" placeholder="Passcode" autocomplete="current-password">
+  <div class="acts" style="justify-content:center"><button class="btn pri" id="gateGo">Unlock</button></div>
+  <div class="err" id="gateErr" hidden></div>
+</div>
+
+<main class="shell" id="app" hidden>
+  <h1>Webinar Command Center</h1>
+  <p class="lede">The date you set here moves the sign-up page, the countdown, the calendar invite and every reminder together.</p>
+  <div id="list"></div>
+
+  <div class="card">
+    <h2>Add a webinar</h2>
+    <p class="muted" style="font-size:13.5px;margin-bottom:14px">Setting one live switches the others off, so the sign-up page always shows the next event.</p>
+    <div class="row">
+      <div><label for="nTitle">Title</label><input id="nTitle" placeholder="7 Steps To Build Muscle…"></div>
+      <div><label for="nDate">Date</label><input id="nDate" type="date"></div>
+      <div><label for="nTime">Start time</label><input id="nTime" type="time" step="300"></div>
+      <div><label for="nZone">Time zone</label>
+        <select id="nZone">
+          <option value="America/New_York">Eastern (New York)</option>
+          <option value="America/Chicago">Central (Chicago)</option>
+          <option value="America/Denver">Mountain (Denver)</option>
+          <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
+          <option value="America/Mexico_City">Mexico City</option>
+          <option value="Europe/London">London</option>
+          <option value="Europe/Madrid">Madrid</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:12px"><label for="nJoin">Room link (Zoom, Meet, StreamYard…)</label>
+      <input id="nJoin" placeholder="Leave blank until you have one"></div>
+    <div class="acts"><button class="btn pri" id="btnNew">Create webinar</button><span id="newPrev" class="when"></span></div>
+  </div>
+</main>
+
+<div class="flash" id="flash"></div>
+
+<script>
+const WORKER = 'https://trt-guy-onboarding.julianhierro.workers.dev';
+const KEYLS  = 'tg-clients-key';            // same passcode as the client manager
+let KEY = localStorage.getItem(KEYLS) || '';
+let DATA = { webinars: [], steps: [] };
+
+/* Each reminder, in the order they go out. The offsets come from the worker so
+   this page can never disagree with what actually sends. */
+const STEP_LABEL = {
+  confirm: ['Confirmation', 'the moment they register'],
+  t24:     ['24 hours before', ''],
+  t1:      ['1 hour before', ''],
+  t10:     ['10 minutes before', ''],
+  live:    ['Going live', 'at the start time'],
+  replay:  ['Replay / no-show', ''],
+};
+const STEP_ORDER = ['confirm','t24','t1','t10','live','replay'];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function flash(m){ const f = $('#flash'); f.textContent = m; f.classList.add('on'); setTimeout(() => f.classList.remove('on'), 2200); }
+
+async function api(path, opts = {}){
+  const res = await fetch(WORKER + path, {
+    ...opts, headers: { 'Content-Type':'application/json', 'X-CC-Key': KEY, ...(opts.headers || {}) },
+  });
+  const j = await res.json().catch(() => ({}));
+  if(!res.ok) throw new Error(j.error || ('HTTP ' + res.status));
+  return j;
+}
+
+/* ── time ────────────────────────────────────────────────────────────────────
+   A wall-clock time in a named zone converted to the real instant. Two passes,
+   because the offset itself depends on the instant around a DST switch. */
+function zoneOffset(date, tz){
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12:false,
+    year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' })
+    .formatToParts(date).map(x => [x.type, x.value]));
+  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, p.hour === '24' ? 0 : +p.hour, +p.minute, +p.second);
+  return asUTC - date.getTime();
+}
+function wallToUtc(dateStr, timeStr, tz){
+  if(!dateStr || !timeStr) return null;
+  let t = new Date(dateStr + 'T' + timeStr + ':00Z');
+  for(let i = 0; i < 2; i++) t = new Date(new Date(dateStr + 'T' + timeStr + ':00Z').getTime() - zoneOffset(t, tz));
+  return t;
+}
+function fmt(iso, tz){
+  if(!iso) return '—';
+  return new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday:'short', month:'short', day:'numeric',
+    year:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short' }).format(new Date(iso));
+}
+function localFmt(iso){
+  return new Intl.DateTimeFormat('en-US', { weekday:'short', month:'short', day:'numeric',
+    hour:'numeric', minute:'2-digit', timeZoneName:'short' }).format(new Date(iso));
+}
+/* The inputs want the wall-clock time in the chosen zone, not UTC. */
+function toParts(iso, tz){
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12:false,
+    year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })
+    .formatToParts(new Date(iso)).map(x => [x.type, x.value]));
+  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour === '24' ? '00' : p.hour}:${p.minute}` };
+}
+
+/* ── render ───────────────────────────────────────────────────────────────── */
+function render(){
+  const tz = 'America/New_York';
+  $('#list').innerHTML = DATA.webinars.map(w => {
+    const past = w.starts_at && new Date(w.starts_at) < new Date();
+    const parts = w.starts_at ? toParts(w.starts_at, tz) : { date:'', time:'' };
+    const pill = !w.active ? '<span class="pill off">Off</span>'
+               : past ? '<span class="pill past">Date has passed</span>'
+                      : '<span class="pill live">Live</span>';
+    return `<div class="card" data-w="${esc(w.id)}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div><h2>${esc(w.title || w.id)}</h2>
+          <div class="when">In your page's zone: <b>${esc(fmt(w.starts_at, tz))}</b><br>
+            On this device: <b>${esc(w.starts_at ? localFmt(w.starts_at) : '—')}</b></div></div>
+        <div style="text-align:right">${pill}
+          <div class="when"><b>${(w.stats && w.stats.registered) || 0}</b> registered</div></div>
+      </div>
+
+      <h3>Details</h3>
+      <div class="row">
+        <div><label>Title</label><input class="f" data-f="title" value="${esc(w.title)}"></div>
+        <div><label>Date</label><input class="f" data-f="date" type="date" value="${parts.date}"></div>
+        <div><label>Start time (ET)</label><input class="f" data-f="time" type="time" step="300" value="${parts.time}"></div>
+        <div><label>Live on the site</label>
+          <select class="f" data-f="active">
+            <option value="1"${w.active ? ' selected' : ''}>Yes — show this one</option>
+            <option value="0"${!w.active ? ' selected' : ''}>No — hide it</option>
+          </select></div>
+      </div>
+      <div style="margin-top:12px"><label>Room link</label>
+        <input class="f" data-f="join_url" value="${esc(w.join_url)}" placeholder="Blank sends people back to the sign-up page">
+        <p class="hint">Invites point at <code>trt-guy.com/webinar/join/</code>, which forwards here — so you can change the room after people have saved the date.</p></div>
+      <div class="acts"><button class="btn pri act" data-act="save">Save</button>
+        <button class="btn ghost act" data-act="regs">Registrations</button>
+        <button class="btn ghost act" data-act="run">Send due reminders now</button></div>
+
+      <h3>Emails</h3>
+      ${STEP_ORDER.map(st => {
+        const m = (w.messages || {})[st] || {};
+        const meta = DATA.steps.find(x => x.step === st);
+        const off = STEP_LABEL[st][1] || (meta ? offsetText(meta.at) : '');
+        const empty = !String(m.body || '').trim();
+        return `<div class="msg" data-step="${st}">
+          <div class="top"><span class="nm">${STEP_LABEL[st][0]}</span>
+            <span class="off">${esc(off)}${empty ? ' · nothing written, so nothing sends' : ''}</span></div>
+          <label>Subject</label><input class="m" data-m="subject" value="${esc(m.subject)}">
+          <label style="margin-top:9px">Message</label><textarea class="m" data-m="body">${esc(m.body)}</textarea>
+          <div class="acts"><button class="btn act" data-act="msg">Save this email</button></div>
+        </div>`;
+      }).join('')}
+      <p class="hint">You can drop <code>{{first_name}}</code>, <code>{{join_link}}</code>, <code>{{title}}</code>,
+        <code>{{date}}</code>, <code>{{time}}</code> and <code>{{calendar}}</code> into any of them.
+        A line that holds only the join link disappears while there is no room link.</p>
+      <div id="regs-${esc(w.id)}"></div>
+    </div>`;
+  }).join('') || '<div class="card"><p class="muted">No webinars yet. Add one below.</p></div>';
+}
+
+function offsetText(min){
+  if(min === 0) return 'at the start time';
+  const a = Math.abs(min);
+  const t = a >= 1440 ? (a / 1440) + (a === 1440 ? ' day' : ' days')
+          : a >= 60 ? (a / 60) + (a === 60 ? ' hour' : ' hours') : a + ' minutes';
+  return min < 0 ? t + ' before' : t + ' after';
+}
+
+/* ── actions ──────────────────────────────────────────────────────────────── */
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('.act'); if(!b) return;
+  const card = b.closest('.card'), id = card.dataset.w, act = b.dataset.act;
+  b.disabled = true;
+  try{
+    if(act === 'save'){
+      const g = f => card.querySelector(`.f[data-f="${f}"]`).value;
+      const when = wallToUtc(g('date'), g('time'), 'America/New_York');
+      if(!when) throw new Error('Pick a date and a time.');
+      await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'save', webinar:{
+        id, title: g('title'), starts_at: when.toISOString(), join_url: g('join_url'), active: g('active') === '1' } }) });
+      flash('Saved — the page, the invite and the reminders all moved.');
+      await load();
+    } else if(act === 'msg'){
+      const box = b.closest('.msg');
+      await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'message', id,
+        step: box.dataset.step,
+        subject: box.querySelector('.m[data-m="subject"]').value,
+        body: box.querySelector('.m[data-m="body"]').value }) });
+      flash('Email saved.');
+      await load();
+    } else if(act === 'run'){
+      const r = await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'run', id }) });
+      flash(r.sent ? `Sent ${r.sent}.` : 'Nothing was due.');
+    } else if(act === 'regs'){
+      const r = await api('/webinar-admin?action=regs&w=' + encodeURIComponent(id));
+      const box = card.querySelector('#regs-' + CSS.escape(id));
+      box.innerHTML = !r.regs.length ? '<h3>Registrations</h3><p class="muted">Nobody yet.</p>'
+        : `<h3>Registrations (${r.regs.length})</h3><table><tr><th>Name</th><th>Email</th><th>Phone</th><th>Instagram</th><th>Sent</th></tr>` +
+          r.regs.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${esc(x.phone)}</td>
+            <td>${esc(x.instagram ? '@' + x.instagram : '')}</td>
+            <td class="muted">${esc(Object.keys(x.sent || {}).join(', ') || '—')}</td></tr>`).join('') + '</table>';
+    }
+  }catch(e){ flash(e.message); }
+  b.disabled = false;
+});
+
+$('#btnNew').onclick = async () => {
+  const when = wallToUtc($('#nDate').value, $('#nTime').value, $('#nZone').value);
+  const title = $('#nTitle').value.trim();
+  if(!title) return flash('Give it a title.');
+  if(!when) return flash('Pick a date and a time.');
+  const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 28)
+             + '-' + when.toISOString().slice(5, 10).replace('-', '');
+  try{
+    await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'save', webinar:{
+      id, title, starts_at: when.toISOString(), join_url: $('#nJoin').value.trim(), active: true } }) });
+    // Only the newest should show on the sign-up page.
+    for(const w of DATA.webinars) if(w.id !== id && w.active){
+      await api('/webinar-admin', { method:'POST', body: JSON.stringify({ action:'save',
+        webinar: { ...w, active: false } }) });
+    }
+    $('#nTitle').value = $('#nJoin').value = '';
+    flash('Created and set live.');
+    await load();
+  }catch(e){ flash(e.message); }
+};
+
+function preview(){
+  const when = wallToUtc($('#nDate').value, $('#nTime').value, $('#nZone').value);
+  $('#newPrev').innerHTML = when
+    ? `That is <b>${esc(localFmt(when.toISOString()))}</b> on this device.` : '';
+}
+['#nDate','#nTime','#nZone'].forEach(s => $(s).addEventListener('change', preview));
+
+/* ── gate ─────────────────────────────────────────────────────────────────── */
+async function load(){ DATA = await api('/webinar-admin'); render(); }
+async function unlock(k){
+  KEY = k;
+  await load();
+  localStorage.setItem(KEYLS, k);
+  $('#gate').hidden = true; $('#app').hidden = false; $('#btnLock').hidden = false;
+}
+$('#gateGo').onclick = async () => {
+  try{ await unlock($('#gateKey').value.trim()); }
+  catch(e){ $('#gateErr').hidden = false; $('#gateErr').textContent = 'Wrong passcode.'; }
+};
+$('#gateKey').addEventListener('keydown', e => { if(e.key === 'Enter') $('#gateGo').click(); });
+$('#btnLock').onclick = () => { localStorage.removeItem(KEYLS); location.reload(); };
+if(KEY) unlock(KEY).catch(() => localStorage.removeItem(KEYLS));
+</script>
+</body>
+</html>
